@@ -63,7 +63,7 @@ export function StatsBlock({ block, ctx }: { block: BlockData; ctx: BlockContext
   return (
     <div className="flex flex-col gap-12">
       <BlockHeading text={block.text} />
-      <dl className={cn("grid gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10", gridCols[str(block.props.columns, "3")])}>
+      <dl className={cn("grid gap-px overflow-hidden rounded-3xl border border-fg/10 bg-fg/10", gridCols[str(block.props.columns, "3")])}>
         {block.items.map((item, i) => {
           const source = str(item.props.sourceNote);
           return (
@@ -106,7 +106,7 @@ export function FeatureGridBlock({ block, ctx }: { block: BlockData; ctx: BlockC
               {item.title && <h3 className="font-display text-xl font-semibold tracking-tight">{item.title}</h3>}
               <Paragraphs text={item.body} className="text-sm" />
               {item.linkUrl && (
-                <SmartLink href={item.linkUrl} locale={ctx.locale} className="mt-auto text-sm font-semibold text-brand-sky hover:text-white">
+                <SmartLink href={item.linkUrl} locale={ctx.locale} className="mt-auto text-sm font-semibold text-brand-sky hover:text-fg">
                   {item.ctaLabel ?? ctx.t.readMore} →
                 </SmartLink>
               )}
@@ -186,7 +186,7 @@ export function TimelineBlock({ block, ctx }: { block: BlockData; ctx: BlockCont
             {item.title && <h3 className="font-display text-xl font-semibold tracking-tight">{item.title}</h3>}
             <Paragraphs text={item.body} className="text-sm" />
             {item.linkUrl && (
-              <SmartLink href={item.linkUrl} locale={ctx.locale} className="text-sm font-semibold text-brand-sky hover:text-white">
+              <SmartLink href={item.linkUrl} locale={ctx.locale} className="text-sm font-semibold text-brand-sky hover:text-fg">
                 {ctx.t.readMore} →
               </SmartLink>
             )}
@@ -208,7 +208,7 @@ export function FaqBlock({ block }: { block: BlockData }) {
               {item.title}
               <span
                 aria-hidden="true"
-                className="flex size-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-brand-sky transition-transform duration-300 group-open:rotate-45"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full border border-fg/15 text-brand-sky transition-transform duration-300 group-open:rotate-45"
               >
                 +
               </span>
@@ -246,7 +246,7 @@ export function VideoBlock({ block, ctx }: { block: BlockData; ctx: BlockContext
 
 export function CtaBlock({ block, ctx }: { block: BlockData; ctx: BlockContext }) {
   return (
-    <div data-reveal className="beam relative overflow-hidden rounded-[2rem] border border-white/10 bg-navy-900/60 px-6 py-14 md:px-14 md:py-20">
+    <div data-reveal className="beam relative overflow-hidden rounded-[2rem] border border-fg/10 bg-navy-900/60 px-6 py-14 md:px-14 md:py-20">
       <div className="aurora opacity-70" />
       <div className="grid-fade pointer-events-none absolute inset-0 opacity-50" />
       <div className="relative flex flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">

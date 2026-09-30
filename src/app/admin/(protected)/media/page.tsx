@@ -58,7 +58,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
                 name="q"
                 defaultValue={q}
                 placeholder="Search by name or tag"
-                className="h-9 w-56 rounded-control border border-white/15 bg-ink-950/60 px-3 text-sm focus:border-brand-sky focus:outline-none"
+                className="h-9 w-56 rounded-control border border-fg/15 bg-ink-950/60 px-3 text-sm focus:border-brand-sky focus:outline-none"
               />
               <button type="submit" className={buttonClasses({ variant: "secondary", size: "sm" })}>
                 Search
@@ -76,7 +76,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
                   key={label}
                   href={filterHref(k)}
                   aria-current={kind === k ? "page" : undefined}
-                  className={cn("rounded-control px-3 py-1.5", kind === k ? "bg-white/10" : "text-text-secondary hover:text-text-primary")}
+                  className={cn("rounded-control px-3 py-1.5", kind === k ? "bg-fg/10" : "text-text-secondary hover:text-text-primary")}
                 >
                   {label}
                 </Link>
@@ -90,7 +90,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
       </div>
 
       {items.length === 0 ? (
-        <p className="rounded-card border border-white/10 px-4 py-10 text-center text-text-secondary">
+        <p className="rounded-card border border-fg/10 px-4 py-10 text-center text-text-secondary">
           {inTrash ? "The trash is empty." : "No files yet."}
         </p>
       ) : (
@@ -99,7 +99,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
             <li key={m.id}>
               <Link
                 href={`/admin/media/${m.id}`}
-                className="flex h-full flex-col overflow-hidden rounded-card border border-white/10 hover:border-brand-sky/50"
+                className="flex h-full flex-col overflow-hidden rounded-card border border-fg/10 hover:border-brand-sky/50"
               >
                 <span className="flex aspect-[4/3] items-center justify-center bg-ink-950">
                   {m.kind === "IMAGE" ? (

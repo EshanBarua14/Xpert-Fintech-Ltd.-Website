@@ -21,12 +21,12 @@ export default async function UsersPage() {
         <ChangePasswordForm />
       </section>
 
-      <section className="flex flex-col gap-4 border-t border-white/10 pt-8">
+      <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
         <h2 className="font-display text-xl font-semibold">My two-factor sign-in</h2>
         <TwoFactorPanel enabled={Boolean(admins.find((a) => a.id === me.id)?.totpEnabled)} serverReady={hasServerSecret()} />
       </section>
 
-      <section className="flex flex-col gap-4 border-t border-white/10 pt-8">
+      <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
         <h2 className="font-display text-xl font-semibold">Admin accounts</h2>
         <AdminUsersTable
           rows={admins.map((a) => ({
@@ -42,7 +42,7 @@ export default async function UsersPage() {
         />
       </section>
 
-      <section className="flex flex-col gap-4 border-t border-white/10 pt-8">
+      <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
         <h2 className="font-display text-xl font-semibold">Add an admin</h2>
         <CreateAdminForm />
       </section>

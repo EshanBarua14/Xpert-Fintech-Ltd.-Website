@@ -26,7 +26,7 @@ export default async function NavigationPage() {
           <li key={m.id}>
             <Link
               href={`/admin/navigation/${m.key}`}
-              className="flex h-full flex-col gap-2 rounded-card border border-white/10 bg-ink-950/50 p-5 hover:border-brand-sky/40"
+              className="flex h-full flex-col gap-2 rounded-card border border-fg/10 bg-ink-950/50 p-5 hover:border-brand-sky/40"
             >
               <span className="font-semibold">{m.name}</span>
               <span className="text-sm text-text-secondary">{DESCRIPTIONS[m.key] ?? `Menu key: ${m.key}`}</span>

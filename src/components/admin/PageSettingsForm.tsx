@@ -34,7 +34,7 @@ export function PageSettingsForm({ values, images }: { values: PageFormValues; i
           const k = (f: string) => `${l}${f}`;
           const v = values[l];
           return (
-            <fieldset key={l} lang={l} className="grid gap-5 rounded-card border border-white/10 p-5 md:grid-cols-2">
+            <fieldset key={l} lang={l} className="grid gap-5 rounded-card border border-fg/10 p-5 md:grid-cols-2">
               <legend className="px-2 text-sm font-semibold">{l === "en" ? "English" : "বাংলা — optional"}</legend>
               <TextInput id={k("Title")} label="Page title" required={l === "en"} defaultValue={v.title} error={e[k("Title")]} />
               {values.isHome ? (
@@ -71,12 +71,12 @@ export function PageSettingsForm({ values, images }: { values: PageFormValues; i
         })}
       </div>
       <aside className="flex flex-col gap-6">
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Publishing</legend>
           <PublishFields status={values.status} publishAt={values.publishAt} error={e.publishAt} />
           <SubmitButton pending={pending}>{values.id ? "Save page settings" : "Create page"}</SubmitButton>
         </fieldset>
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Details</legend>
           <Select
             id="template"

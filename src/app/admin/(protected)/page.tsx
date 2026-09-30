@@ -72,11 +72,11 @@ export default async function DashboardPage() {
           return (
             <li key={s.label}>
               {s.href ? (
-                <Link href={s.href} className="flex h-full flex-col gap-1 rounded-card border border-white/10 bg-ink-950/50 p-5 hover:border-brand-sky/40">
+                <Link href={s.href} className="flex h-full flex-col gap-1 rounded-card border border-fg/10 bg-ink-950/50 p-5 hover:border-brand-sky/40">
                   {body}
                 </Link>
               ) : (
-                <div className="flex h-full flex-col gap-1 rounded-card border border-white/10 bg-ink-950/50 p-5">{body}</div>
+                <div className="flex h-full flex-col gap-1 rounded-card border border-fg/10 bg-ink-950/50 p-5">{body}</div>
               )}
             </li>
           );
@@ -90,7 +90,7 @@ export default async function DashboardPage() {
             All leads →
           </Link>
         </div>
-        <ul className="divide-y divide-white/10 rounded-card border border-white/10">
+        <ul className="divide-y divide-fg/10 rounded-card border border-fg/10">
           {recentLeads.length === 0 && <li className="px-4 py-3 text-sm text-text-secondary">No leads yet. Website enquiries will appear here.</li>}
           {recentLeads.map((l) => (
             <li key={l.id} className="flex items-center justify-between gap-4 px-4 py-3">
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-xl font-semibold">Recently edited products</h2>
-        <ul className="divide-y divide-white/10 rounded-card border border-white/10">
+        <ul className="divide-y divide-fg/10 rounded-card border border-fg/10">
           {recent.map((o) => (
             <li key={o.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <Link href={`/admin/products/${o.id}`} className="hover:text-brand-sky">

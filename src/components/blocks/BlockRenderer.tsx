@@ -64,7 +64,7 @@ const VARIANT: Record<string, string> = {
   dark: "",
   grid: "",
   // Stored as "light" for compatibility; shown in the admin as "Navy (alternate)".
-  light: "border-y border-white/[0.06] bg-white/[0.015]",
+  light: "border-y border-fg/[0.06] bg-fg/[0.015]",
   "full-bleed": "",
 };
 

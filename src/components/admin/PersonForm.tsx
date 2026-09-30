@@ -33,7 +33,7 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
       <div className="flex flex-col gap-6">
         <FormMessage message={state.message} isError={Boolean(state.errors)} />
 
-        <fieldset className="grid gap-5 rounded-card border border-white/10 p-5 md:grid-cols-2">
+        <fieldset className="grid gap-5 rounded-card border border-fg/10 p-5 md:grid-cols-2">
           <legend className="px-2 text-sm font-semibold">Person</legend>
           <TextInput id="enName" label="Name (English)" required defaultValue={values.enName} error={e.enName} />
           <TextInput id="bnName" label="Name (বাংলা)" lang="bn" defaultValue={values.bnName} error={e.bnName} />
@@ -51,7 +51,7 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
           </div>
         </fieldset>
 
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Roles</legend>
           <p className="text-xs text-text-secondary">
             Tick every group this person appears in. Each group has its own title and order.
@@ -64,7 +64,7 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
           {PERSON_GROUPS.map((group) => {
             const r = values.roles[group];
             return (
-              <div key={group} className="grid gap-4 rounded-control border border-white/10 p-4 md:grid-cols-[180px_1fr_1fr_90px]">
+              <div key={group} className="grid gap-4 rounded-control border border-fg/10 p-4 md:grid-cols-[180px_1fr_1fr_90px]">
                 <label className="flex items-center gap-2 text-sm font-medium">
                   <input type="checkbox" name={`role.${group}`} defaultChecked={r.enabled} className="accent-brand-royal" />
                   {PERSON_GROUP_LABELS[group]}
@@ -85,12 +85,12 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
       </div>
 
       <aside className="flex flex-col gap-6">
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Publishing</legend>
           <PublishFields status={values.status} publishAt={values.publishAt} error={e.publishAt} />
           <SubmitButton pending={pending}>Save</SubmitButton>
         </fieldset>
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Photo</legend>
           <ImagePicker
             name="photoMediaId"

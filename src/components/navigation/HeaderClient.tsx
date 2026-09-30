@@ -7,9 +7,10 @@ import type { NavLink } from "@/lib/content/navigation";
 import type { AppLocale } from "@/lib/i18n/config";
 import { Icon } from "@/components/ui/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/utils/cn";
 
-type Labels = { menu: string; closeMenu: string; mainNavigation: string; language: string; overview: string };
+type Labels = { menu: string; closeMenu: string; mainNavigation: string; language: string; overview: string; toLight: string; toDark: string };
 
 /** Picks an icon for a menu link from where it goes. */
 function iconFor(href: string | null): string {
@@ -60,15 +61,15 @@ function MegaPanel({ item, id, overview, onNavigate }: { item: NavLink; id: stri
   return (
     <div id={id} className="absolute inset-x-0 top-full pt-3">
       <div className="glass-strong mega-in grid gap-2 rounded-3xl p-2 shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8)] md:grid-cols-[17rem_1fr]">
-        <div className="relative hidden overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-brand-royal/40 via-navy-800 to-ink-950 p-6 md:flex md:flex-col md:justify-end">
+        <div className="relative hidden overflow-hidden rounded-2xl border border-fg/10 bg-gradient-to-br from-brand-royal/40 via-navy-800 to-ink-950 p-6 md:flex md:flex-col md:justify-end">
           <div className="grid-fade pointer-events-none absolute inset-0 opacity-50" />
-          <span className="relative mb-auto flex size-11 items-center justify-center rounded-2xl bg-white/10 text-cyan-300">
+          <span className="relative mb-auto flex size-11 items-center justify-center rounded-2xl bg-fg/10 text-cyan-300">
             <Icon name={iconFor(item.href)} className="size-5" />
           </span>
           <p className="relative mt-10 font-display text-xl font-semibold">{item.label}</p>
           {item.description && <p className="relative mt-2 text-sm text-text-secondary">{item.description}</p>}
           {item.href && (
-            <ItemLink item={{ ...item, children: [] }} onNavigate={onNavigate} className="relative mt-5 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 hover:text-white">
+            <ItemLink item={{ ...item, children: [] }} onNavigate={onNavigate} className="relative mt-5 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 hover:text-fg">
               {overview} <span aria-hidden="true">→</span>
             </ItemLink>
           )}
@@ -76,8 +77,8 @@ function MegaPanel({ item, id, overview, onNavigate }: { item: NavLink; id: stri
         <ul className="grid content-start gap-1 p-2 sm:grid-cols-2">
           {item.children.map((child) => (
             <li key={child.id}>
-              <ItemLink item={child} onNavigate={onNavigate} className="group flex gap-3 rounded-2xl p-3 transition-colors hover:bg-white/[0.06]">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-brand-sky transition-colors group-hover:border-brand-sky/50 group-hover:text-cyan-300">
+              <ItemLink item={child} onNavigate={onNavigate} className="group flex gap-3 rounded-2xl p-3 transition-colors hover:bg-fg/[0.06]">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-fg/10 bg-fg/[0.04] text-brand-sky transition-colors group-hover:border-brand-sky/50 group-hover:text-cyan-300">
                   <Icon name={iconFor(child.href)} className="size-[18px]" />
                 </span>
                 <span className="flex flex-col gap-0.5">
@@ -184,8 +185,8 @@ export function HeaderClient({
               const active = isActive(item);
               const itemClass = cn(
                 "relative inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors",
-                active || openId === item.id ? "text-white" : "text-text-secondary hover:text-white",
-                openId === item.id && "bg-white/[0.06]",
+                active || openId === item.id ? "text-fg" : "text-text-secondary hover:text-fg",
+                openId === item.id && "bg-fg/[0.06]",
               );
               if (item.children.length === 0) {
                 return (
@@ -225,6 +226,7 @@ export function HeaderClient({
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle labels={{ toLight: labels.toLight, toDark: labels.toDark }} />
           <LanguageSwitch current={locale} label={labels.language} className="hidden md:inline-flex" />
           {cta?.href && (
             <Link
@@ -237,7 +239,7 @@ export function HeaderClient({
           <button
             ref={toggleRef}
             type="button"
-            className="relative inline-flex size-10 items-center justify-center rounded-full border border-white/15 bg-white/[0.04] lg:hidden"
+            className="relative inline-flex size-10 items-center justify-center rounded-full border border-fg/15 bg-fg/[0.04] lg:hidden"
             aria-expanded={menuOpen}
             aria-controls={drawerId}
             aria-label={menuOpen ? labels.closeMenu : labels.menu}
@@ -259,7 +261,7 @@ export function HeaderClient({
         <nav aria-label={labels.mainNavigation}>
           <ul className="flex flex-col">
             {links.map((item, i) => (
-              <li key={item.id} className="mobile-in border-b border-white/[0.07] py-1" style={{ "--d": i } as CSSProperties}>
+              <li key={item.id} className="mobile-in border-b border-fg/[0.07] py-1" style={{ "--d": i } as CSSProperties}>
                 {item.children.length === 0 ? (
                   <ItemLink item={item} onNavigate={() => setMenuOpen(false)} className="flex items-center justify-between py-3 font-display text-2xl font-semibold">
                     {item.label}
@@ -281,7 +283,7 @@ export function HeaderClient({
                       )}
                       {item.children.map((child) => (
                         <li key={child.id}>
-                          <ItemLink item={child} onNavigate={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 text-text-secondary hover:bg-white/5 hover:text-white">
+                          <ItemLink item={child} onNavigate={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 text-text-secondary hover:bg-fg/5 hover:text-fg">
                             <Icon name={iconFor(child.href)} className="size-4 text-brand-sky" />
                             {child.label}
                           </ItemLink>
@@ -300,7 +302,9 @@ export function HeaderClient({
               {cta.label}
             </Link>
           )}
-          <LanguageSwitch current={locale} label={labels.language} className="self-start" />
+          <div className="flex items-center gap-3">
+            <LanguageSwitch current={locale} label={labels.language} />
+          </div>
         </div>
       </div>
     </header>

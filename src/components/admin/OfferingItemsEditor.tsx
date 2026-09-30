@@ -67,7 +67,7 @@ function AddItem({ offeringId, kind }: { offeringId: string; kind: Kind }) {
   // Remounting the form after a save gives the admin an empty form for the next item.
   const [round, setRound] = useState(0);
   return (
-    <details className="rounded-control border border-dashed border-white/15 p-4">
+    <details className="rounded-control border border-dashed border-fg/15 p-4">
       <summary className="cursor-pointer text-sm text-brand-sky">+ Add to {ITEM_KIND_LABELS[kind].toLowerCase()}</summary>
       <div className="mt-4">
         <ItemForm key={round} offeringId={offeringId} kind={kind} onSaved={() => setRound((r) => r + 1)} />
@@ -82,7 +82,7 @@ function IconButton({ label, children }: { label: string; children: React.ReactN
       type="submit"
       aria-label={label}
       title={label}
-      className="inline-flex h-8 min-w-8 items-center justify-center rounded-control border border-white/10 px-2 text-xs hover:border-brand-sky"
+      className="inline-flex h-8 min-w-8 items-center justify-center rounded-control border border-fg/10 px-2 text-xs hover:border-brand-sky"
     >
       {children}
     </button>
@@ -102,7 +102,7 @@ export function OfferingItemsEditor({ offeringId, items }: { offeringId: string;
             </h3>
 
             {group.length > 0 && (
-              <ol className="flex flex-col divide-y divide-white/10 rounded-card border border-white/10">
+              <ol className="flex flex-col divide-y divide-fg/10 rounded-card border border-fg/10">
                 {group.map((item, index) => (
                   <li key={item.id} className="flex flex-col gap-3 p-4">
                     <div className="flex flex-wrap items-center gap-3">

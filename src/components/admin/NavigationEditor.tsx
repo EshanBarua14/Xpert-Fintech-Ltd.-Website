@@ -136,7 +136,7 @@ function NavItemForm({
 function AddNavItem({ menuId, parents, parentId, label }: { menuId: string; parents: { value: string; label: string }[]; parentId?: string; label: string }) {
   const [round, setRound] = useState(0);
   return (
-    <details className="rounded-control border border-dashed border-white/15 p-4">
+    <details className="rounded-control border border-dashed border-fg/15 p-4">
       <summary className="cursor-pointer text-sm text-brand-sky">{label}</summary>
       <div className="mt-4">
         <NavItemForm key={round} menuId={menuId} parents={parents} defaultParentId={parentId} onSaved={() => setRound((r) => r + 1)} />
@@ -146,7 +146,7 @@ function AddNavItem({ menuId, parents, parentId, label }: { menuId: string; pare
 }
 
 function RowControls({ item }: { item: EditorNavItem }) {
-  const btn = "inline-flex h-8 min-w-8 items-center justify-center rounded-control border border-white/10 px-2 text-xs hover:border-brand-sky";
+  const btn = "inline-flex h-8 min-w-8 items-center justify-center rounded-control border border-fg/10 px-2 text-xs hover:border-brand-sky";
   return (
     <div className="ml-auto flex items-center gap-1.5">
       {(["up", "down"] as const).map((direction) => (
@@ -200,9 +200,9 @@ function Row({ item, menuId, parents, depth }: { item: EditorNavItem; menuId: st
         </div>
       </details>
       {depth === 0 && (
-        <div className="flex flex-col gap-2 border-l border-white/10 pl-5">
+        <div className="flex flex-col gap-2 border-l border-fg/10 pl-5">
           {item.children.length > 0 && (
-            <ul className="divide-y divide-white/10">
+            <ul className="divide-y divide-fg/10">
               {item.children.map((child) => (
                 <Row key={child.id} item={child} menuId={menuId} parents={parents} depth={1} />
               ))}
@@ -219,7 +219,7 @@ export function NavigationEditor({ menuId, items }: { menuId: string; items: Edi
   const parents = items.map((i) => ({ value: i.id, label: i.en.label }));
   return (
     <div className="flex flex-col gap-4">
-      <ul className="divide-y divide-white/10 rounded-card border border-white/10 px-4">
+      <ul className="divide-y divide-fg/10 rounded-card border border-fg/10 px-4">
         {items.length === 0 && <li className="py-8 text-center text-text-secondary">This menu is empty.</li>}
         {items.map((item) => (
           <Row key={item.id} item={item} menuId={menuId} parents={parents} depth={0} />

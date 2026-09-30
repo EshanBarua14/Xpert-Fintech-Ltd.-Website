@@ -94,7 +94,7 @@ export default async function OrganizationPage({
               <ul className="flex flex-wrap gap-2 text-sm">
                 {org.deployments.map((d) => (
                   <li key={d.id}>
-                    <Link href={`/admin/deployments/${d.id}`} className="rounded-control border border-white/10 px-3 py-1.5 hover:border-brand-sky">
+                    <Link href={`/admin/deployments/${d.id}`} className="rounded-control border border-fg/10 px-3 py-1.5 hover:border-brand-sky">
                       {d.appName ?? "Unnamed app"}
                     </Link>
                   </li>

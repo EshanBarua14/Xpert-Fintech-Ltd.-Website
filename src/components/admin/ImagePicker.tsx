@@ -37,7 +37,7 @@ export function ImagePicker({
       </span>
       <input type="hidden" name={name} value={selected} />
       <div className="flex items-center gap-3">
-        <div className="flex h-20 w-28 shrink-0 items-center justify-center overflow-hidden rounded-control border border-white/15 bg-ink-950">
+        <div className="flex h-20 w-28 shrink-0 items-center justify-center overflow-hidden rounded-control border border-fg/15 bg-ink-950">
           {current ? (
             // eslint-disable-next-line @next/next/no-img-element -- admin preview
             <img src={current.url} alt="" className="h-full w-full object-contain" />
@@ -49,7 +49,7 @@ export function ImagePicker({
           <button
             type="button"
             aria-describedby={labelId}
-            className="rounded-control border border-white/15 px-3 py-1.5 hover:border-brand-sky"
+            className="rounded-control border border-fg/15 px-3 py-1.5 hover:border-brand-sky"
             onClick={() => dialogRef.current?.showModal()}
           >
             {current ? "Change image" : "Choose image"}
@@ -71,10 +71,10 @@ export function ImagePicker({
       <dialog
         ref={dialogRef}
         aria-labelledby={`${labelId}-dialog`}
-        className="m-auto w-[min(56rem,calc(100vw-2rem))] rounded-card border border-white/10 bg-navy-900 p-0 text-text-primary backdrop:bg-black/60"
+        className="m-auto w-[min(56rem,calc(100vw-2rem))] rounded-card border border-fg/10 bg-navy-900 p-0 text-text-primary backdrop:bg-black/60"
       >
         <div className="flex max-h-[80vh] flex-col">
-          <div className="flex items-center gap-3 border-b border-white/10 p-4">
+          <div className="flex items-center gap-3 border-b border-fg/10 p-4">
             <h2 id={`${labelId}-dialog`} className="font-semibold">
               {label}
             </h2>
@@ -84,9 +84,9 @@ export function ImagePicker({
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Search"
               aria-label="Search images"
-              className="ml-auto h-9 w-48 rounded-control border border-white/15 bg-ink-950/60 px-3 text-sm focus:border-brand-sky focus:outline-none"
+              className="ml-auto h-9 w-48 rounded-control border border-fg/15 bg-ink-950/60 px-3 text-sm focus:border-brand-sky focus:outline-none"
             />
-            <button type="button" className="rounded-control px-2 py-1 text-sm hover:bg-white/10" onClick={() => dialogRef.current?.close()}>
+            <button type="button" className="rounded-control px-2 py-1 text-sm hover:bg-fg/10" onClick={() => dialogRef.current?.close()}>
               Close
             </button>
           </div>
@@ -112,7 +112,7 @@ export function ImagePicker({
                       }}
                       className={
                         "flex w-full flex-col overflow-hidden rounded-control border text-left " +
-                        (o.id === selected ? "border-brand-sky" : "border-white/10 hover:border-brand-sky/50")
+                        (o.id === selected ? "border-brand-sky" : "border-fg/10 hover:border-brand-sky/50")
                       }
                     >
                       <span className="flex aspect-[4/3] items-center justify-center bg-ink-950">

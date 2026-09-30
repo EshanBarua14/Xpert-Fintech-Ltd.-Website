@@ -93,6 +93,7 @@ export function MarketGlobe({ routes = 12, labels = { dse: "DSE", cse: "CSE" } }
     function draw(t: number) {
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
+      const light = document.documentElement.dataset.theme === "light";
       const R = Math.min(width, height) * 0.42;
       const cx = width / 2;
       const cy = height / 2;
@@ -109,7 +110,7 @@ export function MarketGlobe({ routes = 12, labels = { dse: "DSE", cse: "CSE" } }
       ctx.fill();
 
       // Rim
-      ctx.strokeStyle = "rgba(103,232,249,0.18)";
+      ctx.strokeStyle = light ? "rgba(10,120,173,0.25)" : "rgba(103,232,249,0.18)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(cx, cy, R, 0, Math.PI * 2);
@@ -120,7 +121,7 @@ export function MarketGlobe({ routes = 12, labels = { dse: "DSE", cse: "CSE" } }
         const p = project(d, yaw, R, cx, cy);
         if (p.z < -0.1) continue;
         const a = p.z > 0 ? 0.22 + p.z * 0.7 : 0.06;
-        ctx.fillStyle = `rgba(125,200,255,${a.toFixed(3)})`;
+        ctx.fillStyle = light ? `rgba(30,95,175,${(a * 0.9).toFixed(3)})` : `rgba(125,200,255,${a.toFixed(3)})`;
         const size = p.z > 0 ? 1.2 + p.z * 0.9 : 0.8;
         ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
       }
@@ -174,12 +175,12 @@ export function MarketGlobe({ routes = 12, labels = { dse: "DSE", cse: "CSE" } }
         ctx.beginPath();
         ctx.arc(p.x, p.y, 4 + pulse * 18, 0, Math.PI * 2);
         ctx.stroke();
-        ctx.fillStyle = "#e0fbff";
+        ctx.fillStyle = light ? "#0a78ad" : "#e0fbff";
         ctx.beginPath();
         ctx.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
         ctx.fill();
         ctx.font = "600 12px ui-monospace, SFMono-Regular, monospace";
-        ctx.fillStyle = "rgba(224,251,255,0.9)";
+        ctx.fillStyle = light ? "rgba(10,20,40,0.9)" : "rgba(224,251,255,0.9)";
         ctx.fillText(label, p.x + 10, p.y + (label === labels.cse ? 16 : -8));
       }
     }

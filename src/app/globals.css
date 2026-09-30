@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* `dark:` / `light:` variants follow the site theme switch, not only the OS setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
 /*
  * XPERT NEXUS design tokens (DESIGN DECISION — see architecture doc, section 8).
  * Colours are checked against WCAG AA before use in text.
@@ -29,6 +33,9 @@
   --color-brand-royal-hover: #2468c0;
   --color-brand-deep: #1e4f94; /* links and text accents on light sections */
   --color-cyan-300: #67e8f9; /* live pulses only */
+  /* Contrast base: white in dark mode, deep navy in light mode (borders, glass, text) */
+  --color-fg: #ffffff;
+  --color-accent: #67e8f9;
   --color-metal-300: #b8c2cf;
 
   /* Market semantics — market data only, never decoration */
@@ -73,7 +80,79 @@
   --z-modal: 400;
   --z-toast: 500;
   --hairline: rgb(255 255 255 / 0.06);
+  --grid-line: rgb(255 255 255 / 0.05);
+  --glass-a: rgb(255 255 255 / 0.055);
+  --glass-b: rgb(255 255 255 / 0.015);
+  --glass-line: rgb(255 255 255 / 0.08);
+  --glass-strong: rgb(8 13 26 / 0.72);
+  --grad-a: #ffffff;
+  --grad-b: #9fb3cf;
+  --grain: 0.035;
+  --aurora-1: rgb(42 95 174 / 0.55);
+  --aurora-2: rgb(34 188 235 / 0.32);
+  --bg-glow-1: rgb(42 95 174 / 0.18);
+  --bg-glow-2: rgb(34 188 235 / 0.08);
+  /* Ecosystem map */
+  --eco-node: rgb(10 20 40 / 0.92);
+  --eco-line: rgb(255 255 255 / 0.12);
+  --eco-text: #ffffff;
+  --eco-muted: #9aa7ba;
+  --eco-accent: #67e8f9;
+  --eco-flow: #22bceb;
+  --eco-oversight: #8fb4ff;
+  --eco-glow: rgb(34 188 235 / 0.35);
+  --eco-hub-a: #1d4f9a;
+  --eco-hub-b: #0a1428;
+  --eco-pill: #0a1428;
+  --eco-pill-on: #1e5fae;
+  --eco-pill-text: #cfefff;
   color-scheme: dark;
+}
+
+/* ── Light mode ─────────────────────────────────────────────────────────
+ * Same components, lighter surfaces. Accent colours are darkened so text
+ * keeps WCAG AA contrast on white (sky #0a78ad on #f5f7fb ≈ 4.6:1). */
+[data-theme="light"] {
+  --color-ink-950: #f4f7fb;
+  --color-navy-900: #ffffff;
+  --color-navy-800: #e8eef7;
+  --color-graphite-700: #d6dfeb;
+  --color-text-primary: #0b1324;
+  --color-text-secondary: #4a5873;
+  --color-brand-sky: #0a78ad;
+  --color-brand-mid: #1f6fae;
+  --color-cyan-300: #0e7490;
+  --color-accent: #0b6f8a;
+  --color-fg: #0a1428;
+  --color-market-up: #15803d;
+  --color-market-down: #c81e1e;
+  --hairline: rgb(10 20 40 / 0.07);
+  --grid-line: rgb(10 20 40 / 0.06);
+  --glass-a: rgb(255 255 255 / 0.85);
+  --glass-b: rgb(255 255 255 / 0.6);
+  --glass-line: rgb(10 20 40 / 0.09);
+  --glass-strong: rgb(255 255 255 / 0.82);
+  --grad-a: #0a1428;
+  --grad-b: #2d4d7a;
+  --grain: 0.02;
+  --aurora-1: rgb(42 95 174 / 0.22);
+  --aurora-2: rgb(34 188 235 / 0.2);
+  --bg-glow-1: rgb(42 95 174 / 0.1);
+  --bg-glow-2: rgb(34 188 235 / 0.08);
+  --eco-node: #ffffff;
+  --eco-line: rgb(10 20 40 / 0.14);
+  --eco-text: #0a1428;
+  --eco-muted: #4a5873;
+  --eco-accent: #0a78ad;
+  --eco-flow: #1e7fc0;
+  --eco-oversight: #4f6fd8;
+  --eco-glow: rgb(34 188 235 / 0.22);
+  --eco-hub-a: #2a6fc4;
+  --eco-hub-b: #1a4488;
+  --eco-pill: #ffffff;
+  --eco-pill-on: #1e5fae;
+  --eco-pill-text: #0a1428;
+  color-scheme: light;
 }
 
 html {
@@ -169,11 +248,112 @@ html[lang="bn"] {
   inherits: false;
 }
 
-body {
+/* The page backdrop lives on <html> so the ambient layer (z-index -1) sits above it. */
+html {
   background:
-    radial-gradient(1200px 600px at 80% -10%, rgb(42 95 174 / 0.18), transparent 60%),
-    radial-gradient(900px 500px at 0% 10%, rgb(34 188 235 / 0.08), transparent 60%),
+    radial-gradient(1200px 600px at 80% -10%, var(--bg-glow-1), transparent 60%),
+    radial-gradient(900px 500px at 0% 10%, var(--bg-glow-2), transparent 60%),
     var(--color-ink-950);
+  background-attachment: fixed;
+  transition: background-color 400ms var(--ease-ui);
+}
+body {
+  background: transparent;
+}
+
+/* ── Ambient animated background ───────────────────────────────────── */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ambient-orb {
+  position: absolute;
+  width: 55vmax;
+  height: 55vmax;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.55;
+  will-change: transform;
+}
+.ambient-orb-1 {
+  top: -25vmax;
+  left: -15vmax;
+  background: radial-gradient(circle, var(--aurora-1), transparent 65%);
+  animation: orb-1 38s ease-in-out infinite alternate;
+}
+.ambient-orb-2 {
+  top: 20vh;
+  right: -25vmax;
+  background: radial-gradient(circle, var(--aurora-2), transparent 65%);
+  animation: orb-2 46s ease-in-out infinite alternate;
+}
+.ambient-orb-3 {
+  bottom: -30vmax;
+  left: 20vw;
+  background: radial-gradient(circle, var(--aurora-1), transparent 65%);
+  opacity: 0.35;
+  animation: orb-3 52s ease-in-out infinite alternate;
+}
+@keyframes orb-1 {
+  to {
+    transform: translate3d(18vw, 22vh, 0) scale(1.15);
+  }
+}
+@keyframes orb-2 {
+  to {
+    transform: translate3d(-22vw, 18vh, 0) scale(0.9);
+  }
+}
+@keyframes orb-3 {
+  to {
+    transform: translate3d(-15vw, -25vh, 0) scale(1.2);
+  }
+}
+.ambient-grid {
+  position: absolute;
+  inset: -64px;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 20%, transparent 85%);
+  opacity: 0.55;
+  animation: grid-pan 30s linear infinite;
+}
+@keyframes grid-pan {
+  to {
+    transform: translate3d(64px, 64px, 0);
+  }
+}
+.ambient-stream {
+  position: absolute;
+  top: -30vh;
+  width: 1px;
+  height: 22vh;
+  background: linear-gradient(180deg, transparent, var(--color-brand-sky), transparent);
+  opacity: 0;
+  animation-name: stream-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes stream-fall {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.35;
+  }
+  80% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translate3d(0, 150vh, 0);
+    opacity: 0;
+  }
 }
 
 /* Fine film grain over everything (decorative, very faint) */
@@ -183,7 +363,7 @@ body::before {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: var(--grain);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
@@ -207,12 +387,12 @@ body::before {
 .aurora::before {
   top: -45vmax;
   left: -25vmax;
-  background: radial-gradient(circle, rgb(42 95 174 / 0.55), transparent 62%);
+  background: radial-gradient(circle, var(--aurora-1), transparent 62%);
 }
 .aurora::after {
   top: -40vmax;
   right: -30vmax;
-  background: radial-gradient(circle, rgb(34 188 235 / 0.32), transparent 62%);
+  background: radial-gradient(circle, var(--aurora-2), transparent 62%);
   animation-delay: -9s;
 }
 @keyframes aurora-drift {
@@ -224,15 +404,15 @@ body::before {
 /* Grid that fades out from the top centre */
 .grid-fade {
   background-image:
-    linear-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 80%);
 }
 
 /* Headline gradients */
 .text-gradient {
-  background: linear-gradient(180deg, #ffffff 20%, #9fb3cf 100%);
+  background: linear-gradient(180deg, var(--grad-a) 20%, var(--grad-b) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -287,14 +467,14 @@ html[lang="bn"] .eyebrow {
 
 /* Glass surfaces */
 .glass {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.055), rgb(255 255 255 / 0.015));
-  border: 1px solid rgb(255 255 255 / 0.08);
+  background: linear-gradient(180deg, var(--glass-a), var(--glass-b));
+  border: 1px solid var(--glass-line);
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 .glass-strong {
-  background: rgb(8 13 26 / 0.72);
-  border: 1px solid rgb(255 255 255 / 0.09);
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-line);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
@@ -559,6 +739,84 @@ html[lang="bn"] .eyebrow {
   }
 }
 
+[data-theme="light"] .text-gradient-brand {
+  background-image: linear-gradient(90deg, #0a78ad, #1f6fae 35%, #2a5fae 60%, #0a78ad 100%);
+}
+[data-theme="light"] .glass,
+[data-theme="light"] .glass-strong {
+  box-shadow: 0 1px 2px rgb(10 20 40 / 0.04), 0 12px 32px -16px rgb(10 20 40 / 0.18);
+}
+[data-theme="light"] .spotlight::before {
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(10 120 173 / 0.08), transparent 45%);
+}
+[data-theme="light"] .spotlight::after {
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgb(10 120 173 / 0.55), transparent 45%);
+}
+
+/* Diagram flows fade in when a scene starts; active module pills pulse */
+.eco-flow-in {
+  animation: eco-flow-in 700ms var(--ease-ui) both;
+}
+@keyframes eco-flow-in {
+  from {
+    opacity: 0;
+  }
+}
+.eco-pill-pulse {
+  animation: eco-pill-pulse 1.8s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes eco-pill-pulse {
+  from {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+/* Smooth theme switch without animating every property on load */
+.theme-transition,
+.theme-transition * {
+  transition:
+    background-color 350ms var(--ease-ui),
+    border-color 350ms var(--ease-ui),
+    color 350ms var(--ease-ui) !important;
+}
+
+/* Market widgets */
+.demo-text {
+  color: #fcd34d;
+}
+[data-theme="light"] .demo-text {
+  color: #92400e;
+}
+.tick-flash-up {
+  animation: tick-flash-up 1.6s ease-out;
+}
+.tick-flash-down {
+  animation: tick-flash-down 1.6s ease-out;
+}
+@keyframes tick-flash-up {
+  0% {
+    background-color: rgb(34 197 94 / 0.28);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+@keyframes tick-flash-down {
+  0% {
+    background-color: rgb(239 68 68 / 0.28);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
 /* Scrollbar */
 html {
   scrollbar-color: #1e2d4a transparent;
@@ -582,6 +840,14 @@ html {
     opacity: 1;
     transform: none;
     filter: none;
+  }
+  .ambient-orb,
+  .ambient-grid,
+  .ambient-stream {
+    animation: none !important;
+  }
+  .ambient-stream {
+    display: none;
   }
   .marquee-track {
     animation: none;

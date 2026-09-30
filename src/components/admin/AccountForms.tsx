@@ -112,7 +112,7 @@ function ResetPassword({ id }: { id: string }) {
 
 export function AdminUsersTable({ rows }: { rows: AdminRow[] }) {
   return (
-    <ul className="divide-y divide-white/10 rounded-card border border-white/10">
+    <ul className="divide-y divide-fg/10 rounded-card border border-fg/10">
       {rows.map((u) => (
         <li key={u.id} className="flex flex-col gap-3 p-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -132,7 +132,7 @@ export function AdminUsersTable({ rows }: { rows: AdminRow[] }) {
                   <input type="hidden" name="id" value={u.id} />
                   <ConfirmButton
                     message={`Turn off two-factor sign-in for ${u.email}? Do this only if they lost their phone. They will be signed out.`}
-                    className="rounded-control border border-white/15 px-3 py-2 text-sm hover:border-brand-sky"
+                    className="rounded-control border border-fg/15 px-3 py-2 text-sm hover:border-brand-sky"
                   >
                     Turn off two-factor
                   </ConfirmButton>
@@ -144,7 +144,7 @@ export function AdminUsersTable({ rows }: { rows: AdminRow[] }) {
                 {u.isActive ? (
                   <ConfirmButton message={`Deactivate ${u.email}? They are signed out immediately.`}>Deactivate</ConfirmButton>
                 ) : (
-                  <button type="submit" className="rounded-control border border-white/15 px-3 py-2 text-sm hover:border-brand-sky">
+                  <button type="submit" className="rounded-control border border-fg/15 px-3 py-2 text-sm hover:border-brand-sky">
                     Reactivate
                   </button>
                 )}
@@ -212,7 +212,7 @@ export function TwoFactorPanel({ enabled, serverReady }: { enabled: boolean; ser
           </SubmitButton>
         </form>
       ) : (
-        <div className="flex flex-col gap-5 rounded-card border border-white/10 p-5">
+        <div className="flex flex-col gap-5 rounded-card border border-fg/10 p-5">
           <ol className="flex list-decimal flex-col gap-3 pl-5 text-sm">
             <li>
               In your authenticator app, choose <strong>Add account</strong> → <strong>Enter a setup key</strong>. Account: <em>Xpert Fintech</em>, type:{" "}

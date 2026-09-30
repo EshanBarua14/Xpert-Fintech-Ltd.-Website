@@ -21,7 +21,7 @@ export type SettingsValues = {
 
 function Group({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <fieldset className="grid gap-5 rounded-card border border-white/10 p-5 md:grid-cols-2">
+    <fieldset className="grid gap-5 rounded-card border border-fg/10 p-5 md:grid-cols-2">
       <legend className="px-2 text-sm font-semibold">{title}</legend>
       {hint && <p className="text-xs text-text-secondary md:col-span-2">{hint}</p>}
       {children}

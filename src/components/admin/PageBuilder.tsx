@@ -51,7 +51,7 @@ export type BuilderBlock = {
 };
 export type BuilderSection = { id: string; variant: string; anchorId: string; isHidden: boolean; blocks: BuilderBlock[] };
 
-const iconBtn = "inline-flex h-8 min-w-8 items-center justify-center rounded-control border border-white/10 px-2 text-xs hover:border-brand-sky";
+const iconBtn = "inline-flex h-8 min-w-8 items-center justify-center rounded-control border border-fg/10 px-2 text-xs hover:border-brand-sky";
 const dangerBtn = "inline-flex h-8 items-center rounded-control border border-market-down/30 px-2 text-xs text-market-down hover:bg-market-down/10";
 
 function Row({ children }: { children: React.ReactNode }) {
@@ -168,7 +168,7 @@ function AddItem({ block, images }: { block: BuilderBlock; images: ImageOption[]
   const [round, setRound] = useState(0);
   const singular = blockDefinition(block.type)?.cards?.singular ?? "card";
   return (
-    <details className="rounded-control border border-dashed border-white/15 p-4">
+    <details className="rounded-control border border-dashed border-fg/15 p-4">
       <summary className="cursor-pointer text-sm text-brand-sky">+ Add {singular.toLowerCase()}</summary>
       <div className="mt-4">
         <ItemForm key={round} block={block} images={images} onSaved={() => setRound((r) => r + 1)} />
@@ -191,7 +191,7 @@ function BlockForm({ block }: { block: BuilderBlock }) {
       <FormMessage message={state.message} isError={Boolean(state.errors)} />
       <div className="grid gap-5 lg:grid-cols-2">
         {(["en", "bn"] as const).map((l) => (
-          <fieldset key={l} lang={l} className="flex flex-col gap-4 rounded-control border border-white/10 p-4">
+          <fieldset key={l} lang={l} className="flex flex-col gap-4 rounded-control border border-fg/10 p-4">
             <legend className="px-2 text-xs font-semibold">{l === "en" ? "English" : "বাংলা — optional"}</legend>
             {fields.map((f) =>
               f === "body" ? (
@@ -227,7 +227,7 @@ function BlockForm({ block }: { block: BuilderBlock }) {
         ))}
       </div>
       {def.settings.length > 0 && (
-        <fieldset className="grid gap-4 rounded-control border border-white/10 p-4 md:grid-cols-2">
+        <fieldset className="grid gap-4 rounded-control border border-fg/10 p-4 md:grid-cols-2">
           <legend className="px-2 text-xs font-semibold">Settings</legend>
           {def.settings.map((s) => (
             <SettingField key={s.key} s={s} prefix="setting" value={block.props[s.key]} error={e[s.key]} />
@@ -252,7 +252,7 @@ function BlockCard({ block, images, index, total }: { block: BuilderBlock; image
   const def = blockDefinition(block.type);
   const title = block.en.title || block.en.eyebrow || "(no heading)";
   return (
-    <li className="flex flex-col gap-3 rounded-card border border-white/10 bg-ink-950/40 p-4">
+    <li className="flex flex-col gap-3 rounded-card border border-fg/10 bg-ink-950/40 p-4">
       <div className="flex flex-wrap items-center gap-2">
         <Badge tone="brand">{def?.label ?? block.type}</Badge>
         <span className="font-medium">{title}</span>
@@ -289,12 +289,12 @@ function BlockCard({ block, images, index, total }: { block: BuilderBlock; image
             </div>
           </details>
           {def.cards && (
-            <div className="flex flex-col gap-2 border-l border-white/10 pl-4">
+            <div className="flex flex-col gap-2 border-l border-fg/10 pl-4">
               <p className="text-xs font-semibold text-text-secondary">
                 {def.cards.singular}s ({block.items.length})
               </p>
               {block.items.length > 0 && (
-                <ol className="flex flex-col divide-y divide-white/10">
+                <ol className="flex flex-col divide-y divide-fg/10">
                   {block.items.map((item, i) => (
                     <li key={item.id} className="flex flex-col gap-2 py-2">
                       <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -384,12 +384,12 @@ export function PageBuilder({ pageId, sections, images }: { pageId: string; sect
   return (
     <div className="flex flex-col gap-6">
       {sections.length === 0 && (
-        <p className="rounded-card border border-white/10 px-4 py-8 text-center text-text-secondary">
+        <p className="rounded-card border border-fg/10 px-4 py-8 text-center text-text-secondary">
           This page has no sections yet. Add one to start building.
         </p>
       )}
       {sections.map((section, si) => (
-        <section key={section.id} className="flex flex-col gap-4 rounded-card border border-white/15 p-5">
+        <section key={section.id} className="flex flex-col gap-4 rounded-card border border-fg/15 p-5">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-display text-lg font-semibold">Section {si + 1}</h3>
             {section.anchorId && <span className="tabular text-xs text-text-secondary">#{section.anchorId}</span>}

@@ -31,7 +31,7 @@ export function OrganizationForm({ values, images }: { values: OrgFormValues; im
       <div className="flex flex-col gap-6">
         <FormMessage message={state.message} isError={Boolean(state.errors)} />
         {(["en", "bn"] as const).map((l) => (
-          <fieldset key={l} lang={l} className="grid gap-5 rounded-card border border-white/10 p-5 md:grid-cols-2">
+          <fieldset key={l} lang={l} className="grid gap-5 rounded-card border border-fg/10 p-5 md:grid-cols-2">
             <legend className="px-2 text-sm font-semibold">{l === "en" ? "English" : "বাংলা — optional"}</legend>
             <TextInput id={`${l}Name`} label="Name" required={l === "en"} defaultValue={values[l].name} error={e[`${l}Name`]} />
             <TextInput
@@ -54,12 +54,12 @@ export function OrganizationForm({ values, images }: { values: OrgFormValues; im
         ))}
       </div>
       <aside className="flex flex-col gap-6">
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Publishing</legend>
           <PublishFields status={values.status} publishAt={values.publishAt} error={e.publishAt} />
           <SubmitButton pending={pending}>Save</SubmitButton>
         </fieldset>
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Details</legend>
           <Select
             id="kind"

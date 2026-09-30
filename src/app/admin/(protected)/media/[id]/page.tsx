@@ -32,7 +32,7 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="flex items-center justify-center rounded-card border border-white/10 bg-ink-950 p-4">
+        <div className="flex items-center justify-center rounded-card border border-fg/10 bg-ink-950 p-4">
           {isImage ? (
             // eslint-disable-next-line @next/next/no-img-element -- admin preview of our own served file
             <img src={url} alt={t("en")?.altText ?? ""} className="max-h-[70vh] w-auto object-contain" />
@@ -101,7 +101,7 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
               }}
             />
           </section>
-          <section className="flex items-center justify-between gap-4 border-t border-white/10 pt-6">
+          <section className="flex items-center justify-between gap-4 border-t border-fg/10 pt-6">
             <p className="text-sm text-text-secondary">
               {media.usages.length > 0
                 ? "This file is in use. Moving it to the trash removes it from those places on the website."

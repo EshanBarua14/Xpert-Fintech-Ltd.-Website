@@ -63,7 +63,7 @@ export function NetworkDiagram({
                 onKeyDown={(e) => onKey(e, i)}
                 className={
                   "flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm transition-colors md:flex-col md:gap-2 md:px-5 md:text-center " +
-                  (selected ? "border-brand-sky bg-navy-800 text-text-primary" : "border-white/10 bg-ink-950 text-text-secondary hover:border-brand-sky/50")
+                  (selected ? "border-brand-sky bg-navy-800 text-text-primary" : "border-fg/10 bg-ink-950 text-text-secondary hover:border-brand-sky/50")
                 }
               >
                 <span className="tabular text-xs text-brand-sky">{String(i + 1).padStart(2, "0")}</span>

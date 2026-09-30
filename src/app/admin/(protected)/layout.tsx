@@ -16,7 +16,7 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
-      <aside className="flex shrink-0 flex-col gap-6 border-b border-white/10 bg-ink-950 p-4 lg:w-60 lg:border-r lg:border-b-0">
+      <aside className="flex shrink-0 flex-col gap-6 border-b border-fg/10 bg-ink-950 p-4 lg:w-60 lg:border-r lg:border-b-0">
         <Link href="/admin" className="flex items-center gap-3">
           <Logo height={40} />
           <span className="font-display font-semibold">Xpert Admin</span>
@@ -25,7 +25,7 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-end gap-4 border-b border-white/10 px-4 py-3 text-sm md:px-8">
+        <header className="flex items-center justify-end gap-4 border-b border-fg/10 px-4 py-3 text-sm md:px-8">
           <Link href="/en" target="_blank" rel="noopener noreferrer" className="text-brand-sky hover:underline">
             View website ↗
           </Link>
@@ -33,7 +33,7 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
             {admin.name}
           </Link>
           <form action={logoutAction}>
-            <button type="submit" className="rounded-control border border-white/15 px-3 py-1.5 hover:border-brand-sky">
+            <button type="submit" className="rounded-control border border-fg/15 px-3 py-1.5 hover:border-brand-sky">
               Sign out
             </button>
           </form>

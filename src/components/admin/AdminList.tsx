@@ -91,7 +91,7 @@ export function AdminList({
                 name="q"
                 defaultValue={q}
                 placeholder="Search by name"
-                className="h-9 w-56 rounded-control border border-white/15 bg-ink-950/60 px-3 text-sm focus:border-brand-sky focus:outline-none"
+                className="h-9 w-56 rounded-control border border-fg/15 bg-ink-950/60 px-3 text-sm focus:border-brand-sky focus:outline-none"
               />
               <button type="submit" className={buttonClasses({ variant: "secondary", size: "sm" })}>
                 Search
@@ -104,7 +104,7 @@ export function AdminList({
                     key={f.label}
                     href={hrefFor(f.param, f.value)}
                     aria-current={f.active ? "page" : undefined}
-                    className={cn("rounded-control px-3 py-1.5", f.active ? "bg-white/10" : "text-text-secondary hover:text-text-primary")}
+                    className={cn("rounded-control px-3 py-1.5", f.active ? "bg-fg/10" : "text-text-secondary hover:text-text-primary")}
                   >
                     {f.label}
                   </Link>
@@ -118,9 +118,9 @@ export function AdminList({
         </Link>
       </div>
 
-      <div className="overflow-x-auto rounded-card border border-white/10">
+      <div className="overflow-x-auto rounded-card border border-fg/10">
         <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="border-b border-white/10 text-xs tracking-wide text-text-secondary uppercase">
+          <thead className="border-b border-fg/10 text-xs tracking-wide text-text-secondary uppercase">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">
                 Name
@@ -132,7 +132,7 @@ export function AdminList({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10">
+          <tbody className="divide-y divide-fg/10">
             {rows.length === 0 && (
               <tr>
                 <td colSpan={columns.length + 1} className="px-4 py-10 text-center text-text-secondary">
@@ -141,7 +141,7 @@ export function AdminList({
               </tr>
             )}
             {rows.map((r) => (
-              <tr key={r.id} className="hover:bg-white/[0.03]">
+              <tr key={r.id} className="hover:bg-fg/[0.03]">
                 <td className="px-4 py-3">
                   <Link href={r.href} className="font-medium hover:text-brand-sky">
                     {r.title}

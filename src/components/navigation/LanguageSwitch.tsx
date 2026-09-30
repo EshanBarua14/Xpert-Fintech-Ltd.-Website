@@ -22,7 +22,7 @@ export function LanguageSwitch({ current, label, className }: { current: AppLoca
   }
 
   return (
-    <nav aria-label={label} className={cn("relative inline-flex rounded-full border border-white/10 bg-white/[0.04] p-1", className)}>
+    <nav aria-label={label} className={cn("relative inline-flex rounded-full border border-fg/10 bg-fg/[0.04] p-1", className)}>
       <span
         aria-hidden="true"
         className="absolute top-1 bottom-1 left-1 w-16 rounded-full bg-gradient-to-br from-brand-royal to-brand-mid shadow-[0_4px_16px_-4px_rgb(34_188_235/0.6)] transition-transform duration-300 ease-(--ease-ui)"

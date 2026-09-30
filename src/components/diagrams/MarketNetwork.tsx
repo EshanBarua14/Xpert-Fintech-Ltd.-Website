@@ -56,9 +56,9 @@ export function MarketNetwork({ caption }: { caption: string }) {
 
           {brokers.map((b, i) => (
             <g key={i}>
-              <rect x={b.x - 26} y={b.y - 16} width="52" height="32" rx="6" className="fill-navy-900 stroke-white/25" strokeWidth="1" />
-              <rect x={b.x - 14} y={b.y - 6} width="28" height="3" rx="1.5" className="fill-white/30" />
-              <rect x={b.x - 14} y={b.y + 3} width="18" height="3" rx="1.5" className="fill-white/20" />
+              <rect x={b.x - 26} y={b.y - 16} width="52" height="32" rx="6" className="fill-navy-900 stroke-fg/25" strokeWidth="1" />
+              <rect x={b.x - 14} y={b.y - 6} width="28" height="3" rx="1.5" className="fill-fg/30" />
+              <rect x={b.x - 14} y={b.y + 3} width="18" height="3" rx="1.5" className="fill-fg/20" />
             </g>
           ))}
 

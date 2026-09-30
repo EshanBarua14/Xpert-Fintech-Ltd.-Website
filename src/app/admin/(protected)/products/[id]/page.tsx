@@ -99,7 +99,7 @@ export default async function EditProductPage({
         <>
           <ProductForm values={toProductFormValues(offering)} parentOptions={await parentOptions(offering.id)} />
 
-          <section className="flex flex-col gap-4 border-t border-white/10 pt-8">
+          <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
             <div>
               <h2 className="font-display text-2xl font-semibold">Page content</h2>
               <p className="mt-1 text-sm text-text-secondary">
@@ -109,7 +109,7 @@ export default async function EditProductPage({
             <OfferingItemsEditor offeringId={offering.id} items={items} />
           </section>
 
-          <section className="flex items-center justify-between gap-4 border-t border-white/10 pt-8">
+          <section className="flex items-center justify-between gap-4 border-t border-fg/10 pt-8">
             <p className="text-sm text-text-secondary">Move to trash to hide it from the website. You can restore it from the trash.</p>
             <form action={trashOffering}>
               <input type="hidden" name="id" value={offering.id} />

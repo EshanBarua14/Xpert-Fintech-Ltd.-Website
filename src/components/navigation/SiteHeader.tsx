@@ -12,7 +12,7 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
     <HeaderClient
       locale={locale}
       items={items}
-      labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language, overview: t.overview }}
+      labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language, overview: t.overview, toLight: t.themeToLight, toDark: t.themeToDark }}
       logo={<Logo height={40} priority />}
     />
   );

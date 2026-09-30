@@ -91,7 +91,7 @@ export function CtaButton({
   const className =
     variant === "primary"
       ? "btn-glow group inline-flex h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold text-white transition-transform duration-300 hover:-translate-y-0.5"
-      : "inline-flex h-12 items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-6 text-sm font-semibold text-text-primary backdrop-blur transition-colors duration-300 hover:border-brand-sky/60 hover:bg-brand-sky/10";
+      : "inline-flex h-12 items-center gap-2 rounded-full border border-fg/15 bg-fg/[0.03] px-6 text-sm font-semibold text-text-primary backdrop-blur transition-colors duration-300 hover:border-brand-sky/60 hover:bg-brand-sky/10";
   return (
     <SmartLink href={href} locale={locale} className={className}>
       {label}

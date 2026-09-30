@@ -59,7 +59,7 @@ export default async function DesignSystemPage({ params }: { params: Promise<{ l
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {swatches.map(([name, cls, use]) => (
             <li key={name} className="flex flex-col gap-2">
-              <span className={`h-16 rounded-card border border-white/10 ${cls}`} />
+              <span className={`h-16 rounded-card border border-fg/10 ${cls}`} />
               <span className="tabular text-xs">{name}</span>
               <span className="text-xs text-text-secondary">{use}</span>
             </li>

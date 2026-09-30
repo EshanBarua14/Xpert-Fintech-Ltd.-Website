@@ -103,9 +103,9 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
 
       <div className="grid gap-8 xl:grid-cols-[1fr_22rem]">
         <div className="flex flex-col gap-8">
-          <section className="rounded-card border border-white/10 p-6">
+          <section className="rounded-card border border-fg/10 p-6">
             <h2 className="font-display text-lg font-semibold">Enquiry</h2>
-            <dl className="mt-2 divide-y divide-white/10">
+            <dl className="mt-2 divide-y divide-fg/10">
               <Row label="Email">
                 <a href={`mailto:${lead.email}`} className="text-brand-sky hover:underline">
                   {lead.email}
@@ -142,10 +142,10 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
             </dl>
           </section>
 
-          <section className="flex flex-col gap-4 rounded-card border border-white/10 p-6">
+          <section className="flex flex-col gap-4 rounded-card border border-fg/10 p-6">
             <h2 className="font-display text-lg font-semibold">History</h2>
             {!inTrash && <LeadActivityForm leadId={lead.id} />}
-            <ol className="flex flex-col divide-y divide-white/10 border-t border-white/10">
+            <ol className="flex flex-col divide-y divide-fg/10 border-t border-fg/10">
               {lead.activities.length === 0 && <li className="py-4 text-sm text-text-secondary">Nothing logged yet.</li>}
               {lead.activities.map((a) => (
                 <li key={a.id} className="flex flex-col gap-1 py-4">
@@ -169,7 +169,7 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
           </section>
 
           {!inTrash && (
-            <details className="rounded-card border border-white/10 p-6">
+            <details className="rounded-card border border-fg/10 p-6">
               <summary className="cursor-pointer font-display text-lg font-semibold">Edit contact details</summary>
               <div className="mt-6">
                 <LeadDetailsForm
@@ -195,7 +195,7 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
 
         <aside className="flex flex-col gap-6">
           {!inTrash && (
-            <section className="rounded-card border border-white/10 p-6">
+            <section className="rounded-card border border-fg/10 p-6">
               <h2 className="mb-4 font-display text-lg font-semibold">Follow-up</h2>
               <LeadPipelineForm
                 id={lead.id}
@@ -207,7 +207,7 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
             </section>
           )}
 
-          <section className="flex flex-col gap-3 rounded-card border border-white/10 p-6 text-sm">
+          <section className="flex flex-col gap-3 rounded-card border border-fg/10 p-6 text-sm">
             <h2 className="font-display text-lg font-semibold">Technical details</h2>
             <p className="text-text-secondary">Kept for spam checks. Remove the lead permanently if the person asks for their data to be deleted.</p>
             <dl className="flex flex-col gap-2 text-xs">

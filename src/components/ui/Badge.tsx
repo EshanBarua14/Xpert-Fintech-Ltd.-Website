@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils/cn";
 type Tone = "neutral" | "brand" | "up" | "down";
 
 const tones: Record<Tone, string> = {
-  neutral: "border-white/15 text-text-secondary",
+  neutral: "border-fg/15 text-text-secondary",
   brand: "border-brand-sky/40 text-brand-sky",
   up: "border-market-up/40 text-market-up",
   down: "border-market-down/40 text-market-down",

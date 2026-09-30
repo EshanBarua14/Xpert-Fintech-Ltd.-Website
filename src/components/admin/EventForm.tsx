@@ -32,7 +32,7 @@ function Language({ l, values, errors }: { l: "en" | "bn"; values: Text; errors:
   const [touched, setTouched] = useState(Boolean(values.slug));
   const k = (f: string) => `${l}${f}`;
   return (
-    <fieldset lang={l} className="grid gap-5 rounded-card border border-white/10 p-5 md:grid-cols-2">
+    <fieldset lang={l} className="grid gap-5 rounded-card border border-fg/10 p-5 md:grid-cols-2">
       <legend className="px-2 text-sm font-semibold">{l === "en" ? "English" : "বাংলা — optional"}</legend>
       <TextInput
         id={k("Title")}
@@ -84,7 +84,7 @@ export function EventForm({
         <FormMessage message={state.message} isError={Boolean(state.errors)} />
         <Language l="en" values={values.en} errors={e} />
         <Language l="bn" values={values.bn} errors={e} />
-        <fieldset className="flex flex-col gap-3 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-3 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Participating organizations</legend>
           <p className="text-xs text-text-secondary">Shown on the event page. Only tick organizations you may name publicly.</p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -104,12 +104,12 @@ export function EventForm({
         </fieldset>
       </div>
       <aside className="flex flex-col gap-6">
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Publishing</legend>
           <PublishFields status={values.status} publishAt={values.publishAt} error={e.publishAt} />
           <SubmitButton pending={pending}>Save</SubmitButton>
         </fieldset>
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">When</legend>
           <TextInput id="startsAt" type="date" label="Start date" defaultValue={values.startsAt} error={e.startsAt} />
           <TextInput id="endsAt" type="date" label="End date" hint="Optional, for multi-day events." defaultValue={values.endsAt} error={e.endsAt} />
@@ -121,7 +121,7 @@ export function EventForm({
             </span>
           </label>
         </fieldset>
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Media</legend>
           <ImagePicker name="coverMediaId" label="Cover image" options={images} defaultValue={values.coverMediaId} error={e.coverMediaId} />
           <TextInput

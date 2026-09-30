@@ -28,7 +28,7 @@ export function TrashControls({
 }) {
   if (!inTrash) {
     return (
-      <section className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-8">
+      <section className="flex flex-wrap items-center justify-between gap-4 border-t border-fg/10 pt-8">
         <p className="text-sm text-text-secondary">Move to trash to hide this {noun} from the website. You can restore it later.</p>
         <form action={onTrash}>
           <input type="hidden" name="id" value={id} />
@@ -87,7 +87,7 @@ export function PublishFields({
             type="datetime-local"
             name="publishAt"
             defaultValue={publishAt}
-            className="h-11 rounded-control border border-white/15 bg-ink-950/60 px-3 focus:border-brand-sky focus:outline-none"
+            className="h-11 rounded-control border border-fg/15 bg-ink-950/60 px-3 focus:border-brand-sky focus:outline-none"
           />
           <span className="text-xs text-text-secondary">Optional. A published item appears from this moment.</span>
           {error && <span className="text-xs text-market-down">{error}</span>}

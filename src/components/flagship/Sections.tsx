@@ -83,7 +83,7 @@ export function GhostButton({ href, children }: { href: string; children: ReactN
   return (
     <Link
       href={href}
-      className="inline-flex h-12 items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-6 text-sm font-semibold text-text-primary backdrop-blur transition-colors duration-300 hover:border-brand-sky/60 hover:bg-brand-sky/10"
+      className="inline-flex h-12 items-center gap-2 rounded-full border border-fg/15 bg-fg/[0.03] px-6 text-sm font-semibold text-text-primary backdrop-blur transition-colors duration-300 hover:border-brand-sky/60 hover:bg-brand-sky/10"
     >
       {children}
     </Link>
@@ -110,17 +110,20 @@ export function FlagshipHero({
   locale,
   body,
   memberCount,
+  ticker,
 }: {
   t: Messages;
   locale: AppLocale;
   body?: string | null;
   memberCount: number;
+  /** Live price strip shown along the bottom edge of the hero. */
+  ticker?: ReactNode;
 }) {
   return (
     <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
       <div className="aurora" />
       <div className="grid-fade pointer-events-none absolute inset-0" />
-      <div className="relative mx-auto grid min-h-[calc(100svh-6rem)] w-full max-w-7xl items-center gap-10 px-4 pt-10 pb-16 md:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:pt-0">
+      <div className="relative mx-auto grid min-h-[calc(100svh-9rem)] w-full max-w-7xl items-center gap-10 px-4 pt-10 pb-16 md:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:pt-0">
         <div className="flex flex-col gap-8">
           <p className="eyebrow" data-reveal>
             {t.heroEyebrow}
@@ -160,6 +163,7 @@ export function FlagshipHero({
           <EcosystemMap labels={ecosystemLabels(t)} className="relative" />
         </div>
       </div>
+      {ticker && <div className="relative">{ticker}</div>}
     </section>
   );
 }
@@ -170,14 +174,14 @@ export function MemberMarquee({ names, label }: { names: string[]; label: string
   if (names.length === 0) return null;
   const loop = [...names, ...names];
   return (
-    <section aria-label={label} className="relative border-y border-white/[0.06] bg-white/[0.015] py-6">
+    <section aria-label={label} className="relative border-y border-fg/[0.06] bg-fg/[0.015] py-6">
       <p className="sr-only">{names.join(", ")}</p>
       <div className="marquee overflow-hidden" aria-hidden="true">
         <ul className="marquee-track gap-3">
           {loop.map((name, i) => (
             <li
               key={`${name}-${i}`}
-              className="flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 text-sm whitespace-nowrap text-text-secondary"
+              className="flex items-center gap-3 rounded-full border border-fg/10 bg-fg/[0.03] px-5 py-2.5 text-sm whitespace-nowrap text-text-secondary"
             >
               <span className="size-1.5 rounded-full bg-brand-sky" />
               {name}
@@ -238,7 +242,7 @@ export function CapabilityBento({ items, anchors = false }: { items: Capability[
             </div>
             <div className="mt-5 flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-brand-sky/10 text-brand-sky">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-fg/10 bg-brand-sky/10 text-brand-sky">
                   <Icon name={c.icon} className="size-5" />
                 </span>
                 <span aria-hidden="true" className="text-text-secondary transition-all duration-300 group-hover:translate-x-1 group-hover:text-brand-sky">
@@ -268,7 +272,7 @@ export function FlowStory({ t }: { t: Messages }) {
   return (
     <div className="relative">
       {/* Connecting rail with travelling light */}
-      <div aria-hidden="true" className="absolute top-12 right-[10%] left-[10%] hidden h-px bg-gradient-to-r from-transparent via-white/15 to-transparent lg:block">
+      <div aria-hidden="true" className="absolute top-12 right-[10%] left-[10%] hidden h-px bg-gradient-to-r from-transparent via-fg/15 to-transparent lg:block">
         <span
           className="absolute -top-[2px] h-[5px] w-24 rounded-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent"
           style={{ animation: "lane 4.5s linear infinite" }}
@@ -296,7 +300,7 @@ export function FlowStory({ t }: { t: Messages }) {
 
 export function StatGrid({ items, locale }: { items: { value: number; label: string; suffix?: string }[]; locale: AppLocale }) {
   return (
-    <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 lg:grid-cols-4">
+    <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-fg/10 bg-fg/10 lg:grid-cols-4">
       {items.map((s, i) => (
         <div key={s.label} data-reveal style={delay(i)} className="flex flex-col gap-2 bg-ink-950/90 p-6 md:p-8">
           <dt className="order-2 text-sm text-text-secondary">{s.label}</dt>
@@ -338,7 +342,7 @@ export function Principles({ t }: { t: Messages }) {
 export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
   return (
     <Shell className="py-20 md:py-28">
-      <div data-reveal className="beam relative overflow-hidden rounded-[2rem] border border-white/10 bg-navy-900/60 px-6 py-16 text-center md:px-16 md:py-24">
+      <div data-reveal className="beam relative overflow-hidden rounded-[2rem] border border-fg/10 bg-navy-900/60 px-6 py-16 text-center md:px-16 md:py-24">
         <div className="aurora opacity-80" />
         <div className="grid-fade pointer-events-none absolute inset-0 opacity-60" />
         <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-6">

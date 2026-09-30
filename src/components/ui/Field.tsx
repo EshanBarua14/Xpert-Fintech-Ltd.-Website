@@ -2,9 +2,9 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
 const control =
-  "w-full rounded-xl border bg-white/[0.03] px-4 text-sm text-text-primary placeholder:text-text-secondary/70 " +
-  "transition-[border-color,box-shadow,background-color] duration-(--duration-base) hover:border-white/25 " +
-  "focus:border-brand-sky focus:bg-white/[0.05] focus:shadow-[0_0_0_4px_rgb(34_188_235/0.15)] focus:outline-none " +
+  "w-full rounded-xl border bg-fg/[0.03] px-4 text-sm text-text-primary placeholder:text-text-secondary/70 " +
+  "transition-[border-color,box-shadow,background-color] duration-(--duration-base) hover:border-fg/25 " +
+  "focus:border-brand-sky focus:bg-fg/[0.05] focus:shadow-[0_0_0_4px_rgb(34_188_235/0.15)] focus:outline-none " +
   "aria-[invalid=true]:border-market-down";
 
 type FieldProps = {
@@ -59,7 +59,7 @@ export function TextInput({ id, label, hint, error, required, className, ...prop
           required={required}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={cn(control, "h-12 border-white/15", className)}
+          className={cn(control, "h-12 border-fg/15", className)}
           {...props}
         />
       )}
@@ -78,7 +78,7 @@ export function TextArea({ id, label, hint, error, required, className, ...props
           rows={props.rows ?? 5}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={cn(control, "border-white/15 py-3", className)}
+          className={cn(control, "border-fg/15 py-3", className)}
           {...props}
         />
       )}
@@ -109,7 +109,7 @@ export function Select({
           required={required}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={cn(control, "h-12 border-white/15", className)}
+          className={cn(control, "h-12 border-fg/15", className)}
           {...initial}
           {...props}
         >

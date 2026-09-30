@@ -92,7 +92,7 @@ export function OrderFlow({
                 cy={lineY}
                 r="22"
                 strokeWidth={step.highlight ? 2.5 : 1.25}
-                className={step.highlight ? "flow-node-pulse fill-ink-950 stroke-brand-sky" : "fill-ink-950 stroke-white/25"}
+                className={step.highlight ? "flow-node-pulse fill-ink-950 stroke-brand-sky" : "fill-ink-950 stroke-fg/25"}
               />
               <text
                 x={x(i)}
@@ -131,7 +131,7 @@ export function OrderFlow({
             <span
               className={
                 "tabular flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-xs " +
-                (step.highlight ? "border-brand-sky text-brand-sky" : "border-white/25 text-text-secondary")
+                (step.highlight ? "border-brand-sky text-brand-sky" : "border-fg/25 text-text-secondary")
               }
             >
               {String(i + 1).padStart(2, "0")}

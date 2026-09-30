@@ -57,7 +57,7 @@ function LanguageFields({
   const isEn = locale === "en";
 
   return (
-    <fieldset className="flex flex-col gap-5 rounded-card border border-white/10 p-5" lang={locale}>
+    <fieldset className="flex flex-col gap-5 rounded-card border border-fg/10 p-5" lang={locale}>
       <legend className="px-2 text-sm font-semibold">{isEn ? "English" : "বাংলা — optional"}</legend>
       {!isEn && (
         <p className="text-xs text-text-secondary">
@@ -150,7 +150,7 @@ export function ProductForm({
       </div>
 
       <aside className="flex flex-col gap-6">
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Publishing</legend>
           <div className="flex flex-col gap-2 text-sm" role="radiogroup" aria-label="Status">
             {(["DRAFT", "PUBLISHED"] as const).map((s) => (
@@ -171,7 +171,7 @@ export function ProductForm({
           <SubmitButton pending={pending}>Save</SubmitButton>
         </fieldset>
 
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Settings</legend>
           <Select
             id="type"

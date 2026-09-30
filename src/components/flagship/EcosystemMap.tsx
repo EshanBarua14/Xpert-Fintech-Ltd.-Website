@@ -7,8 +7,10 @@ import { cn } from "@/lib/utils/cn";
  * How a brokerage house running Xpert connects to Bangladesh's capital
  * market: investors, banks, DSE, CSE, CDBL and the regulator BSEC.
  * A simplified, conceptual view (labelled as such) — it shows relationships,
- * not live data. Four scenes play in turn; visitors can pick one. Motion
- * stops for reduced-motion users and while the diagram is off-screen.
+ * not live data. Four scenes play in turn; in each, the Xpert modules doing
+ * the work light up and link to the party they deal with. Visitors can pick
+ * a scene. Motion stops for reduced-motion users and while off-screen.
+ * Colours come from CSS variables (--eco-*), so it follows light/dark mode.
  */
 
 export type EcosystemLabels = {
@@ -20,41 +22,113 @@ export type EcosystemLabels = {
   hubSub: string;
   roles: { bsec: string; dse: string; cse: string; cdbl: string; bank: string; investors: string };
   names: { bank: string; investors: string };
+  modules?: string;
 };
 
 type NodeKey = "bsec" | "dse" | "cse" | "cdbl" | "bank" | "investors";
-type Edge = { id: string; d: string; scenes: number[]; from: NodeKey | "hub"; to: NodeKey | "hub"; both?: boolean; dotted?: boolean };
+type ModuleKey = "RMS" | "OMS" | "BO" | "Back office" | "eKYC" | "DMS";
 
+const NODE_W = 150;
+const NODE_H = 62;
 const NODES: Record<NodeKey, { x: number; y: number; name?: string }> = {
-  bsec: { x: 400, y: 58, name: "BSEC" },
+  bsec: { x: 400, y: 52, name: "BSEC" },
   investors: { x: 86, y: 300 },
-  dse: { x: 712, y: 206, name: "DSE" },
-  cse: { x: 712, y: 382, name: "CSE" },
-  cdbl: { x: 560, y: 512, name: "CDBL" },
-  bank: { x: 196, y: 512 },
+  dse: { x: 712, y: 200, name: "DSE" },
+  cse: { x: 712, y: 396, name: "CSE" },
+  cdbl: { x: 570, y: 522, name: "CDBL" },
+  bank: { x: 196, y: 522 },
 };
-const HUB = { x: 392, y: 296, r: 92 };
+const HUB = { x: 392, y: 296, r: 88 };
+const RING = HUB.r + 18;
 
-const EDGES: Edge[] = [
-  // Scene 0 — onboard
-  { id: "inv-hub", d: "M161 300 C 220 300, 260 298, 300 297", scenes: [0, 1], from: "investors", to: "hub" },
-  { id: "hub-cdbl", d: "M444 372 C 470 430, 520 460, 548 481", scenes: [0, 2], from: "hub", to: "cdbl", both: true },
-  // Scene 1 — trade
-  { id: "hub-dse", d: "M470 250 C 540 220, 590 206, 637 206", scenes: [1], from: "hub", to: "dse", both: true },
-  { id: "hub-cse", d: "M470 342 C 540 370, 590 382, 637 382", scenes: [1], from: "hub", to: "cse", both: true },
-  // Scene 2 — settle
-  { id: "dse-cdbl", d: "M760 237 C 790 330, 730 470, 635 505", scenes: [2], from: "dse", to: "cdbl" },
-  { id: "cse-cdbl", d: "M690 413 C 680 445, 650 470, 622 481", scenes: [2], from: "cse", to: "cdbl" },
-  { id: "hub-bank", d: "M341 372 C 300 420, 240 450, 210 481", scenes: [2], from: "hub", to: "bank", both: true },
-  // Scene 3 — oversee (drawn only while active)
-  { id: "bsec-hub", d: "M400 89 L 394 204", scenes: [3], from: "bsec", to: "hub", dotted: true },
-  { id: "bsec-dse", d: "M475 58 C 580 60, 690 100, 712 175", scenes: [3], from: "bsec", to: "dse", dotted: true },
-  { id: "bsec-cse", d: "M475 66 C 700 90, 830 250, 787 370", scenes: [3], from: "bsec", to: "cse", dotted: true },
-  { id: "bsec-cdbl", d: "M462 80 C 560 170, 590 320, 575 481", scenes: [3], from: "bsec", to: "cdbl", dotted: true },
+/* Each module sits on the ring facing the party it works with. */
+const MODULES: { key: ModuleKey; angle: number }[] = [
+  { key: "RMS", angle: -52 },
+  { key: "OMS", angle: 4 },
+  { key: "BO", angle: 58 },
+  { key: "Back office", angle: 124 },
+  { key: "eKYC", angle: 180 },
+  { key: "DMS", angle: 236 },
+];
+const pillPos = (m: ModuleKey) => {
+  const a = (MODULES.find((x) => x.key === m)!.angle * Math.PI) / 180;
+  return { x: HUB.x + Math.cos(a) * RING, y: HUB.y + Math.sin(a) * RING };
+};
+
+/** Point on a node's box edge facing (px, py). */
+function anchor(key: NodeKey, px: number, py: number) {
+  const n = NODES[key];
+  const dx = px - n.x;
+  const dy = py - n.y;
+  const s = Math.min(NODE_W / 2 / Math.max(Math.abs(dx), 1e-6), NODE_H / 2 / Math.max(Math.abs(dy), 1e-6));
+  return { x: n.x + dx * s, y: n.y + dy * s };
+}
+
+/** Curved link from a module pill out to a party. */
+function linkPath(m: ModuleKey, to: NodeKey) {
+  const p = pillPos(m);
+  const t = anchor(to, p.x, p.y);
+  const ux = (p.x - HUB.x) / RING;
+  const uy = (p.y - HUB.y) / RING;
+  const c1 = { x: p.x + ux * 70, y: p.y + uy * 70 };
+  const c2 = { x: t.x + (p.x - t.x) * 0.25, y: t.y + (p.y - t.y) * 0.25 };
+  return `M${p.x.toFixed(1)} ${p.y.toFixed(1)} C ${c1.x.toFixed(1)} ${c1.y.toFixed(1)}, ${c2.x.toFixed(1)} ${c2.y.toFixed(1)}, ${t.x.toFixed(1)} ${t.y.toFixed(1)}`;
+}
+
+type Flow = { id: string; d: string; to: NodeKey; from?: NodeKey; both?: boolean; dotted?: boolean };
+
+/** What happens in each scene: which modules work, and which flows run. */
+const SCENES: { modules: ModuleKey[]; flows: Flow[] }[] = [
+  {
+    // Onboard: eKYC verifies the investor, BO registers the account at CDBL, DMS files the documents.
+    modules: ["eKYC", "BO", "DMS"],
+    flows: [
+      { id: "ekyc-inv", d: linkPath("eKYC", "investors"), to: "investors", both: true },
+      { id: "bo-cdbl", d: linkPath("BO", "cdbl"), to: "cdbl", both: true },
+    ],
+  },
+  {
+    // Trade: orders come in, RMS checks them, the OMS routes them to the exchanges.
+    modules: ["RMS", "OMS"],
+    flows: [
+      { id: "inv-hub", d: "M161 300 C 220 300, 262 298, 304 297", from: "investors", to: "investors" },
+      { id: "oms-dse", d: linkPath("OMS", "dse"), to: "dse", both: true },
+      { id: "oms-cse", d: linkPath("OMS", "cse"), to: "cse", both: true },
+    ],
+  },
+  {
+    // Settle: exchanges settle shares at CDBL; the back office settles money with the banks.
+    modules: ["Back office", "BO"],
+    flows: [
+      { id: "back-bank", d: linkPath("Back office", "bank"), to: "bank", both: true },
+      { id: "bo-cdbl-2", d: linkPath("BO", "cdbl"), to: "cdbl" },
+      { id: "dse-cdbl", d: "M770 231 C 800 330, 740 480, 645 515", from: "dse", to: "cdbl" },
+      { id: "cse-cdbl", d: "M690 427 C 680 460, 660 485, 645 492", from: "cse", to: "cdbl" },
+    ],
+  },
+  {
+    // Oversee: BSEC regulates everyone; the back office and RMS produce the reports.
+    modules: ["Back office", "RMS"],
+    flows: [
+      { id: "rms-bsec", d: linkPath("RMS", "bsec"), to: "bsec", dotted: true },
+      { id: "bsec-dse", d: "M475 52 C 580 54, 690 96, 712 169", from: "bsec", to: "dse", dotted: true },
+      { id: "bsec-cse", d: "M475 60 C 700 84, 830 250, 787 384", from: "bsec", to: "cse", dotted: true },
+      { id: "bsec-cdbl", d: "M462 76 C 560 170, 600 330, 585 491", from: "bsec", to: "cdbl", dotted: true },
+      { id: "back-bsec", d: linkPath("Back office", "bsec"), to: "bsec", dotted: true },
+    ],
+  },
 ];
 
-const MODULES = ["OMS", "RMS", "eKYC", "BO", "DMS", "Back office"];
-const SCENE_MS = 5200;
+/* Always-visible, faint base network. */
+const BASE = [
+  linkPath("eKYC", "investors"),
+  linkPath("OMS", "dse"),
+  linkPath("OMS", "cse"),
+  linkPath("BO", "cdbl"),
+  linkPath("Back office", "bank"),
+];
+
+const SCENE_MS = 5600;
 
 export function EcosystemMap({ labels, className }: { labels: EcosystemLabels; className?: string }) {
   const [scene, setScene] = useState(0);
@@ -72,7 +146,6 @@ export function EcosystemMap({ labels, className }: { labels: EcosystemLabels; c
     if (mq.matches) setAuto(false);
   }, []);
 
-  // Pause scene changes and packet motion while off-screen or the tab is hidden.
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -95,38 +168,37 @@ export function EcosystemMap({ labels, className }: { labels: EcosystemLabels; c
     };
   }, []);
 
+  const [hover, setHover] = useState(false);
   useEffect(() => {
-    if (!auto || paused || reduce) return;
+    if (!auto || paused || hover || reduce) return;
     const id = setTimeout(() => setScene((s) => (s + 1) % 4), SCENE_MS);
     return () => clearTimeout(id);
-  }, [scene, auto, paused, reduce]);
+  }, [scene, auto, paused, hover, reduce]);
 
-  const activeEdges = EDGES.filter((e) => e.scenes.includes(scene));
-  const activeNodes = new Set<string>(activeEdges.flatMap((e) => [e.from, e.to]));
+  const current = SCENES[scene]!;
+  const activeModules = new Set<ModuleKey>(current.modules);
+  const activeNodes = new Set<string>(current.flows.flatMap((f) => [f.to, f.from ?? ""]));
 
   const node = (key: NodeKey, title: string) => {
     const n = NODES[key];
     const on = activeNodes.has(key);
-    const w = 150;
-    const h = 62;
     return (
-      <g key={key} className="transition-opacity duration-500" opacity={on ? 1 : 0.55}>
-        {on && <rect x={n.x - w / 2 - 6} y={n.y - h / 2 - 6} width={w + 12} height={h + 12} rx={20} fill="url(#eco-glow)" />}
+      <g key={key} className="transition-opacity duration-500" opacity={on ? 1 : 0.5}>
+        {on && <rect x={n.x - NODE_W / 2 - 8} y={n.y - NODE_H / 2 - 8} width={NODE_W + 16} height={NODE_H + 16} rx={22} fill="url(#eco-glow)" />}
         <rect
-          x={n.x - w / 2}
-          y={n.y - h / 2}
-          width={w}
-          height={h}
+          x={n.x - NODE_W / 2}
+          y={n.y - NODE_H / 2}
+          width={NODE_W}
+          height={NODE_H}
           rx={16}
-          fill="rgb(10 20 40 / 0.9)"
-          stroke={on ? "#67e8f9" : "rgb(255 255 255 / 0.14)"}
-          strokeWidth={on ? 1.5 : 1}
+          style={{ fill: "var(--eco-node)", stroke: on ? "var(--eco-accent)" : "var(--eco-line)" }}
+          strokeWidth={on ? 1.6 : 1}
           className="transition-[stroke] duration-500"
         />
-        <text x={n.x} y={n.y - 3} textAnchor="middle" className="eco-name fill-white font-display text-[21px] font-semibold">
+        <text x={n.x} y={n.y - 3} textAnchor="middle" style={{ fill: "var(--eco-text)" }} className="eco-name font-display text-[21px] font-semibold">
           {title}
         </text>
-        <text x={n.x} y={n.y + 19} textAnchor="middle" className="eco-role fill-[#9aa7ba] text-[12.5px]">
+        <text x={n.x} y={n.y + 19} textAnchor="middle" style={{ fill: "var(--eco-muted)" }} className="eco-role text-[12.5px]">
           {labels.roles[key]}
         </text>
       </g>
@@ -134,63 +206,68 @@ export function EcosystemMap({ labels, className }: { labels: EcosystemLabels; c
   };
 
   return (
-    <div ref={rootRef} className={cn("flex flex-col gap-5", className)} onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+    <div
+      ref={rootRef}
+      className={cn("flex flex-col gap-5", className)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
       <div className="relative">
-        <svg ref={svgRef} viewBox="0 0 800 570" role="img" aria-labelledby={titleId} className="h-auto w-full overflow-visible">
+        <svg ref={svgRef} viewBox="0 0 800 580" role="img" aria-labelledby={titleId} className="h-auto w-full overflow-visible">
           <title id={titleId}>{labels.aria}</title>
           <defs>
             <radialGradient id="eco-glow">
-              <stop offset="0" stopColor="rgb(34 188 235 / 0.35)" />
-              <stop offset="1" stopColor="rgb(34 188 235 / 0)" />
+              <stop offset="0" style={{ stopColor: "var(--eco-glow)" }} />
+              <stop offset="1" stopColor="rgb(34 188 235)" stopOpacity="0" />
             </radialGradient>
-            <radialGradient id="eco-hub" cx="50%" cy="40%">
-              <stop offset="0" stopColor="#1d4f9a" />
-              <stop offset="1" stopColor="#0a1428" />
+            <radialGradient id="eco-hub" cx="50%" cy="35%">
+              <stop offset="0" style={{ stopColor: "var(--eco-hub-a)" }} />
+              <stop offset="1" style={{ stopColor: "var(--eco-hub-b)" }} />
             </radialGradient>
             <radialGradient id="eco-packet">
               <stop offset="0" stopColor="#ffffff" />
               <stop offset="0.4" stopColor="#67e8f9" />
-              <stop offset="1" stopColor="rgb(34 188 235 / 0)" />
+              <stop offset="1" stopColor="rgb(34 188 235)" stopOpacity="0" />
             </radialGradient>
-            {EDGES.map((e) => (
-              <path key={e.id} id={`${uid}-${e.id}`} d={e.d} />
+            {current.flows.map((f) => (
+              <path key={f.id} id={`${uid}-${scene}-${f.id}`} d={f.d} />
             ))}
           </defs>
 
-          {/* Connections */}
-          {EDGES.map((e) => {
-            const on = e.scenes.includes(scene);
-            if (e.dotted && !on) return null;
-            return (
-              <use
-                key={e.id}
-                href={`#${uid}-${e.id}`}
-                fill="none"
-                stroke={on ? (e.dotted ? "#8fb4ff" : "#22bceb") : "rgb(255 255 255 / 0.09)"}
-                strokeWidth={on ? 2 : 1.25}
-                strokeDasharray={e.dotted ? "4 6" : undefined}
-                strokeLinecap="round"
-                className="transition-[stroke] duration-500"
-              />
-            );
-          })}
+          {/* Base network */}
+          {BASE.map((d, i) => (
+            <path key={i} d={d} fill="none" strokeWidth={1.2} style={{ stroke: "var(--eco-line)" }} />
+          ))}
 
-          {/* Travelling packets on the active connections */}
+          {/* Active flows */}
+          {current.flows.map((f) => (
+            <use
+              key={`${scene}-${f.id}`}
+              href={`#${uid}-${scene}-${f.id}`}
+              fill="none"
+              strokeWidth={2}
+              strokeDasharray={f.dotted ? "4 6" : undefined}
+              strokeLinecap="round"
+              className="eco-flow-in"
+              style={{ stroke: f.dotted ? "var(--eco-oversight)" : "var(--eco-flow)" }}
+            />
+          ))}
+
           {!reduce &&
-            activeEdges.flatMap((e) => {
-              const dirs = e.both ? [false, true] : [false];
+            current.flows.flatMap((f) => {
+              const dirs = f.both ? [false, true] : [false];
               return dirs.flatMap((rev) =>
                 [0, 1].map((k) => (
-                  <circle key={`${scene}-${e.id}-${rev}-${k}`} r={e.dotted ? 4 : 6} fill="url(#eco-packet)">
+                  <circle key={`${scene}-${f.id}-${rev}-${k}`} r={f.dotted ? 4 : 6} fill="url(#eco-packet)">
                     <animateMotion
-                      dur={e.dotted ? "3.2s" : "2.4s"}
-                      begin={`${k * (e.dotted ? 1.6 : 1.2) + (rev ? 0.6 : 0)}s`}
+                      dur={f.dotted ? "3.2s" : "2.3s"}
+                      begin={`${k * (f.dotted ? 1.6 : 1.15) + (rev ? 0.55 : 0)}s`}
                       repeatCount="indefinite"
                       keyPoints={rev ? "1;0" : "0;1"}
                       keyTimes="0;1"
                       calcMode="linear"
                     >
-                      <mpath href={`#${uid}-${e.id}`} />
+                      <mpath href={`#${uid}-${scene}-${f.id}`} />
                     </animateMotion>
                   </circle>
                 )),
@@ -199,34 +276,50 @@ export function EcosystemMap({ labels, className }: { labels: EcosystemLabels; c
 
           {/* Brokerage house running Xpert */}
           <g>
-            <circle cx={HUB.x} cy={HUB.y} r={HUB.r + 34} fill="url(#eco-glow)" />
+            <circle cx={HUB.x} cy={HUB.y} r={HUB.r + 40} fill="url(#eco-glow)" />
             <circle
               cx={HUB.x}
               cy={HUB.y}
-              r={HUB.r + 16}
+              r={RING}
               fill="none"
-              stroke="rgb(103 232 249 / 0.35)"
               strokeDasharray="2 10"
+              style={{ stroke: "var(--eco-accent)", transformOrigin: `${HUB.x}px ${HUB.y}px`, opacity: 0.5 }}
               className={reduce ? undefined : "eco-spin"}
-              style={{ transformOrigin: `${HUB.x}px ${HUB.y}px` }}
             />
             <circle cx={HUB.x} cy={HUB.y} r={HUB.r} fill="url(#eco-hub)" stroke="#22bceb" strokeWidth={1.5} />
             <text x={HUB.x} y={HUB.y - 8} textAnchor="middle" className="eco-hub-text fill-white font-display text-[16px] font-semibold">
               {labels.hub}
             </text>
-            <text x={HUB.x} y={HUB.y + 16} textAnchor="middle" className="eco-hub-sub fill-[#67e8f9] text-[12.5px] font-semibold">
+            <text x={HUB.x} y={HUB.y + 16} textAnchor="middle" className="eco-hub-sub fill-[#9ff0ff] text-[12.5px] font-semibold">
               {labels.hubSub}
             </text>
-            {MODULES.map((m, i) => {
-              const a = (-90 + (360 / MODULES.length) * i + 30) * (Math.PI / 180);
-              const x = HUB.x + Math.cos(a) * (HUB.r + 16);
-              const y = HUB.y + Math.sin(a) * (HUB.r + 16);
-              const w = m.length * 7.2 + 18;
+
+            {MODULES.map(({ key }) => {
+              const { x, y } = pillPos(key);
+              const on = activeModules.has(key);
+              const w = key.length * 7.4 + 22;
               return (
-                <g key={m} className="eco-role">
-                  <rect x={x - w / 2} y={y - 11} width={w} height={22} rx={11} fill="#0a1428" stroke="rgb(103 232 249 / 0.45)" />
-                  <text x={x} y={y + 4} textAnchor="middle" className="fill-[#cfefff] font-mono text-[10.5px]">
-                    {m}
+                <g key={key} className="eco-role transition-opacity duration-500" opacity={on ? 1 : 0.55}>
+                  {on && !reduce && (
+                    <rect x={x - w / 2} y={y - 12} width={w} height={24} rx={12} fill="none" stroke="#67e8f9" className="eco-pill-pulse" />
+                  )}
+                  <rect
+                    x={x - w / 2}
+                    y={y - 12}
+                    width={w}
+                    height={24}
+                    rx={12}
+                    style={{ fill: on ? "var(--eco-pill-on)" : "var(--eco-pill)", stroke: on ? "#67e8f9" : "var(--eco-line)" }}
+                    strokeWidth={on ? 1.5 : 1}
+                  />
+                  <text
+                    x={x}
+                    y={y + 4}
+                    textAnchor="middle"
+                    style={{ fill: on ? "#ffffff" : "var(--eco-pill-text)" }}
+                    className="font-mono text-[11px] font-semibold"
+                  >
+                    {key}
                   </text>
                 </g>
               );
@@ -243,7 +336,6 @@ export function EcosystemMap({ labels, className }: { labels: EcosystemLabels; c
         <span className="glass absolute top-0 right-0 rounded-full px-3 py-1 text-xs text-text-secondary">{labels.caption}</span>
       </div>
 
-      {/* Scene picker and explanation */}
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-4 gap-2" role="group" aria-label={labels.caption}>
           {labels.scenes.map((s, i) => (
@@ -257,11 +349,11 @@ export function EcosystemMap({ labels, className }: { labels: EcosystemLabels; c
               }}
               className={cn(
                 "relative overflow-hidden rounded-full border px-2 py-2 text-xs font-semibold transition-colors sm:text-sm",
-                scene === i ? "border-brand-sky/60 bg-brand-sky/10 text-white" : "border-white/10 text-text-secondary hover:text-white",
+                scene === i ? "border-brand-sky/60 bg-brand-sky/10 text-fg" : "border-fg/10 text-text-secondary hover:text-fg",
               )}
             >
               <span className="relative z-10">
-                <span className="mr-1.5 font-mono text-cyan-300">{i + 1}</span>
+                <span className="mr-1.5 font-mono text-accent">{i + 1}</span>
                 {s}
               </span>
               {scene === i && auto && !reduce && (
@@ -269,13 +361,22 @@ export function EcosystemMap({ labels, className }: { labels: EcosystemLabels; c
                   key={`p-${scene}`}
                   aria-hidden="true"
                   className="eco-progress absolute inset-y-0 left-0 bg-brand-sky/15"
-                  style={{ animationDuration: `${SCENE_MS}ms`, animationPlayState: paused ? "paused" : "running" }}
+                  style={{ animationDuration: `${SCENE_MS}ms`, animationPlayState: paused || hover ? "paused" : "running" }}
                 />
               )}
             </button>
           ))}
         </div>
-        <p className="min-h-[3.5rem] text-sm leading-relaxed text-text-secondary md:text-base">{labels.sceneText[scene]}</p>
+        <p className="min-h-[3.5rem] text-sm leading-relaxed text-text-secondary md:text-base">
+          <span className="mr-2 inline-flex flex-wrap gap-1 align-middle">
+            {current.modules.map((m) => (
+              <span key={m} className="rounded-full border border-brand-sky/40 bg-brand-sky/10 px-2 py-0.5 font-mono text-[11px] text-accent">
+                {m}
+              </span>
+            ))}
+          </span>
+          {labels.sceneText[scene]}
+        </p>
       </div>
     </div>
   );

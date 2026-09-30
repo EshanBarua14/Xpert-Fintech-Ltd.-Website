@@ -42,7 +42,7 @@ export function DeploymentForm({
       {values.id && <input type="hidden" name="id" value={values.id} />}
       <div className="flex flex-col gap-6">
         <FormMessage message={state.message} isError={Boolean(state.errors)} />
-        <fieldset className="grid gap-5 rounded-card border border-white/10 p-5 md:grid-cols-2">
+        <fieldset className="grid gap-5 rounded-card border border-fg/10 p-5 md:grid-cols-2">
           <legend className="px-2 text-sm font-semibold">App</legend>
           <TextInput id="appName" label="App name" required defaultValue={values.appName} error={e.appName} />
           <TextInput
@@ -69,7 +69,7 @@ export function DeploymentForm({
           <TextArea id="enSummary" label="Summary (English)" rows={3} defaultValue={values.enSummary} error={e.enSummary} />
           <TextArea id="bnSummary" label="Summary (বাংলা)" rows={3} lang="bn" defaultValue={values.bnSummary} error={e.bnSummary} />
         </fieldset>
-        <fieldset className="grid gap-5 rounded-card border border-white/10 p-5 md:grid-cols-2">
+        <fieldset className="grid gap-5 rounded-card border border-fg/10 p-5 md:grid-cols-2">
           <legend className="px-2 text-sm font-semibold">Links</legend>
           <TextInput id="playStoreUrl" type="url" label="Google Play" placeholder="https://play.google.com/…" defaultValue={values.playStoreUrl} error={e.playStoreUrl} />
           <TextInput id="appStoreUrl" type="url" label="Apple App Store" placeholder="https://apps.apple.com/…" defaultValue={values.appStoreUrl} error={e.appStoreUrl} />
@@ -85,13 +85,13 @@ export function DeploymentForm({
         </fieldset>
       </div>
       <aside className="flex flex-col gap-6">
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Publishing</legend>
           <p className="text-xs text-text-secondary">Publish only after the brokerage has agreed to be named on the website.</p>
           <PublishFields status={values.status} publishAt={values.publishAt} error={e.publishAt} />
           <SubmitButton pending={pending}>Save</SubmitButton>
         </fieldset>
-        <fieldset className="flex flex-col gap-4 rounded-card border border-white/10 p-5">
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Details</legend>
           <TextInput id="launchedAt" type="date" label="Launched" defaultValue={values.launchedAt} error={e.launchedAt} />
           <TextInput id="sortOrder" type="number" min={0} label="Order" defaultValue={String(values.sortOrder)} error={e.sortOrder} />

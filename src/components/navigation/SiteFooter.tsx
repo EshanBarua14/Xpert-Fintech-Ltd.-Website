@@ -3,13 +3,14 @@ import { Logo } from "@/components/brand/Logo";
 import { Container } from "@/components/ui/Layout";
 import { Icon } from "@/components/ui/Icon";
 import { LanguageSwitch } from "@/components/navigation/LanguageSwitch";
+import { ThemeToggle } from "@/components/navigation/ThemeToggle";
 import { getNavMenu, type NavLink } from "@/lib/content/navigation";
 import { getSiteInfo } from "@/lib/content/settings";
 import { getMessages } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/i18n/config";
 
 function FooterLink({ item }: { item: NavLink }) {
-  const className = "text-sm text-text-secondary transition-colors hover:text-white";
+  const className = "text-sm text-text-secondary transition-colors hover:text-fg";
   if (!item.href) return <span className={className}>{item.label}</span>;
   return item.external ? (
     <a href={item.href} className={className} target="_blank" rel="noopener noreferrer">
@@ -38,7 +39,7 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative mt-auto overflow-hidden border-t border-white/[0.06]">
+    <footer className="relative mt-auto overflow-hidden border-t border-fg/[0.06]">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-sky/60 to-transparent" />
       <div aria-hidden="true" className="pointer-events-none absolute -top-40 left-1/2 h-80 w-[60rem] -translate-x-1/2 rounded-full bg-brand-royal/15 blur-3xl" />
 
@@ -92,11 +93,11 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
       </Container>
 
       {/* Oversized wordmark (typography, not the logo) */}
-      <p aria-hidden="true" className="pointer-events-none -mb-[2vw] text-center font-display text-[16vw] leading-none font-semibold tracking-[-0.06em] text-transparent select-none bg-gradient-to-b from-white/[0.07] to-transparent bg-clip-text">
+      <p aria-hidden="true" className="pointer-events-none -mb-[2vw] text-center font-display text-[16vw] leading-none font-semibold tracking-[-0.06em] text-transparent select-none bg-gradient-to-b from-fg/[0.07] to-transparent bg-clip-text">
         XPERT
       </p>
 
-      <div className="relative border-t border-white/[0.06] bg-ink-950/60 backdrop-blur">
+      <div className="relative border-t border-fg/[0.06] bg-ink-950/60 backdrop-blur">
         <Container className="flex flex-col gap-5 py-6 text-xs text-text-secondary md:flex-row md:items-center md:justify-between">
           <p>
             © {year} {info.companyName} {t.allRightsReserved}
@@ -119,7 +120,7 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
                       href={s.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex h-9 items-center rounded-full border border-white/10 bg-white/[0.03] px-4 text-xs font-medium text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-white"
+                      className="inline-flex h-9 items-center rounded-full border border-fg/10 bg-fg/[0.03] px-4 text-xs font-medium text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-fg"
                     >
                       {s.label}
                     </a>
@@ -127,6 +128,7 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
                 ))}
               </ul>
             )}
+            <ThemeToggle labels={{ toLight: t.themeToLight, toDark: t.themeToDark }} />
             <LanguageSwitch current={locale} label={t.language} />
           </div>
         </Container>

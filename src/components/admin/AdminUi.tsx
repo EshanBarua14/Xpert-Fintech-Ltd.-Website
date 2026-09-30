@@ -12,6 +12,7 @@ import { buttonClasses } from "@/components/ui/Button";
 const NAV = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/leads", label: "Leads" },
+  { href: "/admin/market", label: "Market data" },
   { href: "/admin/pages", label: "Pages" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/events", label: "Events" },
@@ -37,7 +38,7 @@ export function AdminNav() {
             aria-current={active ? "page" : undefined}
             className={cn(
               "rounded-control px-3 py-2 text-sm transition-colors",
-              active ? "bg-brand-royal/25 text-text-primary" : "text-text-secondary hover:bg-white/5 hover:text-text-primary",
+              active ? "bg-brand-royal/25 text-text-primary" : "text-text-secondary hover:bg-fg/5 hover:text-text-primary",
             )}
           >
             {item.label}

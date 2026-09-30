@@ -4,6 +4,7 @@ import { Inter, Inter_Tight, JetBrains_Mono, Noto_Sans_Bengali } from "next/font
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { SiteEffects } from "@/components/motion/SiteEffects";
+import { AmbientBackground } from "@/components/motion/AmbientBackground";
 import { isLocale, locales } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import "../globals.css";
@@ -22,6 +23,12 @@ export const metadata: Metadata = {
 // Header and footer read from the CMS; refresh them at most every 5 minutes.
 // Publishing from the admin portal will also trigger an immediate refresh (Phase 3).
 export const revalidate = 300;
+
+/* Runs before first paint: marks JS as available (for scroll reveals) and
+   applies the saved theme, or the device's light/dark preference. */
+const THEME_SCRIPT =
+  "(function(){var d=document.documentElement;d.classList.add('js');var t=null;try{t=localStorage.getItem('theme')}catch(e){}" +
+  "if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}d.dataset.theme=t})()";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -42,9 +49,10 @@ export default async function LocaleLayout({
     <html lang={locale} className={`${inter.variable} ${interTight.variable} ${mono.variable} ${bengali.variable}`} suppressHydrationWarning>
       <head>
         {/* Lets CSS hide scroll-reveal content only when JavaScript can reveal it again. */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="flex min-h-dvh flex-col text-text-primary">
+        <AmbientBackground />
         <a href="#main" className="skip-link">
           {t.skipToContent}
         </a>

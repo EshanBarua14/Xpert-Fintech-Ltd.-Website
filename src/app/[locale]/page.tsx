@@ -22,6 +22,9 @@ import { getMessages } from "@/lib/i18n/messages";
 import { mediaIdsOf, toSections } from "@/lib/public/blocks";
 import { getEvents, getPageByKey, getSeo } from "@/lib/public/content";
 import { getFlagshipData } from "@/lib/public/flagship";
+import { getMarketPayload } from "@/lib/market/data";
+import { MarketPulse } from "@/components/market/MarketPulse";
+import { MarketTicker } from "@/components/market/MarketTicker";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -64,7 +67,8 @@ export default async function HomePage({ params }: Props) {
   );
 
   const t = getMessages(locale);
-  const [data, events] = await Promise.all([getFlagshipData(locale), getEvents(3)]);
+  const [data, events, market] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload()]);
+  const hasMarket = !!market.snapshot || market.shares.length > 0;
   const sections = page ? toSections(page, locale) : [];
   const ctx = sections.length ? await blockContext(locale, mediaIdsOf(sections)) : null;
   const caps = capabilities(t, locale, data.publishedSlugs);
@@ -72,8 +76,24 @@ export default async function HomePage({ params }: Props) {
   return (
     <>
       {orgLd}
-      <FlagshipHero t={t} locale={locale} memberCount={data.members.length} />
+      <FlagshipHero
+        t={t}
+        locale={locale}
+        memberCount={data.members.length}
+        ticker={market.snapshot ? <MarketTicker initial={market} t={t} locale={locale} /> : undefined}
+      />
       <MemberMarquee names={data.members.map((m) => m.name)} label={t.members} />
+
+      {hasMarket && (
+        <Shell id="market" className="py-20 md:py-28">
+          <div className="flex flex-col gap-12">
+            <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} body={t.marketBody} />
+            <div data-reveal>
+              <MarketPulse initial={market} t={t} locale={locale} />
+            </div>
+          </div>
+        </Shell>
+      )}
 
       <Shell className="py-20 md:py-28">
         <div className="flex flex-col gap-14">
@@ -124,7 +144,7 @@ export default async function HomePage({ params }: Props) {
           <div className="flex flex-col gap-12">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <SectionHeader eyebrow={t.latestEyebrow} title={t.events} />
-              <Link href={`/${locale}/events`} className="text-sm font-semibold text-brand-sky hover:text-white">
+              <Link href={`/${locale}/events`} className="text-sm font-semibold text-brand-sky hover:text-fg">
                 {t.allEvents} →
               </Link>
             </div>

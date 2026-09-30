@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <h1 className="font-display text-2xl font-semibold">Xpert Admin</h1>
           <p className="text-sm text-text-secondary">Sign in to manage the website.</p>
         </div>
-        <div className="rounded-card border border-white/10 bg-navy-900 p-6">
+        <div className="rounded-card border border-fg/10 bg-navy-900 p-6">
           <LoginForm next={next} />
         </div>
       </div>

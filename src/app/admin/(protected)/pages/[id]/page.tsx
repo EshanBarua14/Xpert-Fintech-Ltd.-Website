@@ -161,7 +161,7 @@ export default async function PageEditor({
               }}
             />
           </section>
-          <section className="flex flex-col gap-4 border-t border-white/10 pt-8">
+          <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
             <div>
               <h2 className="font-display text-2xl font-semibold">Content</h2>
               <p className="mt-1 text-sm text-text-secondary">

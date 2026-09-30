@@ -122,13 +122,13 @@ export default async function ProductPage({ params }: Props) {
         <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-16 md:px-8 lg:grid-cols-[1.05fr_1fr] lg:py-24">
           <div className="flex flex-col gap-7">
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-text-secondary" data-reveal>
-              <Link href={`/${found.locale}/products`} className="hover:text-white">
+              <Link href={`/${found.locale}/products`} className="hover:text-fg">
                 {t.products}
               </Link>
               {parent && parentTr && (
                 <>
                   <span aria-hidden="true">/</span>
-                  <Link href={`/${found.locale}/products/${parentTr.slug}`} className="hover:text-white">
+                  <Link href={`/${found.locale}/products/${parentTr.slug}`} className="hover:text-fg">
                     {parentTr.name}
                   </Link>
                 </>
@@ -317,7 +317,7 @@ export default async function ProductPage({ params }: Props) {
                   {f.title}
                   <span
                     aria-hidden="true"
-                    className="flex size-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-brand-sky transition-transform duration-300 group-open:rotate-45"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full border border-fg/15 text-brand-sky transition-transform duration-300 group-open:rotate-45"
                   >
                     +
                   </span>
@@ -331,7 +331,7 @@ export default async function ProductPage({ params }: Props) {
 
       {offering.showDemoCta && (
         <Band>
-          <div data-reveal className="beam relative overflow-hidden rounded-[2rem] border border-white/10 bg-navy-900/60 px-6 py-14 md:px-14 md:py-20">
+          <div data-reveal className="beam relative overflow-hidden rounded-[2rem] border border-fg/10 bg-navy-900/60 px-6 py-14 md:px-14 md:py-20">
             <div className="aurora opacity-70" />
             <div className="relative flex flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">
               <div className="flex max-w-2xl flex-col gap-3">
@@ -349,7 +349,7 @@ export default async function ProductPage({ params }: Props) {
 
 function Band({ title, alt, children }: { title?: string; alt?: boolean; children: React.ReactNode }) {
   return (
-    <section className={alt ? "border-y border-white/[0.06] bg-white/[0.015]" : undefined}>
+    <section className={alt ? "border-y border-fg/[0.06] bg-fg/[0.015]" : undefined}>
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-16 md:px-8 md:py-24">
         {title && <SectionHeader title={title} />}
         {children}
@@ -403,17 +403,17 @@ function Deployments({ offering, locale, t }: { offering: Offering; locale: AppL
               {org && <span className="text-sm text-text-secondary">{org.name}</span>}
               <span className="mt-auto flex flex-wrap gap-3 text-sm">
                 {d.playStoreUrl && (
-                  <a href={d.playStoreUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-white/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-white">
+                  <a href={d.playStoreUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-fg/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-fg">
                     {t.getAndroidApp} ↗
                   </a>
                 )}
                 {d.appStoreUrl && (
-                  <a href={d.appStoreUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-white/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-white">
+                  <a href={d.appStoreUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-fg/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-fg">
                     {t.getIosApp} ↗
                   </a>
                 )}
                 {d.webUrl && (
-                  <a href={d.webUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-white/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-white">
+                  <a href={d.webUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-fg/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-fg">
                     {t.openWebApp} ↗
                   </a>
                 )}

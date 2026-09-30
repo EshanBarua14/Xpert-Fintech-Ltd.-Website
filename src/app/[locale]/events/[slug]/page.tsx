@@ -80,7 +80,7 @@ export default async function EventPage({ params }: Props) {
         <div className="aurora opacity-70" />
         <div className="grid-fade pointer-events-none absolute inset-0" />
         <header className="relative mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-16 pb-12 md:px-8 md:pt-24">
-          <Link href={`/${found.locale}/events`} data-reveal className="text-sm text-text-secondary hover:text-white">
+          <Link href={`/${found.locale}/events`} data-reveal className="text-sm text-text-secondary hover:text-fg">
             ← {t.allEvents}
           </Link>
           {(date || tr.location) && (
@@ -113,7 +113,7 @@ export default async function EventPage({ params }: Props) {
           </div>
         )}
         {participants.length > 0 && (
-          <section className="flex flex-col gap-5 border-t border-white/10 pt-10">
+          <section className="flex flex-col gap-5 border-t border-fg/10 pt-10">
             <h2 className="font-display text-xl font-semibold">{t.participants}</h2>
             <ul className="grid gap-2 sm:grid-cols-2">
               {participants.map((p) => (

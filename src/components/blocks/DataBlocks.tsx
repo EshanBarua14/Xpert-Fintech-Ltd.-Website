@@ -87,7 +87,7 @@ export function PeopleGrid({
         return (
           <li key={p.id} data-reveal style={revealDelay(i)} className={cn(CARD, "flex flex-col gap-4")}>
             {photo && (
-              <Image src={photo.url} alt={name} width={photo.width ?? 400} height={photo.height ?? 400} className="aspect-square w-24 rounded-2xl object-cover ring-1 ring-white/15" />
+              <Image src={photo.url} alt={name} width={photo.width ?? 400} height={photo.height ?? 400} className="aspect-square w-24 rounded-2xl object-cover ring-1 ring-fg/15" />
             )}
             <div>
               <h3 className="font-display text-xl font-semibold tracking-tight">{name}</h3>
@@ -113,7 +113,7 @@ export async function EventListBlock({ block, ctx }: { block: BlockData; ctx: Bl
     <div className="flex flex-col gap-12">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <BlockHeading text={block.text} />
-        <Link href={`/${ctx.locale}/events`} className="text-sm font-semibold text-brand-sky hover:text-white">
+        <Link href={`/${ctx.locale}/events`} className="text-sm font-semibold text-brand-sky hover:text-fg">
           {ctx.t.allEvents} →
         </Link>
       </div>

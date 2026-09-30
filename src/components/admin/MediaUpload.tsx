@@ -30,7 +30,7 @@ export function MediaUpload() {
         setClientError(null);
         onSubmit(e);
       }}
-      className="flex flex-col gap-3 rounded-card border border-dashed border-white/20 p-5"
+      className="flex flex-col gap-3 rounded-card border border-dashed border-fg/20 p-5"
     >
       <label htmlFor="files" className="text-sm font-medium">
         Upload images or PDFs

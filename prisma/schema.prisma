@@ -1360,6 +1360,28 @@ model MarketDataSource {
   updatedAt           DateTime       @updatedAt
 }
 
+enum MarketExchange {
+  DSE
+  CSE
+}
+
+/// Xpert's share of an exchange's turnover on one trading day, entered in
+/// Admin → Market data (or written by the licensed feed). Amounts in BDT.
+model MarketShare {
+  id             String         @id @default(uuid()) @db.Uuid
+  tradeDate      DateTime       @db.Date
+  exchange       MarketExchange
+  xpertTurnover  Decimal        @db.Decimal(20, 2)
+  marketTurnover Decimal        @db.Decimal(20, 2)
+  sourceNote     String?
+  status         ContentStatus  @default(PUBLISHED)
+  createdById    String?        @db.Uuid
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@unique([tradeDate, exchange])
+}
+
 // ── SEO & redirects ──────────────────────────────────────────────────────────
 
 /// Per-record, per-locale SEO fields. Missing fields fall back to the

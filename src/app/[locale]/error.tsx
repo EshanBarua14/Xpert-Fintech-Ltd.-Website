@@ -28,7 +28,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
         <button type="button" onClick={reset} className="btn-glow inline-flex h-12 items-center rounded-full px-6 text-sm font-semibold text-white">
           {t.tryAgain}
         </button>
-        <Link href={`/${locale}`} className="inline-flex h-12 items-center rounded-full border border-white/15 px-6 text-sm font-semibold hover:border-brand-sky/60">
+        <Link href={`/${locale}`} className="inline-flex h-12 items-center rounded-full border border-fg/15 px-6 text-sm font-semibold hover:border-brand-sky/60">
           {t.backHome}
         </Link>
       </div>

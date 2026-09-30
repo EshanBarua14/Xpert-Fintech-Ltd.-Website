@@ -62,7 +62,7 @@ export function NetworkDiagram({
                 onClick={() => setActive(i)}
                 onKeyDown={(e) => onKey(e, i)}
                 className={
-                  "flex items-center gap-3 rounded-card border px-4 py-3 text-left text-sm transition-colors md:flex-col md:gap-2 md:px-5 md:text-center " +
+                  "flex items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm transition-colors md:flex-col md:gap-2 md:px-5 md:text-center " +
                   (selected ? "border-brand-sky bg-navy-800 text-text-primary" : "border-white/10 bg-ink-950 text-text-secondary hover:border-brand-sky/50")
                 }
               >
@@ -74,7 +74,7 @@ export function NetworkDiagram({
         </div>
       </div>
 
-      <div id={`${baseId}-panel`} role="tabpanel" aria-labelledby={`${baseId}-tab-${active}`} className="min-h-24 rounded-card border border-white/10 bg-navy-900/50 p-6">
+      <div id={`${baseId}-panel`} role="tabpanel" aria-labelledby={`${baseId}-tab-${active}`} className="glass min-h-24 rounded-3xl p-6">
         <h3 className="font-display text-xl font-semibold">{current.name}</h3>
         {current.detail && <p className="mt-2 max-w-3xl whitespace-pre-line text-text-secondary">{current.detail}</p>}
         {current.href && (

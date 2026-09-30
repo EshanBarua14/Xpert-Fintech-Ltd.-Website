@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { PersonGroup } from "@prisma/client";
 import { PeopleGrid } from "@/components/blocks/DataBlocks";
-import { Container, SectionHeading } from "@/components/ui/Layout";
+import { CtaBand, PageHero, Shell } from "@/components/flagship/Sections";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getPeople, mediaMap } from "@/lib/public/content";
@@ -23,10 +23,13 @@ export function peoplePage(group: PersonGroup, path: string, titleKey: "board" |
     const people = await getPeople(group);
     const photos = await mediaMap(people.map((p) => p.photoMediaId), locale as AppLocale);
     return (
-      <Container className="flex flex-col gap-12 py-16 md:py-24">
-        <SectionHeading as="h1" title={t[titleKey]} />
-        {people.length ? <PeopleGrid people={people} photos={photos} locale={locale} /> : <p className="text-text-secondary">{t.noItems}</p>}
-      </Container>
+      <>
+        <PageHero eyebrow={t.companyEyebrow} title={t[titleKey]} />
+        <Shell className="pb-16">
+          {people.length ? <PeopleGrid people={people} photos={photos} locale={locale} /> : <p className="text-text-secondary">{t.noItems}</p>}
+        </Shell>
+        <CtaBand t={t} locale={locale} />
+      </>
     );
   }
 

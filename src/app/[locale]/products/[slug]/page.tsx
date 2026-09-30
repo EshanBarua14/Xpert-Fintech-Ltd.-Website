@@ -1,9 +1,10 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
-import { ButtonLink } from "@/components/ui/Button";
-import { Container, SectionHeading } from "@/components/ui/Layout";
+import { GhostButton, PrimaryButton, SectionHeader } from "@/components/flagship/Sections";
+import { CapabilityVisual, type VisualKind } from "@/components/flagship/Visuals";
 import { Icon } from "@/components/ui/Icon";
 import { OrderFlow } from "@/components/diagrams/OrderFlow";
 import { ProductCard } from "@/components/products/ProductCard";
@@ -38,6 +39,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     paths,
     ogImageId: seo?.ogImageId ?? found.offering.heroMediaId,
   });
+}
+
+/** Illustration shown when a product has no hero image yet. */
+function visualFor(slug: string, type: string): VisualKind {
+  if (/rms|risk/.test(slug)) return "risk";
+  if (/ekyc|kyc/.test(slug)) return "ekyc";
+  if (/bo-account|account-opening/.test(slug)) return "bo";
+  if (/dms|document/.test(slug)) return "dms";
+  if (/back-office/.test(slug)) return "back";
+  if (/market-data|data/.test(slug)) return "data";
+  return type === "PLATFORM" ? "trading" : "trading";
 }
 
 type ItemKind = Offering["items"][number]["kind"];
@@ -104,50 +116,76 @@ export default async function ProductPage({ params }: Props) {
       />
 
       {/* Hero */}
-      <section className="bg-grid">
-        <Container className="grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_1fr] lg:py-24">
-          <div className="flex flex-col gap-6">
-            <nav aria-label="Breadcrumb" className="text-sm text-text-secondary">
-              <Link href={`/${found.locale}/products`} className="hover:text-brand-sky">
+      <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
+        <div className="aurora" />
+        <div className="grid-fade pointer-events-none absolute inset-0" />
+        <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-16 md:px-8 lg:grid-cols-[1.05fr_1fr] lg:py-24">
+          <div className="flex flex-col gap-7">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-text-secondary" data-reveal>
+              <Link href={`/${found.locale}/products`} className="hover:text-white">
                 {t.products}
               </Link>
               {parent && parentTr && (
                 <>
-                  {" / "}
-                  <Link href={`/${found.locale}/products/${parentTr.slug}`} className="hover:text-brand-sky">
+                  <span aria-hidden="true">/</span>
+                  <Link href={`/${found.locale}/products/${parentTr.slug}`} className="hover:text-white">
                     {parentTr.name}
                   </Link>
                 </>
               )}
             </nav>
-            <h1 className="font-display text-4xl font-semibold tracking-tight text-balance md:text-6xl">{tr.name}</h1>
-            {tr.tagline && <p className="text-xl text-text-secondary">{tr.tagline}</p>}
-            <Paragraphs text={tr.summary} />
+            <h1
+              data-reveal
+              style={{ "--d": 1 } as CSSProperties}
+              className="text-gradient font-display text-5xl leading-[1.02] font-semibold tracking-[-0.04em] text-balance md:text-7xl"
+            >
+              {tr.name}
+            </h1>
+            {tr.tagline && (
+              <p data-reveal style={{ "--d": 2 } as CSSProperties} className="text-gradient-brand text-xl font-medium md:text-2xl">
+                {tr.tagline}
+              </p>
+            )}
+            <div data-reveal style={{ "--d": 3 } as CSSProperties}>
+              <Paragraphs text={tr.summary} className="text-lg" />
+            </div>
             {offering.showDemoCta && (
-              <div className="flex flex-wrap gap-3">
-                <ButtonLink href={demoHref} size="lg">
-                  {ctaLabel}
-                </ButtonLink>
+              <div data-reveal style={{ "--d": 4 } as CSSProperties} className="flex flex-wrap gap-3">
+                <PrimaryButton href={demoHref}>{ctaLabel}</PrimaryButton>
+                <GhostButton href={`/${found.locale}/platform`}>{t.explorePlatform}</GhostButton>
               </div>
             )}
           </div>
-          {hero && <MediaImage media={hero} priority className="rounded-card border border-white/10" />}
-        </Container>
+          <div data-reveal style={{ "--d": 2 } as CSSProperties}>
+            {hero ? (
+              <div className="glass overflow-hidden rounded-3xl p-2 shadow-[0_40px_120px_-40px_rgb(34_188_235/0.5)]">
+                <MediaImage media={hero} priority className="rounded-2xl" />
+              </div>
+            ) : (
+              <div className="glass relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-3xl p-10 shadow-[0_40px_120px_-40px_rgb(34_188_235/0.5)]">
+                <div className="grid-fade pointer-events-none absolute inset-0 opacity-60" />
+                <div className="relative h-full w-full">
+                  <CapabilityVisual kind={visualFor(tr.slug, offering.type)} />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </section>
 
       {(tr.problem || tr.solution) && (
         <Band>
-          <div className="grid gap-10 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {tr.problem && (
-              <div className="flex flex-col gap-4">
-                <h2 className="tabular text-xs tracking-[0.2em] text-brand-sky uppercase">{t.theProblem}</h2>
+              <div data-reveal className="glass flex flex-col gap-5 rounded-3xl p-8">
+                <h2 className="eyebrow">{t.theProblem}</h2>
                 <Paragraphs text={tr.problem} className="text-lg" />
               </div>
             )}
             {tr.solution && (
-              <div className="flex flex-col gap-4">
-                <h2 className="tabular text-xs tracking-[0.2em] text-brand-sky uppercase">{t.theSolution}</h2>
-                <Paragraphs text={tr.solution} className="text-lg" />
+              <div data-reveal style={{ "--d": 1 } as CSSProperties} className="beam glass flex flex-col gap-5 rounded-3xl p-8">
+                <h2 className="eyebrow">{t.theSolution}</h2>
+                <Paragraphs text={tr.solution} className="text-lg text-text-primary" />
               </div>
             )}
           </div>
@@ -161,25 +199,27 @@ export default async function ProductPage({ params }: Props) {
       )}
 
       {steps.length > 1 && (
-        <Band>
+        <Band title={t.howItWorks}>
+          <div data-reveal className="glass rounded-3xl p-4 md:p-8">
           <OrderFlow
             title={t.howItWorks}
             caption={t.conceptualView}
             steps={steps.map((s, i) => ({ key: s.id, label: s.title, note: s.body, highlight: i === 0 }))}
           />
+          </div>
         </Band>
       )}
 
       {(screenshots.length > 0 || videos.length > 0) && (
         <Band title={t.screenshots} alt>
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {screenshots.map((m) => {
               const caption = pick(m.translations, found.locale)?.caption;
               return (
-                <figure key={m.id} className="flex flex-col gap-2">
-                  <MediaImage media={images.get(m.mediaId!)} className="rounded-card border border-white/10" />
+                <figure key={m.id} data-reveal className="glass flex flex-col gap-3 rounded-3xl p-2">
+                  <MediaImage media={images.get(m.mediaId!)} className="rounded-2xl" />
                   {(caption || m.isConceptual) && (
-                    <figcaption className="text-sm text-text-secondary">
+                    <figcaption className="px-3 pb-2 text-sm text-text-secondary">
                       {caption}
                       {m.isConceptual && <Badge className="ml-2">{t.conceptualPrototype}</Badge>}
                     </figcaption>
@@ -188,7 +228,7 @@ export default async function ProductPage({ params }: Props) {
               );
             })}
             {videos.map((m) => (
-              <div key={m.id} className="aspect-video overflow-hidden rounded-card border border-white/10">
+              <div key={m.id} data-reveal className="glass aspect-video overflow-hidden rounded-3xl p-2 [&>iframe]:rounded-2xl">
                 <iframe
                   src={videoEmbedUrl(m.videoUrl)!}
                   title={pick(m.translations, found.locale)?.caption ?? `${tr.name} — ${t.video}`}
@@ -205,10 +245,16 @@ export default async function ProductPage({ params }: Props) {
 
       {layers.length > 0 && (
         <Band title={t.architecture}>
-          <ol className="flex flex-col gap-2">
-            {layers.map((l) => (
-              <li key={l.id} className="grid gap-2 rounded-card border border-white/10 bg-navy-900/50 p-5 md:grid-cols-[240px_1fr]">
-                <span className="font-semibold">{l.title}</span>
+          <ol className="flex flex-col gap-3">
+            {layers.map((l, i) => (
+              <li
+                key={l.id}
+                data-reveal
+                style={{ "--d": i, marginInline: `${Math.min(i, 4) * 1.5}%` } as CSSProperties}
+                className="spotlight glass grid items-center gap-2 rounded-2xl p-5 md:grid-cols-[3rem_240px_1fr]"
+              >
+                <span className="font-mono text-xs text-cyan-300">L{i + 1}</span>
+                <span className="font-display font-semibold">{l.title}</span>
                 {l.body && <span className="text-sm text-text-secondary">{l.body}</span>}
               </li>
             ))}
@@ -230,16 +276,16 @@ export default async function ProductPage({ params }: Props) {
 
       {(useCases.length > 0 || targetUsers.length > 0 || tr.targetCustomers) && (
         <Band alt>
-          <div className="grid gap-12 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {useCases.length > 0 && (
-              <div className="flex flex-col gap-6">
-                <h2 className="font-display text-2xl font-semibold">{t.useCases}</h2>
+              <div data-reveal className="glass flex flex-col gap-6 rounded-3xl p-8">
+                <h2 className="font-display text-2xl font-semibold tracking-tight">{t.useCases}</h2>
                 <ItemList items={useCases} />
               </div>
             )}
             {(targetUsers.length > 0 || tr.targetCustomers) && (
-              <div className="flex flex-col gap-6">
-                <h2 className="font-display text-2xl font-semibold">{t.whoItsFor}</h2>
+              <div data-reveal style={{ "--d": 1 } as CSSProperties} className="glass flex flex-col gap-6 rounded-3xl p-8">
+                <h2 className="font-display text-2xl font-semibold tracking-tight">{t.whoItsFor}</h2>
                 {tr.targetCustomers && <p className="text-text-secondary">{tr.targetCustomers}</p>}
                 <ItemList items={targetUsers} />
               </div>
@@ -250,9 +296,9 @@ export default async function ProductPage({ params }: Props) {
 
       {offering.children.length > 0 && (
         <Band title={t.modules}>
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {offering.children.map((c) => (
-              <li key={c.id}>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {offering.children.map((c, i) => (
+              <li key={c.id} data-reveal style={{ "--d": i % 3 } as CSSProperties}>
                 <ProductCard offering={c} locale={found.locale} t={t} />
               </li>
             ))}
@@ -264,12 +310,15 @@ export default async function ProductPage({ params }: Props) {
 
       {faqs.length > 0 && (
         <Band title={t.faq}>
-          <div className="max-w-3xl divide-y divide-white/10 border-y border-white/10">
+          <div className="flex max-w-3xl flex-col gap-3">
             {faqs.map((f) => (
-              <details key={f.id} className="group py-5">
+              <details key={f.id} data-reveal className="group glass rounded-2xl px-6 py-5 open:border-brand-sky/30">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
                   {f.title}
-                  <span aria-hidden="true" className="text-brand-sky transition-transform group-open:rotate-45">
+                  <span
+                    aria-hidden="true"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full border border-white/15 text-brand-sky transition-transform duration-300 group-open:rotate-45"
+                  >
                     +
                   </span>
                 </summary>
@@ -282,11 +331,15 @@ export default async function ProductPage({ params }: Props) {
 
       {offering.showDemoCta && (
         <Band>
-          <div className="flex flex-col items-start gap-6 rounded-card border border-brand-sky/20 bg-gradient-to-br from-navy-800 to-ink-950 p-8 md:flex-row md:items-center md:justify-between md:p-12">
-            <h2 className="font-display text-3xl font-semibold text-balance">{tr.name}</h2>
-            <ButtonLink href={demoHref} size="lg">
-              {ctaLabel}
-            </ButtonLink>
+          <div data-reveal className="beam relative overflow-hidden rounded-[2rem] border border-white/10 bg-navy-900/60 px-6 py-14 md:px-14 md:py-20">
+            <div className="aurora opacity-70" />
+            <div className="relative flex flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">
+              <div className="flex max-w-2xl flex-col gap-3">
+                <h2 className="text-gradient font-display text-4xl font-semibold tracking-[-0.035em] text-balance md:text-5xl">{t.ctaTitle}</h2>
+                <p className="text-lg text-text-secondary">{tr.name}</p>
+              </div>
+              <PrimaryButton href={demoHref}>{ctaLabel}</PrimaryButton>
+            </div>
           </div>
         </Band>
       )}
@@ -296,23 +349,25 @@ export default async function ProductPage({ params }: Props) {
 
 function Band({ title, alt, children }: { title?: string; alt?: boolean; children: React.ReactNode }) {
   return (
-    <section className={alt ? "bg-navy-900" : undefined}>
-      <Container className="flex flex-col gap-10 py-16 md:py-20">
-        {title && <SectionHeading title={title} />}
+    <section className={alt ? "border-y border-white/[0.06] bg-white/[0.015]" : undefined}>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-16 md:px-8 md:py-24">
+        {title && <SectionHeader title={title} />}
         {children}
-      </Container>
+      </div>
     </section>
   );
 }
 
 function ItemGrid({ items, icon }: { items: { id: string; title: string; body: string | null; icon: string | null }[]; icon?: string }) {
   return (
-    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((i) => (
-        <li key={i.id} className="flex flex-col gap-3 rounded-card border border-white/10 bg-ink-950/60 p-6">
-          <Icon name={i.icon ?? icon} className="h-7 w-7 text-brand-sky" />
-          <h3 className="font-semibold">{i.title}</h3>
-          {i.body && <p className="text-sm whitespace-pre-line text-text-secondary">{i.body}</p>}
+    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((i, n) => (
+        <li key={i.id} data-reveal style={{ "--d": n % 3 } as CSSProperties} className="spotlight glass flex flex-col gap-4 rounded-3xl p-6 md:p-7">
+          <span className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-sky/25 to-brand-royal/20 text-cyan-300">
+            <Icon name={i.icon ?? icon ?? "check"} className="size-5" />
+          </span>
+          <h3 className="font-display text-lg font-semibold tracking-tight">{i.title}</h3>
+          {i.body && <p className="text-sm leading-relaxed whitespace-pre-line text-text-secondary">{i.body}</p>}
         </li>
       ))}
     </ul>
@@ -343,22 +398,22 @@ function Deployments({ offering, locale, t }: { offering: Offering; locale: AppL
         {offering.deployments.map((d) => {
           const org = d.organization && d.organization.status === "PUBLISHED" && !d.organization.deletedAt ? pick(d.organization.translations, locale) : null;
           return (
-            <li key={d.id} className="flex flex-col gap-3 rounded-card border border-white/10 bg-ink-950/60 p-5">
-              <span className="font-semibold">{d.appName}</span>
+            <li key={d.id} data-reveal className="spotlight glass flex flex-col gap-3 rounded-3xl p-6">
+              <span className="font-display text-lg font-semibold">{d.appName}</span>
               {org && <span className="text-sm text-text-secondary">{org.name}</span>}
               <span className="mt-auto flex flex-wrap gap-3 text-sm">
                 {d.playStoreUrl && (
-                  <a href={d.playStoreUrl} target="_blank" rel="noopener noreferrer" className="text-brand-sky hover:underline">
+                  <a href={d.playStoreUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-white/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-white">
                     {t.getAndroidApp} ↗
                   </a>
                 )}
                 {d.appStoreUrl && (
-                  <a href={d.appStoreUrl} target="_blank" rel="noopener noreferrer" className="text-brand-sky hover:underline">
+                  <a href={d.appStoreUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-white/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-white">
                     {t.getIosApp} ↗
                   </a>
                 )}
                 {d.webUrl && (
-                  <a href={d.webUrl} target="_blank" rel="noopener noreferrer" className="text-brand-sky hover:underline">
+                  <a href={d.webUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-white/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-white">
                     {t.openWebApp} ↗
                   </a>
                 )}

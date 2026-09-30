@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LeadFormSection } from "@/components/forms/LeadFormSection";
 import { ContactDetails } from "@/components/layout/ContactDetails";
-import { Container, SectionHeading } from "@/components/ui/Layout";
+import { PageHero, Shell } from "@/components/flagship/Sections";
 import { getSiteInfo } from "@/lib/content/settings";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
@@ -28,10 +28,11 @@ export default async function RequestDemoPage({ params, searchParams }: Props) {
   const [info, offering] = await Promise.all([getSiteInfo(locale), slug ? getOfferingBySlug(locale, slug) : null]);
 
   return (
-    <Container className="flex flex-col gap-12 py-16 md:py-24">
-      <SectionHeading as="h1" title={t.requestDemo} intro={t.requestDemoIntro} />
-      <div className="grid gap-12 lg:grid-cols-12">
-        <div className="lg:col-span-8">
+    <>
+      <PageHero eyebrow={t.demoEyebrow} title={t.requestDemo} body={t.requestDemoIntro} />
+      <Shell className="pb-24">
+      <div className="grid gap-8 lg:grid-cols-12">
+        <div data-reveal className="glass rounded-3xl p-6 md:p-10 lg:col-span-8">
           <LeadFormSection mode="demo" locale={locale} defaultOfferingId={offering?.id ?? null} />
         </div>
         <aside className="flex flex-col gap-4 lg:col-span-4" aria-labelledby="reach-us">
@@ -41,6 +42,7 @@ export default async function RequestDemoPage({ params, searchParams }: Props) {
           <ContactDetails info={info} t={t} stacked />
         </aside>
       </div>
-    </Container>
+      </Shell>
+    </>
   );
 }

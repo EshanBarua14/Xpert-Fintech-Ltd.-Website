@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { buttonClasses } from "@/components/ui/Button";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { paragraphs, resolveHref } from "@/lib/public/text";
 import type { AppLocale } from "@/lib/i18n/config";
@@ -11,14 +10,29 @@ import type { BlockText } from "./types";
 export function BlockHeading({ text, align = "left", as: H = "h2" }: { text: BlockText; align?: "left" | "center"; as?: "h1" | "h2" }) {
   if (!text.eyebrow && !text.title && !text.subtitle) return null;
   return (
-    <div className={cn("flex max-w-3xl flex-col gap-3", align === "center" && "mx-auto items-center text-center")}>
-      {text.eyebrow && <p className="tabular text-xs tracking-[0.2em] text-brand-sky uppercase">{text.eyebrow}</p>}
+    <div className={cn("flex max-w-3xl flex-col gap-5", align === "center" && "mx-auto items-center text-center")}>
+      {text.eyebrow && (
+        <p className="eyebrow" data-reveal>
+          {text.eyebrow}
+        </p>
+      )}
       {text.title && (
-        <H className={cn("font-display font-semibold tracking-tight text-balance", H === "h1" ? "text-4xl md:text-6xl" : "text-3xl md:text-4xl")}>
+        <H
+          data-reveal
+          style={{ "--d": 1 } as CSSProperties}
+          className={cn(
+            "text-gradient font-display font-semibold tracking-[-0.035em] text-balance",
+            H === "h1" ? "text-5xl leading-[1.02] md:text-7xl" : "text-3xl leading-[1.08] md:text-5xl",
+          )}
+        >
           {text.title}
         </H>
       )}
-      {text.subtitle && <p className="text-lg text-pretty text-text-secondary">{text.subtitle}</p>}
+      {text.subtitle && (
+        <p data-reveal style={{ "--d": 2 } as CSSProperties} className="text-lg leading-relaxed text-pretty text-text-secondary md:text-xl">
+          {text.subtitle}
+        </p>
+      )}
     </div>
   );
 }
@@ -74,12 +88,27 @@ export function CtaButton({
   variant?: "primary" | "secondary";
 }) {
   if (!label) return null;
+  const className =
+    variant === "primary"
+      ? "btn-glow group inline-flex h-12 items-center gap-2 rounded-full px-6 text-sm font-semibold text-white transition-transform duration-300 hover:-translate-y-0.5"
+      : "inline-flex h-12 items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-6 text-sm font-semibold text-text-primary backdrop-blur transition-colors duration-300 hover:border-brand-sky/60 hover:bg-brand-sky/10";
   return (
-    <SmartLink href={href} locale={locale} className={buttonClasses({ variant, size: "lg" })}>
+    <SmartLink href={href} locale={locale} className={className}>
       {label}
+      {variant === "primary" && (
+        <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">
+          →
+        </span>
+      )}
     </SmartLink>
   );
 }
+
+/** Staggered reveal delay for the n-th item in a grid. */
+export const revealDelay = (i: number, perRow = 3) => ({ "--d": i % perRow }) as CSSProperties;
+
+/** The card surface used across the site. */
+export const CARD = "spotlight glass rounded-3xl p-6 md:p-7";
 
 export function MediaImage({ media, className, sizes, priority }: { media: MediaInfo | undefined; className?: string; sizes?: string; priority?: boolean }) {
   if (!media) return null;

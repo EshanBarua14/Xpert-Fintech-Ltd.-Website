@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Container } from "@/components/ui/Layout";
+import { CtaBand } from "@/components/flagship/Sections";
 import { MediaImage, Paragraphs } from "@/components/blocks/Shared";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
@@ -76,41 +76,56 @@ export default async function EventPage({ params }: Props) {
           }}
         />
       )}
-      <Container className="flex max-w-4xl flex-col gap-8 py-16 md:py-24">
-        <Link href={`/${found.locale}/events`} className="text-sm text-text-secondary hover:text-brand-sky">
-          ← {t.allEvents}
-        </Link>
-        <header className="flex flex-col gap-4">
+      <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
+        <div className="aurora opacity-70" />
+        <div className="grid-fade pointer-events-none absolute inset-0" />
+        <header className="relative mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-16 pb-12 md:px-8 md:pt-24">
+          <Link href={`/${found.locale}/events`} data-reveal className="text-sm text-text-secondary hover:text-white">
+            ← {t.allEvents}
+          </Link>
           {(date || tr.location) && (
-            <p className="tabular text-sm text-brand-sky">
+            <p data-reveal className="eyebrow">
               {date}
               {date && tr.location ? " · " : ""}
               {tr.location}
             </p>
           )}
-          <h1 className="font-display text-4xl font-semibold tracking-tight text-balance md:text-5xl">{tr.title}</h1>
-          {tr.summary && <p className="text-xl text-text-secondary">{tr.summary}</p>}
+          <h1 data-reveal className="text-gradient font-display text-4xl leading-[1.05] font-semibold tracking-[-0.035em] text-balance md:text-6xl">
+            {tr.title}
+          </h1>
+          {tr.summary && (
+            <p data-reveal className="text-xl leading-relaxed text-text-secondary">
+              {tr.summary}
+            </p>
+          )}
         </header>
-        {cover && <MediaImage media={cover} priority className="rounded-card border border-white/10" sizes="(min-width: 1024px) 896px, 100vw" />}
+      </section>
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 pb-16 md:px-8">
+        {cover && (
+          <div data-reveal className="glass overflow-hidden rounded-3xl p-2">
+            <MediaImage media={cover} priority className="rounded-2xl" sizes="(min-width: 1024px) 896px, 100vw" />
+          </div>
+        )}
         <Paragraphs text={tr.body} className="text-lg" />
         {video && (
-          <div className="aspect-video overflow-hidden rounded-card border border-white/10">
+          <div data-reveal className="glass aspect-video overflow-hidden rounded-3xl p-2 [&>iframe]:rounded-2xl">
             <iframe src={video} title={`${tr.title} — ${t.video}`} loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" referrerPolicy="strict-origin-when-cross-origin" className="h-full w-full" />
           </div>
         )}
         {participants.length > 0 && (
-          <section className="flex flex-col gap-4 border-t border-white/10 pt-8">
+          <section className="flex flex-col gap-5 border-t border-white/10 pt-10">
             <h2 className="font-display text-xl font-semibold">{t.participants}</h2>
             <ul className="grid gap-2 sm:grid-cols-2">
               {participants.map((p) => (
-                <li key={p.id} className="rounded-control border border-white/10 px-4 py-3 text-sm">
+                <li key={p.id} className="glass rounded-2xl px-5 py-4 text-sm">
                   {p.name}
                 </li>
               ))}
             </ul>
           </section>
         )}
-      </Container>
+      </div>
+      <CtaBand t={t} locale={found.locale} />
     </article>
   );
 }

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Sections } from "@/components/blocks/BlockRenderer";
 import { LeadFormSection } from "@/components/forms/LeadFormSection";
 import { ContactDetails } from "@/components/layout/ContactDetails";
-import { Container, SectionHeading } from "@/components/ui/Layout";
+import { PageHero, Shell } from "@/components/flagship/Sections";
 import { getSiteInfo } from "@/lib/content/settings";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
@@ -37,10 +37,10 @@ export default async function ContactPage({ params }: Props) {
 
   return (
     <>
-      <Container className="flex flex-col gap-12 py-16 md:py-24">
-        <SectionHeading as="h1" title={tr?.title ?? t.contactTitle} intro={tr?.intro ?? t.contactIntro} />
-        <div className="grid gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-8">
+      <PageHero eyebrow={t.contactEyebrow} title={tr?.title ?? t.contactTitle} body={tr?.intro ?? t.contactIntro} />
+      <Shell className="pb-24">
+        <div className="grid gap-8 lg:grid-cols-12">
+          <div data-reveal className="glass rounded-3xl p-6 md:p-10 lg:col-span-8">
             <LeadFormSection mode="contact" locale={locale} />
           </div>
           <aside className="flex flex-col gap-4 lg:col-span-4" aria-labelledby="reach-us">
@@ -50,7 +50,7 @@ export default async function ContactPage({ params }: Props) {
             <ContactDetails info={info} t={t} stacked />
           </aside>
         </div>
-      </Container>
+      </Shell>
       {ctx && <Sections sections={sections} ctx={ctx} />}
     </>
   );

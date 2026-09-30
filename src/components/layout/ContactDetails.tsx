@@ -32,7 +32,7 @@ export function ContactDetails({
     <div className="flex flex-col gap-8">
       <dl className={stacked ? "grid gap-4" : "grid gap-6 sm:grid-cols-2"}>
         {info.email && (
-          <div className="flex flex-col gap-1 rounded-card border border-white/10 bg-navy-900 p-6">
+          <div className="flex flex-col gap-1 spotlight glass rounded-2xl p-6">
             <dt className="text-sm text-text-secondary">{t.email}</dt>
             <dd>
               <a href={mailto!} className="text-lg break-all text-brand-sky hover:underline">
@@ -42,7 +42,7 @@ export function ContactDetails({
           </div>
         )}
         {info.phone && (
-          <div className="flex flex-col gap-1 rounded-card border border-white/10 bg-navy-900 p-6">
+          <div className="flex flex-col gap-1 spotlight glass rounded-2xl p-6">
             <dt className="text-sm text-text-secondary">{t.phone}</dt>
             <dd>
               <a href={tel!} className="text-lg text-brand-sky tabular-nums hover:underline">
@@ -52,7 +52,7 @@ export function ContactDetails({
           </div>
         )}
         {info.address && (
-          <div className={`flex flex-col gap-1 rounded-card border border-white/10 bg-navy-900 p-6 ${stacked ? "" : "sm:col-span-2"}`}>
+          <div className={`flex flex-col gap-1 spotlight glass rounded-2xl p-6 ${stacked ? "" : "sm:col-span-2"}`}>
             <dt className="text-sm text-text-secondary">{t.address}</dt>
             <dd className="text-lg whitespace-pre-line">{info.address}</dd>
           </div>

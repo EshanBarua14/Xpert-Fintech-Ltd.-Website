@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EventCards } from "@/components/blocks/DataBlocks";
-import { Container, SectionHeading } from "@/components/ui/Layout";
+import { CtaBand, PageHero, Shell } from "@/components/flagship/Sections";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getEvents } from "@/lib/public/content";
@@ -21,9 +21,12 @@ export default async function EventsPage({ params }: Props) {
   const t = getMessages(locale);
   const events = await getEvents();
   return (
-    <Container className="flex flex-col gap-12 py-16 md:py-24">
-      <SectionHeading as="h1" title={t.events} />
-      {events.length ? <EventCards events={events} locale={locale} /> : <p className="text-text-secondary">{t.noItems}</p>}
-    </Container>
+    <>
+      <PageHero eyebrow={t.latestEyebrow} title={t.events} />
+      <Shell className="pb-16">
+        {events.length ? <EventCards events={events} locale={locale} /> : <p className="text-text-secondary">{t.noItems}</p>}
+      </Shell>
+      <CtaBand t={t} locale={locale} />
+    </>
   );
 }

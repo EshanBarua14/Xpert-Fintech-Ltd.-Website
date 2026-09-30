@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Sections } from "@/components/blocks/BlockRenderer";
-import { Container, SectionHeading } from "@/components/ui/Layout";
+import { PageHero } from "@/components/flagship/Sections";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { mediaIdsOf, toSections } from "@/lib/public/blocks";
 import { countRedirectHit, findRedirect, getPageByPath, getSeo } from "@/lib/public/content";
@@ -68,11 +68,7 @@ export default async function CmsPage({ params }: Props) {
 
   return (
     <>
-      {!startsWithHero && (
-        <Container className="pt-16 md:pt-24">
-          <SectionHeading as="h1" title={tr.title} intro={tr.intro} />
-        </Container>
-      )}
+      {!startsWithHero && <PageHero title={tr.title} body={tr.intro} />}
       <Sections sections={sections} ctx={ctx} />
     </>
   );

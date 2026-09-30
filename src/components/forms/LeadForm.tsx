@@ -3,7 +3,6 @@
 import Script from "next/script";
 import { useEffect, useRef } from "react";
 import { submitLead } from "@/app/[locale]/lead-actions";
-import { buttonClasses } from "@/components/ui/Button";
 import { Select, TextArea, TextInput } from "@/components/ui/Field";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
@@ -63,7 +62,7 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
 
   if (state.status === "success") {
     return (
-      <div className="flex flex-col gap-3 rounded-card border border-market-up/30 bg-market-up/5 p-8" role="status">
+      <div className="flex flex-col gap-3 rounded-2xl border border-cyan-300/30 bg-cyan-300/5 p-8" role="status">
         <h2 ref={thanksRef} tabIndex={-1} className="font-display text-2xl font-semibold focus:outline-none">
           {t.thanksTitle}
         </h2>
@@ -209,7 +208,7 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
       )}
 
       <div>
-        <button type="submit" disabled={pending} className={buttonClasses({ size: "lg" })}>
+        <button type="submit" disabled={pending} className="btn-glow inline-flex h-12 items-center gap-2 rounded-full px-7 text-sm font-semibold text-white disabled:opacity-60">
           {pending ? t.formSending : mode === "demo" ? t.formSubmitDemo : t.formSubmitContact}
         </button>
       </div>

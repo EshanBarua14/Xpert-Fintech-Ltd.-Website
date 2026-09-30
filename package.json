@@ -1,0 +1,47 @@
+{
+  "name": "xpert-nexus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Xpert Fintech Ltd. website and admin CMS (internal project name: XPERT NEXUS)",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "db:validate": "prisma validate",
+    "db:format": "prisma format",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "db:erd": "node scripts/generate-erd.mjs"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "^2.0.2",
+    "@prisma/client": "^6.16.0",
+    "next": "^15.5.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "eslint": "^9.30.0",
+    "eslint-config-next": "^15.5.0",
+    "prisma": "^6.16.0",
+    "tailwindcss": "^4.1.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}

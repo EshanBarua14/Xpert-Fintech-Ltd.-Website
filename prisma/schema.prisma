@@ -1,0 +1,1397 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// XPERT NEXUS — database schema (PostgreSQL 16+, Prisma 6)
+//
+// Conventions (see architecture doc, section 6):
+//  • Every publishable table carries the same "envelope":
+//      status (DRAFT | PUBLISHED), publishAt?, sortOrder, createdById?, updatedById?,
+//      createdAt, updatedAt, deletedAt? (trash, restorable for 30 days)
+//  • Public pages read rows with status = PUBLISHED, deletedAt = null and
+//    publishAt null or past (src/lib/db/publishing.ts).
+//  • Translatable text lives in <Model>Translation tables, one row per locale.
+//    A record can exist in English only; the Bangla page is hidden until a
+//    Bangla row exists.
+//  • createdById / updatedById store the admin's id without a foreign key, so
+//    "last edited by" survives when an admin account is removed.
+//  • One admin role (no RBAC): every AdminUser has full rights.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ────────────────────────────────────────────────────────────────────
+
+enum Locale {
+  en
+  bn
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+/// What kind of thing an offering is — lets an item move between types
+/// without migrating data.
+enum OfferingType {
+  PRODUCT
+  PLATFORM
+  MODULE
+  CAPABILITY
+  SERVICE
+  INTEGRATION
+}
+
+enum OfferingItemKind {
+  CAPABILITY
+  WORKFLOW_STEP
+  ARCHITECTURE_LAYER
+  INTEGRATION
+  SECURITY
+  USE_CASE
+  TARGET_USER
+  FAQ
+}
+
+enum OfferingMediaKind {
+  SCREENSHOT
+  VIDEO
+  DIAGRAM
+}
+
+enum VideoProvider {
+  UPLOAD
+  YOUTUBE
+  VIMEO
+}
+
+enum MediaKind {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  OTHER
+}
+
+enum BlockType {
+  HERO
+  RICH_TEXT
+  STATS
+  PRODUCT_GRID
+  PRODUCT_SHOWCASE
+  FEATURE_GRID
+  ARCHITECTURE
+  WORKFLOW
+  SCREENSHOT_GALLERY
+  VIDEO
+  LOGO_CLOUD
+  CASE_STUDY
+  TESTIMONIAL
+  FAQ
+  CTA
+  TIMELINE
+  COMPARISON
+  TECHNOLOGY_GRID
+  SECURITY_GRID
+  MARKET_VISUALIZATION
+  NETWORK_DIAGRAM
+  CONTACT_FORM
+  LEAD_FORM
+  RELATED_CONTENT
+  ARTICLE_LIST
+  EVENT_LIST
+  RESOURCE_LIST
+  PEOPLE_LIST
+  VALUES
+}
+
+enum NavLinkType {
+  INTERNAL
+  EXTERNAL
+  ENTITY
+  NONE
+}
+
+/// Tables that can be linked through ContentRelation, SeoMetadata and MediaUsage.
+enum EntityType {
+  PAGE
+  OFFERING
+  SOLUTION
+  ORGANIZATION
+  DEPLOYMENT
+  CASE_STUDY
+  TESTIMONIAL
+  CERTIFICATION
+  METRIC
+  PERSON
+  CAREER
+  ARTICLE
+  EVENT
+  RESOURCE
+}
+
+enum OrganizationKind {
+  CONSORTIUM_MEMBER
+  CLIENT
+  PARTNER
+  EXCHANGE
+  REGULATOR
+  OTHER
+}
+
+enum PersonGroup {
+  BOARD
+  MANAGEMENT
+  LEADERSHIP
+  TEAM
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum ApplicationStatus {
+  NEW
+  REVIEWING
+  SHORTLISTED
+  INTERVIEW
+  OFFERED
+  HIRED
+  REJECTED
+}
+
+enum ResourceKind {
+  BROCHURE
+  PRODUCT_SHEET
+  WHITEPAPER
+  TECHNICAL_DOCUMENT
+  PRESENTATION
+  VIDEO
+  OTHER
+}
+
+enum LeadSource {
+  DEMO_REQUEST
+  CONTACT_FORM
+  MANUAL
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  DEMO_SCHEDULED
+  PROPOSAL
+  WON
+  LOST
+}
+
+enum ContactMethod {
+  EMAIL
+  PHONE
+  WHATSAPP
+  ANY
+}
+
+enum LeadActivityKind {
+  NOTE
+  CALL
+  EMAIL
+  MEETING
+  STATUS_CHANGE
+}
+
+enum MarketDataMode {
+  DEMO
+  LICENSED
+  NONE
+}
+
+// ── Admin accounts ───────────────────────────────────────────────────────────
+
+model AdminUser {
+  id               String    @id @default(uuid()) @db.Uuid
+  email            String    @unique
+  name             String
+  passwordHash     String
+  totpSecret       String? // encrypted at rest by the app before storing
+  totpEnabled      Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  failedLoginCount Int       @default(0)
+  lockedUntil      DateTime?
+  lastLoginAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  sessions       Session[]
+  passwordResets PasswordReset[]
+  ownedLeads     Lead[]          @relation("LeadOwner")
+}
+
+model Session {
+  id          String    @id @default(uuid()) @db.Uuid
+  /// SHA-256 of the session token; the raw token only lives in the cookie.
+  tokenHash   String    @unique
+  adminUserId String    @db.Uuid
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+  lastSeenAt  DateTime  @default(now())
+  expiresAt   DateTime
+  revokedAt   DateTime?
+
+  @@index([adminUserId])
+  @@index([expiresAt])
+}
+
+model PasswordReset {
+  id          String    @id @default(uuid()) @db.Uuid
+  tokenHash   String    @unique
+  adminUserId String    @db.Uuid
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([adminUserId])
+}
+
+// ── Site settings & offices ──────────────────────────────────────────────────
+
+/// Key/value settings edited in Admin → Settings. Values are JSON so a single
+/// key can hold localized text, e.g. { "en": "...", "bn": "..." }.
+model SiteSetting {
+  key         String   @id
+  value       Json
+  updatedById String?  @db.Uuid
+  updatedAt   DateTime @updatedAt
+}
+
+model Office {
+  id          String        @id @default(uuid()) @db.Uuid
+  key         String?       @unique
+  email       String?
+  phone       String?
+  mapUrl      String?
+  latitude    Decimal?      @db.Decimal(9, 6)
+  longitude   Decimal?      @db.Decimal(9, 6)
+  isPrimary   Boolean       @default(false)
+  status      ContentStatus @default(DRAFT)
+  publishAt   DateTime?
+  sortOrder   Int           @default(0)
+  createdById String?       @db.Uuid
+  updatedById String?       @db.Uuid
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  translations OfficeTranslation[]
+
+  @@index([status, deletedAt])
+}
+
+model OfficeTranslation {
+  id       String @id @default(uuid()) @db.Uuid
+  officeId String @db.Uuid
+  office   Office @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  locale   Locale
+  name     String
+  address  String
+  hours    String?
+
+  @@unique([officeId, locale])
+}
+
+// ── Media library ────────────────────────────────────────────────────────────
+
+model MediaFolder {
+  id        String        @id @default(uuid()) @db.Uuid
+  name      String
+  parentId  String?       @db.Uuid
+  parent    MediaFolder?  @relation("FolderTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children  MediaFolder[] @relation("FolderTree")
+  media     Media[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([parentId, name])
+}
+
+model Media {
+  id           String       @id @default(uuid()) @db.Uuid
+  kind         MediaKind
+  /// Object-storage key; never a user-supplied filename.
+  storageKey   String       @unique
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  width        Int?
+  height       Int?
+  durationSec  Int?
+  checksum     String? // SHA-256, to detect duplicate uploads
+  tags         String[]
+  folderId     String?      @db.Uuid
+  folder       MediaFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  /// Upload is quarantined until the file check passes.
+  isScanned    Boolean      @default(false)
+  createdById  String?      @db.Uuid
+  updatedById  String?      @db.Uuid
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+
+  translations MediaTranslation[]
+  usages       MediaUsage[]
+
+  @@index([kind, deletedAt])
+  @@index([folderId])
+  @@index([checksum])
+}
+
+model MediaTranslation {
+  id      String  @id @default(uuid()) @db.Uuid
+  mediaId String  @db.Uuid
+  media   Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  locale  Locale
+  altText String?
+  caption String?
+
+  @@unique([mediaId, locale])
+}
+
+/// Where a media file is used, so the library can warn before deleting it.
+model MediaUsage {
+  id         String     @id @default(uuid()) @db.Uuid
+  mediaId    String     @db.Uuid
+  media      Media      @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  entityType EntityType
+  entityId   String     @db.Uuid
+  field      String
+
+  @@unique([mediaId, entityType, entityId, field])
+  @@index([entityType, entityId])
+}
+
+// ── Pages, sections, blocks, cards ───────────────────────────────────────────
+
+model Page {
+  id           String        @id @default(uuid()) @db.Uuid
+  /// Stable key for system pages (home, about, contact, request-demo…).
+  key          String?       @unique
+  /// Rendering template, e.g. "default", "landing", "legal".
+  template     String        @default("default")
+  showInSearch Boolean       @default(true)
+  status       ContentStatus @default(DRAFT)
+  publishAt    DateTime?
+  sortOrder    Int           @default(0)
+  createdById  String?       @db.Uuid
+  updatedById  String?       @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  translations PageTranslation[]
+  sections     PageSection[]
+  solutions    Solution[]
+
+  @@index([status, deletedAt, publishAt])
+}
+
+model PageTranslation {
+  id     String  @id @default(uuid()) @db.Uuid
+  pageId String  @db.Uuid
+  page   Page    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  locale Locale
+  /// Full path below the locale, e.g. "company/about". Empty string = home.
+  path   String
+  title  String
+  intro  String?
+
+  @@unique([pageId, locale])
+  @@unique([locale, path])
+}
+
+model PageSection {
+  id        String   @id @default(uuid()) @db.Uuid
+  pageId    String   @db.Uuid
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  /// In-page anchor, e.g. "platform" → /#platform
+  anchorId  String?
+  /// Layout variant: "dark", "light", "full-bleed"…
+  variant   String   @default("dark")
+  isHidden  Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blocks ContentBlock[]
+
+  @@index([pageId, sortOrder])
+}
+
+model ContentBlock {
+  id          String        @id @default(uuid()) @db.Uuid
+  sectionId   String        @db.Uuid
+  section     PageSection   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  type        BlockType
+  /// Non-text settings, validated against the block type's schema on save.
+  props       Json          @default("{}")
+  isHidden    Boolean       @default(false)
+  status      ContentStatus @default(DRAFT)
+  publishAt   DateTime?
+  sortOrder   Int           @default(0)
+  createdById String?       @db.Uuid
+  updatedById String?       @db.Uuid
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  translations ContentBlockTranslation[]
+  items        BlockItem[]
+
+  @@index([sectionId, sortOrder])
+}
+
+model ContentBlockTranslation {
+  id       String       @id @default(uuid()) @db.Uuid
+  blockId  String       @db.Uuid
+  block    ContentBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  locale   Locale
+  eyebrow  String?
+  title    String?
+  subtitle String?
+  body     String? // sanitized rich text (HTML)
+  ctaLabel String?
+  ctaHref  String?
+  /// Extra localized fields specific to the block type.
+  data     Json     @default("{}")
+
+  @@unique([blockId, locale])
+}
+
+/// One card inside a block (a stat, a feature card, a timeline entry…).
+model BlockItem {
+  id        String       @id @default(uuid()) @db.Uuid
+  blockId   String       @db.Uuid
+  block     ContentBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  mediaId   String?      @db.Uuid
+  iconName  String?
+  linkUrl   String?
+  props     Json         @default("{}")
+  isHidden  Boolean      @default(false)
+  sortOrder Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  translations BlockItemTranslation[]
+
+  @@index([blockId, sortOrder])
+}
+
+model BlockItemTranslation {
+  id       String    @id @default(uuid()) @db.Uuid
+  itemId   String    @db.Uuid
+  item     BlockItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  locale   Locale
+  title    String?
+  subtitle String?
+  body     String?
+  ctaLabel String?
+  data     Json      @default("{}")
+
+  @@unique([itemId, locale])
+}
+
+// ── Navigation & footer ──────────────────────────────────────────────────────
+
+/// Menus: "header", "footer-products", "footer-company", "footer-legal"…
+model NavMenu {
+  id        String    @id @default(uuid()) @db.Uuid
+  key       String    @unique
+  name      String
+  items     NavItem[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model NavItem {
+  id           String      @id @default(uuid()) @db.Uuid
+  menuId       String      @db.Uuid
+  menu         NavMenu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parentId     String?     @db.Uuid
+  parent       NavItem?    @relation("NavTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children     NavItem[]   @relation("NavTree")
+  linkType     NavLinkType @default(INTERNAL)
+  /// Path below the locale for INTERNAL, full URL for EXTERNAL.
+  href         String?
+  entityType   EntityType?
+  entityId     String?     @db.Uuid
+  openInNewTab Boolean     @default(false)
+  isHidden     Boolean     @default(false)
+  isCta        Boolean     @default(false)
+  sortOrder    Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  translations NavItemTranslation[]
+
+  @@index([menuId, parentId, sortOrder])
+}
+
+model NavItemTranslation {
+  id          String  @id @default(uuid()) @db.Uuid
+  itemId      String  @db.Uuid
+  item        NavItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  locale      Locale
+  label       String
+  description String?
+
+  @@unique([itemId, locale])
+}
+
+// ── Offerings (products, platform, modules, services, integrations) ─────────
+
+model OfferingCategory {
+  id        String     @id @default(uuid()) @db.Uuid
+  key       String     @unique
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  offerings Offering[]
+
+  translations OfferingCategoryTranslation[]
+}
+
+model OfferingCategoryTranslation {
+  id         String           @id @default(uuid()) @db.Uuid
+  categoryId String           @db.Uuid
+  category   OfferingCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale     Locale
+  name       String
+
+  @@unique([categoryId, locale])
+}
+
+model Offering {
+  id           String            @id @default(uuid()) @db.Uuid
+  key          String?           @unique
+  type         OfferingType
+  categoryId   String?           @db.Uuid
+  category     OfferingCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  /// Parent platform for modules (e.g. RMS inside the trading platform).
+  parentId     String?           @db.Uuid
+  parent       Offering?         @relation("OfferingTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Offering[]        @relation("OfferingTree")
+  iconMediaId  String?           @db.Uuid
+  heroMediaId  String?           @db.Uuid
+  isFeatured   Boolean           @default(false)
+  hasOwnPage   Boolean           @default(true)
+  showDemoCta  Boolean           @default(true)
+  status       ContentStatus     @default(DRAFT)
+  publishAt    DateTime?
+  sortOrder    Int               @default(0)
+  createdById  String?           @db.Uuid
+  updatedById  String?           @db.Uuid
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  deletedAt    DateTime?
+
+  translations OfferingTranslation[]
+  items        OfferingItem[]
+  media        OfferingMedia[]
+  deployments  Deployment[]
+  leads        Lead[]
+
+  @@index([status, deletedAt, publishAt])
+  @@index([type])
+}
+
+model OfferingTranslation {
+  id              String   @id @default(uuid()) @db.Uuid
+  offeringId      String   @db.Uuid
+  offering        Offering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  locale          Locale
+  slug            String
+  name            String
+  /// One-line value proposition shown on cards.
+  tagline         String?
+  summary         String?
+  problem         String?
+  solution        String?
+  body            String? // sanitized rich text (HTML)
+  targetCustomers String?
+  ctaLabel        String?
+
+  @@unique([offeringId, locale])
+  @@unique([locale, slug])
+}
+
+/// Capabilities, workflow steps, architecture layers, integrations, security
+/// items, use cases, target users and FAQs of an offering — one table, typed
+/// by `kind`, each row independently editable and orderable.
+model OfferingItem {
+  id          String           @id @default(uuid()) @db.Uuid
+  offeringId  String           @db.Uuid
+  offering    Offering         @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  kind        OfferingItemKind
+  iconName    String?
+  mediaId     String?          @db.Uuid
+  isHidden    Boolean          @default(false)
+  sortOrder   Int              @default(0)
+  createdById String?          @db.Uuid
+  updatedById String?          @db.Uuid
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  translations OfferingItemTranslation[]
+
+  @@index([offeringId, kind, sortOrder])
+}
+
+model OfferingItemTranslation {
+  id     String       @id @default(uuid()) @db.Uuid
+  itemId String       @db.Uuid
+  item   OfferingItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  locale Locale
+  title  String
+  body   String?
+
+  @@unique([itemId, locale])
+}
+
+/// Screenshots, videos and diagrams. `isConceptual` marks a prototype so it is
+/// never presented as the production interface.
+model OfferingMedia {
+  id            String            @id @default(uuid()) @db.Uuid
+  offeringId    String            @db.Uuid
+  offering      Offering          @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  kind          OfferingMediaKind
+  mediaId       String?           @db.Uuid
+  videoProvider VideoProvider?
+  videoUrl      String?
+  posterMediaId String?           @db.Uuid
+  isConceptual  Boolean           @default(false)
+  isHidden      Boolean           @default(false)
+  sortOrder     Int               @default(0)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  translations OfferingMediaTranslation[]
+
+  @@index([offeringId, kind, sortOrder])
+}
+
+model OfferingMediaTranslation {
+  id         String        @id @default(uuid()) @db.Uuid
+  itemId     String        @db.Uuid
+  item       OfferingMedia @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  locale     Locale
+  caption    String?
+  transcript String?
+
+  @@unique([itemId, locale])
+}
+
+// ── Solutions ────────────────────────────────────────────────────────────────
+
+model Solution {
+  id          String        @id @default(uuid()) @db.Uuid
+  key         String?       @unique
+  heroMediaId String?       @db.Uuid
+  /// Optional page whose blocks render the solution's long-form sections.
+  pageId      String?       @db.Uuid
+  page        Page?         @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  status      ContentStatus @default(DRAFT)
+  publishAt   DateTime?
+  sortOrder   Int           @default(0)
+  createdById String?       @db.Uuid
+  updatedById String?       @db.Uuid
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  translations SolutionTranslation[]
+
+  @@index([status, deletedAt, publishAt])
+}
+
+model SolutionTranslation {
+  id         String   @id @default(uuid()) @db.Uuid
+  solutionId String   @db.Uuid
+  solution   Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  locale     Locale
+  slug       String
+  name       String
+  summary    String?
+  body       String?
+
+  @@unique([solutionId, locale])
+  @@unique([locale, slug])
+}
+
+// ── Proof ────────────────────────────────────────────────────────────────────
+
+/// Consortium members, clients, partners, exchanges.
+model Organization {
+  id             String           @id @default(uuid()) @db.Uuid
+  key            String?          @unique
+  kind           OrganizationKind
+  websiteUrl     String?
+  logoMediaId    String?          @db.Uuid
+  /// Logo shown publicly only when written permission is on file.
+  logoPermission Boolean          @default(false)
+  status         ContentStatus    @default(DRAFT)
+  publishAt      DateTime?
+  sortOrder      Int              @default(0)
+  createdById    String?          @db.Uuid
+  updatedById    String?          @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+
+  translations OrganizationTranslation[]
+  deployments  Deployment[]
+  testimonials Testimonial[]
+  events       EventOrganization[]
+
+  @@index([kind, status, deletedAt])
+}
+
+model OrganizationTranslation {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  locale         Locale
+  name           String
+  shortName      String?
+  description    String?
+
+  @@unique([organizationId, locale])
+}
+
+/// A live installation of an Xpert offering at an organization, e.g. a
+/// brokerage's branded trading app.
+model Deployment {
+  id             String        @id @default(uuid()) @db.Uuid
+  key            String?       @unique
+  organizationId String?       @db.Uuid
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  offeringId     String?       @db.Uuid
+  offering       Offering?     @relation(fields: [offeringId], references: [id], onDelete: SetNull)
+  appName        String?
+  androidPackage String?
+  playStoreUrl   String?
+  appStoreUrl    String?
+  webUrl         String?
+  launchedAt     DateTime?
+  /// Last time an admin checked the store links still work.
+  linksCheckedAt DateTime?
+  status         ContentStatus @default(DRAFT)
+  publishAt      DateTime?
+  sortOrder      Int           @default(0)
+  createdById    String?       @db.Uuid
+  updatedById    String?       @db.Uuid
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  translations DeploymentTranslation[]
+
+  @@index([status, deletedAt])
+  @@index([organizationId])
+  @@index([offeringId])
+}
+
+model DeploymentTranslation {
+  id           String     @id @default(uuid()) @db.Uuid
+  deploymentId String     @db.Uuid
+  deployment   Deployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+  locale       Locale
+  summary      String?
+
+  @@unique([deploymentId, locale])
+}
+
+model CaseStudy {
+  id           String        @id @default(uuid()) @db.Uuid
+  coverMediaId String?       @db.Uuid
+  status       ContentStatus @default(DRAFT)
+  publishAt    DateTime?
+  sortOrder    Int           @default(0)
+  createdById  String?       @db.Uuid
+  updatedById  String?       @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  translations CaseStudyTranslation[]
+
+  @@index([status, deletedAt, publishAt])
+}
+
+model CaseStudyTranslation {
+  id          String    @id @default(uuid()) @db.Uuid
+  caseStudyId String    @db.Uuid
+  caseStudy   CaseStudy @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+  locale      Locale
+  slug        String
+  title       String
+  summary     String?
+  challenge   String?
+  solution    String?
+  outcome     String?
+
+  @@unique([caseStudyId, locale])
+  @@unique([locale, slug])
+}
+
+model Testimonial {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String?       @db.Uuid
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  personName     String
+  photoMediaId   String?       @db.Uuid
+  /// Written approval from the quoted person is on file.
+  hasApproval    Boolean       @default(false)
+  status         ContentStatus @default(DRAFT)
+  publishAt      DateTime?
+  sortOrder      Int           @default(0)
+  createdById    String?       @db.Uuid
+  updatedById    String?       @db.Uuid
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  translations TestimonialTranslation[]
+
+  @@index([status, deletedAt])
+}
+
+model TestimonialTranslation {
+  id            String      @id @default(uuid()) @db.Uuid
+  testimonialId String      @db.Uuid
+  testimonial   Testimonial @relation(fields: [testimonialId], references: [id], onDelete: Cascade)
+  locale        Locale
+  personTitle   String?
+  quote         String
+
+  @@unique([testimonialId, locale])
+}
+
+model Certification {
+  id              String        @id @default(uuid()) @db.Uuid
+  issuer          String
+  issuedAt        DateTime?
+  expiresAt       DateTime?
+  documentMediaId String?       @db.Uuid
+  sourceUrl       String?
+  status          ContentStatus @default(DRAFT)
+  publishAt       DateTime?
+  sortOrder       Int           @default(0)
+  createdById     String?       @db.Uuid
+  updatedById     String?       @db.Uuid
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+
+  translations CertificationTranslation[]
+
+  @@index([status, deletedAt])
+}
+
+model CertificationTranslation {
+  id              String        @id @default(uuid()) @db.Uuid
+  certificationId String        @db.Uuid
+  certification   Certification @relation(fields: [certificationId], references: [id], onDelete: Cascade)
+  locale          Locale
+  name            String
+  description     String?
+
+  @@unique([certificationId, locale])
+}
+
+/// Headline numbers (years, institutions, deployments…). Source fields are
+/// shown on hover so every public number can be traced.
+model Metric {
+  id          String        @id @default(uuid()) @db.Uuid
+  key         String?       @unique
+  value       String
+  unit        String?
+  period      String?
+  sourceUrl   String?
+  sourceNote  String?
+  status      ContentStatus @default(DRAFT)
+  publishAt   DateTime?
+  sortOrder   Int           @default(0)
+  createdById String?       @db.Uuid
+  updatedById String?       @db.Uuid
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  translations MetricTranslation[]
+
+  @@index([status, deletedAt])
+}
+
+model MetricTranslation {
+  id       String @id @default(uuid()) @db.Uuid
+  metricId String @db.Uuid
+  metric   Metric @relation(fields: [metricId], references: [id], onDelete: Cascade)
+  locale   Locale
+  label    String
+
+  @@unique([metricId, locale])
+}
+
+// ── Company ──────────────────────────────────────────────────────────────────
+
+model Person {
+  id           String        @id @default(uuid()) @db.Uuid
+  key          String?       @unique
+  photoMediaId String?       @db.Uuid
+  linkedinUrl  String?
+  status       ContentStatus @default(DRAFT)
+  publishAt    DateTime?
+  sortOrder    Int           @default(0)
+  createdById  String?       @db.Uuid
+  updatedById  String?       @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  translations PersonTranslation[]
+  roles        PersonRole[]
+
+  @@index([status, deletedAt])
+}
+
+model PersonTranslation {
+  id       String @id @default(uuid()) @db.Uuid
+  personId String @db.Uuid
+  person   Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  locale   Locale
+  name     String
+  bio      String?
+
+  @@unique([personId, locale])
+}
+
+/// One person can sit on the board and in management; each role has its own
+/// title and order within its group.
+model PersonRole {
+  id        String      @id @default(uuid()) @db.Uuid
+  personId  String      @db.Uuid
+  person    Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
+  group     PersonGroup
+  sortOrder Int         @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  translations PersonRoleTranslation[]
+
+  @@unique([personId, group])
+  @@index([group, sortOrder])
+}
+
+model PersonRoleTranslation {
+  id     String     @id @default(uuid()) @db.Uuid
+  roleId String     @db.Uuid
+  role   PersonRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  locale Locale
+  title  String
+
+  @@unique([roleId, locale])
+}
+
+model Career {
+  id             String         @id @default(uuid()) @db.Uuid
+  department     String?
+  location       String?
+  employmentType EmploymentType @default(FULL_TIME)
+  experience     String?
+  deadline       DateTime?
+  /// Closed jobs stay published (marked closed) but stop accepting applications.
+  isClosed       Boolean        @default(false)
+  status         ContentStatus  @default(DRAFT)
+  publishAt      DateTime?
+  sortOrder      Int            @default(0)
+  createdById    String?        @db.Uuid
+  updatedById    String?        @db.Uuid
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+
+  translations CareerTranslation[]
+  applications CareerApplication[]
+
+  @@index([status, deletedAt, publishAt])
+}
+
+model CareerTranslation {
+  id               String @id @default(uuid()) @db.Uuid
+  careerId         String @db.Uuid
+  career           Career @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  locale           Locale
+  slug             String
+  title            String
+  summary          String?
+  responsibilities String?
+  requirements     String?
+  benefits         String?
+
+  @@unique([careerId, locale])
+  @@unique([locale, slug])
+}
+
+model CareerApplication {
+  id          String            @id @default(uuid()) @db.Uuid
+  careerId    String            @db.Uuid
+  career      Career            @relation(fields: [careerId], references: [id], onDelete: Restrict)
+  name        String
+  email       String
+  phone       String?
+  coverLetter String?
+  cvMediaId   String?           @db.Uuid
+  status      ApplicationStatus @default(NEW)
+  adminNotes  String?
+  consent     Boolean           @default(false)
+  ip          String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  deletedAt   DateTime?
+
+  @@index([careerId, status])
+  @@index([createdAt])
+}
+
+// ── Insights, events, resources ──────────────────────────────────────────────
+
+model ArticleCategory {
+  id        String    @id @default(uuid()) @db.Uuid
+  key       String    @unique
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  articles  Article[]
+
+  translations ArticleCategoryTranslation[]
+}
+
+model ArticleCategoryTranslation {
+  id         String          @id @default(uuid()) @db.Uuid
+  categoryId String          @db.Uuid
+  category   ArticleCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale     Locale
+  slug       String
+  name       String
+
+  @@unique([categoryId, locale])
+  @@unique([locale, slug])
+}
+
+model Tag {
+  id        String       @id @default(uuid()) @db.Uuid
+  key       String       @unique
+  createdAt DateTime     @default(now())
+  articles  ArticleTag[]
+
+  translations TagTranslation[]
+}
+
+model TagTranslation {
+  id     String @id @default(uuid()) @db.Uuid
+  tagId  String @db.Uuid
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  locale Locale
+  slug   String
+  name   String
+
+  @@unique([tagId, locale])
+  @@unique([locale, slug])
+}
+
+model Article {
+  id                  String           @id @default(uuid()) @db.Uuid
+  categoryId          String?          @db.Uuid
+  category            ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  authorName          String?
+  coverMediaId        String?          @db.Uuid
+  /// Date shown to readers; defaults to first publish.
+  displayDate         DateTime?
+  /// Old WordPress URL, kept so a redirect can be created on migration.
+  legacyUrl           String?
+  status              ContentStatus    @default(DRAFT)
+  publishAt           DateTime?
+  sortOrder           Int              @default(0)
+  createdById         String?          @db.Uuid
+  updatedById         String?          @db.Uuid
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  deletedAt           DateTime?
+
+  translations ArticleTranslation[]
+  tags         ArticleTag[]
+
+  @@index([status, deletedAt, publishAt])
+  @@index([categoryId])
+  @@index([displayDate])
+}
+
+model ArticleTranslation {
+  id        String  @id @default(uuid()) @db.Uuid
+  articleId String  @db.Uuid
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  locale    Locale
+  slug      String
+  title     String
+  subtitle  String?
+  excerpt   String?
+  body      String? // sanitized rich text (HTML)
+
+  @@unique([articleId, locale])
+  @@unique([locale, slug])
+}
+
+model ArticleTag {
+  articleId String  @db.Uuid
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tagId     String  @db.Uuid
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+}
+
+model Event {
+  id           String        @id @default(uuid()) @db.Uuid
+  key          String?       @unique
+  startsAt     DateTime?
+  endsAt       DateTime?
+  /// True when the exact date still needs confirming — shown as month/year only.
+  dateIsApprox Boolean       @default(false)
+  coverMediaId String?       @db.Uuid
+  videoUrl     String?
+  legacyUrl    String?
+  status       ContentStatus @default(DRAFT)
+  publishAt    DateTime?
+  sortOrder    Int           @default(0)
+  createdById  String?       @db.Uuid
+  updatedById  String?       @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  translations  EventTranslation[]
+  gallery       EventMedia[]
+  organizations EventOrganization[]
+
+  @@index([status, deletedAt, publishAt])
+  @@index([startsAt])
+}
+
+model EventTranslation {
+  id       String  @id @default(uuid()) @db.Uuid
+  eventId  String  @db.Uuid
+  event    Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  locale   Locale
+  slug     String
+  title    String
+  summary  String?
+  body     String?
+  location String?
+
+  @@unique([eventId, locale])
+  @@unique([locale, slug])
+}
+
+model EventMedia {
+  id        String   @id @default(uuid()) @db.Uuid
+  eventId   String   @db.Uuid
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  mediaId   String   @db.Uuid
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([eventId, sortOrder])
+}
+
+/// Organizations that took part in an event (e.g. the nine TREC holders).
+model EventOrganization {
+  eventId        String       @db.Uuid
+  event          Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  organizationId String       @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sortOrder      Int          @default(0)
+
+  @@id([eventId, organizationId])
+  @@index([organizationId])
+}
+
+model Resource {
+  id           String        @id @default(uuid()) @db.Uuid
+  kind         ResourceKind
+  fileMediaId  String?       @db.Uuid
+  externalUrl  String?
+  coverMediaId String?       @db.Uuid
+  status       ContentStatus @default(DRAFT)
+  publishAt    DateTime?
+  sortOrder    Int           @default(0)
+  createdById  String?       @db.Uuid
+  updatedById  String?       @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  translations ResourceTranslation[]
+
+  @@index([status, deletedAt, publishAt])
+  @@index([kind])
+}
+
+model ResourceTranslation {
+  id         String   @id @default(uuid()) @db.Uuid
+  resourceId String   @db.Uuid
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  locale     Locale
+  slug       String
+  title      String
+  summary    String?
+
+  @@unique([resourceId, locale])
+  @@unique([locale, slug])
+}
+
+// ── Relationships between content ────────────────────────────────────────────
+
+/// "Related" links managed in the admin, e.g. OMS → Brokerage solution,
+/// OMS → case study, OMS → brochure. Ordered per source.
+model ContentRelation {
+  id        String     @id @default(uuid()) @db.Uuid
+  fromType  EntityType
+  fromId    String     @db.Uuid
+  toType    EntityType
+  toId      String     @db.Uuid
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  @@unique([fromType, fromId, toType, toId])
+  @@index([toType, toId])
+}
+
+// ── Sales: leads & CRM ───────────────────────────────────────────────────────
+
+/// Demo requests, contact-form messages and manually added leads.
+model Lead {
+  id                  String         @id @default(uuid()) @db.Uuid
+  source              LeadSource
+  status              LeadStatus     @default(NEW)
+  name                String
+  organization        String?
+  designation         String?
+  email               String
+  phone               String?
+  country             String?
+  businessType        String?
+  interestedOfferingId String?       @db.Uuid
+  interestedOffering  Offering?      @relation(fields: [interestedOfferingId], references: [id], onDelete: SetNull)
+  expectedRequirement String?
+  message             String?
+  preferredContact    ContactMethod  @default(ANY)
+  consent             Boolean        @default(false)
+  consentAt           DateTime?
+  ownerId             String?        @db.Uuid
+  owner               AdminUser?     @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  followUpAt          DateTime?
+  locale              Locale         @default(en)
+  pageUrl             String?
+  utm                 Json?
+  ip                  String?
+  userAgent           String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  deletedAt           DateTime?
+
+  activities LeadActivity[]
+
+  @@index([status, deletedAt])
+  @@index([ownerId, followUpAt])
+  @@index([createdAt])
+  @@index([email])
+}
+
+model LeadActivity {
+  id          String           @id @default(uuid()) @db.Uuid
+  leadId      String           @db.Uuid
+  lead        Lead             @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  kind        LeadActivityKind
+  body        String?
+  fromStatus  LeadStatus?
+  toStatus    LeadStatus?
+  createdById String?          @db.Uuid
+  createdAt   DateTime         @default(now())
+
+  @@index([leadId, createdAt])
+}
+
+// ── Market data ──────────────────────────────────────────────────────────────
+
+/// Non-secret settings for the market-data feed; API keys stay in env vars.
+model MarketDataSource {
+  id                  String         @id @default(uuid()) @db.Uuid
+  name                String
+  mode                MarketDataMode @default(NONE)
+  providerName        String?
+  licenceReference    String?
+  licenceExpiresAt    DateTime?
+  displayDelayMinutes Int            @default(0)
+  isActive            Boolean        @default(false)
+  config              Json           @default("{}")
+  updatedById         String?        @db.Uuid
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+}
+
+// ── SEO & redirects ──────────────────────────────────────────────────────────
+
+/// Per-record, per-locale SEO fields. Missing fields fall back to the
+/// record's own title and summary.
+model SeoMetadata {
+  id             String     @id @default(uuid()) @db.Uuid
+  entityType     EntityType
+  entityId       String     @db.Uuid
+  locale         Locale
+  title          String?
+  description    String?
+  canonicalUrl   String?
+  ogTitle        String?
+  ogDescription  String?
+  ogImageId      String?    @db.Uuid
+  twitterImageId String?    @db.Uuid
+  robots         String?
+  schemaType     String?
+  keywords       String[]
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([entityType, entityId, locale])
+}
+
+model Redirect {
+  id         String   @id @default(uuid()) @db.Uuid
+  fromPath   String   @unique
+  toPath     String
+  statusCode Int      @default(301)
+  isActive   Boolean  @default(true)
+  hits       Int      @default(0)
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

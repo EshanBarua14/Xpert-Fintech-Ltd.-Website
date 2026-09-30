@@ -7,7 +7,18 @@ import type { Messages } from "@/lib/i18n/messages";
  * Contact details from Admin → Settings and Admin → Offices.
  * Rows without a value are hidden; nothing is invented.
  */
-export function ContactDetails({ info, t, mailSubject }: { info: SiteInfo; t: Messages; mailSubject?: string }) {
+export function ContactDetails({
+  info,
+  t,
+  mailSubject,
+  stacked = false,
+}: {
+  info: SiteInfo;
+  t: Messages;
+  mailSubject?: string;
+  /** One column without buttons, for the sidebar next to a form. */
+  stacked?: boolean;
+}) {
   const mailto = info.email
     ? `mailto:${info.email}${mailSubject ? `?subject=${encodeURIComponent(mailSubject)}` : ""}`
     : null;
@@ -19,7 +30,7 @@ export function ContactDetails({ info, t, mailSubject }: { info: SiteInfo; t: Me
 
   return (
     <div className="flex flex-col gap-8">
-      <dl className="grid gap-6 sm:grid-cols-2">
+      <dl className={stacked ? "grid gap-4" : "grid gap-6 sm:grid-cols-2"}>
         {info.email && (
           <div className="flex flex-col gap-1 rounded-card border border-white/10 bg-navy-900 p-6">
             <dt className="text-sm text-text-secondary">{t.email}</dt>
@@ -41,13 +52,13 @@ export function ContactDetails({ info, t, mailSubject }: { info: SiteInfo; t: Me
           </div>
         )}
         {info.address && (
-          <div className="flex flex-col gap-1 rounded-card border border-white/10 bg-navy-900 p-6 sm:col-span-2">
+          <div className={`flex flex-col gap-1 rounded-card border border-white/10 bg-navy-900 p-6 ${stacked ? "" : "sm:col-span-2"}`}>
             <dt className="text-sm text-text-secondary">{t.address}</dt>
             <dd className="text-lg whitespace-pre-line">{info.address}</dd>
           </div>
         )}
       </dl>
-      {(mailto || tel) && (
+      {!stacked && (mailto || tel) && (
         <div className="flex flex-wrap gap-3">
           {mailto && (
             <a href={mailto} className={buttonClasses({})}>

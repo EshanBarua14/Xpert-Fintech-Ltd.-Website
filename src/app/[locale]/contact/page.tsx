@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Sections } from "@/components/blocks/BlockRenderer";
+import { LeadFormSection } from "@/components/forms/LeadFormSection";
 import { ContactDetails } from "@/components/layout/ContactDetails";
 import { Container, SectionHeading } from "@/components/ui/Layout";
 import { getSiteInfo } from "@/lib/content/settings";
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * Contact details from Admin → Settings / Offices. If a published page with
  * the key "contact" exists in Admin → Pages, its sections are shown too.
- * (The enquiry form and lead inbox arrive in Phase 12.)
+ * Messages sent with the form arrive in Admin → Leads.
  */
 export default async function ContactPage({ params }: Props) {
   const { locale } = await params;
@@ -38,7 +39,17 @@ export default async function ContactPage({ params }: Props) {
     <>
       <Container className="flex flex-col gap-12 py-16 md:py-24">
         <SectionHeading as="h1" title={tr?.title ?? t.contactTitle} intro={tr?.intro ?? t.contactIntro} />
-        <ContactDetails info={info} t={t} />
+        <div className="grid gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+            <LeadFormSection mode="contact" locale={locale} />
+          </div>
+          <aside className="flex flex-col gap-4 lg:col-span-4" aria-labelledby="reach-us">
+            <h2 id="reach-us" className="font-display text-lg font-semibold">
+              {t.orReachUs}
+            </h2>
+            <ContactDetails info={info} t={t} stacked />
+          </aside>
+        </div>
       </Container>
       {ctx && <Sections sections={sections} ctx={ctx} />}
     </>

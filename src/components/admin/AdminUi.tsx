@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import { startTransition, useActionState, type FormEvent, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/Badge";
 import { buttonClasses } from "@/components/ui/Button";
@@ -11,6 +11,7 @@ import { buttonClasses } from "@/components/ui/Button";
 /** Sidebar entries. Only sections that exist are listed — no dead links. */
 const NAV = [
   { href: "/admin", label: "Dashboard", exact: true },
+  { href: "/admin/leads", label: "Leads" },
   { href: "/admin/pages", label: "Pages" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/events", label: "Events" },
@@ -108,22 +109,4 @@ export function StatusBadge({
   return <Badge tone="up">Published</Badge>;
 }
 
-/**
- * Like useActionState, but submits via onSubmit so React does not clear the
- * form after the action (React 19 resets forms that use the action attribute),
- * so typed values survive a validation error. "Add" forms that should empty
- * after saving remount with `key={state.savedAt}` instead.
- */
-export function useActionForm<S>(
-  action: (state: Awaited<S>, formData: FormData) => Promise<S>,
-  initial: Awaited<S>,
-) {
-  const [state, dispatch, pending] = useActionState(action, initial);
-
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    startTransition(() => dispatch(formData));
-  }
-  return { state, pending, onSubmit };
-}
+export { useActionForm } from "@/components/forms/useActionForm";

@@ -214,10 +214,21 @@ export const BLOCKS = {
     settings: [],
   },
   LEAD_FORM: {
-    label: "Demo request form",
-    description: "The request-a-demo form (active once the form is built).",
+    label: "Enquiry form",
+    description: "A demo-request or contact form. Submissions arrive in Admin → Leads.",
     text: { title: "Heading", subtitle: "Intro" },
-    settings: [],
+    settings: [
+      {
+        key: "form",
+        label: "Form",
+        type: "select",
+        options: [
+          { value: "demo", label: "Request a demo" },
+          { value: "contact", label: "Contact message" },
+        ],
+        default: "demo",
+      },
+    ],
   },
 } satisfies Partial<Record<string, BlockDefinition>>;
 

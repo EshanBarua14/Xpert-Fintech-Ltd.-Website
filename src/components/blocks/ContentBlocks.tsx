@@ -5,6 +5,7 @@ import { videoEmbedUrl } from "@/lib/public/text";
 import { cn } from "@/lib/utils/cn";
 import { BlockHeading, CtaButton, gridCols, MediaImage, Paragraphs, SmartLink } from "./Shared";
 import { NetworkDiagram } from "./NetworkDiagram";
+import { LeadFormSection } from "@/components/forms/LeadFormSection";
 import { bool, str, type BlockContext, type BlockData } from "./types";
 
 export function HeroBlock({ block, ctx, isFirst }: { block: BlockData; ctx: BlockContext; isFirst: boolean }) {
@@ -212,17 +213,11 @@ export function CtaBlock({ block, ctx }: { block: BlockData; ctx: BlockContext }
 
 /** Until the demo form ships (Phase 12), point people to the contact email. */
 export function LeadFormBlock({ block, ctx }: { block: BlockData; ctx: BlockContext }) {
+  const mode = str(block.props.form) === "contact" ? "contact" : "demo";
   return (
-    <div className="flex max-w-2xl flex-col gap-4">
+    <div className="flex max-w-3xl flex-col gap-8">
       <BlockHeading text={block.text} />
-      {ctx.contactEmail && (
-        <p className="text-lg">
-          {ctx.t.contactUsAt}{" "}
-          <a href={`mailto:${ctx.contactEmail}`} className="text-brand-sky hover:underline">
-            {ctx.contactEmail}
-          </a>
-        </p>
-      )}
+      <LeadFormSection mode={mode} locale={ctx.locale} />
     </div>
   );
 }

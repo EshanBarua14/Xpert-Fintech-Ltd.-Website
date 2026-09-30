@@ -20,6 +20,8 @@ export default async function DashboardPage() {
     newLeads,
     media,
     recent,
+    followUpsDue,
+    recentLeads,
   ] = await Promise.all([
     db.offering.count({ where: live }),
     db.offering.count({ where: draft }),
@@ -35,6 +37,8 @@ export default async function DashboardPage() {
       take: 5,
       include: { translations: { where: { locale: "en" } } },
     }),
+    db.lead.count({ where: { deletedAt: null, followUpAt: { lte: new Date() }, status: { notIn: ["WON", "LOST"] } } }),
+    db.lead.findMany({ where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 5, select: { id: true, name: true, organization: true, createdAt: true, status: true } }),
   ]);
 
   const stats: Stat[] = [
@@ -44,7 +48,8 @@ export default async function DashboardPage() {
     { label: "Consortium members", value: members, href: "/admin/organizations?kind=CONSORTIUM_MEMBER" },
     { label: "App deployments", value: deployments, href: "/admin/deployments" },
     { label: "Events", value: events, href: "/admin/events" },
-    { label: "New leads", value: newLeads, note: "Lead inbox arrives with the demo form" },
+    { label: "New leads", value: newLeads, href: "/admin/leads?status=NEW" },
+    { label: "Follow-ups due", value: followUpsDue, href: "/admin/leads" },
     { label: "Media files", value: media, href: "/admin/media" },
   ];
 
@@ -77,6 +82,30 @@ export default async function DashboardPage() {
           );
         })}
       </ul>
+
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="font-display text-xl font-semibold">Latest leads</h2>
+          <Link href="/admin/leads" className="text-sm text-text-secondary hover:text-brand-sky">
+            All leads →
+          </Link>
+        </div>
+        <ul className="divide-y divide-white/10 rounded-card border border-white/10">
+          {recentLeads.length === 0 && <li className="px-4 py-3 text-sm text-text-secondary">No leads yet. Website enquiries will appear here.</li>}
+          {recentLeads.map((l) => (
+            <li key={l.id} className="flex items-center justify-between gap-4 px-4 py-3">
+              <Link href={`/admin/leads/${l.id}`} className="hover:text-brand-sky">
+                {l.name}
+                {l.organization && <span className="text-text-secondary"> · {l.organization}</span>}
+                {l.status === "NEW" && <span className="ml-2 text-xs text-brand-sky">new</span>}
+              </Link>
+              <time className="text-xs text-text-secondary" dateTime={l.createdAt.toISOString()}>
+                {l.createdAt.toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })}
+              </time>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-xl font-semibold">Recently edited products</h2>

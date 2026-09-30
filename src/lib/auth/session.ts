@@ -114,3 +114,13 @@ export async function requireAdmin(): Promise<CurrentAdmin> {
   if (!admin) redirect("/admin/login");
   return admin;
 }
+
+/** Ends every session of an admin except the one making this request. */
+export async function revokeOtherSessions(adminUserId: string) {
+  const jar = await cookies();
+  const token = jar.get(SESSION_COOKIE)?.value;
+  await db.session.updateMany({
+    where: { adminUserId, revokedAt: null, ...(token ? { tokenHash: { not: hashToken(token) } } : {}) },
+    data: { revokedAt: new Date() },
+  });
+}

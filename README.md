@@ -67,7 +67,7 @@ Sign in at `/admin` with the account created by `npm run db:seed` (`SEED_ADMIN_E
 - Content is **Draft** or **Published**, with an optional scheduled publish date. Visitors only see published rows (`src/lib/db/publishing.ts`).
 - Deleting moves a record to the trash, where it can be restored or deleted permanently. (Automatic clean-up after 30 days: planned.)
 - Every text field is stored per language in a `*Translation` table. A Bangla page appears only once its Bangla text exists.
-- One admin role with full rights. Admin login uses Argon2id password hashes and expiring server-side sessions. Two-factor login: planned (the database already supports it).
+- One admin role with full rights. Admin login uses Argon2id password hashes and expiring server-side sessions. Two-factor login: planned (the database already supports it). Admins change their password and manage other admins under Admin → Admins.
 - Logos of consortium members and clients are shown only when `logoPermission` is on.
 - Market data comes from Xpert's licensed feed; demo data can never reach production.
 
@@ -78,6 +78,7 @@ Sign in at `/admin` with the account created by `npm run db:seed` (`SEED_ADMIN_E
 | 0 Discovery | Done, except capture of the live site's page text |
 | 1 Product architecture | Done: scaffold, schema, ERD, seed |
 | 2 Design system | Done: tokens, components, header, footer, order-flow motion |
-| 3 Admin portal | **In progress**: login, dashboard, products, settings, navigation, media, people, organizations, deployments, events done; pages/blocks next |
+| 3 Admin portal | Done: login, dashboard, pages & blocks, products, events, people, organizations, deployments, navigation, media, settings, admins |
+| 4 Public foundation | Next: public pages rendered from the CMS |
 
 Secrets live only in `.env` (never committed). See `.env.example` for every variable.

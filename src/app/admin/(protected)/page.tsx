@@ -40,7 +40,7 @@ export default async function DashboardPage() {
   const stats: Stat[] = [
     { label: "Products published", value: productsLive, href: "/admin/products?status=PUBLISHED" },
     { label: "Products in draft", value: productsDraft, href: "/admin/products?status=DRAFT" },
-    { label: "Pages", value: pages },
+    { label: "Pages", value: pages, href: "/admin/pages" },
     { label: "Consortium members", value: members, href: "/admin/organizations?kind=CONSORTIUM_MEMBER" },
     { label: "App deployments", value: deployments, href: "/admin/deployments" },
     { label: "Events", value: events, href: "/admin/events" },

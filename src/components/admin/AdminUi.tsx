@@ -11,6 +11,7 @@ import { buttonClasses } from "@/components/ui/Button";
 /** Sidebar entries. Only sections that exist are listed — no dead links. */
 const NAV = [
   { href: "/admin", label: "Dashboard", exact: true },
+  { href: "/admin/pages", label: "Pages" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/people", label: "People" },
@@ -19,6 +20,7 @@ const NAV = [
   { href: "/admin/navigation", label: "Navigation" },
   { href: "/admin/media", label: "Media" },
   { href: "/admin/settings", label: "Settings" },
+  { href: "/admin/users", label: "Admins" },
 ] as const;
 
 export function AdminNav() {

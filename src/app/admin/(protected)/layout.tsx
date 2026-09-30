@@ -25,9 +25,9 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
           <Link href="/en" target="_blank" rel="noopener noreferrer" className="text-brand-sky hover:underline">
             View website ↗
           </Link>
-          <span className="text-text-secondary" title={admin.email}>
+          <Link href="/admin/users" className="text-text-secondary hover:text-text-primary" title={`${admin.email} — change password`}>
             {admin.name}
-          </span>
+          </Link>
           <form action={logoutAction}>
             <button type="submit" className="rounded-control border border-white/15 px-3 py-1.5 hover:border-brand-sky">
               Sign out

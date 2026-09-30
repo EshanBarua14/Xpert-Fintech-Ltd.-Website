@@ -50,11 +50,11 @@ export function SectionHeading({
 }) {
   return (
     <div className={cn("flex max-w-3xl flex-col gap-3", align === "center" && "mx-auto items-center text-center", className)}>
-      {eyebrow && <p className="tabular text-xs tracking-[0.2em] text-brand-sky uppercase">{eyebrow}</p>}
+      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
       <Heading
         className={cn(
-          "font-display font-semibold tracking-tight text-balance",
-          Heading === "h1" ? "text-4xl md:text-6xl" : "text-3xl md:text-4xl",
+          "text-gradient font-display font-semibold tracking-[-0.035em] text-balance",
+          Heading === "h1" ? "text-5xl leading-[1.02] md:text-7xl" : "text-3xl leading-[1.08] md:text-5xl",
         )}
       >
         {title}

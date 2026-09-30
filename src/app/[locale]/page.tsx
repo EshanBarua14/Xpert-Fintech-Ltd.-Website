@@ -3,15 +3,25 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Sections } from "@/components/blocks/BlockRenderer";
 import { EventCards } from "@/components/blocks/DataBlocks";
-import { ProductCard } from "@/components/products/ProductCard";
-import { MarketNetwork } from "@/components/diagrams/MarketNetwork";
-import { ButtonLink } from "@/components/ui/Button";
-import { Container } from "@/components/ui/Layout";
+import {
+  capabilities,
+  CapabilityBento,
+  CtaBand,
+  FlagshipHero,
+  FlowStory,
+  GhostButton,
+  MemberMarquee,
+  Principles,
+  SectionHeader,
+  Shell,
+  StatGrid,
+} from "@/components/flagship/Sections";
 import { getSiteInfo } from "@/lib/content/settings";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { mediaIdsOf, toSections } from "@/lib/public/blocks";
-import { getEvents, getOfferings, getPageByKey, getSeo } from "@/lib/public/content";
+import { getEvents, getPageByKey, getSeo } from "@/lib/public/content";
+import { getFlagshipData } from "@/lib/public/flagship";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -53,78 +63,77 @@ export default async function HomePage({ params }: Props) {
     />
   );
 
+  const t = getMessages(locale);
+  const [data, events] = await Promise.all([getFlagshipData(locale), getEvents(3)]);
   const sections = page ? toSections(page, locale) : [];
-  if (sections.length) {
-    const ctx = await blockContext(locale, mediaIdsOf(sections));
-    return (
-      <>
-        {orgLd}
-        <Sections sections={sections} ctx={ctx} />
-      </>
-    );
-  }
+  const ctx = sections.length ? await blockContext(locale, mediaIdsOf(sections)) : null;
+  const caps = capabilities(t, locale, data.publishedSlugs);
 
-  // Until a Home page is built and published in Admin → Pages, show a simple,
-  // factual home built from Settings, Products and Events.
   return (
     <>
       {orgLd}
-      <DefaultHome locale={locale} companyName={info.companyName} summary={info.summary} />
-    </>
-  );
-}
+      <FlagshipHero t={t} locale={locale} memberCount={data.members.length} />
+      <MemberMarquee names={data.members.map((m) => m.name)} label={t.members} />
 
-async function DefaultHome({ locale, companyName, summary }: { locale: "en" | "bn"; companyName: string; summary: string | null }) {
-  const t = getMessages(locale);
-  const [offerings, events] = await Promise.all([getOfferings({ limit: 8 }), getEvents(3)]);
-  return (
-    <>
-      <section className="bg-grid">
-        <Container className="grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_1fr] lg:py-24">
-          <div className="flex flex-col gap-6">
-            <h1 className="font-display text-4xl font-semibold tracking-tight text-balance md:text-6xl">{companyName}</h1>
-            {summary && <p className="max-w-xl text-lg text-text-secondary">{summary}</p>}
-            <div className="flex flex-wrap gap-3">
-              <ButtonLink href={`/${locale}/request-demo`} size="lg">
-                {t.requestDemo}
-              </ButtonLink>
-              {offerings.length > 0 && (
-                <ButtonLink href={`/${locale}/products`} size="lg" variant="secondary">
-                  {t.exploreProducts}
-                </ButtonLink>
-              )}
+      <Shell className="py-20 md:py-28">
+        <div className="flex flex-col gap-14">
+          <SectionHeader eyebrow={t.platformEyebrow} title={t.platformTitle} body={t.platformBody} />
+          <CapabilityBento items={caps} />
+        </div>
+      </Shell>
+
+      <Shell className="py-16 md:py-24">
+        <div className="flex flex-col gap-16">
+          <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} body={t.flowBody} align="center" />
+          <FlowStory t={t} />
+        </div>
+      </Shell>
+
+      <Shell className="py-16 md:py-24">
+        <div className="flex flex-col gap-14">
+          <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+            <SectionHeader eyebrow={t.consortiumEyebrow} title={t.consortiumTitle} body={t.consortiumBody} />
+            <div data-reveal>
+              <GhostButton href={`/${locale}/consortium`}>{t.meetConsortium} →</GhostButton>
             </div>
           </div>
-          <MarketNetwork caption={t.conceptualView} />
-        </Container>
-      </section>
-      {offerings.length > 0 && (
-        <section>
-          <Container className="flex flex-col gap-10 py-16 md:py-24">
-            <h2 className="font-display text-3xl font-semibold md:text-4xl">{t.products}</h2>
-            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {offerings.map((o) => (
-                <li key={o.id}>
-                  <ProductCard offering={o} locale={locale} t={t} />
-                </li>
-              ))}
-            </ul>
-          </Container>
-        </section>
-      )}
+          <StatGrid
+            locale={locale}
+            items={[
+              { value: data.members.length, label: t.statMembers },
+              { value: Math.max(data.exchanges.length, 2), label: t.statExchanges },
+              { value: caps.length, label: t.statSystems },
+              { value: 2, label: t.statLanguages },
+            ]}
+          />
+        </div>
+      </Shell>
+
+      <Shell className="py-16 md:py-24">
+        <div className="flex flex-col gap-14">
+          <SectionHeader eyebrow={t.principlesEyebrow} title={t.principlesTitle} />
+          <Principles t={t} />
+        </div>
+      </Shell>
+
+      {/* Sections added in Admin → Pages → Home appear here. */}
+      {ctx && <Sections sections={sections} ctx={ctx} />}
+
       {events.length > 0 && (
-        <section className="bg-navy-900">
-          <Container className="flex flex-col gap-10 py-16 md:py-24">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <h2 className="font-display text-3xl font-semibold md:text-4xl">{t.events}</h2>
-              <Link href={`/${locale}/events`} className="text-sm text-brand-sky hover:underline">
+        <Shell className="py-16 md:py-24">
+          <div className="flex flex-col gap-12">
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <SectionHeader eyebrow={t.latestEyebrow} title={t.events} />
+              <Link href={`/${locale}/events`} className="text-sm font-semibold text-brand-sky hover:text-white">
                 {t.allEvents} →
               </Link>
             </div>
             <EventCards events={events} locale={locale} />
-          </Container>
-        </section>
+          </div>
+        </Shell>
       )}
+
+      <CtaBand t={t} locale={locale} />
     </>
   );
 }

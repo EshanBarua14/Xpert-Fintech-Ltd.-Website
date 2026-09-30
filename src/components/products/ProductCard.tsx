@@ -29,14 +29,14 @@ export function ProductCard({ offering, locale, t }: { offering: Offering; local
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col gap-4 rounded-card border border-white/10 bg-navy-900/50 p-6 transition-[border-color,transform] duration-(--duration-slow) ease-(--ease-ui) hover:-translate-y-0.5 hover:border-brand-sky/40"
+      className="spotlight glass group flex h-full min-h-60 flex-col gap-4 rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-1"
     >
       <Badge tone="brand" className="self-start">
         {TYPE_LABEL[offering.type] ?? offering.type}
       </Badge>
-      <h3 className="font-display text-xl font-semibold">{tr.name}</h3>
+      <h3 className="font-display text-2xl font-semibold tracking-tight">{tr.name}</h3>
       {(tr.tagline || tr.summary) && <p className="text-sm text-text-secondary">{tr.tagline ?? tr.summary}</p>}
-      <span className="mt-auto text-sm text-brand-sky">
+      <span className="mt-auto text-sm font-semibold text-brand-sky">
         {t.exploreProduct} <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
       </span>
     </Link>

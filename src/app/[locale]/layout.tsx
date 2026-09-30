@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Inter, Inter_Tight, JetBrains_Mono, Noto_Sans_Bengali } from "next/font/google";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
+import { SiteEffects } from "@/components/motion/SiteEffects";
 import { isLocale, locales } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import "../globals.css";
@@ -38,16 +39,21 @@ export default async function LocaleLayout({
   const t = getMessages(locale);
 
   return (
-    <html lang={locale} className={`${inter.variable} ${interTight.variable} ${mono.variable} ${bengali.variable}`}>
-      <body className="flex min-h-dvh flex-col bg-ink-950 text-text-primary">
+    <html lang={locale} className={`${inter.variable} ${interTight.variable} ${mono.variable} ${bengali.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Lets CSS hide scroll-reveal content only when JavaScript can reveal it again. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
+      <body className="flex min-h-dvh flex-col text-text-primary">
         <a href="#main" className="skip-link">
           {t.skipToContent}
         </a>
         <SiteHeader locale={locale} />
-        <main id="main" className="flex-1">
+        <main id="main" className="relative flex-1 pt-20 md:pt-24">
           {children}
         </main>
         <SiteFooter locale={locale} />
+        <SiteEffects />
       </body>
     </html>
   );

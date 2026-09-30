@@ -461,6 +461,139 @@ async function seedAdmin() {
   console.log(`• Created admin ${email}`);
 }
 
+// ── Menu v2 (flagship redesign) ──────────────────────────────────────────────
+// Replaces the first-draft header and footer menus with the new structure,
+// in English and Bangla — but only if an admin has not edited them yet.
+
+type MenuNode = { en: string; bn: string; href?: string; descEn?: string; descBn?: string; cta?: boolean; children?: MenuNode[] };
+
+const HEADER_V2: MenuNode[] = [
+  {
+    en: "Platform",
+    bn: "প্ল্যাটফর্ম",
+    href: "platform",
+    descEn: "Trading, risk, onboarding and back office, working as one.",
+    descBn: "ট্রেডিং, ঝুঁকি, অনবোর্ডিং ও ব্যাক অফিস, এক সঙ্গে।",
+    children: [
+      { en: "Trading (OMS)", bn: "ট্রেডিং (OMS)", href: "platform#trading", descEn: "Order entry and management for DSE and CSE.", descBn: "ডিএসই ও সিএসই-এর জন্য অর্ডার ব্যবস্থাপনা।" },
+      { en: "Risk management (RMS)", bn: "ঝুঁকি ব্যবস্থাপনা (RMS)", href: "platform#risk", descEn: "Pre-trade limits and exposure checks.", descBn: "প্রি-ট্রেড লিমিট ও এক্সপোজার যাচাই।" },
+      { en: "eKYC", bn: "ই-কেওয়াইসি", href: "platform#ekyc", descEn: "Digital investor verification.", descBn: "ডিজিটাল বিনিয়োগকারী যাচাই।" },
+      { en: "BO account opening", bn: "বিও অ্যাকাউন্ট খোলা", href: "platform#bo", descEn: "Open BO accounts online.", descBn: "অনলাইনে বিও অ্যাকাউন্ট খুলুন।" },
+      { en: "Document management", bn: "ডকুমেন্ট ম্যানেজমেন্ট", href: "platform#dms", descEn: "Client documents, organised.", descBn: "গ্রাহকের নথি, গোছানো।" },
+      { en: "Back office", bn: "ব্যাক অফিস", href: "platform#back", descEn: "Accounts, settlement and reporting.", descBn: "হিসাব, সেটেলমেন্ট ও রিপোর্টিং।" },
+    ],
+  },
+  { en: "Products", bn: "পণ্য", href: "products", descEn: "Every Xpert product in one place.", descBn: "এক্সপার্টের সব পণ্য এক জায়গায়।" },
+  { en: "Consortium", bn: "কনসোর্টিয়াম", href: "consortium" },
+  { en: "Insights", bn: "ইনসাইটস", href: "events" },
+  {
+    en: "Company",
+    bn: "প্রতিষ্ঠান",
+    href: "company/about",
+    descEn: "Who we are and how to reach us.",
+    descBn: "আমরা কারা এবং কীভাবে যোগাযোগ করবেন।",
+    children: [
+      { en: "About", bn: "আমাদের সম্পর্কে", href: "company/about", descEn: "Mission, vision and values.", descBn: "লক্ষ্য, রূপকল্প ও মূল্যবোধ।" },
+      { en: "Board of directors", bn: "পরিচালনা পর্ষদ", href: "company/board", descEn: "The people who guide Xpert.", descBn: "যাঁরা এক্সপার্টকে পথ দেখান।" },
+      { en: "Management", bn: "ব্যবস্থাপনা", href: "company/management", descEn: "The team that runs Xpert.", descBn: "যে টিম এক্সপার্ট পরিচালনা করে।" },
+      { en: "Contact", bn: "যোগাযোগ", href: "contact", descEn: "Talk to our team.", descBn: "আমাদের টিমের সঙ্গে কথা বলুন।" },
+    ],
+  },
+  { en: "Request a demo", bn: "ডেমোর অনুরোধ", href: "request-demo", cta: true },
+];
+
+const FOOTER_V2: MenuNode[] = [
+  {
+    en: "Platform",
+    bn: "প্ল্যাটফর্ম",
+    children: [
+      { en: "Overview", bn: "সংক্ষিপ্ত পরিচিতি", href: "platform" },
+      { en: "Products", bn: "পণ্য", href: "products" },
+      { en: "Request a demo", bn: "ডেমোর অনুরোধ", href: "request-demo" },
+    ],
+  },
+  {
+    en: "Company",
+    bn: "প্রতিষ্ঠান",
+    children: [
+      { en: "About", bn: "আমাদের সম্পর্কে", href: "company/about" },
+      { en: "Consortium", bn: "কনসোর্টিয়াম", href: "consortium" },
+      { en: "Board of directors", bn: "পরিচালনা পর্ষদ", href: "company/board" },
+      { en: "Management", bn: "ব্যবস্থাপনা", href: "company/management" },
+    ],
+  },
+  {
+    en: "Connect",
+    bn: "যোগাযোগ",
+    children: [
+      { en: "Events", bn: "ইভেন্ট", href: "events" },
+      { en: "Contact", bn: "যোগাযোগ", href: "contact" },
+    ],
+  },
+];
+
+async function createMenuTree(menuId: string, nodes: MenuNode[], parentId: string | null) {
+  for (const [i, n] of nodes.entries()) {
+    const item = await db.navItem.create({
+      data: {
+        menuId,
+        parentId,
+        linkType: n.href === undefined ? "NONE" : "INTERNAL",
+        href: n.href ?? null,
+        isCta: n.cta ?? false,
+        sortOrder: i,
+        translations: {
+          create: [
+            { locale: EN, label: n.en, description: n.descEn ?? null },
+            { locale: "bn", label: n.bn, description: n.descBn ?? null },
+          ],
+        },
+      },
+    });
+    if (n.children) await createMenuTree(menuId, n.children, item.id);
+  }
+}
+
+async function upgradeMenusV2() {
+  const header = await db.navMenu.findUnique({ where: { key: "header" }, include: { items: { include: { translations: true } } } });
+  // The first-draft header had "Technology" and "Proof" entries and no Bangla labels.
+  const untouchedHeader =
+    header &&
+    header.items.some((i) => i.href === "technology") &&
+    header.items.some((i) => i.href === "proof") &&
+    !header.items.some((i) => i.translations.some((t) => t.locale === "bn"));
+  if (header && untouchedHeader) {
+    const productLinks = header.items.filter((i) => i.parentId && i.href?.startsWith("products/"));
+    await db.navItem.deleteMany({ where: { menuId: header.id } });
+    await createMenuTree(header.id, HEADER_V2, null);
+    // Products dropdown: one link per product (shown on the site once the product is published).
+    const products = await db.navItem.findFirst({ where: { menuId: header.id, parentId: null, href: "products" } });
+    if (products) {
+      for (const [i, link] of offerings.entries()) {
+        await db.navItem.create({
+          data: {
+            menuId: header.id,
+            parentId: products.id,
+            href: `products/${link.slug}`,
+            sortOrder: i,
+            translations: { create: { locale: EN, label: link.name } },
+          },
+        });
+      }
+    }
+    console.log(`Header menu upgraded (${productLinks.length} old product links replaced).`);
+  }
+
+  const footer = await db.navMenu.findUnique({ where: { key: "footer" }, include: { items: { include: { translations: true } } } });
+  const untouchedFooter =
+    footer && footer.items.some((i) => i.href === "careers") && !footer.items.some((i) => i.translations.some((t) => t.locale === "bn"));
+  if (footer && untouchedFooter) {
+    await db.navItem.deleteMany({ where: { menuId: footer.id } });
+    await createMenuTree(footer.id, FOOTER_V2, null);
+    console.log("Footer menu upgraded.");
+  }
+}
+
 async function main() {
   await seedSettings();
   await seedOffice();
@@ -473,6 +606,7 @@ async function main() {
   await seedHomePage();
   await seedNavigation();
   await seedFooterAndDropdowns();
+  await upgradeMenusV2();
   await seedRedirects();
   await seedMarketData();
   await seedAdmin();

@@ -1,0 +1,61 @@
+import type { CSSProperties } from "react";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import {
+  capabilities,
+  CapabilityBento,
+  CtaBand,
+  FlowStory,
+  PageHero,
+  PrimaryButton,
+  Principles,
+  SectionHeader,
+  Shell,
+} from "@/components/flagship/Sections";
+import { isLocale } from "@/lib/i18n/config";
+import { getMessages } from "@/lib/i18n/messages";
+import { getFlagshipData } from "@/lib/public/flagship";
+import { buildMetadata } from "@/lib/public/seo";
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  if (!isLocale(locale)) return {};
+  const t = getMessages(locale);
+  return buildMetadata({ locale, title: t.platformPageTitle, description: t.platformPageBody, paths: { en: "platform", bn: "platform" } });
+}
+
+/** Overview of the whole suite. Each capability links to its product page once that is published. */
+export default async function PlatformPage({ params }: Props) {
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
+  const t = getMessages(locale);
+  const data = await getFlagshipData(locale);
+
+  return (
+    <>
+      <PageHero eyebrow={t.platformEyebrow} title={t.platformPageTitle} body={t.platformPageBody}>
+        <div data-reveal style={{ "--d": 3 } as CSSProperties}>
+          <PrimaryButton href={`/${locale}/request-demo`}>{t.requestDemo}</PrimaryButton>
+        </div>
+      </PageHero>
+      <Shell className="pb-24 md:pb-32">
+        <CapabilityBento items={capabilities(t, locale, data.publishedSlugs)} anchors />
+      </Shell>
+      <Shell className="py-16 md:py-24">
+        <div className="flex flex-col gap-16">
+          <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} body={t.flowBody} align="center" />
+          <FlowStory t={t} />
+        </div>
+      </Shell>
+      <Shell className="py-16 md:py-24">
+        <div className="flex flex-col gap-14">
+          <SectionHeader eyebrow={t.principlesEyebrow} title={t.principlesTitle} />
+          <Principles t={t} />
+        </div>
+      </Shell>
+      <CtaBand t={t} locale={locale} />
+    </>
+  );
+}

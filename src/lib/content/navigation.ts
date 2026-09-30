@@ -40,7 +40,7 @@ function resolveHref(
 }
 
 /** Routes that always exist, below the locale. */
-const FIXED_ROUTES = ["", "products", "events", "contact", "request-demo", "company/board", "company/management"];
+const FIXED_ROUTES = ["", "platform", "consortium", "products", "events", "contact", "request-demo", "company/board", "company/management"];
 
 /**
  * Every internal path that currently shows a page in this language:

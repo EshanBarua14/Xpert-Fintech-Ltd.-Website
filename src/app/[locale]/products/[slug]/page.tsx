@@ -45,7 +45,10 @@ type ItemKind = Offering["items"][number]["kind"];
 function itemsOf(offering: Offering, kind: ItemKind, locale: AppLocale) {
   return offering.items
     .filter((i) => i.kind === kind)
-    .map((i) => ({ id: i.id, icon: i.iconName, ...(pick(i.translations, locale) ?? { title: "", body: null }) }))
+    .map((i) => {
+      const tr = pick(i.translations, locale);
+      return { id: i.id, icon: i.iconName, title: tr?.title ?? "", body: tr?.body ?? null };
+    })
     .filter((i) => i.title);
 }
 

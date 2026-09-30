@@ -67,7 +67,7 @@ Sign in at `/admin` with the account created by `npm run db:seed` (`SEED_ADMIN_E
 - Content is **Draft** or **Published**, with an optional scheduled publish date. Visitors only see published rows (`src/lib/db/publishing.ts`).
 - Deleting moves a record to the trash, where it can be restored or deleted permanently. (Automatic clean-up after 30 days: planned.)
 - Every text field is stored per language in a `*Translation` table. A Bangla page appears only once its Bangla text exists.
-- One admin role with full rights. Admin login uses Argon2id password hashes and expiring server-side sessions. Two-factor login: planned (the database already supports it). Admins change their password and manage other admins under Admin → Admins.
+- One admin role with full rights. Admin login uses Argon2id password hashes and expiring server-side sessions. Two-factor sign-in with an authenticator app is available under Admin → Admins (needs `SESSION_SECRET`); an admin who loses their phone can have it switched off by another admin. Admins change their password and manage other admins under Admin → Admins.
 - Logos of consortium members and clients are shown only when `logoPermission` is on.
 - Market data comes from Xpert's licensed feed; demo data can never reach production.
 
@@ -81,5 +81,6 @@ Sign in at `/admin` with the account created by `npm run db:seed` (`SEED_ADMIN_E
 | 3 Admin portal | Done: login, dashboard, pages & blocks, products, events, people, organizations, deployments, navigation, media, settings, admins |
 | 4 Public site | Done: home, CMS pages (16 block types), products, events, board, management, contact, request a demo, localized 404/error, redirects, sitemap, robots, JSON-LD |
 | 12 Forms & leads | Done: demo and contact forms (also as a page-builder block), spam protection, Leads inbox with status, owner, follow-up date, history, CSV export and trash. Email alerts for new leads: planned |
+| 13 Admin security & housekeeping | Done: two-factor sign-in (authenticator app), trash emptied automatically after 30 days, expired sessions cleaned up |
 
 Secrets live only in `.env` (never committed). See `.env.example` for every variable.

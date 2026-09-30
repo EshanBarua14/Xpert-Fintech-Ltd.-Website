@@ -6,9 +6,10 @@ import { Prisma, type BlockType } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { clearMediaUsage, isUsableImage, syncMediaUsage } from "@/lib/admin/media";
+import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { checkbox, optionalId, optionalText, parseLocalDateTime, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { blockDefinition, readSettings, settingsSchema } from "@/content/blocks/registry";
+import { purgePage } from "@/lib/admin/purge";
 
 export type PageState = { errors?: FieldErrors; message?: string; savedAt?: number };
 
@@ -154,13 +155,7 @@ export async function deletePageForever(formData: FormData) {
   const id = uuid.parse(formData.get("id"));
   const page = await db.page.findUnique({ where: { id }, select: { deletedAt: true, key: true } });
   if (!page?.deletedAt || page.key) redirect(`/admin/pages/${id}`);
-  await db.$transaction(async (tx) => {
-    await clearMediaUsage(tx, "PAGE", id);
-    await tx.seoMetadata.deleteMany({ where: { entityType: "PAGE", entityId: id } });
-    await tx.contentRelation.deleteMany({ where: { OR: [{ fromType: "PAGE", fromId: id }, { toType: "PAGE", toId: id }] } });
-    await tx.solution.updateMany({ where: { pageId: id }, data: { pageId: null } });
-    await tx.page.delete({ where: { id } });
-  });
+  await purgePage(id);
   refresh();
   redirect("/admin/pages?view=trash&deleted=1");
 }

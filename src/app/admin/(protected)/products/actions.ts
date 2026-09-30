@@ -8,6 +8,7 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { parseLocalDateTime, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { offeringItemSchema, offeringSchema } from "@/lib/validation/offering";
+import { purgeOffering } from "@/lib/admin/purge";
 
 export type FormState = { errors?: FieldErrors; message?: string; savedAt?: number };
 
@@ -134,15 +135,7 @@ export async function deleteOfferingForever(formData: FormData) {
   const id = uuid.parse(formData.get("id"));
   const offering = await db.offering.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!offering?.deletedAt) redirect(`/admin/products/${id}`);
-  // Detach references that should survive, then delete (translations, items and media cascade).
-  await db.$transaction([
-    db.deployment.updateMany({ where: { offeringId: id }, data: { offeringId: null } }),
-    db.lead.updateMany({ where: { interestedOfferingId: id }, data: { interestedOfferingId: null } }),
-    db.offering.updateMany({ where: { parentId: id }, data: { parentId: null } }),
-    db.contentRelation.deleteMany({ where: { OR: [{ fromType: "OFFERING", fromId: id }, { toType: "OFFERING", toId: id }] } }),
-    db.seoMetadata.deleteMany({ where: { entityType: "OFFERING", entityId: id } }),
-    db.offering.delete({ where: { id } }),
-  ]);
+  await purgeOffering(id);
   refreshSite();
   redirect("/admin/products?view=trash&deleted=1");
 }

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { clearMediaUsage, isUsableImage, syncMediaUsage } from "@/lib/admin/media";
+import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import {
   checkbox,
   optionalHttpsUrl,
@@ -16,6 +16,7 @@ import {
   type FieldErrors,
 } from "@/lib/validation/common";
 import { ORGANIZATION_KINDS } from "@/lib/validation/organizations";
+import { purgeOrganization } from "@/lib/admin/purge";
 
 export type OrgState = { errors?: FieldErrors; message?: string };
 
@@ -112,15 +113,7 @@ export async function deleteOrganizationForever(formData: FormData) {
   const id = uuid.parse(formData.get("id"));
   const org = await db.organization.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!org?.deletedAt) redirect(`/admin/organizations/${id}`);
-  await db.$transaction(async (tx) => {
-    await tx.deployment.updateMany({ where: { organizationId: id }, data: { organizationId: null } });
-    await tx.testimonial.updateMany({ where: { organizationId: id }, data: { organizationId: null } });
-    await clearMediaUsage(tx, "ORGANIZATION", id);
-    await tx.contentRelation.deleteMany({
-      where: { OR: [{ fromType: "ORGANIZATION", fromId: id }, { toType: "ORGANIZATION", toId: id }] },
-    });
-    await tx.organization.delete({ where: { id } });
-  });
+  await purgeOrganization(id);
   refresh();
   redirect("/admin/organizations?view=trash&deleted=1");
 }

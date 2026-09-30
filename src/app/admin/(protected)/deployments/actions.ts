@@ -7,6 +7,7 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { optionalHttpsUrl, optionalId, optionalText, parseLocalDateTime, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { parseDateOnly } from "@/lib/validation/organizations";
+import { purgeDeployment } from "@/lib/admin/purge";
 
 export type DeploymentState = { errors?: FieldErrors; message?: string };
 
@@ -111,10 +112,7 @@ export async function deleteDeploymentForever(formData: FormData) {
   const id = uuid.parse(formData.get("id"));
   const d = await db.deployment.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!d?.deletedAt) redirect(`/admin/deployments/${id}`);
-  await db.$transaction([
-    db.contentRelation.deleteMany({ where: { OR: [{ fromType: "DEPLOYMENT", fromId: id }, { toType: "DEPLOYMENT", toId: id }] } }),
-    db.deployment.delete({ where: { id } }),
-  ]);
+  await purgeDeployment(id);
   refresh();
   redirect("/admin/deployments?view=trash&deleted=1");
 }

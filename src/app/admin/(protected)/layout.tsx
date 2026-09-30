@@ -1,14 +1,18 @@
 import Link from "next/link";
+import { after } from "next/server";
 import { Logo } from "@/components/brand/Logo";
 import { AdminNav } from "@/components/admin/AdminUi";
 import { requireAdmin } from "@/lib/auth/session";
 import { logoutAction } from "@/app/admin/auth-actions";
+import { purgeOldTrash } from "@/lib/admin/purge";
 
 // Admin pages always read fresh data and are never cached.
 export const dynamic = "force-dynamic";
 
 export default async function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
   const admin = await requireAdmin();
+  // Housekeeping after the page is sent: empty 30-day-old trash (at most every 6 hours).
+  after(() => purgeOldTrash());
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">

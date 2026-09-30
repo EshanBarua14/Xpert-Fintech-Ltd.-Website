@@ -5,9 +5,10 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { clearMediaUsage, isUsableImage, syncMediaUsage } from "@/lib/admin/media";
+import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { PERSON_GROUPS } from "@/lib/validation/people";
 import { optionalHttpsUrl, optionalId, optionalText, parseLocalDateTime, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
+import { purgePerson } from "@/lib/admin/purge";
 
 export type PersonState = { errors?: FieldErrors; message?: string };
 
@@ -156,11 +157,7 @@ export async function deletePersonForever(formData: FormData) {
   const id = uuid.parse(formData.get("id"));
   const person = await db.person.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!person?.deletedAt) redirect(`/admin/people/${id}`);
-  await db.$transaction(async (tx) => {
-    await clearMediaUsage(tx, "PERSON", id);
-    await tx.seoMetadata.deleteMany({ where: { entityType: "PERSON", entityId: id } });
-    await tx.person.delete({ where: { id } });
-  });
+  await purgePerson(id);
   refresh();
   redirect("/admin/people?view=trash&deleted=1");
 }

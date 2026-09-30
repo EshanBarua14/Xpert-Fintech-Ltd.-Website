@@ -1,7 +1,8 @@
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { formatDhaka } from "@/components/admin/AdminList";
-import { AdminUsersTable, ChangePasswordForm, CreateAdminForm } from "@/components/admin/AccountForms";
+import { AdminUsersTable, ChangePasswordForm, CreateAdminForm, TwoFactorPanel } from "@/components/admin/AccountForms";
+import { hasServerSecret } from "@/lib/auth/totp";
 
 export default async function UsersPage() {
   const me = await requireAdmin();
@@ -21,6 +22,11 @@ export default async function UsersPage() {
       </section>
 
       <section className="flex flex-col gap-4 border-t border-white/10 pt-8">
+        <h2 className="font-display text-xl font-semibold">My two-factor sign-in</h2>
+        <TwoFactorPanel enabled={Boolean(admins.find((a) => a.id === me.id)?.totpEnabled)} serverReady={hasServerSecret()} />
+      </section>
+
+      <section className="flex flex-col gap-4 border-t border-white/10 pt-8">
         <h2 className="font-display text-xl font-semibold">Admin accounts</h2>
         <AdminUsersTable
           rows={admins.map((a) => ({
@@ -31,6 +37,7 @@ export default async function UsersPage() {
             isSelf: a.id === me.id,
             lastLogin: formatDhaka(a.lastLoginAt),
             locked: Boolean(a.lockedUntil && a.lockedUntil > now),
+            twoFactor: a.totpEnabled,
           }))}
         />
       </section>

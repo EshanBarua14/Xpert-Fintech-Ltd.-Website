@@ -7,6 +7,7 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { parseLocalDateTime } from "@/lib/validation/common";
 import { ACTIVITY_KINDS, ADMIN_ERROR_TEXT, LEAD_STATUSES, leadFields, STATUS_LABELS } from "@/lib/validation/lead";
+import { purgeLead } from "@/lib/admin/purge";
 
 export type LeadAdminState = { errors?: Record<string, string>; message?: string; savedAt?: number };
 
@@ -198,7 +199,7 @@ export async function deleteLeadForever(formData: FormData) {
   const id = uuid.parse(formData.get("id"));
   const lead = await db.lead.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!lead?.deletedAt) redirect(`/admin/leads/${id}`);
-  await db.lead.delete({ where: { id } });
+  await purgeLead(id);
   refresh();
   redirect("/admin/leads?view=trash&deleted=1");
 }

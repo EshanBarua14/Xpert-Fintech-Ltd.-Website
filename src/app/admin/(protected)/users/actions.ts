@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin, revokeAllSessions, revokeOtherSessions } from "@/lib/auth/session";
 import { toFieldErrors, type FieldErrors } from "@/lib/validation/common";
+import { consumeStep, decryptSecret, encryptSecret, generateTotpSecret, hasServerSecret, otpauthUri, verifyTotp } from "@/lib/auth/totp";
 
 export type AccountState = { errors?: FieldErrors; message?: string; savedAt?: number };
 
@@ -85,4 +86,58 @@ export async function resetAdminPassword(_prev: AccountState, formData: FormData
   await revokeAllSessions(id);
   revalidatePath("/admin/users");
   return { message: "Password reset. Their other sessions were signed out.", savedAt: Date.now() };
+}
+
+// ── Two-factor sign-in ───────────────────────────────────────────────────────
+
+export type TwoFactorState = { errors?: FieldErrors; message?: string; savedAt?: number; secret?: string; uri?: string };
+
+/** Step 1: create a secret for the signed-in admin (not active until confirmed). */
+export async function startTwoFactorSetup(_prev: TwoFactorState, _formData: FormData): Promise<TwoFactorState> {
+  const admin = await requireAdmin();
+  if (!hasServerSecret()) {
+    return { message: "Set SESSION_SECRET in the server's .env first (32+ random characters), then restart the site." };
+  }
+  const user = await db.adminUser.findUniqueOrThrow({ where: { id: admin.id }, select: { totpEnabled: true } });
+  if (user.totpEnabled) return { message: "Two-factor sign-in is already on." };
+  const secret = generateTotpSecret();
+  await db.adminUser.update({ where: { id: admin.id }, data: { totpSecret: encryptSecret(secret), totpEnabled: false } });
+  return { secret, uri: otpauthUri(secret, admin.email) };
+}
+
+/** Step 2: prove the app works by entering a code; then it is switched on. */
+export async function confirmTwoFactor(prev: TwoFactorState, formData: FormData): Promise<TwoFactorState> {
+  const admin = await requireAdmin();
+  const user = await db.adminUser.findUniqueOrThrow({ where: { id: admin.id }, select: { totpSecret: true } });
+  const secret = decryptSecret(user.totpSecret);
+  if (!secret) return { message: "Setup expired. Start again." };
+  const step = verifyTotp(secret, String(formData.get("code") ?? ""));
+  if (step === null || !consumeStep(admin.id, step)) {
+    return { ...prev, errors: { code: "That code is not correct. Check the time on your phone and use the newest code." } };
+  }
+  await db.adminUser.update({ where: { id: admin.id }, data: { totpEnabled: true } });
+  await revokeOtherSessions(admin.id);
+  revalidatePath("/admin/users");
+  return { message: "Two-factor sign-in is on. Other devices have been signed out.", savedAt: Date.now() };
+}
+
+/** Switch off your own two-factor sign-in (needs your password). */
+export async function disableOwnTwoFactor(_prev: TwoFactorState, formData: FormData): Promise<TwoFactorState> {
+  const admin = await requireAdmin();
+  const user = await db.adminUser.findUniqueOrThrow({ where: { id: admin.id } });
+  const ok = await verify(user.passwordHash, String(formData.get("password") ?? "")).catch(() => false);
+  if (!ok) return { errors: { password: "Your password is not correct." } };
+  await db.adminUser.update({ where: { id: admin.id }, data: { totpEnabled: false, totpSecret: null } });
+  revalidatePath("/admin/users");
+  return { message: "Two-factor sign-in is off.", savedAt: Date.now() };
+}
+
+/** For an admin who lost their phone: another admin switches it off for them. */
+export async function resetAdminTwoFactor(formData: FormData) {
+  const admin = await requireAdmin();
+  const id = z.string().uuid().parse(formData.get("id"));
+  if (id === admin.id) throw new Error("Use the two-factor section above for your own account.");
+  await db.adminUser.update({ where: { id }, data: { totpEnabled: false, totpSecret: null } });
+  await revokeAllSessions(id);
+  revalidatePath("/admin/users");
 }

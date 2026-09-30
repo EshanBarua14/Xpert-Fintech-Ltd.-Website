@@ -67,7 +67,7 @@ export function AdminList({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-semibold">{inTrash ? `${title} — trash` : title}</h1>
-          <p className="mt-1 text-sm text-text-secondary">{inTrash ? "Restore an item, or delete it permanently." : intro}</p>
+          <p className="mt-1 text-sm text-text-secondary">{inTrash ? "Restore an item, or delete it permanently. Items are deleted automatically after 30 days in the trash." : intro}</p>
         </div>
         {!inTrash && newLabel && (
           <Link href={`${basePath}/new`} className={buttonClasses({})}>

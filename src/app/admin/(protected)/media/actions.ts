@@ -7,6 +7,7 @@ import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { storage } from "@/lib/storage";
+import { purgeMedia } from "@/lib/admin/purge";
 import { cleanFileName, MAX_BYTES, sniff } from "@/lib/media/inspect";
 import { optionalText, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 
@@ -134,9 +135,7 @@ export async function restoreMedia(formData: FormData) {
 export async function deleteMediaForever(formData: FormData) {
   await requireAdmin();
   const id = uuid.parse(formData.get("id"));
-  const media = await db.media.findUnique({ where: { id }, include: { _count: { select: { usages: true } } } });
-  if (!media || !media.deletedAt || media._count.usages > 0) redirect(`/admin/media/${id}`);
-  await db.media.delete({ where: { id } });
-  await storage().remove(media.storageKey);
+  const media = await db.media.findUnique({ where: { id }, select: { deletedAt: true } });
+  if (!media?.deletedAt || !(await purgeMedia(id))) redirect(`/admin/media/${id}`);
   redirect("/admin/media?view=trash&deleted=1");
 }

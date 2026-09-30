@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { clearMediaUsage, isUsableImage, syncMediaUsage } from "@/lib/admin/media";
+import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import {
   checkbox,
   optionalHttpsUrl,
@@ -19,6 +19,7 @@ import {
   type FieldErrors,
 } from "@/lib/validation/common";
 import { parseDateOnly } from "@/lib/validation/organizations";
+import { purgeEvent } from "@/lib/admin/purge";
 
 export type EventState = { errors?: FieldErrors; message?: string };
 
@@ -144,12 +145,7 @@ export async function deleteEventForever(formData: FormData) {
   const id = uuid.parse(formData.get("id"));
   const ev = await db.event.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!ev?.deletedAt) redirect(`/admin/events/${id}`);
-  await db.$transaction(async (tx) => {
-    await clearMediaUsage(tx, "EVENT", id);
-    await tx.contentRelation.deleteMany({ where: { OR: [{ fromType: "EVENT", fromId: id }, { toType: "EVENT", toId: id }] } });
-    await tx.seoMetadata.deleteMany({ where: { entityType: "EVENT", entityId: id } });
-    await tx.event.delete({ where: { id } });
-  });
+  await purgeEvent(id);
   refresh();
   redirect("/admin/events?view=trash&deleted=1");
 }

@@ -62,3 +62,18 @@ export function toFieldErrors(error: z.ZodError): FieldErrors {
   }
   return out;
 }
+
+/** Optional media id from a hidden input: "" → null. */
+export const optionalId = z
+  .string()
+  .uuid()
+  .or(z.literal(""))
+  .transform((v) => v || null);
+
+/** Optional https URL: "" → null. */
+export const optionalHttpsUrl = z
+  .string()
+  .trim()
+  .max(500)
+  .refine((v) => v === "" || /^https:\/\/\S+$/.test(v), "Enter a full address starting with https://")
+  .transform((v) => v || null);

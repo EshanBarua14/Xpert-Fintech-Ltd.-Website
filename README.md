@@ -78,6 +78,6 @@ Sign in at `/admin` with the account created by `npm run db:seed` (`SEED_ADMIN_E
 | 0 Discovery | Done, except capture of the live site's page text |
 | 1 Product architecture | Done: scaffold, schema, ERD, seed |
 | 2 Design system | Done: tokens, components, header, footer, order-flow motion |
-| 3 Admin portal | **In progress**: login, dashboard, products, settings, navigation, media done; pages/blocks, people, events, members next |
+| 3 Admin portal | **In progress**: login, dashboard, products, settings, navigation, media, people, organizations, deployments, events done; pages/blocks next |
 
 Secrets live only in `.env` (never committed). See `.env.example` for every variable.

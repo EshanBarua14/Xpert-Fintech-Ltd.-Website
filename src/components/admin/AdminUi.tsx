@@ -12,6 +12,10 @@ import { buttonClasses } from "@/components/ui/Button";
 const NAV = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/events", label: "Events" },
+  { href: "/admin/people", label: "People" },
+  { href: "/admin/organizations", label: "Organizations" },
+  { href: "/admin/deployments", label: "App deployments" },
   { href: "/admin/navigation", label: "Navigation" },
   { href: "/admin/media", label: "Media" },
   { href: "/admin/settings", label: "Settings" },

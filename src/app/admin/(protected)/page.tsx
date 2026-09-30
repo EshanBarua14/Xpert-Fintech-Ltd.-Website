@@ -41,9 +41,9 @@ export default async function DashboardPage() {
     { label: "Products published", value: productsLive, href: "/admin/products?status=PUBLISHED" },
     { label: "Products in draft", value: productsDraft, href: "/admin/products?status=DRAFT" },
     { label: "Pages", value: pages },
-    { label: "Consortium members", value: members },
-    { label: "App deployments", value: deployments },
-    { label: "Events", value: events },
+    { label: "Consortium members", value: members, href: "/admin/organizations?kind=CONSORTIUM_MEMBER" },
+    { label: "App deployments", value: deployments, href: "/admin/deployments" },
+    { label: "Events", value: events, href: "/admin/events" },
     { label: "New leads", value: newLeads, note: "Lead inbox arrives with the demo form" },
     { label: "Media files", value: media, href: "/admin/media" },
   ];

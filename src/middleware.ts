@@ -1,17 +1,28 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { defaultLocale, isLocale, type AppLocale } from "@/lib/i18n/config";
 
+// Must match SESSION_COOKIE in src/lib/auth/session.ts (middleware cannot import server-only code).
+const SESSION_COOKIE = "xpert_admin_session";
+
 /**
- * Locale routing for public pages:
- *  - `/admin`, `/api`, Next internals and files are left alone.
- *  - Paths without a locale prefix are redirected to one: the `locale` cookie
- *    if set, else the browser's preferred language, else English.
- * Admin session checks are added here in Phase 3.
+ * 1. Admin area: without a session cookie, send the visitor to the login page.
+ *    This is only a fast first gate; every admin page and action still checks
+ *    the session in the database (requireAdmin).
+ * 2. Public site: paths without a locale prefix are redirected to one — the
+ *    `locale` cookie if set, else the browser's preferred language, else English.
  */
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const first = pathname.split("/")[1];
 
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    if (pathname === "/admin/login" || request.cookies.has(SESSION_COOKIE)) return NextResponse.next();
+    const url = request.nextUrl.clone();
+    url.pathname = "/admin/login";
+    url.search = `?next=${encodeURIComponent(pathname + search)}`;
+    return NextResponse.redirect(url);
+  }
+
+  const first = pathname.split("/")[1];
   if (isLocale(first)) return NextResponse.next();
 
   const locale = pickLocale(request);
@@ -32,5 +43,5 @@ function pickLocale(request: NextRequest): AppLocale {
 }
 
 export const config = {
-  matcher: ["/((?!admin|api|_next|.*\\..*).*)"],
+  matcher: ["/((?!api|_next|.*\\..*).*)"],
 };

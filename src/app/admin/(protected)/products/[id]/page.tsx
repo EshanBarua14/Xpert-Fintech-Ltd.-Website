@@ -1,0 +1,122 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { z } from "zod";
+import { db } from "@/lib/db/client";
+import { requireAdmin } from "@/lib/auth/session";
+import { ProductForm } from "@/components/admin/ProductForm";
+import { OfferingItemsEditor, type EditorItem } from "@/components/admin/OfferingItemsEditor";
+import { ConfirmButton, StatusBadge } from "@/components/admin/AdminUi";
+import { buttonClasses } from "@/components/ui/Button";
+import { parentOptions, toProductFormValues } from "@/lib/admin/products";
+import { deleteOfferingForever, restoreOffering, trashOffering } from "../actions";
+
+type Params = { id: string };
+type Search = { saved?: string; restored?: string };
+
+export default async function EditProductPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params>;
+  searchParams: Promise<Search>;
+}) {
+  await requireAdmin();
+  const { id } = await params;
+  if (!z.string().uuid().safeParse(id).success) notFound();
+  const flags = await searchParams;
+
+  const offering = await db.offering.findUnique({
+    where: { id },
+    include: {
+      translations: true,
+      items: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], include: { translations: true } },
+    },
+  });
+  if (!offering) notFound();
+
+  const en = offering.translations.find((t) => t.locale === "en");
+  const items: EditorItem[] = offering.items.map((item) => {
+    const itemEn = item.translations.find((t) => t.locale === "en");
+    const itemBn = item.translations.find((t) => t.locale === "bn");
+    return {
+      id: item.id,
+      kind: item.kind,
+      isHidden: item.isHidden,
+      en: { title: itemEn?.title ?? "", body: itemEn?.body ?? "" },
+      bn: { title: itemBn?.title ?? "", body: itemBn?.body ?? "" },
+    };
+  });
+  const inTrash = Boolean(offering.deletedAt);
+
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <Link href="/admin/products" className="text-sm text-text-secondary hover:text-brand-sky">
+            ← Products
+          </Link>
+          <h1 className="mt-2 flex flex-wrap items-center gap-3 font-display text-3xl font-semibold">
+            {en?.name ?? "Untitled product"}
+            <StatusBadge status={offering.status} publishAt={offering.publishAt} deletedAt={offering.deletedAt} />
+          </h1>
+          <p className="mt-1 text-xs text-text-secondary">
+            Last edited{" "}
+            {offering.updatedAt.toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" })}
+          </p>
+        </div>
+        {/* "View on website" is added in Phase 7, when public product pages exist. */}
+      </div>
+
+      {flags.saved && <Notice>Saved.</Notice>}
+      {flags.restored && <Notice>Restored from the trash.</Notice>}
+
+      {inTrash ? (
+        <section className="flex flex-col gap-4 rounded-card border border-market-down/30 p-6">
+          <p>This product is in the trash and hidden from the website.</p>
+          <div className="flex flex-wrap gap-3">
+            <form action={restoreOffering}>
+              <input type="hidden" name="id" value={offering.id} />
+              <button type="submit" className={buttonClasses({})}>
+                Restore
+              </button>
+            </form>
+            <form action={deleteOfferingForever}>
+              <input type="hidden" name="id" value={offering.id} />
+              <ConfirmButton message="Delete this product permanently? This cannot be undone.">Delete permanently</ConfirmButton>
+            </form>
+          </div>
+        </section>
+      ) : (
+        <>
+          <ProductForm values={toProductFormValues(offering)} parentOptions={await parentOptions(offering.id)} />
+
+          <section className="flex flex-col gap-4 border-t border-white/10 pt-8">
+            <div>
+              <h2 className="font-display text-2xl font-semibold">Page content</h2>
+              <p className="mt-1 text-sm text-text-secondary">
+                Each list below becomes a section of the product page. Items save individually.
+              </p>
+            </div>
+            <OfferingItemsEditor offeringId={offering.id} items={items} />
+          </section>
+
+          <section className="flex items-center justify-between gap-4 border-t border-white/10 pt-8">
+            <p className="text-sm text-text-secondary">Move to trash to hide it from the website. You can restore it from the trash.</p>
+            <form action={trashOffering}>
+              <input type="hidden" name="id" value={offering.id} />
+              <ConfirmButton message="Move this product to the trash? It disappears from the website.">Move to trash</ConfirmButton>
+            </form>
+          </section>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Notice({ children }: { children: React.ReactNode }) {
+  return (
+    <p role="status" className="rounded-control border border-market-up/30 bg-market-up/10 px-4 py-2 text-sm">
+      {children}
+    </p>
+  );
+}

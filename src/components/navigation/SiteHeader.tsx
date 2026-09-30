@@ -13,7 +13,7 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
       locale={locale}
       items={items}
       labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language }}
-      logo={<Logo height={48} priority />}
+      logo={<Logo height={56} priority />}
     />
   );
 }

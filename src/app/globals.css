@@ -72,7 +72,7 @@
   --z-drawer: 300;
   --z-modal: 400;
   --z-toast: 500;
-  --hairline: rgb(255 255 255 / 0.1);
+  --hairline: rgb(255 255 255 / 0.06);
   color-scheme: dark;
 }
 

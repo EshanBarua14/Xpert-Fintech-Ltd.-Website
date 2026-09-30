@@ -50,16 +50,24 @@ src/
   components/      ui, layout, navigation, blocks, products, market, diagrams, forms, admin, motion
   content/blocks/  block registry: block type → schema + component
   lib/             db, i18n (auth, storage, seo, search… added per phase)
-  middleware.ts    locale routing (admin session check added in Phase 3)
+  middleware.ts    locale routing and the admin login gate
 docs/              ERD.md
 ```
+
+## Admin portal
+
+Sign in at `/admin` with the account created by `npm run db:seed` (`SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`).
+
+- Five failed passwords lock the account for 15 minutes; 10 attempts per IP per 15 minutes are allowed.
+- Sessions end after 12 idle hours (`SESSION_IDLE_HOURS`) or 7 days, or on sign-out.
+- Every admin page and server action checks the session in the database; the middleware check is only a fast first gate.
 
 ## Content rules
 
 - Content is **Draft** or **Published**, with an optional scheduled publish date. Visitors only see published rows (`src/lib/db/publishing.ts`).
-- Deleting moves a record to the trash for 30 days.
+- Deleting moves a record to the trash, where it can be restored or deleted permanently. (Automatic clean-up after 30 days: planned.)
 - Every text field is stored per language in a `*Translation` table. A Bangla page appears only once its Bangla text exists.
-- One admin role with full rights. Admin login uses Argon2id password hashes, optional two-factor login and expiring server-side sessions.
+- One admin role with full rights. Admin login uses Argon2id password hashes and expiring server-side sessions. Two-factor login: planned (the database already supports it).
 - Logos of consortium members and clients are shown only when `logoPermission` is on.
 - Market data comes from Xpert's licensed feed; demo data can never reach production.
 
@@ -68,7 +76,8 @@ docs/              ERD.md
 | Phase | Status |
 | --- | --- |
 | 0 Discovery | Done, except capture of the live site's page text |
-| 1 Product architecture | **This commit**: scaffold, schema, ERD, seed |
-| 2 Design system | Next |
+| 1 Product architecture | Done: scaffold, schema, ERD, seed |
+| 2 Design system | Done: tokens, components, header, footer, order-flow motion |
+| 3 Admin portal | **In progress**: login, dashboard, products, settings done; navigation, pages/blocks, media, people, events next |
 
 Secrets live only in `.env` (never committed). See `.env.example` for every variable.

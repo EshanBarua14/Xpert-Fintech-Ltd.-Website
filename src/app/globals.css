@@ -4,7 +4,7 @@
  * XPERT NEXUS design tokens (DESIGN DECISION — see architecture doc, section 8).
  * Colours are checked against WCAG AA before use in text.
  * Tailwind v4 exposes each --color-* / --font-* / --radius-* token as a utility,
- * e.g. bg-navy-900, text-teal-400, font-display, rounded-card.
+ * e.g. bg-navy-900, text-brand-sky, font-display, rounded-card.
  */
 @theme {
   /* Surfaces */
@@ -18,9 +18,17 @@
   --color-text-secondary: #9aa7ba;
   --color-text-inverse: #0a1428;
 
-  /* Accent: teal = data, links, focus; cyan = live pulses only */
-  --color-teal-400: #2dd4bf;
-  --color-cyan-300: #67e8f9;
+  /*
+   * Brand blues, sampled from the official logo (sky → royal gradient).
+   * Contrast (WCAG): sky on ink 9.0:1 · white on royal 6.3:1 · deep on white 8.1:1.
+   * Royal on dark backgrounds is 3.2:1 — use it for fills and large shapes, never body text.
+   */
+  --color-brand-sky: #22bceb; /* links, data, focus on dark */
+  --color-brand-mid: #2a88c8; /* icons, large text on dark */
+  --color-brand-royal: #2a5fae; /* primary buttons (white text) */
+  --color-brand-royal-hover: #2468c0;
+  --color-brand-deep: #1e4f94; /* links and text accents on light sections */
+  --color-cyan-300: #67e8f9; /* live pulses only */
   --color-metal-300: #b8c2cf;
 
   /* Market semantics — market data only, never decoration */
@@ -86,8 +94,71 @@ html[lang="bn"] {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-teal-400);
+  outline: 2px solid var(--color-brand-sky);
   outline-offset: 2px;
+}
+
+/* Visible only when focused by keyboard: the "Skip to content" link */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: var(--z-toast);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-control);
+  background: var(--color-brand-royal);
+  color: #fff;
+}
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Precise grid texture for dark sections (decorative) */
+.bg-grid {
+  background-image:
+    linear-gradient(var(--hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: -1px -1px;
+}
+
+/* ── Order-flow animation ───────────────────────────────────────────── */
+/* Packets travel along the flow line; --flow-distance is set per diagram. */
+@keyframes flow-packet {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(var(--flow-distance));
+    opacity: 0;
+  }
+}
+.flow-packet {
+  animation: flow-packet var(--flow-duration, 6s) linear infinite;
+}
+@keyframes flow-node-pulse {
+  0%,
+  100% {
+    stroke-opacity: 0.35;
+  }
+  50% {
+    stroke-opacity: 1;
+  }
+}
+.flow-node-pulse {
+  animation: flow-node-pulse 3s var(--ease-ui) infinite;
+}
+/* Pause decorative motion while the user is not looking at it */
+.motion-paused .flow-packet,
+.motion-paused .flow-node-pulse {
+  animation-play-state: paused;
 }
 
 /* Reduced motion: keep information, drop movement */
@@ -99,5 +170,8 @@ html[lang="bn"] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .flow-packet {
+    display: none;
   }
 }

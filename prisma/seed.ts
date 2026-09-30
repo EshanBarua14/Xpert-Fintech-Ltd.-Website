@@ -346,6 +346,80 @@ async function seedNavigation() {
   }
 }
 
+type SeedLink = { label: string; href?: string; children?: SeedLink[] };
+
+const productLinks: SeedLink[] = offerings.map((o) => ({ label: o.name, href: `products/${o.slug}` }));
+
+/** Creates a menu with nested items, only if the menu has no items yet. */
+async function ensureMenu(key: string, name: string, tree: SeedLink[]) {
+  const menu = await db.navMenu.upsert({ where: { key }, update: {}, create: { key, name } });
+  if ((await db.navItem.count({ where: { menuId: menu.id } })) > 0) return;
+  const create = async (links: SeedLink[], parentId: string | null) => {
+    for (const [i, link] of links.entries()) {
+      const item = await db.navItem.create({
+        data: {
+          menuId: menu.id,
+          parentId,
+          linkType: link.href === undefined ? "NONE" : "INTERNAL",
+          href: link.href ?? null,
+          sortOrder: i,
+          translations: { create: { locale: EN, label: link.label } },
+        },
+      });
+      if (link.children) await create(link.children, item.id);
+    }
+  };
+  await create(tree, null);
+}
+
+async function seedFooterAndDropdowns() {
+  await ensureMenu("footer", "Footer columns", [
+    { label: "Products", children: productLinks },
+    {
+      label: "Company",
+      children: [
+        { label: "About", href: "company/about" },
+        { label: "Management", href: "company/management" },
+        { label: "Board", href: "company/board" },
+        { label: "Careers", href: "careers" },
+        { label: "Contact", href: "contact" },
+      ],
+    },
+    {
+      label: "Insights",
+      children: [
+        { label: "News", href: "insights/news" },
+        { label: "Events", href: "events" },
+        { label: "Resources", href: "resources" },
+      ],
+    },
+  ]);
+  await ensureMenu("footer-legal", "Footer legal links", [
+    { label: "Privacy policy", href: "privacy" },
+    { label: "Terms of use", href: "terms" },
+    { label: "Accessibility", href: "accessibility" },
+  ]);
+
+  // Products dropdown in the header — added once, even on databases seeded before it existed.
+  const header = await db.navMenu.findUnique({ where: { key: "header" } });
+  const products = header
+    ? await db.navItem.findFirst({ where: { menuId: header.id, parentId: null, href: "products" } })
+    : null;
+  if (header && products && (await db.navItem.count({ where: { parentId: products.id } })) === 0) {
+    for (const [i, link] of productLinks.entries()) {
+      await db.navItem.create({
+        data: {
+          menuId: header.id,
+          parentId: products.id,
+          href: link.href ?? null,
+          sortOrder: i,
+          translations: { create: { locale: EN, label: link.label } },
+        },
+      });
+    }
+  }
+}
+
 // ── Redirects from the old site ──────────────────────────────────────────────
 async function seedRedirects() {
   const redirects = [
@@ -398,6 +472,7 @@ async function main() {
   await seedAboutPage();
   await seedHomePage();
   await seedNavigation();
+  await seedFooterAndDropdowns();
   await seedRedirects();
   await seedMarketData();
   await seedAdmin();

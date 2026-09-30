@@ -5,7 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils/cn";
-import { MarketGlobe } from "./MarketGlobe";
+import { EcosystemMap, type EcosystemLabels } from "./EcosystemMap";
 import { CapabilityVisual, type VisualKind } from "./Visuals";
 
 /**
@@ -92,6 +92,19 @@ export function GhostButton({ href, children }: { href: string; children: ReactN
 
 // ── Hero ─────────────────────────────────────────────────────────────────────
 
+export function ecosystemLabels(t: Messages): EcosystemLabels {
+  return {
+    caption: t.ecoCaption,
+    aria: t.ecoAria,
+    scenes: [t.ecoScene1, t.ecoScene2, t.ecoScene3, t.ecoScene4],
+    sceneText: [t.ecoText1, t.ecoText2, t.ecoText3, t.ecoText4],
+    hub: t.ecoHub,
+    hubSub: t.ecoHubSub,
+    roles: { bsec: t.roleBsec, dse: t.roleDse, cse: t.roleCse, cdbl: t.roleCdbl, bank: t.roleBank, investors: t.roleInvestors },
+    names: { bank: t.nameBank, investors: t.nameInvestors },
+  };
+}
+
 export function FlagshipHero({
   t,
   locale,
@@ -107,12 +120,12 @@ export function FlagshipHero({
     <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
       <div className="aurora" />
       <div className="grid-fade pointer-events-none absolute inset-0" />
-      <div className="relative mx-auto grid min-h-[calc(100svh-6rem)] w-full max-w-7xl items-center gap-8 px-4 pt-10 pb-16 md:px-8 lg:grid-cols-[1.05fr_1fr] lg:pt-0">
+      <div className="relative mx-auto grid min-h-[calc(100svh-6rem)] w-full max-w-7xl items-center gap-10 px-4 pt-10 pb-16 md:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:pt-0">
         <div className="flex flex-col gap-8">
           <p className="eyebrow" data-reveal>
             {t.heroEyebrow}
           </p>
-          <h1 className="font-display text-[clamp(2.5rem,5.4vw,4.75rem)] leading-[1] font-semibold tracking-[-0.045em] text-balance">
+          <h1 className="font-display text-[clamp(2.4rem,4.6vw,4.25rem)] leading-[1.02] font-semibold tracking-[-0.045em] text-balance">
             <span data-reveal style={delay(1)} className="text-gradient block">
               {t.heroTitleA}
             </span>
@@ -142,10 +155,9 @@ export function FlagshipHero({
             </p>
           )}
         </div>
-        <div data-reveal style={delay(2)} className="relative aspect-square w-full max-w-[640px] justify-self-center">
-          <div className="absolute inset-[12%] rounded-full bg-brand-royal/20 blur-3xl" aria-hidden="true" />
-          <MarketGlobe routes={Math.max(memberCount, 8)} />
-          <span className="glass absolute right-2 bottom-4 rounded-full px-3 py-1 text-xs text-text-secondary">{t.conceptualView}</span>
+        <div data-reveal style={delay(2)} className="relative w-full">
+          <div className="absolute inset-[10%] rounded-full bg-brand-royal/20 blur-3xl" aria-hidden="true" />
+          <EcosystemMap labels={ecosystemLabels(t)} className="relative" />
         </div>
       </div>
     </section>

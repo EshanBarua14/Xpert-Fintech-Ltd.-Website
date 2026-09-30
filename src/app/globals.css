@@ -520,6 +520,45 @@ html[lang="bn"] .eyebrow {
   }
 }
 
+/* Ecosystem map */
+.eco-spin {
+  animation: eco-spin 40s linear infinite;
+}
+@keyframes eco-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.eco-progress {
+  width: 0;
+  animation-name: eco-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes eco-progress {
+  to {
+    width: 100%;
+  }
+}
+/* Small role labels become unreadable when the diagram is phone-sized */
+@media (max-width: 640px) {
+  .eco-role {
+    display: none;
+  }
+  /* SVG text sizes are in diagram units; enlarge them when the diagram is small */
+  .eco-name {
+    font-size: 25px !important;
+    transform: translateY(8px);
+    transform-box: fill-box;
+  }
+  .eco-hub-text {
+    font-size: 21px !important;
+  }
+  .eco-hub-sub {
+    font-size: 16px !important;
+  }
+}
+
 /* Scrollbar */
 html {
   scrollbar-color: #1e2d4a transparent;

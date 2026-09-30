@@ -5,6 +5,7 @@ import {
   capabilities,
   CapabilityBento,
   CtaBand,
+  ecosystemLabels,
   FlowStory,
   PageHero,
   PrimaryButton,
@@ -12,6 +13,7 @@ import {
   SectionHeader,
   Shell,
 } from "@/components/flagship/Sections";
+import { EcosystemMap } from "@/components/flagship/EcosystemMap";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getFlagshipData } from "@/lib/public/flagship";
@@ -42,6 +44,14 @@ export default async function PlatformPage({ params }: Props) {
       </PageHero>
       <Shell className="pb-24 md:pb-32">
         <CapabilityBento items={capabilities(t, locale, data.publishedSlugs)} anchors />
+      </Shell>
+      <Shell className="py-16 md:py-24">
+        <div className="grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+          <SectionHeader eyebrow={t.ecosystemEyebrow} title={t.ecosystemTitle} body={t.ecosystemBody} />
+          <div data-reveal>
+            <EcosystemMap labels={ecosystemLabels(t)} />
+          </div>
+        </div>
       </Shell>
       <Shell className="py-16 md:py-24">
         <div className="flex flex-col gap-16">

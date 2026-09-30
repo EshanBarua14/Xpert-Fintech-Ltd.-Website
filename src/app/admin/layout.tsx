@@ -5,6 +5,7 @@ import "../globals.css";
 export const metadata: Metadata = {
   title: { default: "Admin", template: "%s · Xpert Admin" },
   robots: { index: false, follow: false },
+  icons: { icon: "/favicon.ico" },
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

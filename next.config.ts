@@ -12,6 +12,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  experimental: {
+    // Media uploads go through server actions; the default limit is 1 MB.
+    serverActions: { bodySizeLimit: "50mb" },
+  },
   images: {
     formats: ["image/avif", "image/webp"],
   },

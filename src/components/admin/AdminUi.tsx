@@ -12,6 +12,8 @@ import { buttonClasses } from "@/components/ui/Button";
 const NAV = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/navigation", label: "Navigation" },
+  { href: "/admin/media", label: "Media" },
   { href: "/admin/settings", label: "Settings" },
 ] as const;
 

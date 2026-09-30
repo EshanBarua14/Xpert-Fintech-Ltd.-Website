@@ -15,7 +15,7 @@ const bengali = Noto_Sans_Bengali({ subsets: ["bengali"], variable: "--font-noto
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: { default: "Xpert Fintech Ltd.", template: "%s · Xpert Fintech Ltd." },
-  icons: { icon: "/brand/xpert-logo.png" },
+  icons: { icon: [{ url: "/favicon.ico", sizes: "48x48" }, { url: "/brand/icon-192.png", sizes: "192x192", type: "image/png" }], apple: "/brand/apple-touch-icon.png" },
 };
 
 // Header and footer read from the CMS; refresh them at most every 5 minutes.

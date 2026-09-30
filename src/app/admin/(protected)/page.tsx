@@ -45,7 +45,7 @@ export default async function DashboardPage() {
     { label: "App deployments", value: deployments },
     { label: "Events", value: events },
     { label: "New leads", value: newLeads, note: "Lead inbox arrives with the demo form" },
-    { label: "Media files", value: media },
+    { label: "Media files", value: media, href: "/admin/media" },
   ];
 
   return (

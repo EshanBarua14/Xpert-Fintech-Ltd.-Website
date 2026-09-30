@@ -106,8 +106,11 @@ export function StatusBadge({
  * so typed values survive a validation error. "Add" forms that should empty
  * after saving remount with `key={state.savedAt}` instead.
  */
-export function useActionForm<S>(action: (state: S, formData: FormData) => Promise<S>, initial: S) {
-  const [state, dispatch, pending] = useActionState<S, FormData>(action, initial);
+export function useActionForm<S>(
+  action: (state: Awaited<S>, formData: FormData) => Promise<S>,
+  initial: Awaited<S>,
+) {
+  const [state, dispatch, pending] = useActionState(action, initial);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

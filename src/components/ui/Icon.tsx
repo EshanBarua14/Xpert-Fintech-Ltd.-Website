@@ -14,6 +14,8 @@ const PATHS: Record<string, string> = {
   exchange: "M4 7h13l-3-3M20 17H7l3 3",
   check: "M5 12l5 5 9-10",
   cloud: "M7 18h10a4 4 0 00.5-8A6 6 0 006 10a4 4 0 001 8z",
+  mail: "M3 5h18v14H3zM3 6l9 7 9-7",
+  phone: "M5 3h4l2 5-3 2a11 11 0 006 6l2-3 5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z",
   id: "M3 5h18v14H3zM8 11a2 2 0 100-.01M6 16c.5-1.5 3.5-1.5 4 0M13 10h5M13 14h4",
 };
 

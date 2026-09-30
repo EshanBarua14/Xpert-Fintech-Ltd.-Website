@@ -19,7 +19,7 @@ export default async function NavigationPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-display text-3xl font-semibold">Navigation</h1>
-        <p className="mt-1 text-sm text-text-secondary">Menus in the header and footer. Changes appear on the website right away.</p>
+        <p className="mt-1 text-sm text-text-secondary">Menus in the header and footer. Changes appear on the website right away. Links to pages that are not published yet (in that language) are hidden on the website automatically and appear once the page is published.</p>
       </div>
       <ul className="grid gap-4 md:grid-cols-3">
         {menus.map((m) => (

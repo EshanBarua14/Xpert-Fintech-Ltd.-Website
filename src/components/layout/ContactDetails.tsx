@@ -34,7 +34,7 @@ export function ContactDetails({ info, t, mailSubject }: { info: SiteInfo; t: Me
           <div className="flex flex-col gap-1 rounded-card border border-white/10 bg-navy-900 p-6">
             <dt className="text-sm text-text-secondary">{t.phone}</dt>
             <dd>
-              <a href={tel!} className="tabular text-lg text-brand-sky hover:underline">
+              <a href={tel!} className="text-lg text-brand-sky tabular-nums hover:underline">
                 {info.phone}
               </a>
             </dd>
@@ -51,12 +51,13 @@ export function ContactDetails({ info, t, mailSubject }: { info: SiteInfo; t: Me
         <div className="flex flex-wrap gap-3">
           {mailto && (
             <a href={mailto} className={buttonClasses({})}>
-              <Icon name="document" className="size-4" />
+              <Icon name="mail" className="size-4" />
               {t.emailUs}
             </a>
           )}
           {tel && (
             <a href={tel} className={buttonClasses({ variant: "secondary" })}>
+              <Icon name="phone" className="size-4" />
               {t.callUs}
             </a>
           )}

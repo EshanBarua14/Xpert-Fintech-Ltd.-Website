@@ -13,16 +13,25 @@ export function MotionPause({ children, className }: { children: ReactNode; clas
     const el = ref.current;
     if (!el) return;
     let visible = true;
-    const apply = () => el.classList.toggle("motion-paused", !visible || document.hidden);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => {
+      const paused = !visible || document.hidden || reduced.matches;
+      el.classList.toggle("motion-paused", paused);
+      // SMIL animations (<animateMotion>) ignore CSS, so pause them directly.
+      el.querySelectorAll("svg").forEach((svg) => (paused ? svg.pauseAnimations() : svg.unpauseAnimations()));
+    };
     const observer = new IntersectionObserver(([entry]) => {
       visible = !!entry?.isIntersecting;
       apply();
     });
     observer.observe(el);
     document.addEventListener("visibilitychange", apply);
+    reduced.addEventListener("change", apply);
+    apply();
     return () => {
       observer.disconnect();
       document.removeEventListener("visibilitychange", apply);
+      reduced.removeEventListener("change", apply);
     };
   }, []);
 

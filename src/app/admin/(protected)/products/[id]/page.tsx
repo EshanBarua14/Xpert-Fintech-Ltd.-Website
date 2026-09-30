@@ -64,7 +64,16 @@ export default async function EditProductPage({
             {offering.updatedAt.toLocaleString("en-GB", { timeZone: "Asia/Dhaka", dateStyle: "medium", timeStyle: "short" })}
           </p>
         </div>
-        {/* "View on website" is added in Phase 7, when public product pages exist. */}
+        {en?.slug && !inTrash && offering.hasOwnPage && offering.status === "PUBLISHED" && (
+          <a
+            href={`/en/products/${en.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClasses({ variant: "secondary", size: "sm" })}
+          >
+            View on website ↗
+          </a>
+        )}
       </div>
 
       {flags.saved && <Notice>Saved.</Notice>}

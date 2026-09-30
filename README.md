@@ -79,6 +79,7 @@ Sign in at `/admin` with the account created by `npm run db:seed` (`SEED_ADMIN_E
 | 1 Product architecture | Done: scaffold, schema, ERD, seed |
 | 2 Design system | Done: tokens, components, header, footer, order-flow motion |
 | 3 Admin portal | Done: login, dashboard, pages & blocks, products, events, people, organizations, deployments, navigation, media, settings, admins |
-| 4 Public foundation | Next: public pages rendered from the CMS |
+| 4 Public site | Done: home, CMS pages (16 block types), products, events, board, management, contact, request a demo, localized 404/error, redirects, sitemap, robots, JSON-LD |
+| 12 Forms & leads | Planned: demo/contact forms, lead inbox. Until then the contact and demo pages show the email and phone from Admin → Settings |
 
 Secrets live only in `.env` (never committed). See `.env.example` for every variable.

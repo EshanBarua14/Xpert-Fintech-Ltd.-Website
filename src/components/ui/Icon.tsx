@@ -1,0 +1,30 @@
+/**
+ * A small set of line icons for feature cards. Admins type one of these
+ * names in the card's "Icon name" field; unknown names show no icon.
+ */
+const PATHS: Record<string, string> = {
+  shield: "M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z",
+  lock: "M7 11V8a5 5 0 0110 0v3M5 11h14v9H5z",
+  chart: "M4 20V10M10 20V4M16 20v-7M22 20H2",
+  network: "M12 5a2 2 0 100-.01M5 19a2 2 0 100-.01M19 19a2 2 0 100-.01M12 7v4M12 11l-6 6M12 11l6 6",
+  users: "M9 11a4 4 0 100-8 4 4 0 000 8zM2 21a7 7 0 0114 0M17 11a3 3 0 100-6M22 21a6 6 0 00-5-5.9",
+  document: "M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h6",
+  bolt: "M13 2L4 14h7l-1 8 9-12h-7z",
+  globe: "M12 21a9 9 0 100-18 9 9 0 000 18zM3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18",
+  exchange: "M4 7h13l-3-3M20 17H7l3 3",
+  check: "M5 12l5 5 9-10",
+  cloud: "M7 18h10a4 4 0 00.5-8A6 6 0 006 10a4 4 0 001 8z",
+  id: "M3 5h18v14H3zM8 11a2 2 0 100-.01M6 16c.5-1.5 3.5-1.5 4 0M13 10h5M13 14h4",
+};
+
+export const ICON_NAMES = Object.keys(PATHS);
+
+export function Icon({ name, className }: { name: string | null | undefined; className?: string }) {
+  const d = name ? PATHS[name] : undefined;
+  if (!d) return null;
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className ?? "h-6 w-6"} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} />
+    </svg>
+  );
+}

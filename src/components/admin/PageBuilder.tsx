@@ -149,7 +149,7 @@ function ItemForm({ block, item, images, onSaved }: { block: BuilderBlock; item?
           <TextInput id={`${uid}-linkUrl`} name="linkUrl" label="Link (page path or https://…)" defaultValue={item?.linkUrl} error={e.linkUrl} />
         )}
         {cards.fields.icon && (
-          <TextInput id={`${uid}-iconName`} name="iconName" label="Icon name" hint="Optional, e.g. shield, chart, network" defaultValue={item?.iconName} />
+          <TextInput id={`${uid}-iconName`} name="iconName" label="Icon name" hint="Optional: shield, lock, chart, network, users, document, bolt, globe, exchange, check, cloud, id" defaultValue={item?.iconName} />
         )}
         {(cards.settings ?? []).map((s) => (
           <SettingField key={s.key} s={s} prefix="cardSetting" value={item?.props[s.key]} error={e[s.key]} />
@@ -358,7 +358,7 @@ function SectionSettings({ section }: { section: BuilderSection }) {
         options={[
           { value: "dark", label: "Dark" },
           { value: "grid", label: "Dark with grid" },
-          { value: "light", label: "Light" },
+          { value: "light", label: "Navy (alternate)" },
           { value: "full-bleed", label: "Full width" },
         ]}
       />

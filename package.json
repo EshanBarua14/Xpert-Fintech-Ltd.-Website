@@ -18,7 +18,10 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "db:erd": "node scripts/generate-erd.mjs"
+    "db:erd": "node scripts/generate-erd.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "test:a11y": "playwright test a11y"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -33,7 +36,9 @@
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@eslint/eslintrc": "^3.3.0",
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.1.0",

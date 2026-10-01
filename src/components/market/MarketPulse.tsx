@@ -214,7 +214,7 @@ export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t:
         )}
 
         {ex && (
-          <div className="glass flex flex-col gap-8 rounded-3xl p-6 lg:col-span-3">
+          <div className={cn("glass flex flex-col gap-8 rounded-3xl p-6", ex.indices.length ? "lg:col-span-3" : share ? "lg:col-span-7" : "lg:col-span-12")}>
             {breadthTotal > 0 && (
               <div className="flex flex-col gap-3">
                 <div className="flex h-2.5 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden="true">
@@ -262,7 +262,7 @@ export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t:
         )}
 
         {share && (
-          <div className={cn(ex ? "lg:col-span-4" : "lg:col-span-6")}>
+          <div className={cn(!ex ? "lg:col-span-6" : ex.indices.length ? "lg:col-span-4" : "lg:col-span-5")}>
             <ShareCard share={share} t={t} locale={locale} />
           </div>
         )}

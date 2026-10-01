@@ -15,7 +15,7 @@ import "../globals.css";
  * only for market figures, where columns of digits must line up.
  */
 const display = Anek_Bangla({ subsets: ["latin", "bengali"], axes: ["wdth"], variable: "--font-display-face", display: "swap" });
-const body = Hind_Siliguri({ subsets: ["latin", "bengali"], weight: ["400", "500", "600", "700"], variable: "--font-body", display: "swap" });
+const body = Hind_Siliguri({ subsets: ["latin", "bengali"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono", display: "swap" });
 
 export const metadata: Metadata = {

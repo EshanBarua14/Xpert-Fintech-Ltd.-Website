@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { BUSINESS_TYPES } from "./lead-constants";
+
+export { BUSINESS_TYPES };
 
 /**
  * Lead (enquiry) fields, shared by the public forms and the admin portal.
@@ -7,7 +10,6 @@ import { z } from "zod";
  */
 export type LeadErrorCode = "required" | "email" | "phone" | "tooLong" | "consent";
 
-export const BUSINESS_TYPES = ["brokerage", "merchantBank", "assetManager", "bank", "other"] as const;
 export const CONTACT_METHODS = ["ANY", "EMAIL", "PHONE", "WHATSAPP"] as const;
 export const LEAD_STATUSES = ["NEW", "CONTACTED", "QUALIFIED", "DEMO_SCHEDULED", "PROPOSAL", "WON", "LOST"] as const;
 export const LEAD_SOURCES = ["DEMO_REQUEST", "CONTACT_FORM", "MANUAL"] as const;

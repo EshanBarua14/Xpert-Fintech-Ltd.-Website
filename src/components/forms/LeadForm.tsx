@@ -6,7 +6,8 @@ import { submitLead } from "@/app/[locale]/lead-actions";
 import { Select, TextArea, TextInput } from "@/components/ui/Field";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
-import { BUSINESS_TYPES, type LeadFormState } from "@/lib/validation/lead";
+import { BUSINESS_TYPES } from "@/lib/validation/lead-constants";
+import type { LeadFormState } from "@/lib/validation/lead";
 import { useActionForm } from "./useActionForm";
 
 type Props = {

@@ -30,7 +30,7 @@ export type ShareFigure = {
 
 /** What the public site receives. */
 export type MarketPayload = {
-  mode: "licensed" | "demo" | "none";
+  mode: "licensed" | "exchange" | "demo" | "none";
   providerName: string | null;
   delayMinutes: number;
   snapshot: MarketSnapshot | null;

@@ -7,6 +7,7 @@ import { deleteMarketShare } from "./actions";
 
 const MODE_TEXT = {
   licensed: "Licensed feed (MARKET_DATA_MODE=licensed)",
+  exchange: "DSE and CSE price boards (MARKET_DATA_MODE=exchange): last prices, changes, top movers and breadth for every listed stock. Index values need the licensed feed.",
   demo: "Demo data — generated prices, clearly labelled on the site. Never use on the live website.",
   none: "Off (MARKET_DATA_MODE=none). Only market-share figures entered below are shown.",
 } as const;
@@ -49,7 +50,7 @@ export default async function MarketAdminPage() {
             isActive: source?.isActive ?? false,
           }}
         />
-        {mode === "licensed" && (
+        {(mode === "licensed" || mode === "exchange") && (
           <div className="border-t border-fg/10 pt-4">
             <TestFeedButton />
           </div>

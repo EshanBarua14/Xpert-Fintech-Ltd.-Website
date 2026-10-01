@@ -17,8 +17,10 @@ export function MarketTicker({ initial, t, locale }: { initial: MarketPayload; t
   if (!snap) return null;
 
   const items = snap.exchanges.flatMap((ex) => [
+    // Exchange label at the start of each exchange's run of prices.
+    { key: `${ex.exchange}-label`, label: ex.exchange, value: "", pct: NaN, index: true, move: undefined as undefined | "up" | "down" },
     ...ex.indices.map((i) => ({ key: `${ex.exchange}-i-${i.name}`, label: i.name, value: fmt(locale, i.value), pct: i.changePct, index: true, move: undefined as undefined | "up" | "down" })),
-    ...ex.quotes.map((q) => ({
+    ...[...ex.quotes].sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct)).slice(0, 180).map((q) => ({
       key: `${ex.exchange}-${q.symbol}`,
       label: q.symbol,
       value: fmt(locale, q.ltp, q.ltp >= 1000 ? 0 : 1),
@@ -54,11 +56,13 @@ export function MarketTicker({ initial, t, locale }: { initial: MarketPayload; t
                     it.move === "down" && "tick-flash-down",
                   )}
                 >
-                  <span className={cn("font-semibold", it.index ? "text-accent" : "text-fg")}>{it.label}</span>
-                  <span className="text-text-secondary">{it.value}</span>
-                  <span className={cn("font-semibold", up && "text-market-up", down && "text-market-down", !up && !down && "text-text-secondary")}>
-                    {up ? "▲" : down ? "▼" : "•"} {signed(locale, it.pct, 2, "%")}
-                  </span>
+                  <span className={cn("font-semibold", it.index ? "text-gold" : "text-fg")}>{it.label}</span>
+                  {it.value && <span className="text-text-secondary">{it.value}</span>}
+                  {Number.isFinite(it.pct) && (
+                    <span className={cn("font-semibold", up && "text-market-up", down && "text-market-down", !up && !down && "text-text-secondary")}>
+                      {up ? "▲" : down ? "▼" : "•"} {signed(locale, it.pct, 2, "%")}
+                    </span>
+                  )}
                 </li>
               );
             })}

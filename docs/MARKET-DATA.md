@@ -15,7 +15,15 @@ only from figures entered in **Admin → Market data** (or written there by the 
 | --- | --- |
 | `none` (default) | No prices. Market-share figures entered in the admin are still shown. |
 | `demo` | Generated prices on real DSE codes, labelled **"Demo data — not real prices"** everywhere. For development and design review only. Refused when `NODE_ENV`/`APP_ENV` is `production` unless `ALLOW_DEMO_MARKET_DATA=true`. |
-| `licensed` | The feed at `MARKET_DATA_API_URL`, shown only after **Show market data on the website** is ticked in Admin → Market data. |
+| `exchange` | Reads the public price boards of DSE (`dse.com.bd/markets`) and CSE (`cse.com.bd/market/current_price`) at most once a minute: last price, change and % change for every listed stock, plus top movers and advanced/declined counts worked out from them. Index values (DSEX, CASPI…) are not on those pages, so they appear only with the licensed feed. DSE's robots.txt allows `/markets` and disallows `/api`; only the page is read. If an exchange changes its page layout, that exchange is left out and *Test connection* in the admin says so. |
+| `licensed` | The feed at `MARKET_DATA_API_URL`. |
+
+Market data appears only after **Show market data on the website** is ticked in Admin → Market data.
+
+If CSE's certificate chain cannot be verified by Node.js on your server, the CSE
+board is skipped (DSE still shows). Fix it by giving Node the missing
+intermediate certificate with `NODE_EXTRA_CA_CERTS=/path/to/chain.pem` — never
+by turning certificate checks off.
 
 ```
 MARKET_DATA_MODE=licensed

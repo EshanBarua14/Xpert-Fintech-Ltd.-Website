@@ -44,7 +44,7 @@ export function BourseCanvas() {
       h = window.innerHeight;
       canvas.width = w;
       canvas.height = h;
-      const gap = w < 640 ? 120 : 150;
+      const gap = w < 640 ? 170 : 150;
       columns = [];
       for (let x = 24; x < w; x += gap) {
         const cells: Cell[] = [];
@@ -131,7 +131,7 @@ export function BourseCanvas() {
     let prev = 0;
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
-      if (now - prev < 33) return; // ~30 fps is plenty for a backdrop
+      if (now - prev < (w < 768 ? 66 : 33)) return; // ~30 fps (15 on phones) is plenty for a backdrop
       prev = now;
       draw(now);
     };

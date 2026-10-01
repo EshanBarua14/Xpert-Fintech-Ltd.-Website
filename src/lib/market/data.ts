@@ -1,15 +1,22 @@
 import "server-only";
 import { db } from "@/lib/db/client";
 import { demoSnapshot } from "./demo";
+import { exchangeSnapshot } from "./exchange";
 import { snapshotSchema } from "./schema";
 import type { MarketPayload, MarketSnapshot, ShareFigure } from "./types";
 
 type Mode = MarketPayload["mode"];
 
-/** MARKET_DATA_MODE: none | demo | licensed. Demo is blocked in production unless explicitly allowed. */
+/**
+ * MARKET_DATA_MODE: none | exchange | licensed | demo.
+ *  - exchange: read the DSE and CSE public price boards (see ./exchange.ts)
+ *  - licensed: the feed at MARKET_DATA_API_URL
+ *  - demo: generated prices, blocked in production unless explicitly allowed
+ */
 export function marketMode(): Mode {
   const raw = (process.env.MARKET_DATA_MODE ?? "none").toLowerCase();
   if (raw === "licensed") return "licensed";
+  if (raw === "exchange") return "exchange";
   if (raw === "demo") {
     const prod = process.env.NODE_ENV === "production" || process.env.APP_ENV === "production";
     if (prod && process.env.ALLOW_DEMO_MARKET_DATA !== "true") {
@@ -23,6 +30,16 @@ export function marketMode(): Mode {
 
 let cache: { at: number; value: MarketSnapshot | null } | null = null;
 const TTL_MS = 15_000;
+let boardCache: { at: number; value: MarketSnapshot | null } | null = null;
+const BOARD_TTL_MS = 60_000; // be a polite reader: at most one request per exchange per minute
+
+async function boardSnapshot(): Promise<MarketSnapshot | null> {
+  if (boardCache && Date.now() - boardCache.at < BOARD_TTL_MS) return boardCache.value;
+  const { snapshot } = await exchangeSnapshot();
+  // Keep the last good board if both exchanges fail this time.
+  boardCache = { at: Date.now(), value: snapshot ?? boardCache?.value ?? null };
+  return boardCache.value;
+}
 
 /** Calls the licensed feed adapter. Short cache so many visitors cause one upstream call. */
 async function licensedSnapshot(): Promise<MarketSnapshot | null> {
@@ -88,9 +105,10 @@ export async function getMarketPayload(): Promise<MarketPayload> {
   if (mode === "demo") snapshot = demoSnapshot();
   // A licensed feed is shown only once an admin switches it on in Admin → Market data.
   if (mode === "licensed" && source?.isActive) snapshot = await licensedSnapshot();
+  if (mode === "exchange" && source?.isActive) snapshot = await boardSnapshot();
   return {
     mode: snapshot ? mode : "none",
-    providerName: source?.providerName ?? null,
+    providerName: source?.providerName ?? (mode === "exchange" ? "DSE, CSE" : null),
     delayMinutes: source?.displayDelayMinutes ?? 0,
     snapshot,
     shares,
@@ -99,6 +117,14 @@ export async function getMarketPayload(): Promise<MarketPayload> {
 
 /** For the admin "test connection" button. */
 export async function testFeed(): Promise<{ ok: boolean; message: string }> {
+  if (marketMode() === "exchange") {
+    const { reports } = await exchangeSnapshot();
+    boardCache = null;
+    return {
+      ok: reports.some((r) => r.ok),
+      message: reports.map((r) => `${r.exchange}: ${r.ok ? "OK" : "not available"} — ${r.message}`).join(" · "),
+    };
+  }
   if (!process.env.MARKET_DATA_API_URL) return { ok: false, message: "MARKET_DATA_API_URL is not set in the server's .env." };
   cache = null;
   const snap = await licensedSnapshot();

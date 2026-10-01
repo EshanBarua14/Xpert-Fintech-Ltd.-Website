@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { capabilities, CtaBand, PageHero, SectionHeader, Shell, StatGrid } from "@/components/flagship/Sections";
+import { CtaBand, PageHero, SectionHeader, Shell } from "@/components/flagship/Sections";
 import { MarketGlobe } from "@/components/flagship/MarketGlobe";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
@@ -23,23 +23,11 @@ export default async function ConsortiumPage({ params }: Props) {
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);
   const data = await getFlagshipData(locale);
-  const fmt = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US");
 
   return (
     <>
       <PageHero eyebrow={t.consortiumEyebrow} title={t.consortiumPageTitle} body={t.consortiumPageBody} />
 
-      <Shell className="pb-24">
-        <StatGrid
-          locale={locale}
-          items={[
-            { value: data.members.length, label: t.statMembers },
-            { value: Math.max(data.exchanges.length, 2), label: t.statExchanges },
-            { value: capabilities(t, locale, data.publishedSlugs).length, label: t.statSystems },
-            { value: 2, label: t.statLanguages },
-          ]}
-        />
-      </Shell>
 
       {data.members.length > 0 && (
         <Shell className="py-16 md:py-24">
@@ -55,8 +43,7 @@ export default async function ConsortiumPage({ params }: Props) {
               {data.members.map((m, i) => {
                 const body = (
                   <>
-                    <span className="font-mono text-xs text-brand-sky">{(i < 9 ? fmt.format(0) : "") + fmt.format(i + 1)}</span>
-                    <span className="font-display text-lg leading-snug font-semibold">{m.name}</span>
+                                        <span className="font-display text-lg leading-snug font-semibold">{m.name}</span>
                     {m.websiteUrl && <span className="mt-auto text-xs text-text-secondary group-hover:text-cyan-300">{t.visitWebsite} ↗</span>}
                   </>
                 );
@@ -84,7 +71,7 @@ export default async function ConsortiumPage({ params }: Props) {
             <SectionHeader title={t.exchanges} />
             <ul className="grid gap-4 md:grid-cols-2">
               {data.exchanges.map((e, i) => (
-                <li key={e.id} data-reveal style={{ "--d": i } as CSSProperties} className="beam glass flex items-center gap-5 rounded-3xl p-8">
+                <li key={e.id} data-reveal style={{ "--d": i } as CSSProperties} className="flex items-center gap-5 rounded-2xl border border-fg/10 p-8">
                   <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-sky/10 font-mono text-sm font-semibold text-cyan-300">
                     {e.name
                       .split(/\s+/)

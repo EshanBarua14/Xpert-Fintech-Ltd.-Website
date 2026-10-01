@@ -23,7 +23,7 @@ function Trading() {
             <span
               key={k}
               className="absolute -top-[3px] h-[7px] w-10 rounded-full bg-gradient-to-r from-transparent to-cyan-300"
-              style={{ animation: `lane ${3.2 + i * 0.5}s linear ${k * 1.7 + i * 0.4}s infinite` }}
+              style={{ animation: `lane ${3.2 + i * 0.5}s linear -${0.8 + k * 1.7 + i * 0.4}s infinite` }}
             />
           ))}
         </div>
@@ -44,7 +44,7 @@ function Risk() {
           strokeWidth="12"
           strokeLinecap="round"
           strokeDasharray="252"
-          style={v({ "--gauge-from": 200, "--gauge-to": 90, animation: "gauge 5s ease-in-out infinite" })}
+          style={v({ "--gauge-from": 200, "--gauge-to": 90, animation: "gauge 5s ease-in-out -2s infinite" })}
         />
         <defs>
           <linearGradient id="risk-g" x1="0" x2="1">
@@ -73,7 +73,7 @@ function Ekyc() {
         </div>
         <span
           className="absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-transparent via-cyan-300/50 to-transparent"
-          style={v({ "--scan": "96px", animation: "scan-y 2.8s ease-in-out infinite" })}
+          style={v({ "--scan": "96px", animation: "scan-y 2.8s ease-in-out -1.2s infinite" })}
         />
       </div>
     </div>
@@ -85,7 +85,7 @@ function Bo() {
     <div className="flex h-full min-h-36 items-center justify-center gap-2">
       {[0, 1, 2, 3, 4].map((i) => (
         <span key={i} className="flex items-center gap-2">
-          <span className="block size-3 rounded-full" style={{ animation: `fill-step 5s ease-in-out ${i * 0.5}s infinite` }} />
+          <span className="block size-3 rounded-full" style={{ animation: `fill-step 5s ease-in-out -${2.5 - i * 0.3}s infinite` }} />
           {i < 4 && <span className="block h-px w-6 bg-fg/15" />}
         </span>
       ))}
@@ -140,7 +140,7 @@ function Data() {
             strokeOpacity={1 - i * 0.3}
             strokeWidth={i === 0 ? 2 : 1.25}
             strokeDasharray="600"
-            style={v({ "--len": 600, animation: `draw-line 4s ease-out ${i * 0.4}s infinite alternate` })}
+            style={v({ "--len": 600, animation: `draw-line 4s ease-out -${3.6 - i * 0.4}s infinite alternate` })}
           />
         ))}
       </svg>
@@ -152,7 +152,7 @@ export function CapabilityVisual({ kind }: { kind: VisualKind }) {
   const map = { trading: Trading, risk: Risk, ekyc: Ekyc, bo: Bo, dms: Dms, back: Back, data: Data } as const;
   const C = map[kind];
   return (
-    <div aria-hidden="true" className="relative h-full w-full">
+    <div aria-hidden="true" className="cap-visual relative h-full w-full">
       <C />
     </div>
   );

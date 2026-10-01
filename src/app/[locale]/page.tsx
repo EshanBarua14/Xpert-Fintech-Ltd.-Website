@@ -10,11 +10,10 @@ import {
   FlagshipHero,
   FlowStory,
   GhostButton,
-  MemberMarquee,
+  MemberBoard,
   Principles,
   SectionHeader,
   Shell,
-  StatGrid,
 } from "@/components/flagship/Sections";
 import { getSiteInfo } from "@/lib/content/settings";
 import { isLocale } from "@/lib/i18n/config";
@@ -25,6 +24,7 @@ import { getFlagshipData } from "@/lib/public/flagship";
 import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
 import { MarketTicker } from "@/components/market/MarketTicker";
+import { MarketStatusLine } from "@/components/market/MarketStatusLine";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -81,16 +81,14 @@ export default async function HomePage({ params }: Props) {
         locale={locale}
         memberCount={data.members.length}
         ticker={market.snapshot ? <MarketTicker initial={market} t={t} locale={locale} /> : undefined}
+        status={market.snapshot ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
       />
-      <MemberMarquee names={data.members.map((m) => m.name)} label={t.members} />
 
       {hasMarket && (
         <Shell id="market" className="py-20 md:py-28">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} body={t.marketBody} />
-            <div data-reveal>
-              <MarketPulse initial={market} t={t} locale={locale} />
-            </div>
+            <MarketPulse initial={market} t={t} locale={locale} />
           </div>
         </Shell>
       )}
@@ -113,25 +111,15 @@ export default async function HomePage({ params }: Props) {
         <div className="flex flex-col gap-14">
           <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
             <SectionHeader eyebrow={t.consortiumEyebrow} title={t.consortiumTitle} body={t.consortiumBody} />
-            <div data-reveal>
-              <GhostButton href={`/${locale}/consortium`}>{t.meetConsortium} →</GhostButton>
-            </div>
+            <GhostButton href={`/${locale}/consortium`}>{t.meetConsortium}</GhostButton>
           </div>
-          <StatGrid
-            locale={locale}
-            items={[
-              { value: data.members.length, label: t.statMembers },
-              { value: Math.max(data.exchanges.length, 2), label: t.statExchanges },
-              { value: caps.length, label: t.statSystems },
-              { value: 2, label: t.statLanguages },
-            ]}
-          />
+          <MemberBoard names={data.members.map((m) => m.name)} />
         </div>
       </Shell>
 
       <Shell className="py-16 md:py-24">
         <div className="flex flex-col gap-14">
-          <SectionHeader eyebrow={t.principlesEyebrow} title={t.principlesTitle} />
+          <SectionHeader title={t.principlesTitle} />
           <Principles t={t} />
         </div>
       </Shell>
@@ -145,7 +133,7 @@ export default async function HomePage({ params }: Props) {
             <div className="flex flex-wrap items-end justify-between gap-6">
               <SectionHeader eyebrow={t.latestEyebrow} title={t.events} />
               <Link href={`/${locale}/events`} className="text-sm font-semibold text-brand-sky hover:text-fg">
-                {t.allEvents} →
+                {t.allEvents}
               </Link>
             </div>
             <EventCards events={events} locale={locale} />

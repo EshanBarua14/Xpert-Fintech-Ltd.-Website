@@ -45,10 +45,10 @@ export function SectionHeader({
       )}
       <H
         data-reveal
-        style={delay(1)}
+        style={{ ...delay(1), fontStretch: "110%" }}
         className={cn(
-          "text-gradient font-display font-semibold tracking-[-0.035em] text-balance",
-          H === "h1" ? "text-5xl leading-[1.02] md:text-7xl" : "text-4xl leading-[1.05] md:text-6xl",
+          "font-display font-semibold tracking-[-0.03em] text-balance text-text-primary",
+          H === "h1" ? "text-5xl leading-[1] md:text-[4.5rem]" : "text-[2.25rem] leading-[1.04] md:text-[3.25rem]",
         )}
       >
         {title}
@@ -72,9 +72,6 @@ export function PrimaryButton({ href, children, className }: { href: string; chi
       )}
     >
       {children}
-      <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">
-        →
-      </span>
     </Link>
   );
 }
@@ -111,6 +108,7 @@ export function FlagshipHero({
   body,
   memberCount,
   ticker,
+  status,
 }: {
   t: Messages;
   locale: AppLocale;
@@ -118,48 +116,40 @@ export function FlagshipHero({
   memberCount: number;
   /** Live price strip shown along the bottom edge of the hero. */
   ticker?: ReactNode;
+  /** Live market status line above the headline (only when market data is on). */
+  status?: ReactNode;
 }) {
   return (
-    <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
-      <div className="aurora" />
-      <div className="grid-fade pointer-events-none absolute inset-0" />
-      <div className="relative mx-auto grid min-h-[calc(100svh-9rem)] w-full max-w-7xl items-center gap-10 px-4 pt-10 pb-16 md:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:pt-0">
+    <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
+      <div className="relative mx-auto grid min-h-[calc(100svh-9rem)] w-full max-w-7xl items-center gap-12 px-4 pt-10 pb-16 md:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:pt-0">
         <div className="flex flex-col gap-8">
-          <p className="eyebrow" data-reveal>
-            {t.heroEyebrow}
-          </p>
-          <h1 className="font-display text-[clamp(2.4rem,4.6vw,4.25rem)] leading-[1.02] font-semibold tracking-[-0.045em] text-balance">
-            <span data-reveal style={delay(1)} className="text-gradient block">
-              {t.heroTitleA}
-            </span>
-            <span data-reveal style={delay(2)} className="text-gradient-brand block">
-              {t.heroTitleB}
-            </span>
+          {status && <div data-reveal>{status}</div>}
+          <h1
+            data-reveal
+            style={{ ...delay(1), fontStretch: "104%" }}
+            className="font-display text-[clamp(2.4rem,4.4vw,4.1rem)] leading-[1] font-semibold tracking-[-0.03em] text-balance text-text-primary"
+          >
+            {t.heroTitleA} {t.heroTitleB}
           </h1>
-          <p data-reveal style={delay(3)} className="max-w-xl text-lg leading-relaxed text-text-secondary md:text-xl">
+          <p data-reveal style={delay(2)} className="max-w-[34rem] text-lg leading-relaxed text-text-secondary md:text-xl">
             {body || t.heroBody}
           </p>
-          <div data-reveal style={delay(4)} className="flex flex-wrap gap-3">
+          <div data-reveal style={delay(3)} className="flex flex-wrap items-center gap-3">
             <PrimaryButton href={`/${locale}/request-demo`}>{t.requestDemo}</PrimaryButton>
             <GhostButton href={`/${locale}/platform`}>{t.explorePlatform}</GhostButton>
           </div>
           {memberCount > 0 && (
-            <p data-reveal style={delay(5)} className="flex items-center gap-3 text-sm text-text-secondary">
-              <span className="flex -space-x-2" aria-hidden="true">
-                {[0, 1, 2, 3].map((i) => (
-                  <span
-                    key={i}
-                    className="size-7 rounded-full border-2 border-ink-950 bg-gradient-to-br from-brand-sky/80 to-brand-royal"
-                    style={{ opacity: 1 - i * 0.18 }}
-                  />
-                ))}
-              </span>
+            <Link
+              href={`/${locale}/consortium`}
+              data-reveal
+              style={delay(4)}
+              className="self-start text-sm text-text-secondary underline decoration-fg/20 underline-offset-4 transition-colors hover:text-fg hover:decoration-gold"
+            >
               {t.trustLine.replace("{n}", new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(memberCount))}
-            </p>
+            </Link>
           )}
         </div>
         <div data-reveal style={delay(2)} className="relative w-full">
-          <div className="absolute inset-[10%] rounded-full bg-brand-royal/20 blur-3xl" aria-hidden="true" />
           <EcosystemMap labels={ecosystemLabels(t)} className="relative" />
         </div>
       </div>
@@ -230,7 +220,7 @@ const SPAN: Record<VisualKind, string> = {
 
 export function CapabilityBento({ items, anchors = false }: { items: Capability[]; anchors?: boolean }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <ul className="bento grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((c, i) => (
         <li key={c.key} id={anchors ? c.key : undefined} data-reveal style={delay(i % 4)} className={cn("scroll-mt-32", SPAN[c.key])}>
           <Link
@@ -244,9 +234,6 @@ export function CapabilityBento({ items, anchors = false }: { items: Capability[
               <div className="flex items-center justify-between">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-fg/10 bg-brand-sky/10 text-brand-sky">
                   <Icon name={c.icon} className="size-5" />
-                </span>
-                <span aria-hidden="true" className="text-text-secondary transition-all duration-300 group-hover:translate-x-1 group-hover:text-brand-sky">
-                  →
                 </span>
               </div>
               <h3 className="font-display text-lg font-semibold tracking-tight">{c.title}</h3>
@@ -287,7 +274,7 @@ export function FlowStory({ t }: { t: Messages }) {
                 {i + 1}
               </span>
             </span>
-            <span className="font-mono text-[11px] tracking-[0.2em] text-cyan-300 uppercase">{s.tag}</span>
+            <span className="text-sm font-semibold text-gold">{s.tag}</span>
             <p className="max-w-[16rem] text-sm leading-relaxed text-text-primary">{s.label}</p>
           </li>
         ))}
@@ -317,20 +304,32 @@ export function StatGrid({ items, locale }: { items: { value: number; label: str
 
 export function Principles({ t }: { t: Messages }) {
   const items = [
-    { icon: "shield", title: t.p1Title, body: t.p1Body },
-    { icon: "globe", title: t.p2Title, body: t.p2Body },
-    { icon: "document", title: t.p3Title, body: t.p3Body },
-    { icon: "cloud", title: t.p4Title, body: t.p4Body },
+    { title: t.p1Title, body: t.p1Body },
+    { title: t.p2Title, body: t.p2Body },
+    { title: t.p3Title, body: t.p3Body },
+    { title: t.p4Title, body: t.p4Body },
   ];
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {items.map((p, i) => (
-        <li key={p.title} data-reveal style={delay(i)} className="spotlight glass flex flex-col gap-4 rounded-3xl p-6">
-          <span className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-sky/25 to-brand-royal/20 text-cyan-300">
-            <Icon name={p.icon} className="size-5" />
-          </span>
-          <h3 className="font-display text-lg font-semibold">{p.title}</h3>
-          <p className="text-sm leading-relaxed text-text-secondary">{p.body}</p>
+    <dl className="grid gap-x-16 gap-y-10 sm:grid-cols-2">
+      {items.map((p) => (
+        <div key={p.title} className="flex flex-col gap-2 border-l-2 border-gold/60 pl-6">
+          <dt className="font-display text-xl font-semibold" style={{ fontStretch: "108%" }}>
+            {p.title}
+          </dt>
+          <dd className="max-w-md leading-relaxed text-text-secondary">{p.body}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** The member brokerage houses as a list of names, like an honours board. */
+export function MemberBoard({ names }: { names: string[] }) {
+  return (
+    <ul className="grid gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
+      {names.map((n) => (
+        <li key={n} className="border-t border-fg/10 py-4 font-display text-lg leading-snug font-medium text-text-primary md:text-xl" style={{ fontStretch: "105%" }}>
+          {n}
         </li>
       ))}
     </ul>
@@ -342,15 +341,27 @@ export function Principles({ t }: { t: Messages }) {
 export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
   return (
     <Shell className="py-20 md:py-28">
-      <div data-reveal className="beam relative overflow-hidden rounded-[2rem] border border-fg/10 bg-navy-900/60 px-6 py-16 text-center md:px-16 md:py-24">
-        <div className="aurora opacity-80" />
-        <div className="grid-fade pointer-events-none absolute inset-0 opacity-60" />
-        <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-6">
-          <h2 className="text-gradient font-display text-4xl font-semibold tracking-[-0.035em] md:text-6xl">{t.ctaTitle}</h2>
-          <p className="text-lg text-text-secondary">{t.ctaBody}</p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <PrimaryButton href={`/${locale}/request-demo`}>{t.requestDemo}</PrimaryButton>
-            <GhostButton href={`/${locale}/contact`}>{t.talkToUs}</GhostButton>
+      <div className="relative overflow-hidden rounded-[2rem] bg-brand-royal px-6 py-14 md:px-16 md:py-20">
+        <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
+          <div className="flex max-w-2xl flex-col gap-4">
+            <h2 className="font-display text-4xl leading-[1.02] font-semibold tracking-[-0.03em] text-white md:text-6xl" style={{ fontStretch: "110%" }}>
+              {t.ctaTitle}
+            </h2>
+            <p className="text-lg text-white/80">{t.ctaBody}</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={`/${locale}/request-demo`}
+              className="inline-flex h-12 items-center rounded-full bg-white px-6 text-sm font-semibold text-brand-deep transition-transform duration-300 hover:-translate-y-0.5"
+            >
+              {t.requestDemo}
+            </Link>
+            <Link
+              href={`/${locale}/contact`}
+              className="inline-flex h-12 items-center rounded-full border border-white/40 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              {t.talkToUs}
+            </Link>
           </div>
         </div>
       </div>
@@ -362,10 +373,8 @@ export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
 
 export function PageHero({ eyebrow, title, body, children }: { eyebrow?: string; title: string; body?: string | null; children?: ReactNode }) {
   return (
-    <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
-      <div className="aurora opacity-70" />
-      <div className="grid-fade pointer-events-none absolute inset-0" />
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 pt-16 pb-16 md:px-8 md:pt-24 md:pb-24">
+    <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 pt-16 pb-12 md:px-8 md:pt-24 md:pb-16">
         <SectionHeader as="h1" eyebrow={eyebrow} title={title} body={body} />
         {children}
       </div>

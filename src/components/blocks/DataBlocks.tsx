@@ -114,7 +114,7 @@ export async function EventListBlock({ block, ctx }: { block: BlockData; ctx: Bl
       <div className="flex flex-wrap items-end justify-between gap-4">
         <BlockHeading text={block.text} />
         <Link href={`/${ctx.locale}/events`} className="text-sm font-semibold text-brand-sky hover:text-fg">
-          {ctx.t.allEvents} →
+          {ctx.t.allEvents}
         </Link>
       </div>
       <EventCards events={events} locale={ctx.locale} />
@@ -141,9 +141,6 @@ export function EventCards({ events, locale }: { events: EventRow[]; locale: Blo
               {date && <time className="font-mono text-xs text-cyan-300">{date}</time>}
               <h3 className="font-display text-xl font-semibold tracking-tight text-balance">{tr.title}</h3>
               {tr.summary && <p className="line-clamp-3 text-sm text-text-secondary">{tr.summary}</p>}
-              <span aria-hidden="true" className="mt-auto text-sm text-text-secondary transition-all group-hover:translate-x-1 group-hover:text-brand-sky">
-                →
-              </span>
             </Link>
           </li>
         );

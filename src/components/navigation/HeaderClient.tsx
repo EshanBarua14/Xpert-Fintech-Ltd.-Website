@@ -70,7 +70,7 @@ function MegaPanel({ item, id, overview, onNavigate }: { item: NavLink; id: stri
           {item.description && <p className="relative mt-2 text-sm text-text-secondary">{item.description}</p>}
           {item.href && (
             <ItemLink item={{ ...item, children: [] }} onNavigate={onNavigate} className="relative mt-5 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 hover:text-fg">
-              {overview} <span aria-hidden="true">→</span>
+              {overview}
             </ItemLink>
           )}
         </div>
@@ -265,7 +265,6 @@ export function HeaderClient({
                 {item.children.length === 0 ? (
                   <ItemLink item={item} onNavigate={() => setMenuOpen(false)} className="flex items-center justify-between py-3 font-display text-2xl font-semibold">
                     {item.label}
-                    <span aria-hidden="true" className="text-text-secondary">→</span>
                   </ItemLink>
                 ) : (
                   <details className="group">
@@ -277,7 +276,7 @@ export function HeaderClient({
                       {item.href && (
                         <li>
                           <ItemLink item={{ ...item, children: [] }} onNavigate={() => setMenuOpen(false)} className="block rounded-xl px-3 py-2 text-cyan-300">
-                            {labels.overview} →
+                            {labels.overview}
                           </ItemLink>
                         </li>
                       )}

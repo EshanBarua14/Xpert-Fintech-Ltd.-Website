@@ -37,7 +37,7 @@ export function ProductCard({ offering, locale, t }: { offering: Offering; local
       <h3 className="font-display text-2xl font-semibold tracking-tight">{tr.name}</h3>
       {(tr.tagline || tr.summary) && <p className="text-sm text-text-secondary">{tr.tagline ?? tr.summary}</p>}
       <span className="mt-auto text-sm font-semibold text-brand-sky">
-        {t.exploreProduct} <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
+        {t.exploreProduct}
       </span>
     </Link>
   );

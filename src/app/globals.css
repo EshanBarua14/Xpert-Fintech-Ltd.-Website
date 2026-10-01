@@ -36,6 +36,8 @@
   /* Contrast base: white in dark mode, deep navy in light mode (borders, glass, text) */
   --color-fg: #ffffff;
   --color-accent: #67e8f9;
+  /* Jute gold: the one warm accent, used only where something is happening */
+  --color-gold: #e0b252;
   --color-metal-300: #b8c2cf;
 
   /* Market semantics — market data only, never decoration */
@@ -44,10 +46,10 @@
   --color-market-neutral: #94a3b8;
 
   /* Type */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-inter-tight), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-body), ui-sans-serif, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
-  --font-bangla: var(--font-noto-bengali), var(--font-inter), sans-serif;
+  --font-bangla: var(--font-body), ui-sans-serif, sans-serif;
 
   /* Radius */
   --radius-cell: 2px;
@@ -124,6 +126,7 @@
   --color-cyan-300: #0e7490;
   --color-accent: #0b6f8a;
   --color-fg: #0a1428;
+  --color-gold: #8a5d0b;
   --color-market-up: #15803d;
   --color-market-down: #c81e1e;
   --hairline: rgb(10 20 40 / 0.07);
@@ -410,59 +413,23 @@ body::before {
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 80%);
 }
 
-/* Headline gradients */
+/* Headlines are solid; colour carries meaning, not decoration */
 .text-gradient {
-  background: linear-gradient(180deg, var(--grad-a) 20%, var(--grad-b) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-text-primary);
 }
 .text-gradient-brand {
-  background: linear-gradient(90deg, #67e8f9, #22bceb 30%, #4f8fe0 60%, #67e8f9 100%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: text-shine 8s linear infinite;
-}
-@keyframes text-shine {
-  to {
-    background-position: -200% 0;
-  }
+  color: var(--color-brand-sky);
 }
 
-/* Small uppercase label with a live dot */
+/* Small label above a heading: sentence case, in the warm accent */
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--color-brand-sky);
-}
-html[lang="bn"] .eyebrow {
-  font-family: var(--font-bangla);
-  letter-spacing: 0.04em;
-  font-size: 0.85rem;
-}
-.eyebrow::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--color-cyan-300);
-  box-shadow: 0 0 0 0 rgb(103 232 249 / 0.7);
-  animation: live-dot 2.4s ease-out infinite;
-}
-@keyframes live-dot {
-  70% {
-    box-shadow: 0 0 0 8px rgb(103 232 249 / 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgb(103 232 249 / 0);
-  }
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-gold);
 }
 
 /* Glass surfaces */
@@ -507,8 +474,8 @@ html[lang="bn"] .eyebrow {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
-.spotlight:hover::before,
-.spotlight:hover::after {
+.bento .spotlight:hover::before,
+.bento .spotlight:hover::after {
   opacity: 1;
 }
 
@@ -555,11 +522,12 @@ html[lang="bn"] .eyebrow {
   z-index: -1;
   background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
   transform: translateX(-120%);
-  animation: btn-sweep 4.5s var(--ease-ui) infinite;
+}
+.btn-glow:hover::after {
+  animation: btn-sweep 900ms var(--ease-ui);
 }
 @keyframes btn-sweep {
-  0%,
-  60% {
+  0% {
     transform: translateX(-120%);
   }
   100% {
@@ -569,7 +537,7 @@ html[lang="bn"] .eyebrow {
 
 /* Scroll reveal: elements with data-reveal fade and rise into view (SiteEffects adds .is-in).
    Only hidden when JavaScript is running, so content never disappears without it. */
-.js [data-reveal]:not(.is-in) {
+.js .hero-seq [data-reveal]:not(.is-in) {
   opacity: 0;
   transform: translateY(28px);
   filter: blur(6px);
@@ -817,6 +785,38 @@ html[lang="bn"] .eyebrow {
   }
 }
 
+/* Live market dot (gold pulse) */
+.live-dot {
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-gold) 70%, transparent);
+  animation: live-dot 2.4s ease-out infinite;
+}
+@keyframes live-dot {
+  70% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* Product illustrations move only when the card is pointed at */
+.bento .cap-visual * {
+  animation-play-state: paused !important;
+}
+.bento a:hover .cap-visual *,
+.bento a:focus-visible .cap-visual * {
+  animation-play-state: running !important;
+}
+
+/* Trading-board backdrop: dimmed where the main text sits */
+.bourse-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  mask-image: radial-gradient(ellipse 60% 55% at 28% 42%, rgb(0 0 0 / 0.12), #000 85%);
+}
+
 /* Scrollbar */
 html {
   scrollbar-color: #1e2d4a transparent;
@@ -836,7 +836,7 @@ html {
   .flow-packet-svg {
     display: none;
   }
-  .js [data-reveal]:not(.is-in) {
+  .js .hero-seq [data-reveal]:not(.is-in) {
     opacity: 1;
     transform: none;
     filter: none;

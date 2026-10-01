@@ -92,10 +92,6 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
         </div>
       </Container>
 
-      {/* Oversized wordmark (typography, not the logo) */}
-      <p aria-hidden="true" className="pointer-events-none -mb-[2vw] text-center font-display text-[16vw] leading-none font-semibold tracking-[-0.06em] text-transparent select-none bg-gradient-to-b from-fg/[0.07] to-transparent bg-clip-text">
-        XPERT
-      </p>
 
       <div className="relative border-t border-fg/[0.06] bg-ink-950/60 backdrop-blur">
         <Container className="flex flex-col gap-5 py-6 text-xs text-text-secondary md:flex-row md:items-center md:justify-between">

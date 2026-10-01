@@ -107,7 +107,7 @@ export function FeatureGridBlock({ block, ctx }: { block: BlockData; ctx: BlockC
               <Paragraphs text={item.body} className="text-sm" />
               {item.linkUrl && (
                 <SmartLink href={item.linkUrl} locale={ctx.locale} className="mt-auto text-sm font-semibold text-brand-sky hover:text-fg">
-                  {item.ctaLabel ?? ctx.t.readMore} →
+                  {item.ctaLabel ?? ctx.t.readMore}
                 </SmartLink>
               )}
             </li>
@@ -187,7 +187,7 @@ export function TimelineBlock({ block, ctx }: { block: BlockData; ctx: BlockCont
             <Paragraphs text={item.body} className="text-sm" />
             {item.linkUrl && (
               <SmartLink href={item.linkUrl} locale={ctx.locale} className="text-sm font-semibold text-brand-sky hover:text-fg">
-                {ctx.t.readMore} →
+                {ctx.t.readMore}
               </SmartLink>
             )}
           </li>

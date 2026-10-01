@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Inter, Inter_Tight, JetBrains_Mono, Noto_Sans_Bengali } from "next/font/google";
+import { Anek_Bangla, Hind_Siliguri, JetBrains_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { SiteEffects } from "@/components/motion/SiteEffects";
@@ -9,10 +9,14 @@ import { isLocale, locales } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import "../globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const interTight = Inter_Tight({ subsets: ["latin"], variable: "--font-inter-tight", display: "swap" });
+/*
+ * Type: Anek Bangla (display) and Hind Siliguri (text) both cover Latin and
+ * Bangla, so English and বাংলা pages share one voice. JetBrains Mono is used
+ * only for market figures, where columns of digits must line up.
+ */
+const display = Anek_Bangla({ subsets: ["latin", "bengali"], axes: ["wdth"], variable: "--font-display-face", display: "swap" });
+const body = Hind_Siliguri({ subsets: ["latin", "bengali"], weight: ["400", "500", "600", "700"], variable: "--font-body", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono", display: "swap" });
-const bengali = Noto_Sans_Bengali({ subsets: ["bengali"], variable: "--font-noto-bengali", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
@@ -46,7 +50,7 @@ export default async function LocaleLayout({
   const t = getMessages(locale);
 
   return (
-    <html lang={locale} className={`${inter.variable} ${interTight.variable} ${mono.variable} ${bengali.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`${display.variable} ${body.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         {/* Lets CSS hide scroll-reveal content only when JavaScript can reveal it again. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />

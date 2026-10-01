@@ -79,7 +79,7 @@ export function NetworkDiagram({
         {current.detail && <p className="mt-2 max-w-3xl whitespace-pre-line text-text-secondary">{current.detail}</p>}
         {current.href && (
           <SmartLinkClient href={current.href} locale={locale} className="mt-4 inline-block text-sm text-brand-sky hover:underline">
-            {readMore} →
+            {readMore}
           </SmartLinkClient>
         )}
       </div>

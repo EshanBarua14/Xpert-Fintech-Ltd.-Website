@@ -6,6 +6,7 @@ import {
   CapabilityBento,
   CtaBand,
   ecosystemLabels,
+  ecosystemModules,
   FlowStory,
   PageHero,
   PrimaryButton,
@@ -49,7 +50,7 @@ export default async function PlatformPage({ params }: Props) {
         <div className="grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           <SectionHeader eyebrow={t.ecosystemEyebrow} title={t.ecosystemTitle} body={t.ecosystemBody} />
           <div data-reveal>
-            <EcosystemMap labels={ecosystemLabels(t)} />
+            <EcosystemMap labels={ecosystemLabels(t)} modules={ecosystemModules(data.offerings, locale)} />
           </div>
         </div>
       </Shell>

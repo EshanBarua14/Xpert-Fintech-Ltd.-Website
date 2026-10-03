@@ -398,6 +398,91 @@ async function seedDeployments() {
   console.log(`• Published ${res.count} branded trading apps`);
 }
 
+
+// ── Milestones: events with confirmed dates ──────────────────────────────────
+
+/** Publishes events whose date and facts are public; fills a summary only where it is empty. */
+const EVENT_CONTENT: { key: string; summary: Text }[] = [
+  {
+    key: "cse-api-agreement-2024",
+    summary: t(
+      "An API agreement with the Chittagong Stock Exchange was signed with nine TREC holders, connecting their trading to CSE.",
+      "নয়টি ট্রেক হোল্ডারের সঙ্গে চট্টগ্রাম স্টক এক্সচেঞ্জের এপিআই চুক্তি স্বাক্ষরিত হয়, যা তাদের লেনদেন সিএসই-র সঙ্গে যুক্ত করে।",
+    ),
+  },
+  {
+    key: "ecosoftbd-acquisition",
+    summary: t(
+      "Xpert Fintech Ltd. acquired EcoSoftBD IT Ltd. to strengthen its digital footprint in the financial sector.",
+      "আর্থিক খাতে ডিজিটাল উপস্থিতি জোরদার করতে এক্সপার্ট ফিনটেক লিমিটেড ইকোসফটবিডি আইটি লিমিটেড অধিগ্রহণ করে।",
+    ),
+  },
+];
+
+async function seedMilestones() {
+  let published = 0;
+  for (const e of EVENT_CONTENT) {
+    const event = await db.event.findUnique({ where: { key: e.key }, include: { translations: true } });
+    if (!event || !event.startsAt) continue;
+    const en = event.translations.find((x) => x.locale === EN);
+    if (en && !en.summary) await db.eventTranslation.update({ where: { id: en.id }, data: { summary: e.summary.en } });
+    const bn = event.translations.find((x) => x.locale === BN);
+    if (bn && !bn.summary && e.summary.bn) await db.eventTranslation.update({ where: { id: bn.id }, data: { summary: e.summary.bn } });
+    if (event.status !== "PUBLISHED") {
+      await db.event.update({ where: { id: event.id }, data: { status: "PUBLISHED" } });
+      published++;
+    }
+  }
+  if (published) console.log(`• Published ${published} milestone event(s)`);
+}
+
+// ── Navigation: hide links to pending products ───────────────────────────────
+
+/** Hides menu links to products that are not published (e.g. eKYC), and shows them again once they are. */
+async function syncPendingProductLinks() {
+  const pending = [{ key: "ekyc", hrefs: ["platform#ekyc", "products/ekyc"] }];
+  for (const p of pending) {
+    const offering = await db.offering.findUnique({ where: { key: p.key } });
+    const live = offering?.status === "PUBLISHED" && !offering.deletedAt;
+    const res = await db.navItem.updateMany({ where: { href: { in: p.hrefs }, isHidden: live } , data: { isHidden: !live } });
+    if (res.count) console.log(`• ${live ? "Showed" : "Hid"} ${res.count} menu link(s) to ${p.key}`);
+  }
+}
+
+// ── Navigation: Team link under Company (header and footer) ──────────────────
+
+/** Adds a "Team" link right after "Management" in every menu that has one, once. */
+async function seedTeamLinks() {
+  const managementLinks = await db.navItem.findMany({ where: { href: "company/management", parentId: { not: null } } });
+  let added = 0;
+  for (const m of managementLinks) {
+    const exists = await db.navItem.findFirst({ where: { menuId: m.menuId, parentId: m.parentId, href: "company/team" } });
+    if (exists) continue;
+    // Make room right after Management.
+    await db.navItem.updateMany({
+      where: { menuId: m.menuId, parentId: m.parentId, sortOrder: { gt: m.sortOrder } },
+      data: { sortOrder: { increment: 1 } },
+    });
+    await db.navItem.create({
+      data: {
+        menuId: m.menuId,
+        parentId: m.parentId,
+        linkType: "INTERNAL",
+        href: "company/team",
+        sortOrder: m.sortOrder + 1,
+        translations: {
+          create: [
+            { locale: EN, label: "Team", description: "The people who build and run Xpert." },
+            { locale: BN, label: "টিম", description: "যাঁরা এক্সপার্ট তৈরি ও পরিচালনা করেন।" },
+          ],
+        },
+      },
+    });
+    added++;
+  }
+  if (added) console.log(`• Added the Team link to ${added} menu(s)`);
+}
+
 async function main() {
   const ids = new Map<string, string>();
   for (const c of CONTENT) ids.set(c.key, (await upsertOffering(c)).id);
@@ -409,6 +494,9 @@ async function main() {
   console.log(`• Products: ${[...PUBLISH].join(", ")} published`);
   await seedPeople();
   await seedDeployments();
+  await seedTeamLinks();
+  await seedMilestones();
+  await syncPendingProductLinks();
   console.log("Content seed complete.");
 }
 

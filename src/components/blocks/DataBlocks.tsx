@@ -83,7 +83,8 @@ export function PeopleGrid({
   group?: PersonGroup;
 }) {
   const t = getMessages(locale);
-  const groupLabel = group === "BOARD" ? t.boardMember : t.managementMember;
+  const groupLabel =
+    group === "BOARD" ? t.boardMember : group === "MANAGEMENT" ? t.managementMember : group === "LEADERSHIP" ? t.leadershipMember : t.teamMember;
   const rows: GalleryPerson[] = people.map((p) => {
     const tr = pick(p.translations, locale);
     const photo = photos.get(p.photoMediaId ?? "");

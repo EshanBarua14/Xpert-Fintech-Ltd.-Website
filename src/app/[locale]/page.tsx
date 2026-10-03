@@ -14,10 +14,13 @@ import {
   Principles,
   SectionHeader,
   Shell,
+  StatGrid,
 } from "@/components/flagship/Sections";
 import { getSiteInfo } from "@/lib/content/settings";
 import { LogoWall } from "@/components/organizations/LogoWall";
 import { ProductShowcase } from "@/components/products/ProductShowcase";
+import { LiveApps } from "@/components/organizations/LiveApps";
+import { getLiveApps } from "@/lib/public/company";
 import { getShowcase } from "@/lib/public/showcase";
 import { showcaseLabels } from "@/lib/public/labels";
 import { isLocale } from "@/lib/i18n/config";
@@ -72,6 +75,13 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   const [data, events, market, showcase] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale)]);
+  const apps = await getLiveApps(locale);
+  const proof = [
+    { value: data.members.length, label: t.proofMembers },
+    { value: data.offerings.length, label: t.proofProducts },
+    { value: apps.length, label: t.proofApps },
+    { value: data.exchanges.length, label: t.proofExchanges },
+  ].filter((p) => p.value > 0);
   const hasMarket = !!market.snapshot || market.shares.length > 0;
   const sections = page ? toSections(page, locale) : [];
   const ctx = sections.length ? await blockContext(locale, mediaIdsOf(sections)) : null;
@@ -106,6 +116,21 @@ export default async function HomePage({ params }: Props) {
               <GhostButton href={`/${locale}/products`}>{t.exploreProducts}</GhostButton>
             </div>
             <ProductShowcase products={showcase} labels={showcaseLabels(t)} />
+          </div>
+        </Shell>
+      )}
+
+      {(proof.length > 0 || apps.length > 0) && (
+        <Shell id="proof" className="py-20 md:py-28">
+          <div className="flex flex-col gap-12">
+            <SectionHeader eyebrow={t.proofEyebrow} title={t.proofTitle} body={t.proofBody} />
+            {proof.length > 0 && <StatGrid items={proof} locale={locale} />}
+            {apps.length > 0 && (
+              <div className="flex flex-col gap-5">
+                <p className="text-xs font-semibold tracking-[0.16em] text-text-secondary uppercase">{t.liveAppsTitle}</p>
+                <LiveApps apps={apps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp }} />
+              </div>
+            )}
           </div>
         </Shell>
       )}

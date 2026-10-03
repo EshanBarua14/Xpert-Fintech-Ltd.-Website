@@ -910,3 +910,23 @@ html {
   --xfl-up: var(--color-market-up);
   --xfl-down: var(--color-market-down);
 }
+
+/* ── XFL 2.0: milestone timeline — the rail draws down as it scrolls in ─── */
+.timeline-line { transform: scaleY(0); transition: transform 1600ms cubic-bezier(0.16, 1, 0.3, 1) 200ms; }
+.timeline.is-in .timeline-line { transform: scaleY(1); }
+.js .timeline:not(.is-in) .timeline-item { opacity: 0; transform: translateX(-12px); }
+.timeline-item { transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1), transform 700ms cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(300ms + var(--i, 0) * 180ms); }
+@media (prefers-reduced-motion: reduce) {
+  .timeline-line { transform: none; transition: none; }
+  .js .timeline:not(.is-in) .timeline-item { opacity: 1; transform: none; }
+}
+
+/* ── XFL 2.0: live apps — tiles light up in turn, like orders printing ──── */
+.live-app-pulse {
+  background: radial-gradient(120% 80% at 0% 0%, rgb(34 188 235 / 0.16), transparent 60%);
+  opacity: 0;
+  animation: live-app-pulse 6s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.6s);
+}
+@keyframes live-app-pulse { 0%, 70%, 100% { opacity: 0; } 12% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .live-app-pulse { animation: none; } }

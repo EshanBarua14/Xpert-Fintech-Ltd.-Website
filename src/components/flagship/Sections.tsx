@@ -246,8 +246,11 @@ const CAPABILITY_KEYS: { key: VisualKind; icon: string; title: keyof Messages; b
 ];
 
 /** The seven capabilities; each links to its product page once published, else to the platform page. */
+/** Capabilities shown only once their product is published (pending products stay off the site). */
+const HIDE_UNTIL_PUBLISHED = new Set(["ekyc"]);
+
 export function capabilities(t: Messages, locale: AppLocale, publishedSlugs: Set<string>): Capability[] {
-  return CAPABILITY_KEYS.map((c) => ({
+  return CAPABILITY_KEYS.filter((c) => !HIDE_UNTIL_PUBLISHED.has(c.slug) || publishedSlugs.has(c.slug)).map((c) => ({
     key: c.key,
     icon: c.icon,
     title: t[c.title],
@@ -267,10 +270,12 @@ const SPAN: Record<VisualKind, string> = {
 };
 
 export function CapabilityBento({ items, anchors = false }: { items: Capability[]; anchors?: boolean }) {
+  // With six cards (eKYC hidden), widen the back-office card so the last row has no gap.
+  const span = (k: VisualKind) => (k === "back" && items.length === 6 ? "lg:col-span-2" : SPAN[k]);
   return (
     <ul className="bento grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((c, i) => (
-        <li key={c.key} id={anchors ? c.key : undefined} data-reveal style={delay(i % 4)} className={cn("scroll-mt-32", SPAN[c.key])}>
+        <li key={c.key} id={anchors ? c.key : undefined} data-reveal style={delay(i % 4)} className={cn("scroll-mt-32", span(c.key))}>
           <Link
             href={c.href}
             className="spotlight group glass flex h-full flex-col overflow-hidden rounded-3xl p-6 transition-transform duration-500 hover:-translate-y-1"

@@ -27,7 +27,9 @@ export default async function NewsPage({ params, searchParams }: Props) {
   const { category } = await searchParams;
   const slug = typeof category === "string" && /^[a-z0-9-]{1,80}$/.test(category) ? category : null;
   const [cards, categories] = await Promise.all([getArticleCards(loc, slug), getNewsCategories(loc)]);
-  const [lead, ...rest] = slug ? [undefined, ...cards] : cards;
+  // With a category filter, every story is a card; otherwise the newest leads.
+  const lead = slug ? undefined : cards[0];
+  const rest = slug ? cards : cards.slice(1);
 
   return (
     <>

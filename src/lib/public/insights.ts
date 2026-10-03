@@ -139,7 +139,7 @@ export const getJobs = cache(async (locale: AppLocale): Promise<JobCard[]> => {
   });
   const now = new Date();
   return rows
-    .map((c) => {
+    .map((c): JobCard | null => {
       const tr = pick(c.translations, locale);
       if (!tr) return null;
       const own = c.translations.find((x) => x.locale === locale);
@@ -227,10 +227,10 @@ export const getResources = cache(async (locale: AppLocale): Promise<ResourceCar
     where: { id: { in: rows.map((r) => r.fileMediaId).filter((x): x is string => Boolean(x)) }, deletedAt: null, NOT: { tags: { has: "private" } } },
     select: { id: true, storageKey: true, sizeBytes: true },
   });
-  const fileById = new Map(files.map((f) => [f.id, f]));
+  const fileById = new Map<string, { id: string; storageKey: string; sizeBytes: number }>(files.map((f) => [f.id, f]));
   const covers = await mediaMap(rows.map((r) => r.coverMediaId), locale);
   return rows
-    .map((r) => {
+    .map((r): ResourceCard | null => {
       const tr = pick(r.translations, locale);
       if (!tr) return null;
       const file = r.fileMediaId ? fileById.get(r.fileMediaId) : undefined;

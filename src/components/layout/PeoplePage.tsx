@@ -26,7 +26,7 @@ export function peoplePage(group: PersonGroup, path: string, titleKey: "board" |
       <>
         <PageHero eyebrow={t.companyEyebrow} title={t[titleKey]} />
         <Shell className="pb-16">
-          {people.length ? <PeopleGrid people={people} photos={photos} locale={locale} /> : <p className="text-text-secondary">{t.noItems}</p>}
+          {people.length ? <PeopleGrid people={people} photos={photos} locale={locale as AppLocale} group={group} /> : <p className="text-text-secondary">{t.noItems}</p>}
         </Shell>
         <CtaBand t={t} locale={locale} />
       </>

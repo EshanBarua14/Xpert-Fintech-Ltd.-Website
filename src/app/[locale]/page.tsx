@@ -7,15 +7,19 @@ import {
   capabilities,
   CapabilityBento,
   CtaBand,
+  ecosystemModules,
   FlagshipHero,
   FlowStory,
   GhostButton,
-  MemberBoard,
   Principles,
   SectionHeader,
   Shell,
 } from "@/components/flagship/Sections";
 import { getSiteInfo } from "@/lib/content/settings";
+import { LogoWall } from "@/components/organizations/LogoWall";
+import { ProductShowcase } from "@/components/products/ProductShowcase";
+import { getShowcase } from "@/lib/public/showcase";
+import { showcaseLabels } from "@/lib/public/labels";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { mediaIdsOf, toSections } from "@/lib/public/blocks";
@@ -67,7 +71,7 @@ export default async function HomePage({ params }: Props) {
   );
 
   const t = getMessages(locale);
-  const [data, events, market] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload()]);
+  const [data, events, market, showcase] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale)]);
   const hasMarket = !!market.snapshot || market.shares.length > 0;
   const sections = page ? toSections(page, locale) : [];
   const ctx = sections.length ? await blockContext(locale, mediaIdsOf(sections)) : null;
@@ -80,6 +84,7 @@ export default async function HomePage({ params }: Props) {
         t={t}
         locale={locale}
         memberCount={data.members.length}
+        modules={ecosystemModules(data.offerings, locale)}
         ticker={market.snapshot ? <MarketTicker initial={market} t={t} locale={locale} /> : undefined}
         status={market.snapshot ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
       />
@@ -89,6 +94,18 @@ export default async function HomePage({ params }: Props) {
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} body={t.marketBody} />
             <MarketPulse initial={market} t={t} locale={locale} />
+          </div>
+        </Shell>
+      )}
+
+      {showcase.length > 0 && (
+        <Shell id="products" className="py-20 md:py-28">
+          <div className="flex flex-col gap-14">
+            <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+              <SectionHeader eyebrow={t.showcaseEyebrow} title={t.showcaseTitle} body={t.showcaseBody} />
+              <GhostButton href={`/${locale}/products`}>{t.exploreProducts}</GhostButton>
+            </div>
+            <ProductShowcase products={showcase} labels={showcaseLabels(t)} />
           </div>
         </Shell>
       )}
@@ -113,7 +130,7 @@ export default async function HomePage({ params }: Props) {
             <SectionHeader eyebrow={t.consortiumEyebrow} title={t.consortiumTitle} body={t.consortiumBody} />
             <GhostButton href={`/${locale}/consortium`}>{t.meetConsortium}</GhostButton>
           </div>
-          <MemberBoard names={data.members.map((m) => m.name)} />
+          <LogoWall members={data.members} size="sm" />
         </div>
       </Shell>
 

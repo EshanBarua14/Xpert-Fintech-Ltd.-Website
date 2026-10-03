@@ -5,7 +5,9 @@ import { Icon } from "@/components/ui/Icon";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils/cn";
-import { EcosystemMap, type EcosystemLabels } from "./EcosystemMap";
+import { EcosystemMap, type EcosystemLabels, type EcosystemModuleInfo } from "./EcosystemMap";
+import { ECOSYSTEM_MODULES, type EcosystemModuleKey } from "./ecosystem-modules";
+import { pick } from "@/lib/public/text";
 import { CapabilityVisual, type VisualKind } from "./Visuals";
 
 /**
@@ -99,7 +101,50 @@ export function ecosystemLabels(t: Messages): EcosystemLabels {
     hubSub: t.ecoHubSub,
     roles: { bsec: t.roleBsec, dse: t.roleDse, cse: t.roleCse, cdbl: t.roleCdbl, bank: t.roleBank, investors: t.roleInvestors },
     names: { bank: t.nameBank, investors: t.nameInvestors },
+    explore: t.exploreProduct,
   };
+}
+
+/** Which product page each ecosystem module opens. */
+const MODULE_SLUG: Record<EcosystemModuleKey, string> = {
+  OMS: "trading-platform",
+  RMS: "rms",
+  BO: "bo-account-opening",
+  "Back office": "back-office",
+  eKYC: "ekyc",
+  DMS: "dms",
+};
+
+type OfferingLike = { translations: { locale: string; slug: string; name: string; tagline: string | null }[] };
+
+/**
+ * Ecosystem modules from the published products: a module whose product is
+ * not published (e.g. eKYC while pending) is hidden from the map, and each
+ * visible module links to its product page with its tagline as the description.
+ */
+export function ecosystemModules(offerings: OfferingLike[], locale: AppLocale): Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>> {
+  const bySlug = new Map<string, OfferingLike>();
+  for (const o of offerings) for (const tr of o.translations) if (tr.locale === "en") bySlug.set(tr.slug, o);
+  const out: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>> = {};
+  for (const key of ECOSYSTEM_MODULES) {
+    const o = bySlug.get(MODULE_SLUG[key]);
+    if (!o) {
+      out[key] = { available: false };
+      continue;
+    }
+    const tr = pick(o.translations, locale);
+    const own = o.translations.find((x) => x.locale === locale);
+    out[key] = {
+      description: tr?.tagline ?? undefined,
+      href: `/${own ? locale : "en"}/products/${(own ?? tr)?.slug ?? MODULE_SLUG[key]}`,
+    };
+  }
+  return out;
+}
+
+/** The ecosystem module that represents a product slug, if any. */
+export function moduleForSlug(slug: string): EcosystemModuleKey | undefined {
+  return ECOSYSTEM_MODULES.find((k) => MODULE_SLUG[k] === slug);
 }
 
 export function FlagshipHero({
@@ -109,11 +154,14 @@ export function FlagshipHero({
   memberCount,
   ticker,
   status,
+  modules,
 }: {
   t: Messages;
   locale: AppLocale;
   body?: string | null;
   memberCount: number;
+  /** Which ecosystem modules to show and where they link (from published products). */
+  modules?: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>>;
   /** Live price strip shown along the bottom edge of the hero. */
   ticker?: ReactNode;
   /** Live market status line above the headline (only when market data is on). */
@@ -150,7 +198,7 @@ export function FlagshipHero({
           )}
         </div>
         <div data-reveal style={delay(2)} className="relative w-full">
-          <EcosystemMap labels={ecosystemLabels(t)} className="relative" />
+          <EcosystemMap labels={ecosystemLabels(t)} modules={modules} className="relative" />
         </div>
       </div>
       {ticker && <div className="relative">{ticker}</div>}

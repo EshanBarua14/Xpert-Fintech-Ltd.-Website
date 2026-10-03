@@ -37,8 +37,8 @@ export type EcosystemLabels = {
 };
 
 type NodeKey = "bsec" | "dse" | "cse" | "cdbl" | "bank" | "investors";
-export type EcosystemModuleKey = "RMS" | "OMS" | "BO" | "Back office" | "eKYC" | "DMS";
-export const ECOSYSTEM_MODULES: EcosystemModuleKey[] = ["RMS", "OMS", "BO", "Back office", "eKYC", "DMS"];
+import type { EcosystemModuleKey } from "./ecosystem-modules";
+export type { EcosystemModuleKey };
 type ModuleKey = EcosystemModuleKey;
 
 export type EcosystemModuleInfo = {

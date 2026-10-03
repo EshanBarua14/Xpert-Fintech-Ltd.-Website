@@ -5,7 +5,8 @@ import { Icon } from "@/components/ui/Icon";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils/cn";
-import { EcosystemMap, ECOSYSTEM_MODULES, type EcosystemLabels, type EcosystemModuleInfo, type EcosystemModuleKey } from "./EcosystemMap";
+import { EcosystemMap, type EcosystemLabels, type EcosystemModuleInfo } from "./EcosystemMap";
+import { ECOSYSTEM_MODULES, type EcosystemModuleKey } from "./ecosystem-modules";
 import { pick } from "@/lib/public/text";
 import { CapabilityVisual, type VisualKind } from "./Visuals";
 

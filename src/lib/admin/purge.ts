@@ -119,6 +119,23 @@ export async function purgeCaseStudy(id: string) {
   });
 }
 
+export async function purgeAlbum(id: string) {
+  await db.$transaction(async (tx) => {
+    await clearMediaUsage(tx, "ALBUM", id);
+    await tx.contentRelation.deleteMany({ where: { OR: [{ fromType: "ALBUM", fromId: id }, { toType: "ALBUM", toId: id }] } });
+    await tx.seoMetadata.deleteMany({ where: { entityType: "ALBUM", entityId: id } });
+    await tx.album.delete({ where: { id } });
+  });
+}
+
+export async function purgeVideo(id: string) {
+  await db.$transaction(async (tx) => {
+    await clearMediaUsage(tx, "VIDEO", id);
+    await tx.contentRelation.deleteMany({ where: { OR: [{ fromType: "VIDEO", fromId: id }, { toType: "VIDEO", toId: id }] } });
+    await tx.video.delete({ where: { id } });
+  });
+}
+
 export async function purgeLead(id: string) {
   await db.lead.delete({ where: { id } });
 }
@@ -171,6 +188,8 @@ export async function purgeOldTrash(force = false): Promise<number> {
     await run(await db.career.findMany({ where: old, select: { id: true } }), purgeCareer);
     await run(await db.resource.findMany({ where: old, select: { id: true } }), purgeResource);
     await run(await db.caseStudy.findMany({ where: old, select: { id: true } }), purgeCaseStudy);
+    await run(await db.album.findMany({ where: old, select: { id: true } }), purgeAlbum);
+    await run(await db.video.findMany({ where: old, select: { id: true } }), purgeVideo);
     await run(await db.person.findMany({ where: old, select: { id: true } }), purgePerson);
     await run(await db.offering.findMany({ where: old, select: { id: true } }), purgeOffering);
     await run(await db.organization.findMany({ where: old, select: { id: true } }), purgeOrganization);

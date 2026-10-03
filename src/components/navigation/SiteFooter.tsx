@@ -10,7 +10,8 @@ import { getMessages } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/i18n/config";
 
 function FooterLink({ item }: { item: NavLink }) {
-  const className = "text-sm text-text-secondary transition-colors hover:text-fg";
+  // py-1: a comfortable tap target on phones without changing the column rhythm much.
+  const className = "inline-block py-1 text-sm text-text-secondary transition-colors hover:text-fg";
   if (!item.href) return <span className={className}>{item.label}</span>;
   return item.external ? (
     <a href={item.href} className={className} target="_blank" rel="noopener noreferrer">
@@ -79,7 +80,7 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
             {columns.map((column) => (
               <nav key={column.id} aria-label={column.label} className="min-w-40">
                 <h2 className="mb-5 font-mono text-[11px] tracking-[0.2em] text-text-secondary uppercase">{column.label}</h2>
-                <ul className="flex flex-col gap-3">
+                <ul className="flex flex-col gap-1.5">
                   {column.children.map((item) => (
                     <li key={item.id}>
                       <FooterLink item={item} />

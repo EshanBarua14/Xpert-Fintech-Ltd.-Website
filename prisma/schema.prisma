@@ -68,6 +68,7 @@ enum VideoProvider {
   UPLOAD
   YOUTUBE
   VIMEO
+  FACEBOOK
 }
 
 enum MediaKind {
@@ -132,6 +133,8 @@ enum EntityType {
   ARTICLE
   EVENT
   RESOURCE
+  ALBUM
+  VIDEO
 }
 
 enum OrganizationKind {
@@ -1194,6 +1197,7 @@ model Event {
   translations  EventTranslation[]
   gallery       EventMedia[]
   organizations EventOrganization[]
+  videos        Video[]
 
   @@index([status, deletedAt, publishAt])
   @@index([startsAt])
@@ -1223,6 +1227,92 @@ model EventMedia {
   createdAt DateTime @default(now())
 
   @@index([eventId, sortOrder])
+}
+
+// ── Gallery: photo albums and videos ────────────────────────────────────────
+
+/// A photo album that is not tied to an event (office, culture, training…).
+/// Event photos stay on the event and appear in the gallery automatically.
+model Album {
+  id           String        @id @default(uuid()) @db.Uuid
+  coverMediaId String?       @db.Uuid
+  takenAt      DateTime?
+  status       ContentStatus @default(DRAFT)
+  publishAt    DateTime?
+  sortOrder    Int           @default(0)
+  createdById  String?       @db.Uuid
+  updatedById  String?       @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  translations AlbumTranslation[]
+  photos       AlbumMedia[]
+
+  @@index([status, deletedAt, publishAt])
+}
+
+model AlbumTranslation {
+  id          String  @id @default(uuid()) @db.Uuid
+  albumId     String  @db.Uuid
+  album       Album   @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  locale      Locale
+  slug        String
+  title       String
+  description String?
+
+  @@unique([albumId, locale])
+  @@unique([locale, slug])
+}
+
+model AlbumMedia {
+  id        String   @id @default(uuid()) @db.Uuid
+  albumId   String   @db.Uuid
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  mediaId   String   @db.Uuid
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([albumId, sortOrder])
+}
+
+/// A video in the gallery: a YouTube, Vimeo or Facebook link, or an MP4/WebM
+/// uploaded to the media library. Can belong to an event.
+model Video {
+  id            String        @id @default(uuid()) @db.Uuid
+  provider      VideoProvider
+  url           String?
+  mediaId       String?       @db.Uuid
+  posterMediaId String?       @db.Uuid
+  eventId       String?       @db.Uuid
+  event         Event?        @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  recordedAt    DateTime?
+  durationSec   Int?
+  isFeatured    Boolean       @default(false)
+  status        ContentStatus @default(DRAFT)
+  publishAt     DateTime?
+  sortOrder     Int           @default(0)
+  createdById   String?       @db.Uuid
+  updatedById   String?       @db.Uuid
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+
+  translations VideoTranslation[]
+
+  @@index([status, deletedAt, publishAt])
+  @@index([eventId])
+}
+
+model VideoTranslation {
+  id          String  @id @default(uuid()) @db.Uuid
+  videoId     String  @db.Uuid
+  video       Video   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  locale      Locale
+  title       String
+  description String?
+
+  @@unique([videoId, locale])
 }
 
 /// Organizations that took part in an event (e.g. the nine TREC holders).

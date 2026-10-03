@@ -3,19 +3,20 @@
  * or the browser-reported type, and reads image dimensions without extra
  * libraries.
  *
- * Accepted: PNG, JPEG, WebP, GIF images and PDF documents.
- * Not accepted: SVG (it can carry scripts), HTML, executables, archives.
- * Videos are added as YouTube/Vimeo links rather than uploads.
+ * Accepted: PNG, JPEG, WebP, GIF images, PDF documents and short MP4/WebM
+ * videos. Not accepted: SVG (it can carry scripts), HTML, executables,
+ * archives. Long videos are better added as YouTube/Vimeo/Facebook links.
  */
 export type Sniffed = {
-  kind: "IMAGE" | "DOCUMENT";
-  ext: "png" | "jpg" | "webp" | "gif" | "pdf";
+  kind: "IMAGE" | "DOCUMENT" | "VIDEO";
+  ext: "png" | "jpg" | "webp" | "gif" | "pdf" | "mp4" | "webm";
   mimeType: string;
   width?: number;
   height?: number;
 };
 
-export const MAX_BYTES = { IMAGE: 10 * 1024 * 1024, DOCUMENT: 25 * 1024 * 1024 } as const;
+// Uploads travel through a server action limited to 50 MB (next.config.ts).
+export const MAX_BYTES = { IMAGE: 10 * 1024 * 1024, DOCUMENT: 25 * 1024 * 1024, VIDEO: 45 * 1024 * 1024 } as const;
 
 const ascii = (b: Buffer, start: number, end: number) => b.toString("latin1", start, end);
 
@@ -63,6 +64,16 @@ export function sniff(b: Buffer): Sniffed | null {
   }
   if (ascii(b, 0, 5) === "%PDF-") {
     return { kind: "DOCUMENT", ext: "pdf", mimeType: "application/pdf" };
+  }
+  // ISO base media ("ftyp" box first): MP4 and its common brands. QuickTime
+  // (.mov, brand "qt  ") is refused because most browsers cannot play it.
+  if (ascii(b, 4, 8) === "ftyp") {
+    const brand = ascii(b, 8, 12);
+    if (/^(isom|iso[2-9]|mp41|mp42|avc1|dash|M4V |MSNV)$/.test(brand)) return { kind: "VIDEO", ext: "mp4", mimeType: "video/mp4" };
+    return null;
+  }
+  if (b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3 && ascii(b, 0, 64).includes("webm")) {
+    return { kind: "VIDEO", ext: "webm", mimeType: "video/webm" };
   }
   return null;
 }

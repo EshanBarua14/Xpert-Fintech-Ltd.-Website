@@ -29,8 +29,8 @@ export function TranslatedFieldset({
   values: Record<string, string>;
   errors: Record<string, string>;
   fields: FieldSpec[];
-  /** Address shown in the slug hint, e.g. "news" → /en/news/your-slug */
-  slugBase: string;
+  /** Address shown in the slug hint, e.g. "news" → /en/news/your-slug. Omit for items without their own page. */
+  slugBase?: string;
 }) {
   const [slug, setSlug] = useState(values.slug ?? "");
   const [touched, setTouched] = useState(Boolean(values.slug));
@@ -49,7 +49,7 @@ export function TranslatedFieldset({
           error={errors[k(title.name)]}
         />
       )}
-      <TextInput
+      {slugBase !== undefined && <TextInput
         id={k("Slug")}
         label="URL slug"
         hint={l === "en" ? `Shown in the address: /en/${slugBase}/your-slug` : "Leave empty to reuse the English slug."}
@@ -59,7 +59,7 @@ export function TranslatedFieldset({
           setTouched(true);
         }}
         error={errors[k("Slug")]}
-      />
+      />}
       {rest.map((f) => {
         const value = values[f.name.charAt(0).toLowerCase() + f.name.slice(1)] ?? "";
         return (

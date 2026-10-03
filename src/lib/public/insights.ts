@@ -4,7 +4,7 @@ import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
 import type { AppLocale } from "@/lib/i18n/config";
 import { mediaMap, type MediaInfo } from "./content";
-import { pick } from "./text";
+import { parseVideoUrl, pick } from "./text";
 
 // ── News ─────────────────────────────────────────────────────────────────────
 
@@ -177,32 +177,189 @@ export function lines(text: string | null | undefined) {
 // ── Gallery ──────────────────────────────────────────────────────────────────
 
 export type GalleryPhoto = { id: string; url: string; alt: string; width: number | null; height: number | null };
-export type Album = { id: string; title: string; href: string; date: Date | null; approx: boolean; photos: GalleryPhoto[] };
+export type Album = {
+  id: string;
+  kind: "album" | "event";
+  title: string;
+  description: string | null;
+  href: string;
+  date: Date | null;
+  approx: boolean;
+  cover: GalleryPhoto | null;
+  photos: GalleryPhoto[];
+};
 
-/** Published events that have photos, newest first; each is an album. */
+const toPhoto = (id: string, m: MediaInfo | undefined, fallbackAlt: string): GalleryPhoto | null =>
+  m ? { id, url: m.url, alt: m.alt || fallbackAlt, width: m.width, height: m.height } : null;
+
+/**
+ * Every album in the gallery, newest first: photo albums from Admin → Photo
+ * albums, and every published event that has photos.
+ */
 export const getAlbums = cache(async (locale: AppLocale): Promise<Album[]> => {
-  const rows = await db.event.findMany({
-    where: { ...publishedWhere(), gallery: { some: {} } },
-    orderBy: [{ startsAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
-    include: { translations: true, gallery: { orderBy: { sortOrder: "asc" } } },
+  const [events, albums] = await Promise.all([
+    db.event.findMany({
+      where: { ...publishedWhere(), gallery: { some: {} } },
+      include: { translations: true, gallery: { orderBy: { sortOrder: "asc" } } },
+    }),
+    db.album.findMany({
+      where: { ...publishedWhere(), photos: { some: {} } },
+      include: { translations: true, photos: { orderBy: { sortOrder: "asc" } } },
+    }),
+  ]);
+  const media = await mediaMap(
+    [...events.flatMap((r) => r.gallery.map((g) => g.mediaId)), ...albums.flatMap((a) => [a.coverMediaId, ...a.photos.map((p) => p.mediaId)])],
+    locale,
+  );
+  const out: (Album & { sort: number })[] = [];
+  for (const e of events) {
+    const tr = pick(e.translations, locale);
+    if (!tr) continue;
+    const own = e.translations.find((x) => x.locale === locale);
+    const photos = e.gallery.map((g) => toPhoto(g.id, media.get(g.mediaId), tr.title)).filter((p): p is GalleryPhoto => p !== null);
+    if (!photos.length) continue;
+    out.push({
+      id: e.id,
+      kind: "event",
+      title: tr.title,
+      description: tr.summary ?? null,
+      href: `/${own ? locale : "en"}/events/${(own ?? tr).slug}#gallery`,
+      date: e.startsAt,
+      approx: e.dateIsApprox,
+      cover: photos[0] ?? null,
+      photos,
+      sort: (e.startsAt ?? e.createdAt).getTime(),
+    });
+  }
+  for (const a of albums) {
+    const tr = pick(a.translations, locale);
+    if (!tr) continue;
+    const own = a.translations.find((x) => x.locale === locale);
+    const photos = a.photos.map((p) => toPhoto(p.id, media.get(p.mediaId), tr.title)).filter((p): p is GalleryPhoto => p !== null);
+    if (!photos.length) continue;
+    const cover = (a.coverMediaId && toPhoto(a.coverMediaId, media.get(a.coverMediaId), tr.title)) || photos[0] || null;
+    out.push({
+      id: a.id,
+      kind: "album",
+      title: tr.title,
+      description: tr.description ?? null,
+      href: `/${own ? locale : "en"}/gallery/${(own ?? tr).slug}`,
+      date: a.takenAt,
+      approx: false,
+      cover,
+      photos,
+      sort: (a.takenAt ?? a.createdAt).getTime() - a.sortOrder,
+    });
+  }
+  return out.sort((x, y) => y.sort - x.sort).map(({ sort: _sort, ...album }) => album);
+});
+
+/** One photo album with its photos, by slug in this language (or English). */
+export const getAlbumBySlug = cache(async (locale: AppLocale, slug: string) => {
+  const album = await db.album.findFirst({
+    where: { ...publishedWhere(), translations: { some: { slug, locale: { in: [locale, "en"] } } } },
+    include: { translations: true, photos: { orderBy: { sortOrder: "asc" } } },
   });
-  const media = await mediaMap(rows.flatMap((r) => r.gallery.map((g) => g.mediaId)), locale);
-  return rows
-    .map((e) => {
-      const tr = pick(e.translations, locale);
-      if (!tr) return null;
-      const own = e.translations.find((x) => x.locale === locale);
-      const photos = e.gallery
-        .map((g) => {
-          const m = media.get(g.mediaId);
-          return m ? { id: g.id, url: m.url, alt: m.alt || tr.title, width: m.width, height: m.height } : null;
-        })
-        .filter((p): p is GalleryPhoto => p !== null);
-      return photos.length
-        ? { id: e.id, title: tr.title, href: `/${own ? locale : "en"}/events/${(own ?? tr).slug}#gallery`, date: e.startsAt, approx: e.dateIsApprox, photos }
-        : null;
-    })
-    .filter((a): a is Album => a !== null);
+  if (!album) return null;
+  const tr = pick(album.translations, locale);
+  if (!tr) return null;
+  const media = await mediaMap(album.photos.map((p) => p.mediaId), locale);
+  const photos = album.photos.map((p) => toPhoto(p.id, media.get(p.mediaId), tr.title)).filter((p): p is GalleryPhoto => p !== null);
+  if (!photos.length) return null;
+  return { album, tr, photos };
+});
+
+// ── Videos ───────────────────────────────────────────────────────────────────
+
+export type GalleryVideo = {
+  id: string;
+  title: string;
+  description: string | null;
+  provider: "UPLOAD" | "YOUTUBE" | "VIMEO" | "FACEBOOK";
+  /** iframe player for linked videos. */
+  embedUrl: string | null;
+  /** Our own file for uploaded videos. */
+  file: { url: string; type: string } | null;
+  poster: string | null;
+  date: Date | null;
+  durationSec: number | null;
+  featured: boolean;
+  event: { title: string; href: string } | null;
+};
+
+/**
+ * Every video in the gallery: Admin → Videos, plus the video of any published
+ * event that is not already listed there. Featured first, then newest.
+ */
+export const getVideos = cache(async (locale: AppLocale): Promise<GalleryVideo[]> => {
+  const [rows, events] = await Promise.all([
+    db.video.findMany({
+      where: publishedWhere(),
+      orderBy: [{ isFeatured: "desc" }, { recordedAt: { sort: "desc", nulls: "last" } }, { sortOrder: "asc" }, { createdAt: "desc" }],
+      include: { translations: true, event: { include: { translations: true } } },
+    }),
+    db.event.findMany({
+      where: { ...publishedWhere(), videoUrl: { not: null } },
+      orderBy: [{ startsAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
+      include: { translations: true },
+    }),
+  ]);
+  const media = await mediaMap([...rows.flatMap((r) => [r.mediaId, r.posterMediaId]), ...events.map((e) => e.coverMediaId)], locale);
+  const files = await db.media.findMany({
+    where: { id: { in: rows.map((r) => r.mediaId).filter((x): x is string => Boolean(x)) }, kind: "VIDEO", deletedAt: null },
+    select: { id: true, storageKey: true, mimeType: true },
+  });
+  const fileById = new Map<string, { id: string; storageKey: string; mimeType: string }>(files.map((f) => [f.id, f]));
+  const eventLink = (e: { translations: { locale: string; slug: string; title: string }[] }) => {
+    const tr = pick(e.translations, locale);
+    if (!tr) return null;
+    const own = e.translations.find((x) => x.locale === locale);
+    return { title: tr.title, href: `/${own ? locale : "en"}/events/${(own ?? tr).slug}` };
+  };
+
+  const out: GalleryVideo[] = [];
+  const seen = new Set<string>();
+  for (const r of rows) {
+    const tr = pick(r.translations, locale);
+    if (!tr) continue;
+    const link = r.provider === "UPLOAD" ? null : parseVideoUrl(r.url);
+    const f = r.mediaId ? fileById.get(r.mediaId) : undefined;
+    if (!link && !f) continue;
+    if (r.url) seen.add(r.url);
+    out.push({
+      id: r.id,
+      title: tr.title,
+      description: tr.description ?? null,
+      provider: r.provider,
+      embedUrl: link?.embedUrl ?? null,
+      file: f ? { url: `/media/${f.storageKey}`, type: f.mimeType } : null,
+      poster: (r.posterMediaId && media.get(r.posterMediaId)?.url) || link?.thumbnail || null,
+      date: r.recordedAt,
+      durationSec: r.durationSec,
+      featured: r.isFeatured,
+      event: r.event && !r.event.deletedAt ? eventLink(r.event) : null,
+    });
+  }
+  for (const e of events) {
+    if (!e.videoUrl || seen.has(e.videoUrl)) continue;
+    const link = parseVideoUrl(e.videoUrl);
+    const ev = eventLink(e);
+    if (!link || !ev) continue;
+    out.push({
+      id: `event-${e.id}`,
+      title: ev.title,
+      description: null,
+      provider: link.provider,
+      embedUrl: link.embedUrl,
+      file: null,
+      poster: link.thumbnail || (e.coverMediaId && media.get(e.coverMediaId)?.url) || null,
+      date: e.startsAt,
+      durationSec: null,
+      featured: false,
+      event: ev,
+    });
+  }
+  return out;
 });
 
 /** One event's photos, in order. */

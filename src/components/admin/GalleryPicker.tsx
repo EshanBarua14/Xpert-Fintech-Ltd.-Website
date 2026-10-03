@@ -2,29 +2,83 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
+import { uploadPhotos } from "@/app/admin/(protected)/media/actions";
 import type { ImageOption } from "@/lib/admin/media";
+
+// Each request must stay within serverActions.bodySizeLimit (50 MB) and 10 files.
+const MAX_GROUP_BYTES = 45 * 1024 * 1024;
+const MAX_GROUP_FILES = 10;
 
 /**
  * An ordered list of photos from the media library. Submits one hidden input
- * per photo, named `name`, in display order. Photos can be added several at a
- * time, reordered with the arrow buttons, and removed.
+ * per photo, named `name`, in display order. Photos can be uploaded right
+ * here or picked from the library, reordered by dragging or with the arrow
+ * buttons, and removed.
  */
-export function GalleryPicker({ name, options, defaultValue }: { name: string; options: ImageOption[]; defaultValue: string[] }) {
-  const [ids, setIds] = useState<string[]>(defaultValue.filter((id) => options.some((o) => o.id === id)));
+export function GalleryPicker({ name, options: initialOptions, defaultValue }: { name: string; options: ImageOption[]; defaultValue: string[] }) {
+  const [options, setOptions] = useState<ImageOption[]>(initialOptions);
+  const [ids, setIds] = useState<string[]>(defaultValue.filter((id) => initialOptions.some((o) => o.id === id)));
   const [picking, setPicking] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("");
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [uploadProblems, setUploadProblems] = useState<string[]>([]);
+  const [dragFrom, setDragFrom] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  /** Uploads in small groups so large selections never exceed the request limit. */
+  async function upload(files: File[]) {
+    const groups: File[][] = [];
+    let group: File[] = [];
+    let size = 0;
+    for (const f of files) {
+      if (group.length && (group.length >= MAX_GROUP_FILES || size + f.size > MAX_GROUP_BYTES)) {
+        groups.push(group);
+        group = [];
+        size = 0;
+      }
+      group.push(f);
+      size += f.size;
+    }
+    if (group.length) groups.push(group);
+    const problems: string[] = [];
+    let done = 0;
+    for (const g of groups) {
+      setUploading(`Uploading ${done + 1}–${done + g.length} of ${files.length}…`);
+      const fd = new FormData();
+      for (const f of g) fd.append("files", f);
+      try {
+        const res = await uploadPhotos(fd);
+        problems.push(...res.problems);
+        if (res.added.length) {
+          setOptions((o) => [...res.added, ...o]);
+          setIds((l) => [...l, ...res.added.map((a) => a.id)]);
+        }
+      } catch {
+        problems.push(`Could not upload ${g.length} photo(s). Check your connection and try again.`);
+      }
+      done += g.length;
+    }
+    setUploading(null);
+    setUploadProblems(problems);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
+  const reorder = (from: number, to: number) =>
+    setIds((list) => {
+      if (from === to) return list;
+      const next = [...list];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item!);
+      return next;
+    });
   const byId = new Map(options.map((o) => [o.id, o]));
   const available = options.filter((o) => !ids.includes(o.id) && o.name.toLowerCase().includes(filter.toLowerCase()));
 
-  const move = (i: number, d: -1 | 1) =>
-    setIds((list) => {
-      const next = [...list];
-      const j = i + d;
-      if (j < 0 || j >= next.length) return list;
-      [next[i], next[j]] = [next[j]!, next[i]!];
-      return next;
-    });
+  const move = (i: number, d: -1 | 1) => {
+    const j = i + d;
+    if (j >= 0 && j < ids.length) reorder(i, j);
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -38,10 +92,22 @@ export function GalleryPicker({ name, options, defaultValue }: { name: string; o
           {ids.map((id, i) => {
             const o = byId.get(id)!;
             return (
-              <li key={id} className="flex flex-col overflow-hidden rounded-control border border-fg/10">
-                <span className="relative flex aspect-[4/3] items-center justify-center bg-ink-950">
+              <li
+                key={id}
+                draggable
+                onDragStart={() => setDragFrom(i)}
+                onDragOver={(ev) => ev.preventDefault()}
+                onDrop={(ev) => {
+                  ev.preventDefault();
+                  if (dragFrom !== null) reorder(dragFrom, i);
+                  setDragFrom(null);
+                }}
+                onDragEnd={() => setDragFrom(null)}
+                className={"flex cursor-grab flex-col overflow-hidden rounded-control border active:cursor-grabbing " + (dragFrom === i ? "border-brand-sky opacity-50" : "border-fg/10")}
+              >
+                <span className="relative block aspect-[4/3] overflow-hidden bg-ink-950">
                   {/* eslint-disable-next-line @next/next/no-img-element -- admin thumbnail */}
-                  <img src={o.url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <img src={o.url} alt="" loading="lazy" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
                   <span className="absolute top-1.5 left-1.5 rounded bg-ink-950/80 px-1.5 text-[11px]">{i + 1}</span>
                 </span>
                 <span className="flex items-center justify-between gap-1 px-2 py-1.5 text-xs">
@@ -71,15 +137,39 @@ export function GalleryPicker({ name, options, defaultValue }: { name: string; o
           }}
           className="rounded-control border border-fg/15 px-3 py-1.5 text-sm hover:border-brand-sky"
         >
-          Add photos
+          Add from library
         </button>
-        <span className="text-xs text-text-secondary">{ids.length} photo(s). The first is the album cover.</span>
+        <label className={"cursor-pointer rounded-control bg-brand-royal px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-royal/90 " + (uploading ? "pointer-events-none opacity-60" : "")}>
+          Upload new photos
+          <input
+            ref={fileRef}
+            type="file"
+            multiple
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            className="sr-only"
+            disabled={Boolean(uploading)}
+            onChange={(ev) => {
+              const files = Array.from(ev.target.files ?? []);
+              if (files.length) void upload(files);
+            }}
+          />
+        </label>
+        <span className="text-xs text-text-secondary" role="status">
+          {uploading ?? `${ids.length} photo(s). Drag to reorder; the first is the cover unless you choose one.`}
+        </span>
       </div>
+      {uploadProblems.length > 0 && (
+        <ul className="flex flex-col gap-1 text-xs text-market-down">
+          {uploadProblems.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ul>
+      )}
 
-      <dialog ref={dialogRef} aria-label="Add photos" className="m-auto w-[min(60rem,calc(100vw-2rem))] rounded-card border border-fg/10 bg-navy-900 p-0 text-text-primary backdrop:bg-black/60">
+      <dialog ref={dialogRef} aria-label="Add from library" className="m-auto w-[min(60rem,calc(100vw-2rem))] rounded-card border border-fg/10 bg-navy-900 p-0 text-text-primary backdrop:bg-black/60">
         <div className="flex max-h-[80vh] flex-col">
           <div className="flex flex-wrap items-center gap-3 border-b border-fg/10 p-4">
-            <h2 className="font-semibold">Add photos</h2>
+            <h2 className="font-semibold">Add from library</h2>
             <input
               type="search"
               value={filter}
@@ -133,9 +223,9 @@ export function GalleryPicker({ name, options, defaultValue }: { name: string; o
                         }
                         className={"flex w-full flex-col overflow-hidden rounded-control border text-left " + (on ? "border-brand-sky ring-2 ring-brand-sky/40" : "border-fg/10 hover:border-brand-sky/50")}
                       >
-                        <span className="flex aspect-[4/3] items-center justify-center bg-ink-950">
+                        <span className="relative block aspect-[4/3] overflow-hidden bg-ink-950">
                           {/* eslint-disable-next-line @next/next/no-img-element -- admin thumbnail */}
-                          <img src={o.url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                          <img src={o.url} alt="" loading="lazy" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
                         </span>
                         <span className="truncate px-2 py-1.5 text-xs">{on ? "✓ " : ""}{o.name}</span>
                       </button>

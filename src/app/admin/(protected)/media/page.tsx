@@ -14,7 +14,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
   const params = await searchParams;
   const inTrash = params.view === "trash";
   const q = params.q?.trim().toLowerCase() ?? "";
-  const kind = params.kind === "IMAGE" || params.kind === "DOCUMENT" ? params.kind : undefined;
+  const kind = params.kind === "IMAGE" || params.kind === "DOCUMENT" || params.kind === "VIDEO" ? params.kind : undefined;
 
   const where: Prisma.MediaWhereInput = {
     deletedAt: inTrash ? { not: null } : null,
@@ -72,6 +72,7 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
                   [undefined, "All"],
                   ["IMAGE", "Images"],
                   ["DOCUMENT", "Documents"],
+                  ["VIDEO", "Videos"],
                 ] as const
               ).map(([k, label]) => (
                 <Link
@@ -107,6 +108,8 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
                   {m.kind === "IMAGE" ? (
                     // eslint-disable-next-line @next/next/no-img-element -- admin thumbnails, served from our own route
                     <img src={`/media/${m.storageKey}`} alt="" loading="lazy" className="h-full w-full object-contain" />
+                  ) : m.kind === "VIDEO" ? (
+                    <video src={`/media/${m.storageKey}#t=0.5`} preload="metadata" muted playsInline className="h-full w-full object-contain" />
                   ) : (
                     <span className="tabular text-sm text-text-secondary">PDF</span>
                   )}

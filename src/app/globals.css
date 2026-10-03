@@ -446,6 +446,14 @@ body::before {
   -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
 
+/* The phone menu sits over busy page content: keep the glass, but nearly opaque. */
+.menu-drawer {
+  background: rgb(5 8 15 / 0.94);
+}
+[data-theme="light"] .menu-drawer {
+  background: rgb(255 255 255 / 0.96);
+}
+
 /* Cards that light up under the pointer (--mx/--my set by SiteEffects) */
 .spotlight {
   position: relative;

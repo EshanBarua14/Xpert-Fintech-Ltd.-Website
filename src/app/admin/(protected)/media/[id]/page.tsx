@@ -36,6 +36,8 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
           {isImage ? (
             // eslint-disable-next-line @next/next/no-img-element -- admin preview of our own served file
             <img src={url} alt={t("en")?.altText ?? ""} className="max-h-[70vh] w-auto object-contain" />
+          ) : media.kind === "VIDEO" ? (
+            <video src={url} controls preload="metadata" playsInline className="max-h-[70vh] w-full rounded-control" />
           ) : (
             <a href={url} target="_blank" rel="noopener noreferrer" className={buttonClasses({ variant: "secondary" })}>
               Open PDF ↗

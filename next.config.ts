@@ -4,8 +4,8 @@ const isDev = process.env.NODE_ENV !== "production";
 
 /*
  * Content-Security-Policy. Scripts and styles are limited to this site, plus
- * Cloudflare Turnstile (spam check) and the YouTube/Vimeo players used in
- * product pages. 'unsafe-inline' is kept for scripts because Next.js and the
+ * Cloudflare Turnstile (spam check) and the YouTube/Vimeo/Facebook players used in
+ * product pages and the video gallery. 'unsafe-inline' is kept for scripts because Next.js and the
  * theme/JSON-LD snippets are inline; a per-request nonce would force every page
  * to render dynamically and lose caching. Everything else is locked down:
  * no plugins, no framing of this site, forms only post back here.
@@ -14,10 +14,11 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  // i.ytimg.com: YouTube video thumbnails in the gallery.
+  "img-src 'self' data: blob: https://i.ytimg.com",
   "font-src 'self' data:",
   `connect-src 'self' https://challenges.cloudflare.com${isDev ? " ws: wss:" : ""}`,
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://challenges.cloudflare.com",
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com https://challenges.cloudflare.com",
   "media-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",

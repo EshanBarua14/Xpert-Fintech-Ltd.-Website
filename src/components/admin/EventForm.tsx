@@ -135,7 +135,7 @@ export function EventForm({
           <TextInput
             id="videoUrl"
             type="url"
-            label="Video (YouTube or Vimeo)"
+            label="Video (YouTube, Vimeo or Facebook)"
             placeholder="https://www.youtube.com/watch?v=…"
             defaultValue={values.videoUrl}
             error={e.videoUrl}

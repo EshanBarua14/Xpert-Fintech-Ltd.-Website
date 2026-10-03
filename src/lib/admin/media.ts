@@ -64,3 +64,30 @@ export async function isUsableDocument(id: string | null | undefined): Promise<b
   const m = await db.media.findFirst({ where: { id, kind: "DOCUMENT", deletedAt: null, NOT: { tags: { has: "private" } } }, select: { id: true } });
   return Boolean(m);
 }
+
+export type VideoFileOption = { value: string; label: string };
+
+/** MP4/WebM files in the media library, for the Videos editor. */
+export async function videoFileOptions(): Promise<VideoFileOption[]> {
+  const rows = await db.media.findMany({
+    where: { kind: "VIDEO", deletedAt: null },
+    orderBy: { createdAt: "desc" },
+    take: 300,
+    select: { id: true, originalName: true, sizeBytes: true },
+  });
+  return rows.map((m) => ({ value: m.id, label: `${m.originalName} (${Math.max(1, Math.round(m.sizeBytes / 1024 / 1024))} MB)` }));
+}
+
+/** True when the id is a video file in the library (not in the trash). */
+export async function isUsableVideoFile(id: string | null | undefined): Promise<boolean> {
+  if (!id) return true;
+  const m = await db.media.findFirst({ where: { id, kind: "VIDEO", deletedAt: null }, select: { id: true } });
+  return Boolean(m);
+}
+
+/** Checks that every id is an image in the library; returns false if any is missing. */
+export async function allUsableImages(ids: string[]): Promise<boolean> {
+  if (ids.length === 0) return true;
+  const n = await db.media.count({ where: { id: { in: ids }, kind: "IMAGE", deletedAt: null } });
+  return n === ids.length;
+}

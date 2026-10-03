@@ -43,6 +43,8 @@ function resolveHref(
 const FIXED_ROUTES = [
   "", "platform", "consortium", "products", "events", "contact", "request-demo",
   "company/about", "company/board", "company/management", "company/team", "careers",
+  // Always in the menu, with a friendly empty state until content is added.
+  "news", "gallery",
 ];
 
 /**
@@ -53,7 +55,7 @@ const FIXED_ROUTES = [
  */
 const livePaths = cache(async (locale: AppLocale): Promise<Set<string>> => {
   const now = new Date();
-  const [pages, offerings, events, articles, careers, cases, resourceCount, albumCount] = await Promise.all([
+  const [pages, offerings, events, articles, careers, cases, resourceCount, albums] = await Promise.all([
     db.pageTranslation.findMany({ where: { locale, page: publishedWhere(now) }, select: { path: true } }),
     db.offeringTranslation.findMany({ where: { locale, offering: { ...publishedWhere(now), hasOwnPage: true } }, select: { slug: true } }),
     db.eventTranslation.findMany({ where: { locale, event: publishedWhere(now) }, select: { slug: true } }),
@@ -61,14 +63,12 @@ const livePaths = cache(async (locale: AppLocale): Promise<Set<string>> => {
     db.careerTranslation.findMany({ where: { locale, career: publishedWhere(now) }, select: { slug: true } }),
     db.caseStudyTranslation.findMany({ where: { locale, caseStudy: publishedWhere(now) }, select: { slug: true } }),
     db.resource.count({ where: publishedWhere(now) }),
-    db.event.count({ where: { ...publishedWhere(now), gallery: { some: {} } } }),
+    db.albumTranslation.findMany({ where: { locale, album: publishedWhere(now) }, select: { slug: true } }),
   ]);
   // Listing pages appear in menus only once they have something to show.
   const listings = [
-    articles.length > 0 && "news",
     cases.length > 0 && "case-studies",
     resourceCount > 0 && "resources",
-    albumCount > 0 && "gallery",
   ].filter((x): x is string => Boolean(x));
   return new Set([
     ...FIXED_ROUTES,
@@ -79,6 +79,7 @@ const livePaths = cache(async (locale: AppLocale): Promise<Set<string>> => {
     ...articles.map((a) => `news/${a.slug}`),
     ...careers.map((c) => `careers/${c.slug}`),
     ...cases.map((c) => `case-studies/${c.slug}`),
+    ...albums.map((a) => `gallery/${a.slug}`),
   ]);
 });
 

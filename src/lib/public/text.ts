@@ -47,25 +47,63 @@ export function formatEventDate(date: Date | null, approx: boolean, locale: AppL
   return approx ? monthFmt(locale).format(date) : dayFmt(locale).format(date);
 }
 
-/** YouTube/Vimeo watch URL → privacy-friendly embed URL, or null. */
-export function videoEmbedUrl(url: string | null | undefined): string | null {
+/** 225 → "3:45", 3750 → "1:02:30" (Bangla digits on Bangla pages). */
+export function formatDuration(sec: number | null | undefined, locale: AppLocale): string | null {
+  if (sec == null || sec <= 0) return null;
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = String(sec % 60).padStart(2, "0");
+  const text = h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+  return locale === "bn" ? text.replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]!) : text;
+}
+
+export type VideoLink = {
+  provider: "YOUTUBE" | "VIMEO" | "FACEBOOK";
+  /** Privacy-friendly player URL for an iframe. */
+  embedUrl: string;
+  /** Still image from the provider, when it offers one without an API call. */
+  thumbnail: string | null;
+};
+
+/**
+ * Recognises a YouTube, Vimeo or Facebook video address and returns how to
+ * embed it, or null for anything else (so admins cannot embed arbitrary sites).
+ */
+export function parseVideoUrl(url: string | null | undefined): VideoLink | null {
   if (!url) return null;
   try {
-    const u = new URL(url);
-    if (/(^|\.)youtube\.com$/.test(u.hostname)) {
-      const id = u.searchParams.get("v") ?? u.pathname.split("/").filter(Boolean).pop();
-      return id && /^[\w-]{6,}$/.test(id) ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+    const u = new URL(url.trim());
+    if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+    const host = u.hostname.toLowerCase();
+    const parts = u.pathname.split("/").filter(Boolean);
+    const youtube = (id: string | null | undefined): VideoLink | null =>
+      id && /^[\w-]{6,20}$/.test(id)
+        ? { provider: "YOUTUBE", embedUrl: `https://www.youtube-nocookie.com/embed/${id}?rel=0`, thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg` }
+        : null;
+    if (/(^|\.)youtube\.com$/.test(host)) {
+      // watch?v=ID, /embed/ID, /shorts/ID, /live/ID
+      if (parts[0] === "watch") return youtube(u.searchParams.get("v"));
+      if (["embed", "shorts", "live", "v"].includes(parts[0] ?? "")) return youtube(parts[1]);
+      return null;
     }
-    if (u.hostname === "youtu.be") {
-      const id = u.pathname.slice(1);
-      return /^[\w-]{6,}$/.test(id) ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+    if (host === "youtu.be") return youtube(parts[0]);
+    if (/(^|\.)vimeo\.com$/.test(host)) {
+      const id = [...parts].reverse().find((p) => /^\d+$/.test(p));
+      return id ? { provider: "VIMEO", embedUrl: `https://player.vimeo.com/video/${id}?dnt=1`, thumbnail: null } : null;
     }
-    if (/(^|\.)vimeo\.com$/.test(u.hostname)) {
-      const id = u.pathname.split("/").filter(Boolean).pop();
-      return id && /^\d+$/.test(id) ? `https://player.vimeo.com/video/${id}?dnt=1` : null;
+    if (/(^|\.)facebook\.com$/.test(host) || host === "fb.watch") {
+      const isVideo = host === "fb.watch" || parts.includes("videos") || parts[0] === "watch" || parts[0] === "reel";
+      if (!isVideo) return null;
+      const href = encodeURIComponent(`https://${host === "fb.watch" ? "fb.watch" : "www.facebook.com"}${u.pathname}${u.search}`);
+      return { provider: "FACEBOOK", embedUrl: `https://www.facebook.com/plugins/video.php?href=${href}&show_text=false`, thumbnail: null };
     }
   } catch {
     return null;
   }
   return null;
+}
+
+/** YouTube/Vimeo/Facebook watch URL → embed URL, or null. */
+export function videoEmbedUrl(url: string | null | undefined): string | null {
+  return parseVideoUrl(url)?.embedUrl ?? null;
 }

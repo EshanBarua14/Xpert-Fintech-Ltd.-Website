@@ -19,6 +19,7 @@ import {
   type FieldErrors,
 } from "@/lib/validation/common";
 import { parseDateOnly } from "@/lib/validation/organizations";
+import { parseVideoUrl } from "@/lib/public/text";
 import { purgeEvent } from "@/lib/admin/purge";
 
 export type EventState = { errors?: FieldErrors; message?: string };
@@ -61,6 +62,7 @@ export async function saveEvent(_prev: EventState, formData: FormData): Promise<
   const endsAt = parseDateOnly(v.endsAt);
   if (startsAt && endsAt && endsAt < startsAt) return { errors: { endsAt: "The end date is before the start date." } };
   if (!(await isUsableImage(v.coverMediaId))) return { errors: { coverMediaId: "That image is no longer in the media library." } };
+  if (v.videoUrl && !parseVideoUrl(v.videoUrl)) return { errors: { videoUrl: "Paste a YouTube, Vimeo or Facebook video address." }, message: "Please fix the highlighted fields." };
 
   const enSlug = v.enSlug || slugify(v.enTitle);
   if (!enSlug) return { errors: { enSlug: "Enter a URL slug using English letters." } };

@@ -256,7 +256,7 @@ export function HeaderClient({
         id={drawerId}
         ref={drawerRef}
         hidden={!menuOpen}
-        className="glass-strong fixed inset-x-3 top-20 bottom-3 z-(--z-drawer) overflow-y-auto rounded-3xl p-6 lg:hidden"
+        className="glass-strong menu-drawer fixed inset-x-3 top-20 bottom-3 z-(--z-drawer) overflow-y-auto rounded-3xl p-6 lg:hidden"
       >
         <nav aria-label={labels.mainNavigation}>
           <ul className="flex flex-col">

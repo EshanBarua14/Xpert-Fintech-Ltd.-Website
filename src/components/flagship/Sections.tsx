@@ -278,18 +278,19 @@ export function CapabilityBento({ items, anchors = false }: { items: Capability[
         <li key={c.key} id={anchors ? c.key : undefined} data-reveal style={delay(i % 4)} className={cn("scroll-mt-32", span(c.key))}>
           <Link
             href={c.href}
-            className="spotlight group glass flex h-full flex-col overflow-hidden rounded-3xl p-6 transition-transform duration-500 hover:-translate-y-1"
+            className="spotlight group glass flex h-full flex-col overflow-hidden rounded-3xl p-5 transition-transform duration-500 hover:-translate-y-1 sm:p-6"
           >
             <div className="flex-1">
               <CapabilityVisual kind={c.key} />
             </div>
-            <div className="mt-5 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
+            <div className="mt-4 flex flex-col gap-2.5 sm:mt-5 sm:gap-3">
+              {/* Phones: icon beside the title to keep six cards short; larger screens: icon above. */}
+              <div className="flex items-center gap-3 sm:flex-col sm:items-start">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-fg/10 bg-brand-sky/10 text-brand-sky">
                   <Icon name={c.icon} className="size-5" />
                 </span>
+                <h3 className="font-display text-lg font-semibold tracking-tight">{c.title}</h3>
               </div>
-              <h3 className="font-display text-lg font-semibold tracking-tight">{c.title}</h3>
               <p className="text-sm leading-relaxed text-text-secondary">{c.body}</p>
             </div>
           </Link>

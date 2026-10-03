@@ -493,13 +493,17 @@ async function ensureChildren(menuKey: string, parent: { href?: string; label?: 
 const INSIGHTS: NavChild[] = [
   { href: "news", en: "News", bn: "সংবাদ", descEn: "Announcements and company news.", descBn: "ঘোষণা ও প্রতিষ্ঠানের সংবাদ।" },
   { href: "events", en: "Events", bn: "ইভেন্ট", descEn: "Milestones, agreements and events.", descBn: "মাইলফলক, চুক্তি ও ইভেন্ট।" },
-  { href: "gallery", en: "Gallery", bn: "গ্যালারি", descEn: "Photos from our events.", descBn: "আমাদের ইভেন্টের ছবি।" },
+  { href: "gallery", en: "Gallery", bn: "গ্যালারি", descEn: "Photo albums from events and the office.", descBn: "ইভেন্ট ও অফিসের ছবির অ্যালবাম।" },
+  { href: "gallery#videos", en: "Videos", bn: "ভিডিও", descEn: "Walkthroughs, recordings and interviews.", descBn: "ওয়াকথ্রু, রেকর্ডিং ও সাক্ষাৎকার।" },
   { href: "resources", en: "Resources", bn: "রিসোর্স", descEn: "Brochures and product documents.", descBn: "ব্রোশিওর ও পণ্যের নথি।" },
   { href: "case-studies", en: "Case studies", bn: "কেস স্টাডি", descEn: "How brokerages use Xpert.", descBn: "ব্রোকারেজগুলো কীভাবে এক্সপার্ট ব্যবহার করে।" },
 ];
 const CAREERS: NavChild = { href: "careers", en: "Careers", bn: "ক্যারিয়ার", descEn: "Join the team.", descBn: "আমাদের টিমে যোগ দিন।" };
 
 async function seedInsightsLinks() {
+  // Earlier seeds described the Gallery as event photos only.
+  await db.navItemTranslation.updateMany({ where: { description: "Photos from our events." }, data: { description: "Photo albums from events and the office." } });
+  await db.navItemTranslation.updateMany({ where: { description: "আমাদের ইভেন্টের ছবি।" }, data: { description: "ইভেন্ট ও অফিসের ছবির অ্যালবাম।" } });
   let added = 0;
   added += await ensureChildren("header", { href: "events" }, INSIGHTS);
   added += await ensureChildren("header", { href: "company/about" }, [CAREERS]);

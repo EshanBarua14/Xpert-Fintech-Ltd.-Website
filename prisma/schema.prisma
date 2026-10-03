@@ -299,9 +299,9 @@ model Office {
 }
 
 model OfficeTranslation {
-  id       String @id @default(uuid()) @db.Uuid
-  officeId String @db.Uuid
-  office   Office @relation(fields: [officeId], references: [id], onDelete: Cascade)
+  id       String  @id @default(uuid()) @db.Uuid
+  officeId String  @db.Uuid
+  office   Office  @relation(fields: [officeId], references: [id], onDelete: Cascade)
   locale   Locale
   name     String
   address  String
@@ -472,7 +472,7 @@ model ContentBlockTranslation {
   ctaLabel String?
   ctaHref  String?
   /// Extra localized fields specific to the block type.
-  data     Json     @default("{}")
+  data     Json         @default("{}")
 
   @@unique([blockId, locale])
 }
@@ -581,28 +581,28 @@ model OfferingCategoryTranslation {
 }
 
 model Offering {
-  id           String            @id @default(uuid()) @db.Uuid
-  key          String?           @unique
-  type         OfferingType
-  categoryId   String?           @db.Uuid
-  category     OfferingCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  id          String            @id @default(uuid()) @db.Uuid
+  key         String?           @unique
+  type        OfferingType
+  categoryId  String?           @db.Uuid
+  category    OfferingCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   /// Parent platform for modules (e.g. RMS inside the trading platform).
-  parentId     String?           @db.Uuid
-  parent       Offering?         @relation("OfferingTree", fields: [parentId], references: [id], onDelete: SetNull)
-  children     Offering[]        @relation("OfferingTree")
-  iconMediaId  String?           @db.Uuid
-  heroMediaId  String?           @db.Uuid
-  isFeatured   Boolean           @default(false)
-  hasOwnPage   Boolean           @default(true)
-  showDemoCta  Boolean           @default(true)
-  status       ContentStatus     @default(DRAFT)
-  publishAt    DateTime?
-  sortOrder    Int               @default(0)
-  createdById  String?           @db.Uuid
-  updatedById  String?           @db.Uuid
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  deletedAt    DateTime?
+  parentId    String?           @db.Uuid
+  parent      Offering?         @relation("OfferingTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Offering[]        @relation("OfferingTree")
+  iconMediaId String?           @db.Uuid
+  heroMediaId String?           @db.Uuid
+  isFeatured  Boolean           @default(false)
+  hasOwnPage  Boolean           @default(true)
+  showDemoCta Boolean           @default(true)
+  status      ContentStatus     @default(DRAFT)
+  publishAt   DateTime?
+  sortOrder   Int               @default(0)
+  createdById String?           @db.Uuid
+  updatedById String?           @db.Uuid
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  deletedAt   DateTime?
 
   translations OfferingTranslation[]
   items        OfferingItem[]
@@ -955,18 +955,19 @@ model MetricTranslation {
 // ── Company ──────────────────────────────────────────────────────────────────
 
 model Person {
-  id           String        @id @default(uuid()) @db.Uuid
-  key          String?       @unique
-  photoMediaId String?       @db.Uuid
-  linkedinUrl  String?
-  status       ContentStatus @default(DRAFT)
-  publishAt    DateTime?
-  sortOrder    Int           @default(0)
-  createdById  String?       @db.Uuid
-  updatedById  String?       @db.Uuid
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  deletedAt    DateTime?
+  isPlaceholder Boolean       @default(false)
+  id            String        @id @default(uuid()) @db.Uuid
+  key           String?       @unique
+  photoMediaId  String?       @db.Uuid
+  linkedinUrl   String?
+  status        ContentStatus @default(DRAFT)
+  publishAt     DateTime?
+  sortOrder     Int           @default(0)
+  createdById   String?       @db.Uuid
+  updatedById   String?       @db.Uuid
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
 
   translations PersonTranslation[]
   roles        PersonRole[]
@@ -975,9 +976,9 @@ model Person {
 }
 
 model PersonTranslation {
-  id       String @id @default(uuid()) @db.Uuid
-  personId String @db.Uuid
-  person   Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  id       String  @id @default(uuid()) @db.Uuid
+  personId String  @db.Uuid
+  person   Person  @relation(fields: [personId], references: [id], onDelete: Cascade)
   locale   Locale
   name     String
   bio      String?
@@ -1037,9 +1038,9 @@ model Career {
 }
 
 model CareerTranslation {
-  id               String @id @default(uuid()) @db.Uuid
-  careerId         String @db.Uuid
-  career           Career @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  id               String  @id @default(uuid()) @db.Uuid
+  careerId         String  @db.Uuid
+  career           Career  @relation(fields: [careerId], references: [id], onDelete: Cascade)
   locale           Locale
   slug             String
   title            String
@@ -1120,23 +1121,23 @@ model TagTranslation {
 }
 
 model Article {
-  id                  String           @id @default(uuid()) @db.Uuid
-  categoryId          String?          @db.Uuid
-  category            ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  authorName          String?
-  coverMediaId        String?          @db.Uuid
+  id           String           @id @default(uuid()) @db.Uuid
+  categoryId   String?          @db.Uuid
+  category     ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  authorName   String?
+  coverMediaId String?          @db.Uuid
   /// Date shown to readers; defaults to first publish.
-  displayDate         DateTime?
+  displayDate  DateTime?
   /// Old WordPress URL, kept so a redirect can be created on migration.
-  legacyUrl           String?
-  status              ContentStatus    @default(DRAFT)
-  publishAt           DateTime?
-  sortOrder           Int              @default(0)
-  createdById         String?          @db.Uuid
-  updatedById         String?          @db.Uuid
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
-  deletedAt           DateTime?
+  legacyUrl    String?
+  status       ContentStatus    @default(DRAFT)
+  publishAt    DateTime?
+  sortOrder    Int              @default(0)
+  createdById  String?          @db.Uuid
+  updatedById  String?          @db.Uuid
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  deletedAt    DateTime?
 
   translations ArticleTranslation[]
   tags         ArticleTag[]
@@ -1291,34 +1292,34 @@ model ContentRelation {
 
 /// Demo requests, contact-form messages and manually added leads.
 model Lead {
-  id                  String         @id @default(uuid()) @db.Uuid
-  source              LeadSource
-  status              LeadStatus     @default(NEW)
-  name                String
-  organization        String?
-  designation         String?
-  email               String
-  phone               String?
-  country             String?
-  businessType        String?
+  id                   String        @id @default(uuid()) @db.Uuid
+  source               LeadSource
+  status               LeadStatus    @default(NEW)
+  name                 String
+  organization         String?
+  designation          String?
+  email                String
+  phone                String?
+  country              String?
+  businessType         String?
   interestedOfferingId String?       @db.Uuid
-  interestedOffering  Offering?      @relation(fields: [interestedOfferingId], references: [id], onDelete: SetNull)
-  expectedRequirement String?
-  message             String?
-  preferredContact    ContactMethod  @default(ANY)
-  consent             Boolean        @default(false)
-  consentAt           DateTime?
-  ownerId             String?        @db.Uuid
-  owner               AdminUser?     @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
-  followUpAt          DateTime?
-  locale              Locale         @default(en)
-  pageUrl             String?
-  utm                 Json?
-  ip                  String?
-  userAgent           String?
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  deletedAt           DateTime?
+  interestedOffering   Offering?     @relation(fields: [interestedOfferingId], references: [id], onDelete: SetNull)
+  expectedRequirement  String?
+  message              String?
+  preferredContact     ContactMethod @default(ANY)
+  consent              Boolean       @default(false)
+  consentAt            DateTime?
+  ownerId              String?       @db.Uuid
+  owner                AdminUser?    @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  followUpAt           DateTime?
+  locale               Locale        @default(en)
+  pageUrl              String?
+  utm                  Json?
+  ip                   String?
+  userAgent            String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  deletedAt            DateTime?
 
   activities LeadActivity[]
 
@@ -1416,4 +1417,142 @@ model Redirect {
   note       String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+// XFL 2.0 schema additions. Merge into prisma/schema.prisma, then:
+//   npm run db:migrate -- --name xfl2_ecosystem_audit
+//   npm run db:erd
+// Check enum names/values (ContentStatus, Locale, EntityType) against the existing schema before merging.
+
+// 1) Add to the existing Person model:
+//   isPlaceholder Boolean @default(false)
+
+enum EcosystemLayer {
+  MARKET
+  XFL
+  PRODUCT
+  INSTITUTION
+  USER
+}
+
+enum EcosystemEdgeKind {
+  DATA
+  ORDER
+  ONBOARDING
+  RISK
+  OPERATIONS
+}
+
+model EcosystemNode {
+  id             String                     @id @default(cuid())
+  key            String                     @unique
+  layer          EcosystemLayer
+  offeringId     String?
+  organizationId String?
+  iconName       String?
+  layoutX        Float?
+  layoutY        Float?
+  mobileOrder    Int                        @default(0)
+  editorNote     String?
+  status         ContentStatus              @default(DRAFT)
+  publishAt      DateTime?
+  sortOrder      Int                        @default(0)
+  createdById    String?
+  updatedById    String?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  deletedAt      DateTime?
+  translations   EcosystemNodeTranslation[]
+  outgoing       EcosystemEdge[]            @relation("EdgeFrom")
+  incoming       EcosystemEdge[]            @relation("EdgeTo")
+  flowSteps      EcosystemFlowStep[]
+}
+
+model EcosystemNodeTranslation {
+  id          String        @id @default(cuid())
+  nodeId      String
+  locale      Locale
+  label       String
+  description String?
+  ctaLabel    String?
+  node        EcosystemNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@unique([nodeId, locale])
+}
+
+model EcosystemEdge {
+  id         String              @id @default(cuid())
+  fromNodeId String
+  toNodeId   String
+  kind       EcosystemEdgeKind
+  sortOrder  Int                 @default(0)
+  from       EcosystemNode       @relation("EdgeFrom", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  to         EcosystemNode       @relation("EdgeTo", fields: [toNodeId], references: [id], onDelete: Cascade)
+  flowSteps  EcosystemFlowStep[]
+
+  @@unique([fromNodeId, toNodeId, kind])
+}
+
+model EcosystemFlow {
+  id           String                     @id @default(cuid())
+  key          String                     @unique
+  isPlayback   Boolean                    @default(false)
+  status       ContentStatus              @default(DRAFT)
+  publishAt    DateTime?
+  sortOrder    Int                        @default(0)
+  createdById  String?
+  updatedById  String?
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+  deletedAt    DateTime?
+  translations EcosystemFlowTranslation[]
+  steps        EcosystemFlowStep[]
+}
+
+model EcosystemFlowTranslation {
+  id     String        @id @default(cuid())
+  flowId String
+  locale Locale
+  name   String
+  flow   EcosystemFlow @relation(fields: [flowId], references: [id], onDelete: Cascade)
+
+  @@unique([flowId, locale])
+}
+
+model EcosystemFlowStep {
+  id           String                         @id @default(cuid())
+  flowId       String
+  nodeId       String
+  edgeId       String?
+  sortOrder    Int
+  flow         EcosystemFlow                  @relation(fields: [flowId], references: [id], onDelete: Cascade)
+  node         EcosystemNode                  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  edge         EcosystemEdge?                 @relation(fields: [edgeId], references: [id], onDelete: SetNull)
+  translations EcosystemFlowStepTranslation[]
+}
+
+model EcosystemFlowStepTranslation {
+  id     String            @id @default(cuid())
+  stepId String
+  locale Locale
+  title  String
+  body   String?
+  step   EcosystemFlowStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@unique([stepId, locale])
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType EntityType?
+  entityId   String?
+  changes    Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime    @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
 }

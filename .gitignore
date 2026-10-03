@@ -30,3 +30,7 @@ npm-debug.log*
 /test-results/
 /blob-report/
 /backups/
+
+# Real images for import (see assets/README.md)
+assets/*
+!assets/README.md

@@ -3,7 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
-import { GhostButton, PrimaryButton, SectionHeader } from "@/components/flagship/Sections";
+import { ecosystemLabels, ecosystemModules, GhostButton, moduleForSlug, PrimaryButton, SectionHeader } from "@/components/flagship/Sections";
+import { EcosystemMap } from "@/components/flagship/EcosystemMap";
+import OmsPreview from "@/components/products/oms-preview/OmsPreview";
+import { getFlagshipData } from "@/lib/public/flagship";
+import { omsLabels } from "@/lib/public/labels";
 import { CapabilityVisual, type VisualKind } from "@/components/flagship/Visuals";
 import { Icon } from "@/components/ui/Icon";
 import { OrderFlow } from "@/components/diagrams/OrderFlow";
@@ -93,6 +97,10 @@ export default async function ProductPage({ params }: Props) {
   const ctaLabel = tr.ctaLabel ?? t.requestDemo;
 
   const url = `${SITE_URL}/${found.locale}/products/${tr.slug}`;
+  const enSlug = offering.translations.find((x) => x.locale === "en")?.slug ?? tr.slug;
+  const ecoModule = moduleForSlug(enSlug);
+  const flagship = ecoModule ? await getFlagshipData(found.locale) : null;
+  const showOmsPreview = offering.key === "trading-platform";
 
   return (
     <>
@@ -198,6 +206,15 @@ export default async function ProductPage({ params }: Props) {
         </Band>
       )}
 
+      {showOmsPreview && (
+        <Band title={t.omsPreviewTitle}>
+          <p data-reveal className="-mt-6 max-w-2xl text-lg text-text-secondary">{t.omsPreviewBody}</p>
+          <div data-reveal>
+            <OmsPreview labels={omsLabels(t)} />
+          </div>
+        </Band>
+      )}
+
       {steps.length > 1 && (
         <Band title={t.howItWorks}>
           <div data-reveal className="glass rounded-3xl p-4 md:p-8">
@@ -290,6 +307,15 @@ export default async function ProductPage({ params }: Props) {
                 <ItemList items={targetUsers} />
               </div>
             )}
+          </div>
+        </Band>
+      )}
+
+      {ecoModule && flagship && (
+        <Band title={t.whereItFits} alt>
+          <p data-reveal className="-mt-6 max-w-2xl text-lg text-text-secondary">{t.whereItFitsBody}</p>
+          <div data-reveal className="glass rounded-3xl p-4 md:p-8">
+            <EcosystemMap labels={ecosystemLabels(t)} modules={ecosystemModules(flagship.offerings, found.locale)} focus={ecoModule} />
           </div>
         </Band>
       )}
@@ -425,3 +451,4 @@ function Deployments({ offering, locale, t }: { offering: Offering; locale: AppL
     </Band>
   );
 }
+

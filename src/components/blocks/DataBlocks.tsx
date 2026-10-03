@@ -5,6 +5,8 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { getEvents, getOfferings, getOrganizations, getPeople, mediaMap } from "@/lib/public/content";
 import { formatEventDate, pick } from "@/lib/public/text";
 import { cn } from "@/lib/utils/cn";
+import { getMessages } from "@/lib/i18n/messages";
+import { PeopleGallery, type GalleryPerson } from "@/components/people/PeopleGallery";
 import { BlockHeading, CARD, gridCols, revealDelay } from "./Shared";
 import { num, str, type BlockContext, type BlockData } from "./types";
 
@@ -61,48 +63,55 @@ export async function PeopleListBlock({ block, ctx }: { block: BlockData; ctx: B
   return (
     <div className="flex flex-col gap-12">
       <BlockHeading text={block.text} />
-      <PeopleGrid people={people} photos={photos} locale={ctx.locale} />
+      <PeopleGrid people={people} photos={photos} locale={ctx.locale} group={group} />
     </div>
   );
 }
 
 type PersonRow = Awaited<ReturnType<typeof getPeople>>[number];
 
+/** Board / management profiles as photo cards with a pop-up profile. */
 export function PeopleGrid({
   people,
   photos,
   locale,
+  group = "MANAGEMENT",
 }: {
   people: PersonRow[];
   photos: Awaited<ReturnType<typeof mediaMap>>;
   locale: BlockContext["locale"];
+  group?: PersonGroup;
 }) {
+  const t = getMessages(locale);
+  const groupLabel = group === "BOARD" ? t.boardMember : t.managementMember;
+  const rows: GalleryPerson[] = people.map((p) => {
+    const tr = pick(p.translations, locale);
+    const photo = photos.get(p.photoMediaId ?? "");
+    return {
+      id: p.id,
+      name: tr?.name ?? "",
+      title: pick(p.roles[0]?.translations ?? [], locale)?.title ?? null,
+      bio: tr?.bio ?? null,
+      photo: photo ? { url: photo.url, width: photo.width, height: photo.height } : null,
+      linkedinUrl: p.linkedinUrl,
+      isPlaceholder: (p.key ?? "").startsWith("placeholder-"),
+    };
+  });
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {people.map((p, i) => {
-        const name = pick(p.translations, locale)?.name ?? "";
-        const bio = pick(p.translations, locale)?.bio;
-        const title = pick(p.roles[0]?.translations ?? [], locale)?.title;
-        const photo = photos.get(p.photoMediaId ?? "");
-        return (
-          <li key={p.id} data-reveal style={revealDelay(i)} className={cn(CARD, "flex flex-col gap-4")}>
-            {photo && (
-              <Image src={photo.url} alt={name} width={photo.width ?? 400} height={photo.height ?? 400} className="aspect-square w-24 rounded-2xl object-cover ring-1 ring-fg/15" />
-            )}
-            <div>
-              <h3 className="font-display text-xl font-semibold tracking-tight">{name}</h3>
-              {title && <p className="mt-1 text-sm text-cyan-300">{title}</p>}
-            </div>
-            {bio && <p className="text-sm whitespace-pre-line text-text-secondary">{bio}</p>}
-            {p.linkedinUrl && (
-              <a href={p.linkedinUrl} target="_blank" rel="noopener noreferrer" className="mt-auto text-sm text-text-secondary hover:text-brand-sky">
-                LinkedIn ↗
-              </a>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+    <PeopleGallery
+      people={rows.filter((r) => r.name)}
+      groupLabel={groupLabel}
+      showPlaceholderBadge={process.env.APP_ENV !== "production"}
+      labels={{
+        viewProfile: t.viewProfile,
+        close: t.close,
+        biography: t.biography,
+        bioPending: t.bioPending,
+        linkedin: t.linkedinProfile,
+        placeholder: t.placeholderBadge,
+        role: t.roleLabel,
+      }}
+    />
   );
 }
 

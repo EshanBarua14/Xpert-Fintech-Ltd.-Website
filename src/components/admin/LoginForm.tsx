@@ -31,6 +31,8 @@ function CodeForm() {
     return (
       <div className="flex flex-col gap-5">
         <ErrorBox message={state.error} />
+        {/* Full page load on purpose: it resets the two-step sign-in state. A <Link> would keep it. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/admin/login" className={buttonClasses({ size: "lg", className: "w-full" })}>
           Sign in again
         </a>
@@ -53,6 +55,8 @@ function CodeForm() {
         className="tabular text-lg tracking-[0.3em]"
       />
       <Submit label="Verify" pendingLabel="Checking…" />
+      {/* Full page load on purpose: it resets the two-step sign-in state. A <Link> would keep it. */}
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
       <a href="/admin/login" className="text-center text-sm text-text-secondary hover:text-brand-sky">
         Use a different account
       </a>

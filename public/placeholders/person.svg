@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600" role="img" aria-label="Photo to be added">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#11223f"/><stop offset="1" stop-color="#0a1428"/></linearGradient>
+    <radialGradient id="glow" cx="50%" cy="38%" r="55%"><stop offset="0" stop-color="#22bceb" stop-opacity=".18"/><stop offset="1" stop-color="#22bceb" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="480" height="600" fill="url(#bg)"/>
+  <g stroke="#1b2f52" stroke-width="1">
+    <path d="M0 60h480M0 120h480M0 180h480M0 240h480M0 300h480M0 360h480M0 420h480M0 480h480M0 540h480"/>
+    <path d="M60 0v600M120 0v600M180 0v600M240 0v600M300 0v600M360 0v600M420 0v600"/>
+  </g>
+  <rect width="480" height="600" fill="url(#glow)"/>
+  <circle cx="240" cy="236" r="84" fill="#24406b"/>
+  <path d="M84 600c0-112 70-186 156-186s156 74 156 186z" fill="#24406b"/>
+</svg>

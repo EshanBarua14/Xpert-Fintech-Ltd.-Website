@@ -54,8 +54,8 @@
 .move[data-dir="up"] { color: var(--o-up); }
 .move[data-dir="down"] { color: var(--o-down); }
 .move[data-dir="flat"] { color: var(--o-muted); }
-td[data-side="BUY"] { color: var(--o-up); }
-td[data-side="SELL"] { color: var(--o-down); }
+.side[data-side="BUY"] { color: var(--o-up); }
+.side[data-side="SELL"] { color: var(--o-down); }
 .badge { display: inline-block; font-size: 0.6875rem; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.125rem 0.375rem; border: 1px solid var(--o-line); border-radius: 3px; }
 .badge[data-status="FILLED"] { border-color: var(--o-up); color: var(--o-up); }
 .badge[data-status="REJECTED"] { border-color: var(--o-down); color: var(--o-down); }

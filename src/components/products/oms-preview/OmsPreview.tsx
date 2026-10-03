@@ -223,7 +223,7 @@ export default function OmsPreview({ labels: partial, tickMs = 1500, seed = 42 }
                     {sim.orders.map((o) => (
                       <tr key={o.id}>
                         <td>{o.id}</td><th scope="row">{o.symbol}</th>
-                        <td data-side={o.side}>{o.side === "BUY" ? L.buy : L.sell}</td>
+                        <td className={styles.side} data-side={o.side}>{o.side === "BUY" ? L.buy : L.sell}</td>
                         <td className={styles.num}>{o.qty.toLocaleString("en-US")}</td>
                         <td className={styles.num}>{fmt(o.price)}</td>
                         <td><span className={styles.badge} data-status={o.status}>{L.status[o.status]}</span>

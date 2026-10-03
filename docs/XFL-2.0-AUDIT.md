@@ -17,6 +17,20 @@ Scoring: **Critical** blocks trust or breaks a page · **High** visibly weakens 
 
 Earlier today: empty product pages, missing showcase, people pop-ups, logo wall, OMS preview, server/client boundary bug, CSS-module build error.
 
+## Round 2: content sections and admin (same day)
+
+| # | Severity | Finding | Fix |
+|---|---|---|---|
+| 7 | Critical | **Team link hidden by the menu.** Menus only link to known pages and `company/team` was not on the list, so the link the seed added never showed. | Added Team, About and the new sections to the menu's page list. |
+| 8 | Critical | **No News, Careers, Gallery, Resources or Case studies pages,** although the database had models for all of them. | Public pages for each, plus full admin management (below). |
+| 9 | High | **Job applicants' CVs would have been public by URL** (all uploads were served to anyone). | Files tagged private (CVs) open only for signed-in admins, are never cached publicly, are hidden from the media grid, are marked in use so they cannot be deleted by mistake, and are deleted with the application. |
+| 10 | High | **Event photo galleries could not be managed** (database support, no editor). | Gallery editor in Admin → Events & gallery: add many photos at once, reorder, remove; the first photo is the album cover. |
+| 11 | Medium | Empty sections would appear in menus. | News, Gallery, Resources and Case studies appear in menus only once they have published content. Careers always shows. |
+
+**Admin coverage added:** News (articles, categories with their own screen, tags, author, cover, display date, scheduled publishing), Careers (jobs with department, type, location, experience, deadline, open/closed), Applications (inbox filterable by status, private notes, CV, status pipeline New → Hired / Not selected), Events & gallery (ordered photos), Resources (PDF from the library or a link, type, cover), Case studies (challenge, solution, outcome, cover). Every section: English + Bangla, draft/published, publish-at time, order, trash with restore, permanent delete, 30-day automatic trash clean-up.
+
+**Public pages added:** `/news`, `/news/[slug]` (reading time, author, tags, share, related, NewsArticle data), `/careers`, `/careers/[slug]` (apply with PDF CV; JobPosting data for search engines), `/gallery` (albums) and a full-screen photo viewer on event pages, `/resources`, `/case-studies`, `/case-studies/[slug]`. All in the sitemap.
+
 ## Needs XFL content (not code)
 
 1. **Logos** for 12 members + DSE/CSE (`npm run assets:import -- --list` for file names). Until then: monograms.

@@ -38,3 +38,8 @@ export function omsLabels(t: Messages): OmsPreviewLabels {
     up: t.omsUp, down: t.omsDown, unchanged: t.omsUnchanged, currency: t.omsCurrency,
   };
 }
+
+/** "FULL_TIME" → "Full time", in the visitor's language. */
+export function employmentLabel(t: Messages, type: string) {
+  return ({ FULL_TIME: t.jobFullTime, PART_TIME: t.jobPartTime, CONTRACT: t.jobContract, INTERNSHIP: t.jobInternship } as Record<string, string>)[type] ?? type;
+}

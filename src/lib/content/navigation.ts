@@ -40,7 +40,10 @@ function resolveHref(
 }
 
 /** Routes that always exist, below the locale. */
-const FIXED_ROUTES = ["", "platform", "consortium", "products", "events", "contact", "request-demo", "company/board", "company/management"];
+const FIXED_ROUTES = [
+  "", "platform", "consortium", "products", "events", "contact", "request-demo",
+  "company/about", "company/board", "company/management", "company/team", "careers",
+];
 
 /**
  * Every internal path that currently shows a page in this language:
@@ -50,16 +53,32 @@ const FIXED_ROUTES = ["", "platform", "consortium", "products", "events", "conta
  */
 const livePaths = cache(async (locale: AppLocale): Promise<Set<string>> => {
   const now = new Date();
-  const [pages, offerings, events] = await Promise.all([
+  const [pages, offerings, events, articles, careers, cases, resourceCount, albumCount] = await Promise.all([
     db.pageTranslation.findMany({ where: { locale, page: publishedWhere(now) }, select: { path: true } }),
     db.offeringTranslation.findMany({ where: { locale, offering: { ...publishedWhere(now), hasOwnPage: true } }, select: { slug: true } }),
     db.eventTranslation.findMany({ where: { locale, event: publishedWhere(now) }, select: { slug: true } }),
+    db.articleTranslation.findMany({ where: { locale, article: publishedWhere(now) }, select: { slug: true } }),
+    db.careerTranslation.findMany({ where: { locale, career: publishedWhere(now) }, select: { slug: true } }),
+    db.caseStudyTranslation.findMany({ where: { locale, caseStudy: publishedWhere(now) }, select: { slug: true } }),
+    db.resource.count({ where: publishedWhere(now) }),
+    db.event.count({ where: { ...publishedWhere(now), gallery: { some: {} } } }),
   ]);
+  // Listing pages appear in menus only once they have something to show.
+  const listings = [
+    articles.length > 0 && "news",
+    cases.length > 0 && "case-studies",
+    resourceCount > 0 && "resources",
+    albumCount > 0 && "gallery",
+  ].filter((x): x is string => Boolean(x));
   return new Set([
     ...FIXED_ROUTES,
+    ...listings,
     ...pages.map((p) => p.path),
     ...offerings.map((o) => `products/${o.slug}`),
     ...events.map((e) => `events/${e.slug}`),
+    ...articles.map((a) => `news/${a.slug}`),
+    ...careers.map((c) => `careers/${c.slug}`),
+    ...cases.map((c) => `case-studies/${c.slug}`),
   ]);
 });
 

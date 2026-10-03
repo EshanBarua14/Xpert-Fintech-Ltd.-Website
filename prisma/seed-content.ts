@@ -449,6 +449,65 @@ async function syncPendingProductLinks() {
   }
 }
 
+// ── Navigation: Insights and Careers links ───────────────────────────────────
+
+type NavChild = { href: string; en: string; bn: string; descEn?: string; descBn?: string };
+
+/**
+ * Adds missing links under a parent menu item (found by its href, or by label
+ * for footer column headings), once. Menus hide links to empty sections, so a
+ * link shows only when that section has published content.
+ */
+async function ensureChildren(menuKey: string, parent: { href?: string; label?: string }, children: NavChild[]) {
+  const menu = await db.navMenu.findUnique({ where: { key: menuKey } });
+  if (!menu) return 0;
+  const parentItem = parent.href
+    ? await db.navItem.findFirst({ where: { menuId: menu.id, parentId: null, href: parent.href } })
+    : await db.navItem.findFirst({ where: { menuId: menu.id, parentId: null, translations: { some: { locale: EN, label: parent.label } } } });
+  if (!parentItem) return 0;
+  let added = 0;
+  for (const c of children) {
+    const exists = await db.navItem.findFirst({ where: { menuId: menu.id, parentId: parentItem.id, href: c.href } });
+    if (exists) continue;
+    const max = await db.navItem.aggregate({ where: { menuId: menu.id, parentId: parentItem.id }, _max: { sortOrder: true } });
+    await db.navItem.create({
+      data: {
+        menuId: menu.id,
+        parentId: parentItem.id,
+        linkType: "INTERNAL",
+        href: c.href,
+        sortOrder: (max._max.sortOrder ?? -1) + 1,
+        translations: {
+          create: [
+            { locale: EN, label: c.en, description: c.descEn ?? null },
+            { locale: BN, label: c.bn, description: c.descBn ?? null },
+          ],
+        },
+      },
+    });
+    added++;
+  }
+  return added;
+}
+
+const INSIGHTS: NavChild[] = [
+  { href: "news", en: "News", bn: "সংবাদ", descEn: "Announcements and company news.", descBn: "ঘোষণা ও প্রতিষ্ঠানের সংবাদ।" },
+  { href: "events", en: "Events", bn: "ইভেন্ট", descEn: "Milestones, agreements and events.", descBn: "মাইলফলক, চুক্তি ও ইভেন্ট।" },
+  { href: "gallery", en: "Gallery", bn: "গ্যালারি", descEn: "Photos from our events.", descBn: "আমাদের ইভেন্টের ছবি।" },
+  { href: "resources", en: "Resources", bn: "রিসোর্স", descEn: "Brochures and product documents.", descBn: "ব্রোশিওর ও পণ্যের নথি।" },
+  { href: "case-studies", en: "Case studies", bn: "কেস স্টাডি", descEn: "How brokerages use Xpert.", descBn: "ব্রোকারেজগুলো কীভাবে এক্সপার্ট ব্যবহার করে।" },
+];
+const CAREERS: NavChild = { href: "careers", en: "Careers", bn: "ক্যারিয়ার", descEn: "Join the team.", descBn: "আমাদের টিমে যোগ দিন।" };
+
+async function seedInsightsLinks() {
+  let added = 0;
+  added += await ensureChildren("header", { href: "events" }, INSIGHTS);
+  added += await ensureChildren("header", { href: "company/about" }, [CAREERS]);
+  added += await ensureChildren("footer", { label: "Connect" }, INSIGHTS.filter((c) => c.href !== "events"));
+  added += await ensureChildren("footer", { label: "Company" }, [CAREERS]);
+  if (added) console.log(`• Added ${added} Insights/Careers menu link(s)`);
+}
+
 // ── Navigation: Team link under Company (header and footer) ──────────────────
 
 /** Adds a "Team" link right after "Management" in every menu that has one, once. */
@@ -497,6 +556,7 @@ async function main() {
   await seedTeamLinks();
   await seedMilestones();
   await syncPendingProductLinks();
+  await seedInsightsLinks();
   console.log("Content seed complete.");
 }
 

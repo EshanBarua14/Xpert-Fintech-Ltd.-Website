@@ -39,6 +39,7 @@ export default async function EventPage({
       videoUrl: "",
       legacyUrl: null,
       participants: [],
+      gallery: [],
       en: { ...emptyText },
       bn: { ...emptyText },
     };
@@ -54,7 +55,7 @@ export default async function EventPage({
   if (!z.string().uuid().safeParse(id).success) notFound();
   const ev = await db.event.findUnique({
     where: { id },
-    include: { translations: true, organizations: { orderBy: { sortOrder: "asc" } } },
+    include: { translations: true, organizations: { orderBy: { sortOrder: "asc" } }, gallery: { orderBy: { sortOrder: "asc" } } },
   });
   if (!ev) notFound();
   const text = (l: string) => {
@@ -92,6 +93,7 @@ export default async function EventPage({
             videoUrl: ev.videoUrl ?? "",
             legacyUrl: ev.legacyUrl,
             participants: ev.organizations.map((o) => o.organizationId),
+            gallery: ev.gallery.map((g) => g.mediaId),
             en: text("en"),
             bn: text("bn"),
           }}

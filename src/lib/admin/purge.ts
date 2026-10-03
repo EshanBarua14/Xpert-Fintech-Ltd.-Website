@@ -66,6 +66,59 @@ export async function purgeDeployment(id: string) {
   ]);
 }
 
+export async function purgeArticle(id: string) {
+  await db.$transaction(async (tx) => {
+    await clearMediaUsage(tx, "ARTICLE", id);
+    await tx.contentRelation.deleteMany({ where: { OR: [{ fromType: "ARTICLE", fromId: id }, { toType: "ARTICLE", toId: id }] } });
+    await tx.seoMetadata.deleteMany({ where: { entityType: "ARTICLE", entityId: id } });
+    await tx.article.delete({ where: { id } });
+  });
+}
+
+/** Deletes a job and its applications (and the applicants' CV files). */
+export async function purgeCareer(id: string) {
+  const apps = await db.careerApplication.findMany({ where: { careerId: id }, select: { id: true } });
+  for (const a of apps) await purgeApplication(a.id);
+  await db.$transaction(async (tx) => {
+    await tx.contentRelation.deleteMany({ where: { OR: [{ fromType: "CAREER", fromId: id }, { toType: "CAREER", toId: id }] } });
+    await tx.seoMetadata.deleteMany({ where: { entityType: "CAREER", entityId: id } });
+    await tx.career.delete({ where: { id } });
+  });
+}
+
+/** Deletes an application and its CV file, so personal data does not linger. */
+export async function purgeApplication(id: string) {
+  const app = await db.careerApplication.findUnique({ where: { id }, select: { cvMediaId: true } });
+  if (!app) return;
+  await db.careerApplication.delete({ where: { id } });
+  if (app.cvMediaId) {
+    const media = await db.media.findUnique({ where: { id: app.cvMediaId } });
+    if (media) {
+      await db.mediaUsage.deleteMany({ where: { mediaId: media.id } });
+      await db.media.delete({ where: { id: media.id } });
+      await storage().remove(media.storageKey).catch((error: unknown) => console.error("[purge] could not remove CV", error));
+    }
+  }
+}
+
+export async function purgeResource(id: string) {
+  await db.$transaction(async (tx) => {
+    await clearMediaUsage(tx, "RESOURCE", id);
+    await tx.contentRelation.deleteMany({ where: { OR: [{ fromType: "RESOURCE", fromId: id }, { toType: "RESOURCE", toId: id }] } });
+    await tx.seoMetadata.deleteMany({ where: { entityType: "RESOURCE", entityId: id } });
+    await tx.resource.delete({ where: { id } });
+  });
+}
+
+export async function purgeCaseStudy(id: string) {
+  await db.$transaction(async (tx) => {
+    await clearMediaUsage(tx, "CASE_STUDY", id);
+    await tx.contentRelation.deleteMany({ where: { OR: [{ fromType: "CASE_STUDY", fromId: id }, { toType: "CASE_STUDY", toId: id }] } });
+    await tx.seoMetadata.deleteMany({ where: { entityType: "CASE_STUDY", entityId: id } });
+    await tx.caseStudy.delete({ where: { id } });
+  });
+}
+
 export async function purgeLead(id: string) {
   await db.lead.delete({ where: { id } });
 }
@@ -113,6 +166,11 @@ export async function purgeOldTrash(force = false): Promise<number> {
     await run(await db.lead.findMany({ where: old, select: { id: true } }), purgeLead);
     await run(await db.deployment.findMany({ where: old, select: { id: true } }), purgeDeployment);
     await run(await db.event.findMany({ where: old, select: { id: true } }), purgeEvent);
+    await run(await db.article.findMany({ where: old, select: { id: true } }), purgeArticle);
+    await run(await db.careerApplication.findMany({ where: old, select: { id: true } }), purgeApplication);
+    await run(await db.career.findMany({ where: old, select: { id: true } }), purgeCareer);
+    await run(await db.resource.findMany({ where: old, select: { id: true } }), purgeResource);
+    await run(await db.caseStudy.findMany({ where: old, select: { id: true } }), purgeCaseStudy);
     await run(await db.person.findMany({ where: old, select: { id: true } }), purgePerson);
     await run(await db.offering.findMany({ where: old, select: { id: true } }), purgeOffering);
     await run(await db.organization.findMany({ where: old, select: { id: true } }), purgeOrganization);

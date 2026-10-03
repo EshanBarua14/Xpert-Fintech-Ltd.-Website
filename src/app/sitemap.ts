@@ -33,7 +33,7 @@ const fixed = (path: string, updatedAt: Date) => ({
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   try {
-    const [pages, offerings, events] = await Promise.all([
+    const [pages, offerings, events, articles, careers, cases] = await Promise.all([
       db.page.findMany({
         where: { ...publishedWhere(now), showInSearch: true },
         select: { key: true, updatedAt: true, translations: { select: { locale: true, path: true } } },
@@ -46,7 +46,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         where: publishedWhere(now),
         select: { updatedAt: true, translations: { select: { locale: true, slug: true } } },
       }),
+      db.article.findMany({ where: publishedWhere(now), select: { updatedAt: true, translations: { select: { locale: true, slug: true } } } }),
+      db.career.findMany({ where: publishedWhere(now), select: { updatedAt: true, translations: { select: { locale: true, slug: true } } } }),
+      db.caseStudy.findMany({ where: publishedWhere(now), select: { updatedAt: true, translations: { select: { locale: true, slug: true } } } }),
     ]);
+    const under = (base: string, rows: { updatedAt: Date; translations: { locale: string; slug: string }[] }[]) =>
+      rows.map((r) => ({ updatedAt: r.updatedAt, translations: r.translations.map((t) => ({ locale: t.locale, path: `${base}/${t.slug}` })) }));
 
     // Pages with system keys (home, contact…) are rendered by their own routes.
     const cmsPages = pages.filter((p) => !["home", "contact", "request-demo"].includes(p.key ?? ""));
@@ -65,7 +70,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         events.map((e) => ({ updatedAt: e.updatedAt, translations: e.translations.map((t) => ({ locale: t.locale, path: `events/${t.slug}` })) })),
         0.4,
       ),
-      ...entries([fixed("company/board", now), fixed("company/management", now)], 0.4),
+      ...entries([fixed("company/about", now), fixed("company/board", now), fixed("company/management", now), fixed("company/team", now)], 0.5),
+      ...entries([fixed("careers", now)], 0.5),
+      ...entries(under("careers", careers), 0.5),
+      ...(articles.length ? entries([fixed("news", now)], 0.6) : []),
+      ...entries(under("news", articles), 0.6),
+      ...(cases.length ? entries([fixed("case-studies", now)], 0.5) : []),
+      ...entries(under("case-studies", cases), 0.5),
       ...entries([fixed("contact", now), fixed("request-demo", now)], 0.6),
     ];
     const seen = new Set<string>();

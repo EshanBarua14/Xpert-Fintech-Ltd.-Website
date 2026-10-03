@@ -6,6 +6,8 @@ import { MediaImage, Paragraphs } from "@/components/blocks/Shared";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getEventBySlug, getSeo, mediaMap } from "@/lib/public/content";
+import { Lightbox } from "@/components/gallery/Lightbox";
+import { getEventPhotos } from "@/lib/public/insights";
 import { breadcrumbLd, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 import { formatEventDate, pick, videoEmbedUrl } from "@/lib/public/text";
 
@@ -51,6 +53,7 @@ export default async function EventPage({ params }: Props) {
     .map((eo) => ({ id: eo.organizationId, name: pick(eo.organization.translations, found.locale)?.name }))
     .filter((p) => p.name);
   const url = `${SITE_URL}/${found.locale}/events/${tr.slug}`;
+  const photos = await getEventPhotos(event.id, tr.title, found.locale);
 
   return (
     <article>
@@ -111,6 +114,12 @@ export default async function EventPage({ params }: Props) {
           <div data-reveal className="glass aspect-video overflow-hidden rounded-3xl p-2 [&>iframe]:rounded-2xl">
             <iframe src={video} title={`${tr.title} — ${t.video}`} loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" referrerPolicy="strict-origin-when-cross-origin" className="h-full w-full" />
           </div>
+        )}
+        {photos.length > 0 && (
+          <section id="gallery" className="flex scroll-mt-28 flex-col gap-5 border-t border-fg/10 pt-10">
+            <h2 className="font-display text-xl font-semibold">{t.galleryTitle}</h2>
+            <Lightbox photos={photos} labels={{ open: t.openPhoto, close: t.close, prev: t.prevPhoto, next: t.nextPhoto, counter: t.photoCounter }} />
+          </section>
         )}
         {participants.length > 0 && (
           <section className="flex flex-col gap-5 border-t border-fg/10 pt-10">

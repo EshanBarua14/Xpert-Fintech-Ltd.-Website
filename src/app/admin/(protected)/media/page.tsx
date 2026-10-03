@@ -18,6 +18,8 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
 
   const where: Prisma.MediaWhereInput = {
     deletedAt: inTrash ? { not: null } : null,
+    // Job applicants' CVs are managed in Applications, not here.
+    NOT: { tags: { has: "private" } },
     ...(kind && { kind }),
     ...(q && { OR: [{ originalName: { contains: q, mode: "insensitive" } }, { tags: { has: q } }] }),
   };

@@ -417,5 +417,11 @@
   "eventAlbum": "ইভেন্ট",
   "photoAlbum": "অ্যালবাম",
   "backToGallery": "গ্যালারি",
-  "moreAlbums": "আরও অ্যালবাম"
+  "moreAlbums": "আরও অ্যালবাম",
+  "marketSharePending": "প্রকাশিত হলে {exchange}-এর হিসাব এখানে দেখা যাবে।",
+  "clientsEyebrow": "আমাদের ক্লায়েন্ট",
+  "clientsTitle": "{n}টি প্রতিষ্ঠানের আস্থা",
+  "clientsBody": "যেসব ব্রোকারেজ হাউস ও আর্থিক প্রতিষ্ঠান এক্সপার্টের প্রযুক্তিতে তাদের ব্যবসা পরিচালনা করে।",
+  "proofClients": "ক্লায়েন্ট প্রতিষ্ঠান",
+  "emailPerson": "{name}-কে ইমেইল করুন"
 }

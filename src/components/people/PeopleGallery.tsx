@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import { useRef, useState, type CSSProperties } from "react";
+import { SocialIcon } from "@/components/ui/SocialIcon";
 
 /**
  * Board and management profiles: photo cards that open a full profile in a
- * dialog (photo, role, biography, LinkedIn). Keyboard and screen-reader
+ * dialog (photo, role, biography, email, LinkedIn). Email and LinkedIn also
+ * sit on the card itself as icon links (next to the card button, never inside it). Keyboard and screen-reader
  * friendly: cards are buttons, the native dialog keeps focus inside, Esc
  * closes it and focus returns to the card. Motion is skipped for
  * reduced-motion users (see .person-* rules in globals.css).
@@ -18,6 +20,7 @@ export type GalleryPerson = {
   bio: string | null;
   photo: { url: string; width: number | null; height: number | null } | null;
   linkedinUrl: string | null;
+  email: string | null;
   /** Seeded stand-in until XFL sends the real profile. */
   isPlaceholder: boolean;
 };
@@ -28,11 +31,42 @@ export type GalleryLabels = {
   biography: string;
   bioPending: string;
   linkedin: string;
+  /** "Email {name}" */
+  email: string;
   placeholder: string;
   role: string;
 };
 
 const PLACEHOLDER_PHOTO = "/placeholders/person.svg";
+
+/** Email and LinkedIn as round icon links. */
+function ContactLinks({ p, labels, size = "sm" }: { p: GalleryPerson; labels: GalleryLabels; size?: "sm" | "lg" }) {
+  if (!p.email && !p.linkedinUrl) return null;
+  const cls =
+    size === "sm"
+      ? "flex size-10 items-center justify-center rounded-full border border-white/20 bg-[#05080f]/70 text-white backdrop-blur-md transition-[background-color,border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-brand-sky/70 hover:bg-brand-royal/80 focus-visible:border-brand-sky"
+      : "inline-flex h-11 items-center gap-2 rounded-full border border-fg/15 px-5 text-sm font-semibold text-brand-sky transition-colors hover:border-brand-sky/60";
+  return (
+    <>
+      {p.email && (
+        <a href={`mailto:${p.email}`} className={cls} aria-label={labels.email.replace("{name}", p.name)} title={p.email}>
+          <SocialIcon kind="email" className={size === "sm" ? "size-[18px]" : "size-4"} />
+          {size === "lg" && <span className="font-mono text-[13px] font-medium">{p.email}</span>}
+        </a>
+      )}
+      {p.linkedinUrl && (
+        <a href={p.linkedinUrl} target="_blank" rel="noopener noreferrer" className={cls} aria-label={`${labels.linkedin}: ${p.name}`} title={labels.linkedin}>
+          <SocialIcon kind="linkedin" className={size === "sm" ? "size-[17px]" : "size-4"} />
+          {size === "lg" && (
+            <span>
+              {labels.linkedin} <span aria-hidden="true">↗</span>
+            </span>
+          )}
+        </a>
+      )}
+    </>
+  );
+}
 
 export function PeopleGallery({
   people,
@@ -65,13 +99,13 @@ export function PeopleGallery({
     <>
       <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {people.map((p, i) => (
-          <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties}>
+          <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className="group/card relative">
             <button
               type="button"
               aria-haspopup="dialog"
               data-person={p.id}
               onClick={(e) => show(p, e.currentTarget)}
-              className="person-card spotlight glass group flex h-full w-full flex-col overflow-hidden rounded-3xl text-left transition-[transform,border-color,box-shadow] duration-500 hover:-translate-y-1.5 hover:border-brand-sky/40 hover:shadow-[0_30px_80px_-40px_rgb(34_188_235/0.7)] focus-visible:-translate-y-1.5"
+              className="person-card spotlight glass group flex h-full w-full flex-col overflow-hidden rounded-3xl text-left transition-[transform,border-color,box-shadow] duration-500 group-hover/card:-translate-y-1.5 hover:border-brand-sky/40 hover:shadow-[0_30px_80px_-40px_rgb(34_188_235/0.7)] focus-visible:-translate-y-1.5"
             >
               <span className="relative block aspect-[4/5] overflow-hidden bg-navy-800">
                 <Image
@@ -103,6 +137,11 @@ export function PeopleGallery({
                 </span>
               </span>
             </button>
+            {(p.email || p.linkedinUrl) && (
+              <div className="absolute top-4 right-4 z-10 flex gap-2 transition-transform duration-500 group-hover/card:-translate-y-1.5">
+                <ContactLinks p={p} labels={labels} />
+              </div>
+            )}
           </li>
         ))}
       </ul>
@@ -168,15 +207,10 @@ export function PeopleGallery({
                   <p className="text-text-secondary italic">{labels.bioPending}</p>
                 )}
               </section>
-              {open.linkedinUrl && (
-                <a
-                  href={open.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-auto inline-flex h-11 items-center gap-2 self-start rounded-full border border-fg/15 px-5 text-sm font-semibold text-brand-sky transition-colors hover:border-brand-sky/60"
-                >
-                  {labels.linkedin} <span aria-hidden="true">↗</span>
-                </a>
+              {(open.email || open.linkedinUrl) && (
+                <div className="mt-auto flex flex-wrap gap-3">
+                  <ContactLinks p={open} labels={labels} size="lg" />
+                </div>
               )}
             </div>
           </div>

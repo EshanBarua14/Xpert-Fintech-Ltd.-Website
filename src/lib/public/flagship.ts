@@ -9,14 +9,15 @@ export type Member = { id: string; name: string; shortName: string | null; websi
 
 /** Real data the flagship sections show: consortium members, exchanges, published products. */
 export const getFlagshipData = cache(async (locale: AppLocale) => {
-  const [members, exchanges, offerings] = await Promise.all([
+  const [members, exchanges, clients, offerings] = await Promise.all([
     getOrganizations("CONSORTIUM_MEMBER"),
     getOrganizations("EXCHANGE"),
+    getOrganizations("CLIENT"),
     getOfferings(),
   ]);
   // A logo is shown only when it is uploaded AND written permission is on file.
   const logos = await mediaMap(
-    [...members, ...exchanges].map((o) => (o.logoPermission ? o.logoMediaId : null)),
+    [...members, ...exchanges, ...clients].map((o) => (o.logoPermission ? o.logoMediaId : null)),
     locale,
   );
   const toMember = (o: (typeof members)[number]): Member => {
@@ -38,6 +39,7 @@ export const getFlagshipData = cache(async (locale: AppLocale) => {
   return {
     members: members.map(toMember).filter((m) => m.name),
     exchanges: exchanges.map(toMember).filter((e) => e.name),
+    clients: clients.map(toMember).filter((c) => c.name),
     offerings,
     publishedSlugs,
   };

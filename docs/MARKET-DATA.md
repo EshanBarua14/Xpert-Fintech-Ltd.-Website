@@ -15,7 +15,7 @@ only from figures entered in **Admin → Market data** (or written there by the 
 | --- | --- |
 | `none` (default) | No prices. Market-share figures entered in the admin are still shown. |
 | `demo` | Generated prices on real DSE codes, labelled **"Demo data — not real prices"** everywhere. For development and design review only. Refused when `NODE_ENV`/`APP_ENV` is `production` unless `ALLOW_DEMO_MARKET_DATA=true`. |
-| `exchange` | Reads the public price boards of DSE (`dse.com.bd/markets`) and CSE (`cse.com.bd/market/current_price`) at most once a minute: last price, change and % change for every listed stock, plus top movers and advanced/declined counts worked out from them. Index values (DSEX, CASPI…) are not on those pages, so they appear only with the licensed feed. DSE's robots.txt allows `/markets` and disallows `/api`; only the page is read. If an exchange changes its page layout, that exchange is left out and *Test connection* in the admin says so. |
+| `exchange` | Reads DSE's and CSE's public pages at most once a minute. **DSE** (`dse.com.bd/markets`): last price, change and % change for every listed stock, so the ticker, top gainers/losers and advanced/declined counts are worked out from them. DSE's index values (DSEX, DS30, DSES), turnover and trades load through `dse.com.bd/api`, which DSE's robots.txt disallows, so they appear only with the licensed feed. **CSE** (`cse.com.bd/market/current_price` and the home page `cse.com.bd/`): every stock's price, the market status, the five indices (CASPI, CSE30, CSCX, CSI, CSE50) and the session's trades, volume and value. Before the session opens CSE shows the previous session's indices, which are used and the totals left out. If an exchange changes its page layout, that part is left out and *Test connection* in the admin says so. Remember to tick *Show market data on the website* in Admin → Market data. |
 | `licensed` | The feed at `MARKET_DATA_API_URL`. |
 
 Market data appears only after **Show market data on the website** is ticked in Admin → Market data.
@@ -82,9 +82,33 @@ format differs, put a small adapter in front of it that returns this.
 A response that does not match is rejected (the reason is written to the server
 log) and **Test connection** in the admin says so.
 
-## Market share
+## Market share (DSE and CSE, every trading day)
 
-Admin → Market data → **Xpert market share**: for each trading day and exchange,
-enter the turnover traded through Xpert and the exchange's total turnover (BDT),
-plus the source (e.g. "DSE daily broker turnover report"). The site shows the
-latest figure for each exchange as a percentage, with the date and source.
+The home page shows Xpert's share of each exchange's turnover side by side,
+with the trading day it belongs to. A figure is Xpert turnover ÷ the
+exchange's total turnover for that day.
+
+**By hand** — Admin → Market data → *Xpert market share*: pick the day (today
+by default), fill in Xpert's turnover for DSE, CSE or both, and the market
+totals. For today, an empty CSE total is taken from CSE's live data (exchange
+mode) or the licensed feed. DSE does not publish its total outside its data
+feed, so enter it from DSE's daily report unless the licensed feed is on. The
+page shows whether today's figure is saved for each exchange.
+
+**Automatically** — Xpert's OMS or back office posts the day's figures after
+the close (e.g. a 15:30 Dhaka scheduled job):
+
+```bash
+curl -X POST https://www.xpertfintech.com/api/market-share \
+  -H "Authorization: Bearer $MARKET_SHARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"source":"Xpert OMS end-of-day",
+       "figures":[{"exchange":"DSE","xpertTurnover":812345678.5,"marketTurnover":6123456789},
+                  {"exchange":"CSE","xpertTurnover":12345678}]}'
+```
+
+- `tradeDate` (YYYY-MM-DD) is optional and defaults to today in Dhaka.
+- `marketTurnover` may be left out for CSE (and for DSE with the licensed feed); it is then read from live data.
+- Sending the same day again replaces it. Amounts are in taka.
+- The endpoint is off until `MARKET_SHARE_API_TOKEN` (24+ random characters) is set in `.env`.
+- Response: `200` when every figure was saved, `207` when some were refused (with the reason), `401` with a wrong token.

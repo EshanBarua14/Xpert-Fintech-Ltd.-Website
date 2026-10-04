@@ -2,8 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { Container } from "@/components/ui/Layout";
 import { Icon } from "@/components/ui/Icon";
-import { LanguageSwitch } from "@/components/navigation/LanguageSwitch";
-import { ThemeToggle } from "@/components/navigation/ThemeToggle";
+import { SocialIcon, socialKind } from "@/components/ui/SocialIcon";
 import { getNavMenu, type NavLink } from "@/lib/content/navigation";
 import { getSiteInfo } from "@/lib/content/settings";
 import { getMessages } from "@/lib/i18n/messages";
@@ -108,26 +107,36 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
               ))}
             </ul>
           )}
-          <div className="flex flex-wrap items-center gap-4">
-            {info.socialLinks.length > 0 && (
-              <ul className="flex gap-2" aria-label={t.followUs}>
-                {info.socialLinks.map((s) => (
-                  <li key={s.url}>
-                    <a
-                      href={s.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-9 items-center rounded-full border border-fg/10 bg-fg/[0.03] px-4 text-xs font-medium text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-fg"
-                    >
-                      {s.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <ThemeToggle labels={{ toLight: t.themeToLight, toDark: t.themeToDark }} />
-            <LanguageSwitch current={locale} label={t.language} />
-          </div>
+          {(info.socialLinks.length > 0 || info.email) && (
+            <ul className="flex flex-wrap items-center gap-2" aria-label={t.followUs}>
+              {info.email && (
+                <li>
+                  <a
+                    href={`mailto:${info.email}`}
+                    aria-label={`${t.email}: ${info.email}`}
+                    title={info.email}
+                    className="inline-flex size-10 items-center justify-center rounded-full border border-fg/10 bg-fg/[0.03] text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-fg"
+                  >
+                    <SocialIcon kind="email" />
+                  </a>
+                </li>
+              )}
+              {info.socialLinks.map((s) => (
+                <li key={s.url}>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    title={s.label}
+                    className="inline-flex size-10 items-center justify-center rounded-full border border-fg/10 bg-fg/[0.03] text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-fg"
+                  >
+                    <SocialIcon kind={socialKind(s.url)} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </Container>
       </div>
     </footer>

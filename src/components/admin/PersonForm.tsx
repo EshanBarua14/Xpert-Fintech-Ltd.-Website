@@ -15,6 +15,7 @@ export type PersonFormValues = {
   sortOrder: number;
   photoMediaId: string;
   linkedinUrl: string;
+  email: string;
   enName: string;
   bnName: string;
   enBio: string;
@@ -39,16 +40,24 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
           <TextInput id="bnName" label="Name (বাংলা)" lang="bn" defaultValue={values.bnName} error={e.bnName} />
           <TextArea id="enBio" label="Short bio (English)" rows={5} defaultValue={values.enBio} error={e.enBio} />
           <TextArea id="bnBio" label="Short bio (বাংলা)" rows={5} lang="bn" defaultValue={values.bnBio} error={e.bnBio} />
-          <div className="md:col-span-2">
-            <TextInput
-              id="linkedinUrl"
-              type="url"
-              label="LinkedIn profile"
-              placeholder="https://www.linkedin.com/in/…"
-              defaultValue={values.linkedinUrl}
-              error={e.linkedinUrl}
-            />
-          </div>
+          <TextInput
+            id="email"
+            type="email"
+            label="Work email"
+            placeholder="name@xpertfintech.com"
+            hint="Optional. Shown as an email icon on the card and in the profile."
+            defaultValue={values.email}
+            error={e.email}
+          />
+          <TextInput
+            id="linkedinUrl"
+            type="url"
+            label="LinkedIn profile"
+            placeholder="https://www.linkedin.com/in/…"
+            hint="Optional. Shown as a LinkedIn icon on the card and in the profile."
+            defaultValue={values.linkedinUrl}
+            error={e.linkedinUrl}
+          />
         </fieldset>
 
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">

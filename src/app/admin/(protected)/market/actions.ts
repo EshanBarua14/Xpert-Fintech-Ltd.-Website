@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { testFeed } from "@/lib/market/data";
+import { dhakaToday, testFeed } from "@/lib/market/data";
+import { saveShares, type ShareInput } from "@/lib/market/share";
 import { checkbox, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 
 export type MarketState = { errors?: FieldErrors; message?: string; savedAt?: number; ok?: boolean };
@@ -51,49 +52,48 @@ export async function testMarketFeed(_prev: MarketState, _formData: FormData): P
   return { message: r.message, ok: r.ok, savedAt: Date.now() };
 }
 
-const money = z
+const amount = z
   .string()
   .trim()
   .transform((v) => v.replace(/[,\s৳]/g, ""))
-  .pipe(z.coerce.number({ invalid_type_error: "Enter an amount in taka." }).positive("Enter an amount above zero.").max(1e15));
+  .refine((v) => v === "" || (/^\d+(\.\d{1,2})?$/.test(v) && Number(v) <= 1e14), "Enter an amount in taka, e.g. 812345678.50")
+  .transform((v) => (v === "" ? null : Number(v)));
 
-const shareSchema = z
-  .object({
-    tradeDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick the trading day."),
-    exchange: z.enum(["DSE", "CSE"]),
-    xpertTurnover: money,
-    marketTurnover: money,
-    sourceNote: z.string().trim().max(200).transform((v) => v || null),
-  })
-  .refine((v) => v.xpertTurnover <= v.marketTurnover, { path: ["xpertTurnover"], message: "Xpert turnover cannot be larger than the market's." });
+const dailySchema = z.object({
+  tradeDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick the trading day."),
+  sourceNote: z.string().trim().max(200).transform((v) => v || null),
+  dseXpert: amount,
+  dseMarket: amount,
+  cseXpert: amount,
+  cseMarket: amount,
+});
 
-/** Add or replace the market-share figure for one trading day and exchange. */
+/**
+ * Saves the day's market share for DSE and/or CSE in one go. An exchange is
+ * saved when its Xpert turnover is filled in; for today, an empty market
+ * total is taken from the live exchange data when available.
+ */
 export async function saveMarketShare(_prev: MarketState, formData: FormData): Promise<MarketState> {
   const admin = await requireAdmin();
-  const parsed = shareSchema.safeParse({
-    tradeDate: formData.get("tradeDate") ?? "",
-    exchange: formData.get("exchange") ?? "",
-    xpertTurnover: String(formData.get("xpertTurnover") ?? ""),
-    marketTurnover: String(formData.get("marketTurnover") ?? ""),
-    sourceNote: formData.get("sourceNote") ?? "",
-  });
+  const parsed = dailySchema.safeParse(Object.fromEntries(Object.keys(dailySchema.shape).map((k) => [k, formData.get(k) ?? ""])));
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), message: "Please fix the highlighted fields." };
   const v = parsed.data;
-  const tradeDate = new Date(`${v.tradeDate}T00:00:00Z`);
-  const data = {
-    xpertTurnover: v.xpertTurnover.toFixed(2),
-    marketTurnover: v.marketTurnover.toFixed(2),
-    sourceNote: v.sourceNote,
-    status: "PUBLISHED" as const,
+  if (v.tradeDate > dhakaToday()) return { errors: { tradeDate: "That day has not happened yet." }, message: "Please fix the highlighted fields." };
+  const inputs: ShareInput[] = [];
+  if (v.dseXpert !== null) inputs.push({ exchange: "DSE", xpertTurnover: v.dseXpert, marketTurnover: v.dseMarket });
+  if (v.cseXpert !== null) inputs.push({ exchange: "CSE", xpertTurnover: v.cseXpert, marketTurnover: v.cseMarket });
+  if (!inputs.length) return { errors: { dseXpert: "Fill in Xpert's turnover for DSE, CSE or both." }, message: "Nothing to save yet." };
+  const results = await saveShares(v.tradeDate, inputs, v.sourceNote, admin.id);
+  if (results.some((r) => r.ok)) refresh();
+  const errors: FieldErrors = {};
+  for (const r of results) if (!r.ok) errors[r.exchange === "DSE" ? "dseMarket" : "cseMarket"] = r.message;
+  const saved = results.filter((r) => r.ok).map((r) => r.message);
+  return {
+    ok: saved.length > 0 && Object.keys(errors).length === 0,
+    savedAt: Date.now(),
+    message: saved.length ? `Saved — ${saved.join(" · ")}` : "Nothing saved.",
+    ...(Object.keys(errors).length && { errors }),
   };
-  await db.marketShare.upsert({
-    where: { tradeDate_exchange: { tradeDate, exchange: v.exchange } },
-    update: data,
-    create: { tradeDate, exchange: v.exchange, createdById: admin.id, ...data },
-  });
-  refresh();
-  const pct = ((v.xpertTurnover / v.marketTurnover) * 100).toFixed(2);
-  return { message: `Saved: ${v.exchange} ${v.tradeDate} — ${pct}% market share.`, savedAt: Date.now(), ok: true };
 }
 
 export async function deleteMarketShare(formData: FormData) {

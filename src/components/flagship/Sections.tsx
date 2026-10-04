@@ -339,11 +339,19 @@ export function FlowStory({ t }: { t: Messages }) {
 
 // ── Numbers ──────────────────────────────────────────────────────────────────
 
+const LG_COLS: Record<number, string> = { 1: "lg:grid-cols-1", 2: "lg:grid-cols-2", 3: "lg:grid-cols-3", 4: "lg:grid-cols-4", 5: "lg:grid-cols-5" };
+
 export function StatGrid({ items, locale }: { items: { value: number; label: string; suffix?: string }[]; locale: AppLocale }) {
   return (
-    <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-fg/10 bg-fg/10 lg:grid-cols-4">
+    <dl className={cn("grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-fg/10 bg-fg/10", LG_COLS[items.length] ?? "lg:grid-cols-4")}>
       {items.map((s, i) => (
-        <div key={s.label} data-reveal style={delay(i)} className="flex flex-col gap-2 bg-ink-950/90 p-6 md:p-8">
+        <div
+          key={s.label}
+          data-reveal
+          style={delay(i)}
+          // An odd last tile spans both columns on phones, so the grid has no hole.
+          className={cn("flex flex-col gap-2 bg-ink-950/90 p-6 md:p-8", items.length % 2 === 1 && i === items.length - 1 && "col-span-2 lg:col-span-1")}
+        >
           <dt className="order-2 text-sm text-text-secondary">{s.label}</dt>
           <dd className="text-gradient-brand order-1 font-display text-5xl font-semibold tracking-tight md:text-6xl">
             <CountUp value={s.value} suffix={s.suffix} locale={locale} />

@@ -109,9 +109,9 @@ function ShareCard({ share, t, locale }: { share: ShareFigure; t: Messages; loca
         <div className="relative size-36 shrink-0">
           <svg viewBox="0 0 140 140" className="size-full -rotate-90" aria-hidden="true">
             <circle cx="70" cy="70" r={R} fill="none" strokeWidth="12" className="stroke-fg/[0.08]" />
-            <circle cx="70" cy="70" r={R} fill="none" strokeWidth="12" strokeLinecap="round" stroke="url(#share-g)" strokeDasharray={`${C * frac} ${C}`} />
+            <circle cx="70" cy="70" r={R} fill="none" strokeWidth="12" strokeLinecap="round" stroke={`url(#share-g-${share.exchange})`} strokeDasharray={`${C * frac} ${C}`} />
             <defs>
-              <linearGradient id="share-g" x1="0" x2="1">
+              <linearGradient id={`share-g-${share.exchange}`} x1="0" x2="1">
                 <stop offset="0" stopColor="#2a5fae" />
                 <stop offset="1" stopColor="#22bceb" />
               </linearGradient>
@@ -154,10 +154,9 @@ export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t:
   const exchanges = data.snapshot?.exchanges ?? [];
   const [tab, setTab] = useState<"DSE" | "CSE">(exchanges[0]?.exchange ?? data.shares[0]?.exchange ?? "DSE");
   const ex = exchanges.find((e) => e.exchange === tab) ?? exchanges[0];
-  const share = data.shares.find((s) => s.exchange === tab) ?? data.shares[0];
-  const tabs = Array.from(new Set([...exchanges.map((e) => e.exchange), ...data.shares.map((s) => s.exchange)]));
+  const tabs = exchanges.map((e) => e.exchange);
 
-  if (!ex && !share) return null;
+  if (!ex && !data.shares.length) return null;
   const { gainers, losers } = ex ? movers(ex) : { gainers: [], losers: [] };
   const breadthTotal = ex ? (ex.advancers ?? 0) + (ex.decliners ?? 0) + (ex.unchanged ?? 0) : 0;
 
@@ -214,7 +213,7 @@ export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t:
         )}
 
         {ex && (
-          <div className={cn("glass flex flex-col gap-8 rounded-3xl p-6", ex.indices.length ? "lg:col-span-3" : share ? "lg:col-span-7" : "lg:col-span-12")}>
+          <div className={cn("glass flex flex-col gap-8 rounded-3xl p-6", ex.indices.length ? "lg:col-span-7" : "lg:col-span-12")}>
             {breadthTotal > 0 && (
               <div className="flex flex-col gap-3">
                 <div className="flex h-2.5 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden="true">
@@ -261,12 +260,6 @@ export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t:
           </div>
         )}
 
-        {share && (
-          <div className={cn(!ex ? "lg:col-span-6" : ex.indices.length ? "lg:col-span-4" : "lg:col-span-5")}>
-            <ShareCard share={share} t={t} locale={locale} />
-          </div>
-        )}
-
         {ex && (
           <>
             <div className="lg:col-span-6" style={{ "--d": 1 } as CSSProperties}>
@@ -278,6 +271,25 @@ export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t:
           </>
         )}
       </div>
+
+      {data.shares.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {(["DSE", "CSE"] as const).map((x) => {
+            const s = data.shares.find((f) => f.exchange === x);
+            return s ? (
+              <ShareCard key={x} share={s} t={t} locale={locale} />
+            ) : (
+              <div key={x} className="glass flex flex-col justify-center gap-2 rounded-3xl p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-display text-lg font-semibold">{t.marketShareTitle}</h3>
+                  <span className="rounded-full border border-fg/10 px-2.5 py-0.5 font-mono text-xs text-accent">{x}</span>
+                </div>
+                <p className="text-sm text-text-secondary">{t.marketSharePending.replace("{exchange}", x)}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

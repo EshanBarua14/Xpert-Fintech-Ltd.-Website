@@ -417,5 +417,11 @@
   "eventAlbum": "Event",
   "photoAlbum": "Album",
   "backToGallery": "Gallery",
-  "moreAlbums": "More albums"
+  "moreAlbums": "More albums",
+  "marketSharePending": "The {exchange} figure will appear here once it is published.",
+  "clientsEyebrow": "Our clients",
+  "clientsTitle": "Trusted by {n} institutions",
+  "clientsBody": "Brokerage houses and financial institutions that run their business on Xpert technology.",
+  "proofClients": "Client institutions",
+  "emailPerson": "Email {name}"
 }

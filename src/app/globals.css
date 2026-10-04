@@ -570,6 +570,9 @@ body::before {
 .marquee:hover .marquee-track {
   animation-play-state: paused;
 }
+.marquee-reverse {
+  animation-direction: reverse;
+}
 @keyframes marquee {
   to {
     transform: translateX(-50%);

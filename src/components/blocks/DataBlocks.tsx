@@ -95,6 +95,7 @@ export function PeopleGrid({
       bio: tr?.bio ?? null,
       photo: photo ? { url: photo.url, width: photo.width, height: photo.height } : null,
       linkedinUrl: p.linkedinUrl,
+      email: p.email,
       isPlaceholder: (p.key ?? "").startsWith("placeholder-"),
     };
   });
@@ -109,6 +110,7 @@ export function PeopleGrid({
         biography: t.biography,
         bioPending: t.bioPending,
         linkedin: t.linkedinProfile,
+        email: t.emailPerson,
         placeholder: t.placeholderBadge,
         role: t.roleLabel,
       }}

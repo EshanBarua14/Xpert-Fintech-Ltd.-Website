@@ -1,13 +1,13 @@
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { marketMode } from "@/lib/market/data";
+import { dhakaToday, liveMarketTurnover, marketMode } from "@/lib/market/data";
 import { ConfirmButton } from "@/components/admin/AdminUi";
 import { MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
 import { deleteMarketShare } from "./actions";
 
 const MODE_TEXT = {
   licensed: "Licensed feed (MARKET_DATA_MODE=licensed)",
-  exchange: "DSE and CSE price boards (MARKET_DATA_MODE=exchange): last prices, changes, top movers and breadth for every listed stock. Index values need the licensed feed.",
+  exchange: "DSE and CSE public pages (MARKET_DATA_MODE=exchange): every listed stock's price, top gainers and losers, advanced/declined; CSE's five indices, trades, volume and value. DSE's indices and turnover need the licensed feed.",
   demo: "Demo data — generated prices, clearly labelled on the site. Never use on the live website.",
   none: "Off (MARKET_DATA_MODE=none). Only market-share figures entered below are shown.",
 } as const;
@@ -19,7 +19,10 @@ export default async function MarketAdminPage() {
     db.marketShare.findMany({ orderBy: [{ tradeDate: "desc" }, { exchange: "asc" }], take: 60 }),
   ]);
   const mode = marketMode();
-  const today = new Date(Date.now() + 6 * 3600 * 1000).toISOString().slice(0, 10);
+  const today = dhakaToday();
+  const [liveDse, liveCse] = await Promise.all([liveMarketTurnover("DSE").catch(() => null), liveMarketTurnover("CSE").catch(() => null)]);
+  const latest = (ex: "DSE" | "CSE") => shares.find((s) => s.exchange === ex)?.tradeDate.toISOString().slice(0, 10) ?? null;
+  const apiOn = (process.env.MARKET_SHARE_API_TOKEN ?? "").length >= 24;
   const bdt = (v: unknown) => `৳${(Number(v) / 1e7).toLocaleString("en-US", { maximumFractionDigits: 2 })} cr`;
 
   return (
@@ -63,7 +66,21 @@ export default async function MarketAdminPage() {
           Enter the day&rsquo;s turnover traded through Xpert and the exchange&rsquo;s total turnover. The website shows the latest figure for each exchange with its source. Saving the
           same day and exchange again replaces it.
         </p>
-        <MarketShareForm today={today} />
+        <ul className="flex flex-wrap gap-3 text-sm">
+          {(["DSE", "CSE"] as const).map((ex) => {
+            const d = latest(ex);
+            return (
+              <li key={ex} className={"rounded-full border px-3 py-1 " + (d === today ? "border-market-up/40 text-market-up" : "border-amber-400/40 text-amber-300")}>
+                {ex}: {d ? (d === today ? "today's figure saved" : `latest is ${d}`) : "no figure yet"}
+              </li>
+            );
+          })}
+        </ul>
+        <MarketShareForm today={today} live={{ DSE: liveDse, CSE: liveCse }} />
+        <p className="text-xs text-text-secondary">
+          Automatic daily update: {apiOn ? "on" : "off"}. Xpert&rsquo;s OMS or back office can send the day&rsquo;s figures to <code>POST /api/market-share</code> with the
+          token in <code>MARKET_SHARE_API_TOKEN</code> (see docs/MARKET-DATA.md); CSE&rsquo;s total is filled in automatically.
+        </p>
         <div className="overflow-x-auto rounded-card border border-fg/10">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-b border-fg/10 text-xs tracking-wide text-text-secondary uppercase">

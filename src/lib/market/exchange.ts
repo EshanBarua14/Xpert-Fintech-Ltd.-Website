@@ -1,5 +1,5 @@
 import "server-only";
-import type { ExchangeSnapshot, MarketSnapshot, Quote } from "./types";
+import type { ExchangeSnapshot, IndexValue, MarketSnapshot, Quote } from "./types";
 
 /*
  * Reads the public price boards of the Dhaka and Chittagong stock exchanges
@@ -9,7 +9,12 @@ import type { ExchangeSnapshot, MarketSnapshot, Quote } from "./types";
  *    every listed company ("GP 287.30 ▲ +1.40 +0.49%"). DSE's robots.txt
  *    allows /markets and disallows /api, so only the page is read.
  *  - CSE: https://www.cse.com.bd/market/current_price — a price table, read by
- *    its column headings (code, LTP, YCP, change, volume).
+ *    its column headings (code, LTP, YCP, change, volume); and the CSE home
+ *    page (https://www.cse.com.bd/) for the market status, the five indices
+ *    (CASPI, CSE30, CSCX, CSI, CSE50) and the day's trades, volume and value.
+ *  - DSE index values (DSEX, DS30, DSES), turnover and trades are loaded on
+ *    dse.com.bd through its /api, which DSE's robots.txt disallows, so they
+ *    are not read; they need the licensed feed (MARKET_DATA_MODE=licensed).
  *
  * One request per exchange per minute at most, shared by all visitors. If an
  * exchange's page changes shape, that exchange is simply left out (and the
@@ -19,6 +24,8 @@ import type { ExchangeSnapshot, MarketSnapshot, Quote } from "./types";
 
 const DSE_URL = () => process.env.MARKET_DSE_URL || "https://www.dse.com.bd/markets";
 const CSE_URL = () => process.env.MARKET_CSE_URL || "https://www.cse.com.bd/market/current_price";
+const CSE_HOME_URL = () => process.env.MARKET_CSE_HOME_URL || "https://www.cse.com.bd/";
+const CSE_INDEX_NAMES = ["CASPI", "CSE30", "CSCX", "CSI", "CSE50"] as const;
 const USER_AGENT = "Mozilla/5.0 (compatible; XpertFintechWebsite/1.0; +https://www.xpertfintech.com)";
 
 const decode = (s: string) =>
@@ -93,6 +100,72 @@ export function parsePriceTable(html: string): Quote[] {
   return [...out.values()];
 }
 
+export type CseSummary = {
+  status?: ExchangeSnapshot["status"];
+  indices: IndexValue[];
+  turnover?: number;
+  volume?: number;
+  trades?: number;
+  /** True when the figures are the previous session's (before today's trading starts). */
+  previousSession: boolean;
+};
+
+/**
+ * CSE home page: "Market Status: …", then one block per index:
+ * "TODAY Index … % … Trade … Volume … Value … YESTERDAY Index … % … Trade … Volume … Value …".
+ * Before the session starts TODAY is empty or zero, so YESTERDAY is used and flagged.
+ * Read from the page text (not its markup), so styling changes do not break it.
+ */
+export function parseCseSummary(html: string): CseSummary {
+  const text = decode(html);
+  const n = String.raw`([+\-−]?[\d,]*\.?\d*)`;
+  const block = new RegExp(
+    String.raw`TODAY\s*Index\s*${n}\s*%\s*${n}\s*Trade\s*${n}\s*Volume\s*${n}\s*Value\s*${n}\s*YESTERDAY\s*Index\s*${n}\s*%\s*${n}\s*Trade\s*${n}\s*Volume\s*${n}\s*Value\s*${n}`,
+    "gi",
+  );
+  const blocks = [...text.matchAll(block)];
+  // Index names in the order the page lists them (its tabs); fall back to CSE's usual order.
+  const named = [...text.matchAll(/\b(CASPI|CSE30|CSCX|CSI|CSE50)\b/g)].map((m) => m[1]!);
+  const order = [...new Set(named)].length === blocks.length ? [...new Set(named)] : [...CSE_INDEX_NAMES];
+  const today = blocks.some((b) => num(b[1]) > 0);
+  const indices: IndexValue[] = [];
+  blocks.forEach((b, i) => {
+    const name = order[i];
+    const value = today ? num(b[1]) : num(b[6]);
+    const pct = today ? num(b[2]) : num(b[7]);
+    if (!name || !(value > 0) || !Number.isFinite(pct)) return;
+    const change = (value * pct) / (100 + pct);
+    indices.push({ name, value: round(value, 2), change: round(change, 2), changePct: round(pct, 2) });
+  });
+  const first = blocks[0];
+  const pick = (todayIdx: number, yIdx: number) => {
+    if (!first) return undefined;
+    const v = today ? num(first[todayIdx]) : num(first[yIdx]);
+    return v > 0 ? v : undefined;
+  };
+  // The page's own summary line for today ("Value in Taka 1,234 … Contract Number 567").
+  const valueToday = num(/Value in Taka\s*([\d,]+(?:\.\d+)?)/i.exec(text)?.[1]);
+  const tradesToday = num(/Contract Number\s*([\d,]+)/i.exec(text)?.[1]);
+  const statusText = /Market Status\s*:?\s*([A-Za-z -]{3,20}?)(?=\s+(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)|\s{2}|$)/i.exec(text)?.[1]?.trim().toLowerCase() ?? "";
+  const status: CseSummary["status"] = /pre|opening/.test(statusText)
+    ? "PRE_OPEN"
+    : /open|running|continuous/.test(statusText)
+      ? "OPEN"
+      : /halt|suspend/.test(statusText)
+        ? "HALTED"
+        : /clos|end|post/.test(statusText)
+          ? "CLOSED"
+          : undefined;
+  return {
+    status,
+    indices,
+    turnover: valueToday > 0 ? valueToday : pick(5, 10),
+    volume: pick(4, 9),
+    trades: tradesToday > 0 ? tradesToday : pick(3, 8),
+    previousSession: !today && blocks.length > 0,
+  };
+}
+
 function withBreadth(exchange: "DSE" | "CSE", quotes: Quote[]): ExchangeSnapshot {
   return {
     exchange,
@@ -129,14 +202,31 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
     ],
     ["CSE", async () => parsePriceTable(await getHtml(CSE_URL()))],
   ];
-  const results = await Promise.allSettled(tasks.map(([, run]) => run()));
+  const [results, cse] = await Promise.all([
+    Promise.allSettled(tasks.map(([, run]) => run())),
+    getHtml(CSE_HOME_URL())
+      .then(parseCseSummary)
+      .catch((error: unknown) => {
+        console.error("[market] CSE summary unavailable:", (error as Error)?.message ?? error);
+        return null;
+      }),
+  ]);
   const exchanges: ExchangeSnapshot[] = [];
   const reports: ExchangeReport[] = [];
   results.forEach((r, i) => {
     const exchange = tasks[i]![0];
     if (r.status === "fulfilled" && r.value.length >= 5) {
-      exchanges.push(withBreadth(exchange, r.value));
-      reports.push({ exchange, ok: true, count: r.value.length, message: `${r.value.length} prices read` });
+      const snap = withBreadth(exchange, r.value);
+      let extra = "";
+      if (exchange === "CSE" && cse) {
+        snap.indices = cse.indices;
+        if (cse.status) snap.status = cse.status;
+        // Totals belong to today's session only; yesterday's are not shown as today's.
+        if (!cse.previousSession) Object.assign(snap, { turnover: cse.turnover, volume: cse.volume, trades: cse.trades });
+        extra = `, ${cse.indices.length} indices${cse.previousSession ? " (previous session)" : ""}`;
+      }
+      exchanges.push(snap);
+      reports.push({ exchange, ok: true, count: r.value.length, message: `${r.value.length} prices read${extra}` });
     } else {
       const message = r.status === "rejected" ? String((r.reason as Error)?.message ?? r.reason) : "page read, but no price list found (the page layout may have changed)";
       console.error(`[market] ${exchange} board unavailable: ${message}`);

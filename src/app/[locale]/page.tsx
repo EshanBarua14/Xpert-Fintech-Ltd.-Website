@@ -18,6 +18,7 @@ import {
 } from "@/components/flagship/Sections";
 import { getSiteInfo } from "@/lib/content/settings";
 import { LogoWall } from "@/components/organizations/LogoWall";
+import { ClientMarquee } from "@/components/organizations/ClientMarquee";
 import { ProductShowcase } from "@/components/products/ProductShowcase";
 import { LiveApps } from "@/components/organizations/LiveApps";
 import { getLiveApps } from "@/lib/public/company";
@@ -78,6 +79,7 @@ export default async function HomePage({ params }: Props) {
   const apps = await getLiveApps(locale);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
+    { value: data.clients.length, label: t.proofClients },
     { value: data.offerings.length, label: t.proofProducts },
     { value: apps.length, label: t.proofApps },
     { value: data.exchanges.length, label: t.proofExchanges },
@@ -181,6 +183,15 @@ export default async function HomePage({ params }: Props) {
             <EventCards events={events} locale={locale} />
           </div>
         </Shell>
+      )}
+
+      {data.clients.length > 0 && (
+        <section id="clients" className="relative scroll-mt-28 overflow-hidden py-16 md:py-24">
+          <div className="mx-auto mb-10 w-full max-w-7xl px-4 md:px-8">
+            <SectionHeader eyebrow={t.clientsEyebrow} title={t.clientsTitle.replace("{n}", new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(data.clients.length))} body={t.clientsBody} />
+          </div>
+          <ClientMarquee clients={data.clients} label={t.clientsEyebrow} />
+        </section>
       )}
 
       <CtaBand t={t} locale={locale} />

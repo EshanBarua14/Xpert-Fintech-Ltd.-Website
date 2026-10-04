@@ -132,3 +132,22 @@ export async function testFeed(): Promise<{ ok: boolean; message: string }> {
   const q = snap.exchanges.reduce((n, e) => n + e.quotes.length, 0);
   return { ok: true, message: `Connected. ${snap.exchanges.map((e) => e.exchange).join(" and ")}, ${q} quotes, as of ${snap.asOf}.` };
 }
+
+/**
+ * Today's total turnover of an exchange from the live source, when it reports
+ * one: CSE's home page in exchange mode, or the licensed feed. Used to fill
+ * in the market side of the daily market-share figure. Null when unknown.
+ */
+export async function liveMarketTurnover(exchange: "DSE" | "CSE"): Promise<number | null> {
+  const mode = marketMode();
+  let snapshot: MarketSnapshot | null = null;
+  if (mode === "exchange") snapshot = await boardSnapshot();
+  else if (mode === "licensed") snapshot = await licensedSnapshot();
+  const t = snapshot?.exchanges.find((e) => e.exchange === exchange)?.turnover;
+  return t && t > 0 ? t : null;
+}
+
+/** Today's date in Dhaka as YYYY-MM-DD. */
+export function dhakaToday(): string {
+  return new Date(Date.now() + 6 * 3600 * 1000).toISOString().slice(0, 10);
+}

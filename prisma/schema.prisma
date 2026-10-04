@@ -963,6 +963,8 @@ model Person {
   key           String?       @unique
   photoMediaId  String?       @db.Uuid
   linkedinUrl   String?
+  /// Work email shown on the person's card (optional).
+  email         String?
   status        ContentStatus @default(DRAFT)
   publishAt     DateTime?
   sortOrder     Int           @default(0)

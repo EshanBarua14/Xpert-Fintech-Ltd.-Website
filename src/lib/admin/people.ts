@@ -11,6 +11,7 @@ export const emptyPerson: PersonFormValues = {
   sortOrder: 0,
   photoMediaId: "",
   linkedinUrl: "",
+  email: "",
   enName: "",
   bnName: "",
   enBio: "",
@@ -25,6 +26,7 @@ export function toPersonFormValues(p: {
   sortOrder: number;
   photoMediaId: string | null;
   linkedinUrl: string | null;
+  email: string | null;
   translations: { locale: string; name: string; bio: string | null }[];
   roles: Role[];
 }): PersonFormValues {
@@ -45,6 +47,7 @@ export function toPersonFormValues(p: {
     sortOrder: p.sortOrder,
     photoMediaId: p.photoMediaId ?? "",
     linkedinUrl: p.linkedinUrl ?? "",
+    email: p.email ?? "",
     enName: t("en")?.name ?? "",
     bnName: t("bn")?.name ?? "",
     enBio: t("en")?.bio ?? "",

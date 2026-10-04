@@ -546,6 +546,67 @@ async function seedTeamLinks() {
   if (added) console.log(`• Added the Team link to ${added} menu(s)`);
 }
 
+// ── Navigation: Markets link in the header and footer ───────────────────────
+
+/** Adds "Markets" to the header (after Products) and to the footer's first column, once. */
+async function seedMarketsLinks() {
+  let added = 0;
+  const header = await db.navMenu.findUnique({ where: { key: "header" } });
+  if (header && !(await db.navItem.findFirst({ where: { menuId: header.id, parentId: null, href: "markets" } }))) {
+    const products = await db.navItem.findFirst({ where: { menuId: header.id, parentId: null, href: "products" } });
+    const at = (products?.sortOrder ?? 1) + 1;
+    await db.navItem.updateMany({ where: { menuId: header.id, parentId: null, sortOrder: { gte: at } }, data: { sortOrder: { increment: 1 } } });
+    const item = await db.navItem.create({
+      data: {
+        menuId: header.id,
+        linkType: "INTERNAL",
+        href: "markets",
+        sortOrder: at,
+        translations: {
+          create: [
+            { locale: EN, label: "Markets", description: "Live DSE and CSE prices, indices and movers." },
+            { locale: BN, label: "বাজার", description: "ডিএসই ও সিএসই-এর সরাসরি দাম, সূচক ও মুভার।" },
+          ],
+        },
+      },
+    });
+    const kids = [
+      { href: "markets/dse", en: "DSE board", bn: "ডিএসই বোর্ড", descEn: "Dhaka Stock Exchange prices.", descBn: "ঢাকা স্টক এক্সচেঞ্জের দাম।" },
+      { href: "markets/cse", en: "CSE board", bn: "সিএসই বোর্ড", descEn: "Chittagong Stock Exchange prices and indices.", descBn: "চট্টগ্রাম স্টক এক্সচেঞ্জের দাম ও সূচক।" },
+    ];
+    for (const [i, k] of kids.entries()) {
+      await db.navItem.create({
+        data: {
+          menuId: header.id,
+          parentId: item.id,
+          linkType: "INTERNAL",
+          href: k.href,
+          sortOrder: i,
+          translations: { create: [{ locale: EN, label: k.en, description: k.descEn }, { locale: BN, label: k.bn, description: k.descBn }] },
+        },
+      });
+    }
+    added++;
+  }
+  const footer = await db.navMenu.findUnique({ where: { key: "footer" } });
+  const firstColumn = footer ? await db.navItem.findFirst({ where: { menuId: footer.id, parentId: null }, orderBy: { sortOrder: "asc" } }) : null;
+  if (footer && firstColumn && !(await db.navItem.findFirst({ where: { menuId: footer.id, href: "markets" } }))) {
+    const max = await db.navItem.aggregate({ where: { parentId: firstColumn.id }, _max: { sortOrder: true } });
+    await db.navItem.create({
+      data: {
+        menuId: footer.id,
+        parentId: firstColumn.id,
+        linkType: "INTERNAL",
+        href: "markets",
+        sortOrder: (max._max.sortOrder ?? -1) + 1,
+        translations: { create: [{ locale: EN, label: "Markets" }, { locale: BN, label: "বাজার" }] },
+      },
+    });
+    added++;
+  }
+  if (added) console.log(`• Added the Markets link to ${added} menu(s)`);
+}
+
 async function main() {
   const ids = new Map<string, string>();
   for (const c of CONTENT) ids.set(c.key, (await upsertOffering(c)).id);
@@ -561,6 +622,7 @@ async function main() {
   await seedMilestones();
   await syncPendingProductLinks();
   await seedInsightsLinks();
+  await seedMarketsLinks();
   console.log("Content seed complete.");
 }
 

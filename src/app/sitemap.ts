@@ -75,6 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...entries([fixed("careers", now)], 0.5),
       ...entries(under("careers", careers), 0.5),
       ...entries([fixed("news", now), fixed("gallery", now)], 0.6),
+      ...entries([fixed("markets", now), fixed("markets/dse", now), fixed("markets/cse", now)], 0.6),
       ...entries(under("gallery", albums), 0.4),
       ...entries(under("news", articles), 0.6),
       ...(cases.length ? entries([fixed("case-studies", now)], 0.5) : []),

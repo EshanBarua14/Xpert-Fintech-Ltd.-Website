@@ -45,6 +45,7 @@ const FIXED_ROUTES = [
   "company/about", "company/board", "company/management", "company/team", "careers",
   // Always in the menu, with a friendly empty state until content is added.
   "news", "gallery",
+  "markets", "markets/dse", "markets/cse",
 ];
 
 /**

@@ -15,6 +15,7 @@ type Labels = { menu: string; closeMenu: string; mainNavigation: string; languag
 /** Picks an icon for a menu link from where it goes. */
 function iconFor(href: string | null): string {
   const h = href ?? "";
+  if (/\/markets(\/|$)/.test(h)) return "chart";
   if (/trading|oms|#trading/.test(h)) return "exchange";
   if (/rms|risk/.test(h)) return "shield";
   if (/ekyc/.test(h)) return "id";

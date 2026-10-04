@@ -76,7 +76,10 @@ const MODULES: { key: ModuleKey; angle: number }[] = [
 ];
 const pillPos = (m: ModuleKey) => {
   const a = (MODULES.find((x) => x.key === m)!.angle * Math.PI) / 180;
-  return { x: HUB.x + Math.cos(a) * RING, y: HUB.y + Math.sin(a) * RING };
+  // Rounded so the server and the browser produce identical SVG attributes
+  // (their sin/cos can differ in the last digits, which breaks hydration).
+  const r2 = (v: number) => Math.round(v * 100) / 100;
+  return { x: r2(HUB.x + Math.cos(a) * RING), y: r2(HUB.y + Math.sin(a) * RING) };
 };
 
 /** Point on a node's box edge facing (px, py). */

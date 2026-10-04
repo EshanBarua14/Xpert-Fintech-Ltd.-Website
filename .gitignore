@@ -34,3 +34,4 @@ npm-debug.log*
 # Real images for import (see assets/README.md)
 assets/*
 !assets/README.md
+market-debug/

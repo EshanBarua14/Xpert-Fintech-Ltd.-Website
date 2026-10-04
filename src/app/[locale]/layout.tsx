@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { THEME_SCRIPT } from "@/lib/theme-script";
+import { marketMode } from "@/lib/market/data";
 import { Anek_Bangla, Hind_Siliguri, JetBrains_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
@@ -46,7 +47,7 @@ export default async function LocaleLayout({
   const t = getMessages(locale);
 
   return (
-    <html lang={locale} className={`${display.variable} ${body.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`${display.variable} ${body.variable} ${mono.variable}${marketMode() !== "none" ? " has-ticker" : ""}`} suppressHydrationWarning>
       <head>
         {/* Lets CSS hide scroll-reveal content only when JavaScript can reveal it again. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
@@ -57,7 +58,7 @@ export default async function LocaleLayout({
           {t.skipToContent}
         </a>
         <SiteHeader locale={locale} />
-        <main id="main" className="relative flex-1 pt-20 md:pt-24">
+        <main id="main" className="relative flex-1 pt-[calc(5rem+var(--ticker-h))] md:pt-[calc(6rem+var(--ticker-h))]">
           {children}
         </main>
         <SiteFooter locale={locale} />

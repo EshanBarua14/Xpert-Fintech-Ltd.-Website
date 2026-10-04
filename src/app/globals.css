@@ -75,6 +75,8 @@
 }
 
 :root {
+  /* Height of the DSE/CSE ticker bar above the header (0 when market data is off). */
+  --ticker-h: 0px;
   --z-base: 0;
   --z-sticky: 100;
   --z-dropdown: 200;
@@ -570,6 +572,24 @@ body::before {
 .marquee:hover .marquee-track {
   animation-play-state: paused;
 }
+/* DSE · CSE ticker bar (top of every public page) */
+html.has-ticker {
+  --ticker-h: 2.25rem;
+  scroll-padding-top: var(--ticker-h);
+}
+.ticker-lane {
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 94%, transparent);
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 80s linear infinite;
+}
+.ticker-lane:hover .ticker-track,
+.ticker-lane:focus-within .ticker-track,
+.ticker-paused .ticker-track {
+  animation-play-state: paused;
+}
 .marquee-reverse {
   animation-direction: reverse;
 }
@@ -871,6 +891,18 @@ html {
     animation: none;
     flex-wrap: wrap;
     width: auto;
+  }
+  /* The ticker stays one line and scrolls by hand instead of moving. */
+  .ticker-track {
+    animation: none;
+  }
+  .ticker-lane {
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: none;
+  }
+  .ticker-copy {
+    display: none;
   }
 }
 

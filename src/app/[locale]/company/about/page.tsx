@@ -115,7 +115,7 @@ export default async function AboutPage({ params }: Props) {
       {milestones.length > 0 && (
         <Shell className="pb-20 md:pb-28">
           <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="lg:sticky lg:top-32 lg:self-start">
+            <div className="lg:sticky lg:top-[calc(8rem+var(--ticker-h))] lg:self-start">
               <SectionHeader eyebrow={t.milestonesEyebrow} title={t.milestonesTitle} />
             </div>
             <ol data-reveal className="timeline relative flex flex-col gap-8 pl-10">

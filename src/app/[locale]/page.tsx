@@ -32,7 +32,6 @@ import { getFlagshipData } from "@/lib/public/flagship";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
-import { MarketTicker } from "@/components/market/MarketTicker";
 import { MarketStatusLine } from "@/components/market/MarketStatusLine";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
@@ -99,7 +98,6 @@ export default async function HomePage({ params }: Props) {
         memberCount={data.members.length}
         modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)}
         graph={eco}
-        ticker={market.snapshot ? <MarketTicker initial={market} t={t} locale={locale} /> : undefined}
         status={market.snapshot ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
       />
 

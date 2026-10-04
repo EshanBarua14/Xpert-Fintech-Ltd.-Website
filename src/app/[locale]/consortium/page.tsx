@@ -34,7 +34,7 @@ export default async function ConsortiumPage({ params }: Props) {
       {data.members.length > 0 && (
         <Shell className="py-16 md:py-24">
           <div className="grid gap-14 lg:grid-cols-[1fr_1.2fr] lg:items-start">
-            <div className="flex flex-col gap-8 lg:sticky lg:top-32">
+            <div className="flex flex-col gap-8 lg:sticky lg:top-[calc(8rem+var(--ticker-h))]">
               <SectionHeader title={t.members} />
               <div data-reveal className="relative mx-auto aspect-square w-full max-w-md">
                 <MarketGlobe routes={data.members.length} />

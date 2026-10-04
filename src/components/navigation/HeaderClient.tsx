@@ -101,11 +101,14 @@ export function HeaderClient({
   items,
   labels,
   logo,
+  ticker,
 }: {
   locale: AppLocale;
   items: NavLink[];
   labels: Labels;
   logo: ReactNode;
+  /** DSE · CSE ticker bar, shown above the navigation when market data is on. */
+  ticker?: ReactNode;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -169,7 +172,9 @@ export function HeaderClient({
     [item, ...item.children].some((i) => !!i.href && i.href !== `/${locale}` && pathname.startsWith(i.href.split("#")[0]!));
 
   return (
-    <header className="fixed inset-x-0 top-0 z-(--z-sticky) px-3 pt-3 md:px-6 md:pt-4">
+    <header className="fixed inset-x-0 top-0 z-(--z-sticky)">
+      {ticker}
+      <div className="px-3 pt-3 md:px-6 md:pt-4">
       <div
         className={cn(
           "relative mx-auto flex h-14 max-w-7xl items-center gap-2 rounded-full border px-2 pl-4 transition-[background-color,border-color,box-shadow] duration-500 md:h-16",
@@ -234,7 +239,7 @@ export function HeaderClient({
           {cta?.href && (
             <Link
               href={cta.href}
-              className="btn-glow hidden h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold text-white sm:inline-flex"
+              className="btn-glow hidden h-10 items-center gap-2 rounded-full px-5 whitespace-nowrap text-sm font-semibold text-white sm:inline-flex"
             >
               {cta.label}
             </Link>
@@ -253,13 +258,14 @@ export function HeaderClient({
           </button>
         </div>
       </div>
+      </div>
 
       {/* Mobile menu */}
       <div
         id={drawerId}
         ref={drawerRef}
         hidden={!menuOpen}
-        className="glass-strong menu-drawer fixed inset-x-3 top-20 bottom-3 z-(--z-drawer) overflow-y-auto rounded-3xl p-6 lg:hidden"
+        className="glass-strong menu-drawer fixed inset-x-3 top-[calc(5rem+var(--ticker-h))] bottom-3 z-(--z-drawer) overflow-y-auto rounded-3xl p-6 lg:hidden"
       >
         <nav aria-label={labels.mainNavigation}>
           <ul className="flex flex-col">

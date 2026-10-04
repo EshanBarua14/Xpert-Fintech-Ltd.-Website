@@ -45,7 +45,7 @@ export function Star({ on, label, onClick }: { on: boolean; label: string; onCli
 
 function MiniList({ title, rows, basePath, locale, t, metric }: { title: string; rows: Quote[]; basePath: string; locale: Locale; t: Messages; metric: "pct" | "volume" }) {
   return (
-    <section className="glass flex flex-col gap-3 rounded-3xl p-5">
+    <section className="glass flex min-w-0 flex-col gap-3 rounded-3xl p-5">
       <h3 className="font-display text-base font-semibold">{title}</h3>
       {rows.length === 0 ? (
         <p className="text-sm text-text-secondary">—</p>
@@ -53,7 +53,7 @@ function MiniList({ title, rows, basePath, locale, t, metric }: { title: string;
         <ol className="flex flex-col divide-y divide-fg/[0.06]">
           {rows.map((q, i) => (
             <li key={q.symbol}>
-              <Link href={`${basePath}/${encodeURIComponent(q.symbol)}`} className="flex items-center gap-3 py-2 text-sm hover:text-brand-sky">
+              <Link href={`${basePath}/${encodeURIComponent(q.symbol)}`} className="relative flex items-center gap-2.5 py-2 text-sm hover:text-brand-sky">
                 <span className="w-4 font-mono text-xs text-text-secondary">{fmt(locale, i + 1, 0)}</span>
                 <span className="min-w-0 flex-1 truncate font-mono font-semibold">{q.symbol}</span>
                 <span className="font-mono text-text-secondary tabular-nums">{fmt(locale, q.ltp)}</span>
@@ -231,7 +231,7 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
         ) : rows.length === 0 ? (
           <p className="rounded-2xl border border-fg/10 p-6 text-sm text-text-secondary">{t.noMatches}</p>
         ) : (
-          <div className="overflow-x-auto rounded-3xl border border-fg/10">
+          <div className="relative overflow-x-auto rounded-3xl border border-fg/10">
             <table className="w-full min-w-[34rem] text-sm">
               <thead className="sticky top-0 z-10 bg-navy-900/95 text-xs text-text-secondary backdrop-blur">
                 <tr>

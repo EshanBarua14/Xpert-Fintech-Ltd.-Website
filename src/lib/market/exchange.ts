@@ -12,9 +12,10 @@ import type { ExchangeSnapshot, IndexValue, MarketSnapshot, Quote } from "./type
  *    its column headings (code, LTP, YCP, change, volume); and the CSE home
  *    page (https://www.cse.com.bd/) for the market status, the five indices
  *    (CASPI, CSE30, CSCX, CSI, CSE50) and the day's trades, volume and value.
- *  - DSE index values (DSEX, DS30, DSES), turnover and trades are loaded on
- *    dse.com.bd through its /api, which DSE's robots.txt disallows, so they
- *    are not read; they need the licensed feed (MARKET_DATA_MODE=licensed).
+ *  - DSE index values (DSEX, DSES, DS30), market status, trades, volume and
+ *    turnover come from the text of DSE's long-standing site (www.dsebd.org);
+ *    its full price table (latest_share_price_scroll_l.php) is the fallback
+ *    when the dse.com.bd strip cannot be read. dse.com.bd's /api is never used.
  *
  * One request per exchange per minute at most, shared by all visitors. If an
  * exchange's page changes shape, that exchange is simply left out (and the
@@ -23,6 +24,10 @@ import type { ExchangeSnapshot, IndexValue, MarketSnapshot, Quote } from "./type
  */
 
 const DSE_URL = () => process.env.MARKET_DSE_URL || "https://www.dse.com.bd/markets";
+/** DSE's long-standing site: a full price table and the index/turnover summary on its home page. */
+const DSE_TABLE_URL = () => process.env.MARKET_DSE_TABLE_URL || "https://www.dsebd.org/latest_share_price_scroll_l.php";
+const DSE_HOME_URL = () => process.env.MARKET_DSE_HOME_URL || "https://www.dsebd.org/";
+const DSE_INDEX_NAMES = ["DSEX", "DSES", "DS30"] as const;
 const CSE_URL = () => process.env.MARKET_CSE_URL || "https://www.cse.com.bd/market/current_price";
 const CSE_HOME_URL = () => process.env.MARKET_CSE_HOME_URL || "https://www.cse.com.bd/";
 const CSE_INDEX_NAMES = ["CASPI", "CSE30", "CSCX", "CSI", "CSE50"] as const;
@@ -80,7 +85,8 @@ export function parsePriceTable(html: string): Quote[] {
   const col = (re: RegExp, not?: RegExp) => head.findIndex((h) => re.test(h) && !(not && not.test(h)));
   const iCode = col(/code|scrip|symbol|instrument/);
   const iLtp = col(/^ltp|last/);
-  const iYcp = col(/ycp|prev|yesterday|closep/);
+  // Yesterday's close: prefer YCP / previous over today's CLOSEP when both are present.
+  const iYcp = col(/ycp|prev|yesterday/) >= 0 ? col(/ycp|prev|yesterday/) : col(/closep/);
   const iPct = col(/%/);
   const iChg = col(/change|chg/, /%/);
   const iVol = col(/volume/);
@@ -166,6 +172,44 @@ export function parseCseSummary(html: string): CseSummary {
   };
 }
 
+export type DseSummary = { status?: ExchangeSnapshot["status"]; indices: IndexValue[]; turnover?: number; volume?: number; trades?: number };
+
+/**
+ * DSE home page (dsebd.org): "DSEX Index 5,123.45 12.34 0.24%", the same for
+ * DSES and DS30, then "Total Trade …", "Total Volume …", "Total Value in Taka (mn) …"
+ * and "Market Status: Open/Closed". Read from the page text, so styling changes
+ * do not break it; anything not found is simply left out.
+ */
+export function parseDseSummary(html: string): DseSummary {
+  const text = decode(html);
+  const indices: IndexValue[] = [];
+  for (const name of DSE_INDEX_NAMES) {
+    const m = new RegExp(String.raw`\b${name}\b\s*(?:Index)?\s*([\d,]+\.\d+)\s*([+\-−]?\s*[\d,]*\.?\d+)\s*([+\-−]?\s*[\d.]+)\s*%`).exec(text);
+    if (!m) continue;
+    const value = num(m[1]);
+    let change = num(m[2]);
+    let pct = num(m[3]);
+    if (!(value > 0) || !Number.isFinite(change) || !Number.isFinite(pct)) continue;
+    if (change < 0 || pct < 0) {
+      change = -Math.abs(change);
+      pct = -Math.abs(pct);
+    }
+    indices.push({ name, value: round(value), change: round(change), changePct: round(pct) });
+  }
+  const trades = num(/Total\s*Trade[s]?\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
+  const volume = num(/Total\s*Volume\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
+  const valueMn = num(/Total\s*Value\s*in\s*Taka\s*\(?\s*mn\s*\)?\s*:?\s*([\d,]+(?:\.\d+)?)/i.exec(text)?.[1]);
+  const statusText = /Market\s*Status\s*:?\s*([A-Za-z-]+)/i.exec(text)?.[1]?.toLowerCase() ?? "";
+  const status: DseSummary["status"] = /pre/.test(statusText) ? "PRE_OPEN" : /open/.test(statusText) ? "OPEN" : /halt|suspend/.test(statusText) ? "HALTED" : /clos/.test(statusText) ? "CLOSED" : undefined;
+  return {
+    status,
+    indices,
+    ...(trades > 0 && { trades }),
+    ...(volume > 0 && { volume }),
+    ...(valueMn > 0 && { turnover: Math.round(valueMn * 1_000_000) }),
+  };
+}
+
 function withBreadth(exchange: "DSE" | "CSE", quotes: Quote[]): ExchangeSnapshot {
   return {
     exchange,
@@ -195,19 +239,35 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
     [
       "DSE",
       async () => {
-        const html = await getHtml(DSE_URL());
-        const strip = parseDseStrip(html);
-        return strip.length ? strip : parsePriceTable(html);
+        // The current DSE site first; its long-standing price table if that gives nothing.
+        let first: unknown = null;
+        try {
+          const html = await getHtml(DSE_URL());
+          const strip = parseDseStrip(html);
+          const quotes = strip.length ? strip : parsePriceTable(html);
+          if (quotes.length >= 5) return quotes;
+        } catch (error) {
+          first = error;
+        }
+        const table = parsePriceTable(await getHtml(DSE_TABLE_URL()));
+        if (!table.length && first) throw first;
+        return table;
       },
     ],
     ["CSE", async () => parsePriceTable(await getHtml(CSE_URL()))],
   ];
-  const [results, cse] = await Promise.all([
+  const [results, cse, dse] = await Promise.all([
     Promise.allSettled(tasks.map(([, run]) => run())),
     getHtml(CSE_HOME_URL())
       .then(parseCseSummary)
       .catch((error: unknown) => {
         console.error("[market] CSE summary unavailable:", (error as Error)?.message ?? error);
+        return null;
+      }),
+    getHtml(DSE_HOME_URL())
+      .then(parseDseSummary)
+      .catch((error: unknown) => {
+        console.error("[market] DSE summary unavailable:", (error as Error)?.message ?? error);
         return null;
       }),
   ]);
@@ -224,6 +284,12 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
         // Totals belong to today's session only; yesterday's are not shown as today's.
         if (!cse.previousSession) Object.assign(snap, { turnover: cse.turnover, volume: cse.volume, trades: cse.trades });
         extra = `, ${cse.indices.length} indices${cse.previousSession ? " (previous session)" : ""}`;
+      }
+      if (exchange === "DSE" && dse) {
+        snap.indices = dse.indices;
+        if (dse.status) snap.status = dse.status;
+        Object.assign(snap, { turnover: dse.turnover, volume: dse.volume, trades: dse.trades });
+        extra = `, ${dse.indices.length} indices${dse.turnover ? ", turnover" : ""}`;
       }
       exchanges.push(snap);
       reports.push({ exchange, ok: true, count: r.value.length, message: `${r.value.length} prices read${extra}` });

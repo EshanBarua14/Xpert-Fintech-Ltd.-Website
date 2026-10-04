@@ -25,7 +25,8 @@
     "db:seed:content": "tsx prisma/seed-content.ts",
     "assets:import": "tsx scripts/import-assets.ts",
     "admin:password": "tsx scripts/reset-admin-password.ts",
-    "setup": "tsx scripts/setup.ts"
+    "setup": "tsx scripts/setup.ts",
+    "market:check": "tsx --conditions=react-server scripts/market-check.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

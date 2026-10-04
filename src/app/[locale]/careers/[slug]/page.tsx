@@ -98,7 +98,7 @@ export default async function JobPage({ params }: Props) {
               </section>
             ))}
           </div>
-          <aside id="apply" className="lg:sticky lg:top-28 lg:self-start">
+          <aside id="apply" className="lg:sticky lg:top-[calc(7rem+var(--ticker-h))] lg:self-start">
             <div data-reveal className="beam glass rounded-[2rem] p-6 md:p-8">
               {open ? (
                 <>

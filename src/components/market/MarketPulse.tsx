@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Messages } from "@/lib/i18n/messages";
 import { compact, crore, dhakaTime, fmt, signed } from "@/lib/market/format";
-import { movers, type MarketPayload, type Quote, type ShareFigure } from "@/lib/market/types";
+import { movers, type ExchangeSnapshot, type MarketPayload, type Quote, type ShareFigure } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
 import { MarketBadge } from "./MarketBadge";
 import { useMarket } from "./useMarket";
@@ -21,18 +21,22 @@ function Change({ pct, abs, locale, big = false }: { pct: number; abs?: number; 
   );
 }
 
-function MoversTable({ title, rows, locale, t, tone }: { title: string; rows: Quote[]; locale: Locale; t: Messages; tone: "up" | "down" }) {
+/** Compact top-5 list (gainers or losers) with a bar showing the size of the move. */
+function Movers({ title, rows, locale, t, tone, exchange }: { title: string; rows: Quote[]; locale: Locale; t: Messages; tone: "up" | "down"; exchange: "DSE" | "CSE" }) {
   const max = Math.max(...rows.map((r) => Math.abs(r.changePct)), 1);
   return (
-    <div className="glass flex flex-col gap-4 rounded-3xl p-6">
-      <h3 className="flex items-center gap-2 font-display text-lg font-semibold">
+    <div className="flex min-w-0 flex-col gap-2">
+      <h4 className="flex items-center gap-2 text-sm font-semibold">
         <span className={cn("size-2 rounded-full", tone === "up" ? "bg-market-up" : "bg-market-down")} />
         {title}
-      </h3>
+      </h4>
       {rows.length === 0 ? (
         <p className="text-sm text-text-secondary">{t.noMovers}</p>
       ) : (
         <table className="w-full text-sm">
+          <caption className="sr-only">
+            {exchange} {title}
+          </caption>
           <thead className="sr-only">
             <tr>
               <th>{t.symbol}</th>
@@ -41,20 +45,21 @@ function MoversTable({ title, rows, locale, t, tone }: { title: string; rows: Qu
             </tr>
           </thead>
           <tbody>
-            {rows.map((q, i) => (
+            {rows.map((q) => (
               <tr key={q.symbol} className="border-t border-fg/[0.06] first:border-t-0">
-                <td className="py-2.5 pr-3">
-                  <span className="mr-2 font-mono text-[11px] text-text-secondary">{fmt(locale, i + 1, 0)}</span>
-                  <span className="font-mono font-semibold">{q.symbol}</span>
+                <td className="py-2 pr-2 font-mono text-[13px] font-semibold whitespace-nowrap">
+                  <a href={`/${locale}/markets/${exchange.toLowerCase()}/${encodeURIComponent(q.symbol)}`} className="hover:text-brand-sky">
+                    {q.symbol}
+                  </a>
                 </td>
-                <td className="py-2.5 pr-3 text-right font-mono tabular-nums text-text-secondary">{fmt(locale, q.ltp, q.ltp >= 1000 ? 0 : 1)}</td>
-                <td className="relative w-40 py-2.5 text-right">
+                <td className="py-2 pr-2 text-right font-mono tabular-nums text-text-secondary">{fmt(locale, q.ltp, q.ltp >= 1000 ? 0 : 1)}</td>
+                <td className="relative w-24 py-2 text-right">
                   <span
                     aria-hidden="true"
-                    className={cn("absolute inset-y-2 right-0 rounded-md opacity-15", tone === "up" ? "bg-market-up" : "bg-market-down")}
+                    className={cn("absolute inset-y-1.5 right-0 rounded-md opacity-10", tone === "up" ? "bg-market-up" : "bg-market-down")}
                     style={{ width: `${(Math.abs(q.changePct) / max) * 100}%` }}
                   />
-                  <span className="relative pr-2">
+                  <span className="relative pr-1.5">
                     <Change pct={q.changePct} locale={locale} />
                   </span>
                 </td>
@@ -67,8 +72,8 @@ function MoversTable({ title, rows, locale, t, tone }: { title: string; rows: Qu
   );
 }
 
-/** Radial gauge for Xpert's share of turnover; animates once in view. */
-function ShareCard({ share, t, locale }: { share: ShareFigure; t: Messages; locale: Locale }) {
+/** Xpert's share of the exchange's turnover: a ring that fills once in view. */
+function ShareBlock({ share, t, locale }: { share: ShareFigure; t: Messages; locale: Locale }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(share.sharePct);
   useEffect(() => {
@@ -100,93 +105,183 @@ function ShareCard({ share, t, locale }: { share: ShareFigure; t: Messages; loca
   const date = new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${share.tradeDate}T00:00:00Z`));
 
   return (
-    <div ref={ref} className="beam glass flex h-full flex-col gap-5 rounded-3xl p-6">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="font-display text-lg font-semibold">{t.marketShareTitle}</h3>
-        <span className="rounded-full border border-fg/10 px-2.5 py-0.5 font-mono text-xs text-accent">{share.exchange}</span>
+    <div ref={ref} className="flex flex-col gap-4 rounded-2xl border border-brand-sky/20 bg-brand-sky/[0.05] p-4 sm:flex-row sm:items-center sm:gap-5">
+      <div className="relative size-28 shrink-0 self-center sm:self-auto">
+        <svg viewBox="0 0 140 140" className="size-full -rotate-90" aria-hidden="true">
+          <circle cx="70" cy="70" r={R} fill="none" strokeWidth="12" className="stroke-fg/[0.08]" />
+          <circle cx="70" cy="70" r={R} fill="none" strokeWidth="12" strokeLinecap="round" stroke={`url(#share-g-${share.exchange})`} strokeDasharray={`${C * frac} ${C}`} />
+          <defs>
+            <linearGradient id={`share-g-${share.exchange}`} x1="0" x2="1">
+              <stop offset="0" stopColor="#2a5fae" />
+              <stop offset="1" stopColor="#22bceb" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <span className="text-gradient-brand absolute inset-0 flex items-center justify-center font-display text-2xl font-semibold tabular-nums">{fmt(locale, shown, 2)}%</span>
       </div>
-      <div className="flex items-center gap-6">
-        <div className="relative size-36 shrink-0">
-          <svg viewBox="0 0 140 140" className="size-full -rotate-90" aria-hidden="true">
-            <circle cx="70" cy="70" r={R} fill="none" strokeWidth="12" className="stroke-fg/[0.08]" />
-            <circle cx="70" cy="70" r={R} fill="none" strokeWidth="12" strokeLinecap="round" stroke={`url(#share-g-${share.exchange})`} strokeDasharray={`${C * frac} ${C}`} />
-            <defs>
-              <linearGradient id={`share-g-${share.exchange}`} x1="0" x2="1">
-                <stop offset="0" stopColor="#2a5fae" />
-                <stop offset="1" stopColor="#22bceb" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <span className="text-gradient-brand absolute inset-0 flex items-center justify-center font-display text-3xl font-semibold tabular-nums">
-            {fmt(locale, shown, 2)}%
-          </span>
-        </div>
-        <dl className="flex flex-col gap-3 text-sm">
+      <div className="flex min-w-0 flex-col gap-2">
+        <h4 className="font-display text-base font-semibold">{t.marketShareTitle}</h4>
+        <dl className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <dt className="text-text-secondary">{t.xpertTurnover}</dt>
+            <dt className="text-xs text-text-secondary">{t.xpertTurnover}</dt>
             <dd className="font-mono font-semibold tabular-nums">{crore(locale, share.xpertTurnover)}</dd>
           </div>
           <div>
-            <dt className="text-text-secondary">{t.marketTurnover}</dt>
+            <dt className="text-xs text-text-secondary">{t.marketTurnover}</dt>
             <dd className="font-mono font-semibold tabular-nums">{crore(locale, share.marketTurnover)}</dd>
           </div>
         </dl>
+        <p className="text-xs leading-relaxed text-text-secondary">
+          {t.marketShareBody.replace("{exchange}", share.exchange).replace("{date}", date)}
+          {share.sourceNote && (
+            <>
+              {" "}
+              {t.marketSource}: {share.sourceNote}
+            </>
+          )}
+        </p>
       </div>
-      <p className="text-xs leading-relaxed text-text-secondary">
-        {t.marketShareBody.replace("{exchange}", share.exchange).replace("{date}", date)}
-        {share.sourceNote && (
-          <>
-            {" "}
-            {t.marketSource}: {share.sourceNote}
-          </>
-        )}
-      </p>
     </div>
   );
 }
 
+/** One exchange at a glance: status, indices, breadth and totals, Xpert's share, top gainers and losers. */
+function ExchangeGlance({ exchange, ex, share, t, locale, className }: { exchange: "DSE" | "CSE"; ex?: ExchangeSnapshot; share?: ShareFigure; t: Messages; locale: Locale; className?: string }) {
+  const { gainers, losers } = ex ? movers(ex) : { gainers: [], losers: [] };
+  const breadthTotal = ex ? (ex.advancers ?? 0) + (ex.decliners ?? 0) + (ex.unchanged ?? 0) : 0;
+  const totals = ex
+    ? ([
+        ex.turnover !== undefined && [t.turnover, crore(locale, ex.turnover)],
+        ex.volume !== undefined && [t.volume, compact(locale, ex.volume)],
+        ex.trades !== undefined && [t.trades, fmt(locale, ex.trades, 0)],
+      ].filter(Boolean) as [string, string][])
+    : [];
+  return (
+    <article aria-labelledby={`glance-${exchange}`} className={cn("glass flex-col gap-6 rounded-3xl p-5 sm:p-6", className)}>
+      <header className="flex flex-wrap items-center gap-3">
+        <h3 id={`glance-${exchange}`} className="font-mono text-xl font-semibold tracking-widest">
+          {exchange}
+        </h3>
+        {ex?.status && (
+          <span className="inline-flex items-center gap-2 rounded-full border border-fg/10 px-3 py-1 text-xs font-semibold text-text-secondary">
+            <span className={cn("size-1.5 rounded-full", ex.status === "OPEN" ? "animate-pulse bg-market-up" : "bg-text-secondary")} />
+            {t[`marketStatus${ex.status}` as keyof Messages]}
+          </span>
+        )}
+        {ex && (
+          <a href={`/${locale}/markets/${exchange.toLowerCase()}`} className="ml-auto text-sm font-semibold text-brand-sky hover:underline">
+            {t.tickerBoard.replace("{exchange}", exchange)} →
+          </a>
+        )}
+      </header>
+
+      {ex && ex.indices.length > 0 && (
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {ex.indices.map((i) => (
+            <li key={i.name} className="flex flex-col gap-1 rounded-2xl border border-fg/[0.07] bg-fg/[0.02] p-3">
+              <span className="font-mono text-[11px] tracking-widest text-accent">{i.name}</span>
+              <span className="font-display text-xl font-semibold tabular-nums">{fmt(locale, i.value)}</span>
+              <Change pct={i.changePct} abs={i.change} locale={locale} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {(breadthTotal > 0 || totals.length > 0) && (
+        <div className="flex flex-col gap-3">
+          {breadthTotal > 0 && (
+            <>
+              <div className="flex h-2 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden="true">
+                <span className="bg-market-up" style={{ width: `${((ex!.advancers ?? 0) / breadthTotal) * 100}%` }} />
+                <span className="bg-text-secondary/50" style={{ width: `${((ex!.unchanged ?? 0) / breadthTotal) * 100}%` }} />
+                <span className="bg-market-down" style={{ width: `${((ex!.decliners ?? 0) / breadthTotal) * 100}%` }} />
+              </div>
+              <dl className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div>
+                  <dt className="text-text-secondary">{t.advanced}</dt>
+                  <dd className="font-mono text-base font-semibold text-market-up">{fmt(locale, ex!.advancers ?? 0, 0)}</dd>
+                </div>
+                <div>
+                  <dt className="text-text-secondary">{t.unchanged}</dt>
+                  <dd className="font-mono text-base font-semibold">{fmt(locale, ex!.unchanged ?? 0, 0)}</dd>
+                </div>
+                <div>
+                  <dt className="text-text-secondary">{t.declined}</dt>
+                  <dd className="font-mono text-base font-semibold text-market-down">{fmt(locale, ex!.decliners ?? 0, 0)}</dd>
+                </div>
+              </dl>
+            </>
+          )}
+          {totals.length > 0 && (
+            <dl className="grid grid-cols-3 gap-2 border-t border-fg/[0.06] pt-3 text-xs">
+              {totals.map(([k, v]) => (
+                <div key={k}>
+                  <dt className="text-text-secondary">{k}</dt>
+                  <dd className="font-mono text-sm font-semibold tabular-nums">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+      )}
+
+      {share ? (
+        <ShareBlock share={share} t={t} locale={locale} />
+      ) : (
+        <p className="rounded-2xl border border-dashed border-fg/15 p-4 text-sm text-text-secondary">
+          <span className="font-semibold text-text-primary">{t.marketShareTitle}: </span>
+          {t.marketSharePending.replace("{exchange}", exchange)}
+        </p>
+      )}
+
+      {ex ? (
+        <div className="grid gap-6 sm:grid-cols-2">
+          <Movers title={t.topGainers} rows={gainers} locale={locale} t={t} tone="up" exchange={exchange} />
+          <Movers title={t.topLosers} rows={losers} locale={locale} t={t} tone="down" exchange={exchange} />
+        </div>
+      ) : (
+        <p className="text-sm text-text-secondary">{t.tickerUnavailable}</p>
+      )}
+    </article>
+  );
+}
+
 /**
- * Market pulse: indices, breadth, turnover, top gainers and losers per
- * exchange, and Xpert's market share. Refreshes itself every 20 s.
+ * Market at a glance: DSE and CSE side by side on wide screens (a DSE/CSE
+ * switch on phones), each with status, indices, breadth and totals, Xpert's
+ * market share and the top gainers and losers. Refreshes itself every 20 s.
  */
 export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t: Messages; locale: Locale }) {
   const { data } = useMarket(initial);
-  const exchanges = data.snapshot?.exchanges ?? [];
-  const [tab, setTab] = useState<"DSE" | "CSE">(exchanges[0]?.exchange ?? data.shares[0]?.exchange ?? "DSE");
-  const ex = exchanges.find((e) => e.exchange === tab) ?? exchanges[0];
-  const tabs = exchanges.map((e) => e.exchange);
-
-  if (!ex && !data.shares.length) return null;
-  const { gainers, losers } = ex ? movers(ex) : { gainers: [], losers: [] };
-  const breadthTotal = ex ? (ex.advancers ?? 0) + (ex.decliners ?? 0) + (ex.unchanged ?? 0) : 0;
+  const snapOf = (x: "DSE" | "CSE") => data.snapshot?.exchanges.find((e) => e.exchange === x);
+  const shareOf = (x: "DSE" | "CSE") => data.shares.find((f) => f.exchange === x);
+  const list = (["DSE", "CSE"] as const).filter((x) => snapOf(x) || shareOf(x));
+  const [tab, setTab] = useState<"DSE" | "CSE">(list[0] ?? "DSE");
+  if (!list.length) return null;
+  const active = list.includes(tab) ? tab : list[0]!;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-3">
-        {tabs.length > 1 && (
-          <div role="tablist" aria-label={t.tickerLabel} className="relative inline-flex rounded-full border border-fg/10 bg-fg/[0.04] p-1">
-            {tabs.map((x) => (
+        {list.length > 1 && (
+          <div role="tablist" aria-label={t.tickerLabel} className="relative inline-flex rounded-full border border-fg/10 bg-fg/[0.04] p-1 lg:hidden">
+            {list.map((x) => (
               <button
                 key={x}
                 role="tab"
                 type="button"
-                aria-selected={tab === x}
+                aria-selected={active === x}
+                aria-controls={`glance-panel-${x}`}
                 onClick={() => setTab(x)}
                 className={cn(
                   "h-9 rounded-full px-5 font-mono text-sm font-semibold transition-colors",
-                  tab === x ? "bg-gradient-to-br from-brand-royal to-brand-mid text-white shadow-[0_4px_16px_-4px_rgb(34_188_235/0.6)]" : "text-text-secondary hover:text-fg",
+                  active === x ? "bg-gradient-to-br from-brand-royal to-brand-mid text-white shadow-[0_4px_16px_-4px_rgb(34_188_235/0.6)]" : "text-text-secondary hover:text-fg",
                 )}
               >
                 {x}
               </button>
             ))}
           </div>
-        )}
-        {ex?.status && (
-          <span className="inline-flex items-center gap-2 rounded-full border border-fg/10 px-3 py-1 text-xs font-semibold text-text-secondary">
-            <span className={cn("size-1.5 rounded-full", ex.status === "OPEN" ? "animate-pulse bg-market-up" : "bg-text-secondary")} />
-            {t[`marketStatus${ex.status}` as keyof Messages]}
-          </span>
         )}
         {data.snapshot && <MarketBadge data={data} t={t} />}
         {data.snapshot && (
@@ -197,99 +292,13 @@ export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t:
         )}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-12">
-        {ex && ex.indices.length > 0 && (
-          <div className="glass flex flex-col gap-5 rounded-3xl p-6 lg:col-span-5">
-            {ex.indices.map((i, n) => (
-              <div key={i.name} className={cn("flex items-end justify-between gap-4", n > 0 && "border-t border-fg/[0.06] pt-5")}>
-                <div>
-                  <p className="font-mono text-xs tracking-widest text-accent">{i.name}</p>
-                  <p className="font-display text-3xl font-semibold tabular-nums md:text-4xl">{fmt(locale, i.value)}</p>
-                </div>
-                <Change pct={i.changePct} abs={i.change} locale={locale} big />
-              </div>
-            ))}
+      <div className={cn("grid gap-6", list.length > 1 && "lg:grid-cols-2")}>
+        {list.map((x) => (
+          <div key={x} id={`glance-panel-${x}`} className={cn(x === active ? "flex" : "hidden lg:flex", "min-w-0 flex-col")}>
+            <ExchangeGlance exchange={x} ex={snapOf(x)} share={shareOf(x)} t={t} locale={locale} className="flex h-full" />
           </div>
-        )}
-
-        {ex && (
-          <div className={cn("glass flex flex-col gap-8 rounded-3xl p-6", ex.indices.length ? "lg:col-span-7" : "lg:col-span-12")}>
-            {breadthTotal > 0 && (
-              <div className="flex flex-col gap-3">
-                <div className="flex h-2.5 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden="true">
-                  <span className="bg-market-up" style={{ width: `${((ex.advancers ?? 0) / breadthTotal) * 100}%` }} />
-                  <span className="bg-text-secondary/50" style={{ width: `${((ex.unchanged ?? 0) / breadthTotal) * 100}%` }} />
-                  <span className="bg-market-down" style={{ width: `${((ex.decliners ?? 0) / breadthTotal) * 100}%` }} />
-                </div>
-                <dl className="grid grid-cols-3 gap-2 text-center text-xs">
-                  <div>
-                    <dt className="text-text-secondary">{t.advanced}</dt>
-                    <dd className="font-mono text-base font-semibold text-market-up">{fmt(locale, ex.advancers ?? 0, 0)}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-text-secondary">{t.unchanged}</dt>
-                    <dd className="font-mono text-base font-semibold">{fmt(locale, ex.unchanged ?? 0, 0)}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-text-secondary">{t.declined}</dt>
-                    <dd className="font-mono text-base font-semibold text-market-down">{fmt(locale, ex.decliners ?? 0, 0)}</dd>
-                  </div>
-                </dl>
-              </div>
-            )}
-            <dl className="flex flex-col gap-3 text-sm">
-              {ex.turnover !== undefined && (
-                <div className="flex justify-between gap-3">
-                  <dt className="text-text-secondary">{t.turnover}</dt>
-                  <dd className="font-mono font-semibold tabular-nums">{crore(locale, ex.turnover)}</dd>
-                </div>
-              )}
-              {ex.volume !== undefined && (
-                <div className="flex justify-between gap-3">
-                  <dt className="text-text-secondary">{t.volume}</dt>
-                  <dd className="font-mono font-semibold tabular-nums">{compact(locale, ex.volume)}</dd>
-                </div>
-              )}
-              {ex.trades !== undefined && (
-                <div className="flex justify-between gap-3">
-                  <dt className="text-text-secondary">{t.trades}</dt>
-                  <dd className="font-mono font-semibold tabular-nums">{fmt(locale, ex.trades, 0)}</dd>
-                </div>
-              )}
-            </dl>
-          </div>
-        )}
-
-        {ex && (
-          <>
-            <div className="lg:col-span-6" style={{ "--d": 1 } as CSSProperties}>
-              <MoversTable title={t.topGainers} rows={gainers} locale={locale} t={t} tone="up" />
-            </div>
-            <div className="lg:col-span-6">
-              <MoversTable title={t.topLosers} rows={losers} locale={locale} t={t} tone="down" />
-            </div>
-          </>
-        )}
+        ))}
       </div>
-
-      {data.shares.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2">
-          {(["DSE", "CSE"] as const).map((x) => {
-            const s = data.shares.find((f) => f.exchange === x);
-            return s ? (
-              <ShareCard key={x} share={s} t={t} locale={locale} />
-            ) : (
-              <div key={x} className="glass flex flex-col justify-center gap-2 rounded-3xl p-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-display text-lg font-semibold">{t.marketShareTitle}</h3>
-                  <span className="rounded-full border border-fg/10 px-2.5 py-0.5 font-mono text-xs text-accent">{x}</span>
-                </div>
-                <p className="text-sm text-text-secondary">{t.marketSharePending.replace("{exchange}", x)}</p>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

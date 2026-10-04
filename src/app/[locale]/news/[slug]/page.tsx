@@ -106,7 +106,7 @@ export default async function ArticlePage({ params }: Props) {
         <div className="article-body max-w-3xl">
           <Paragraphs text={tr.body} className="text-lg leading-[1.8]" />
         </div>
-        <aside className="flex flex-col gap-8 lg:sticky lg:top-32 lg:self-start">
+        <aside className="flex flex-col gap-8 lg:sticky lg:top-[calc(8rem+var(--ticker-h))] lg:self-start">
           {tags.length > 0 && (
             <div className="flex flex-col gap-3">
               <p className="text-xs font-semibold tracking-[0.14em] text-text-secondary uppercase">{t.tagsLabel}</p>

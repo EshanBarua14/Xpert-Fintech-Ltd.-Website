@@ -73,7 +73,7 @@ export const ecosystemNodes: EcosystemNode[] = [
     label: { en: "Xpert Fintech", bn: "এক্সপার্ট ফিনটেক" } },
 
   // Products (confirmed)
-  { key: "oms", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "oms", mobileOrder: 20, layoutX: 0.6, layoutY: 0.15,
+  { key: "oms", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "trading-platform", mobileOrder: 20, layoutX: 0.6, layoutY: 0.15,
     label: { en: "OMS", bn: "ওএমএস" },
     description: { en: "Order management for brokerage trading on DSE and CSE.", bn: "ডিএসই ও সিএসইতে ব্রোকারেজ লেনদেনের অর্ডার ব্যবস্থাপনা।" } },
   { key: "rms", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "rms", mobileOrder: 21, layoutX: 0.6, layoutY: 0.3,
@@ -85,7 +85,10 @@ export const ecosystemNodes: EcosystemNode[] = [
   { key: "bo-account-opening", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "bo-account-opening", mobileOrder: 23, layoutX: 0.6, layoutY: 0.6,
     label: { en: "BO Account Opening", bn: "বিও অ্যাকাউন্ট খোলা" },
     description: { en: "Digital application and approval of investor BO accounts.", bn: "বিনিয়োগকারীর বিও অ্যাকাউন্টের ডিজিটাল আবেদন ও অনুমোদন।" } },
-  { key: "smart-stock", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "smart-stock", mobileOrder: 24, layoutX: 0.6, layoutY: 0.75,
+  { key: "back-office", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "back-office", mobileOrder: 24, layoutX: 0.6, layoutY: 0.68,
+    label: { en: "Back office", bn: "ব্যাক অফিস" },
+    description: { en: "Accounts, settlement and reporting for the brokerage back office.", bn: "ব্রোকারেজ ব্যাক অফিসের হিসাব, নিষ্পত্তি ও রিপোর্টিং।" } },
+  { key: "smart-stock", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "smart-stock", mobileOrder: 25, layoutX: 0.6, layoutY: 0.75,
     label: { en: "Smart Stock", bn: "স্মার্ট স্টক" },
     editorNote: "Description pending from XFL. Node shows label only until then." },
 
@@ -97,7 +100,7 @@ export const ecosystemNodes: EcosystemNode[] = [
 
   // Institutions
   { key: "brokerages", layer: "INSTITUTION", status: "PUBLISHED", mobileOrder: 30, layoutX: 0.8, layoutY: 0.5,
-    label: { en: "Consortium brokerages (14)", bn: "কনসোর্টিয়াম ব্রোকারেজ (১৪)" } },
+    label: { en: "Consortium brokerages", bn: "কনসোর্টিয়াম ব্রোকারেজ" } },
 
   // Users
   { key: "investors", layer: "USER", status: "PUBLISHED", mobileOrder: 40, layoutX: 0.95, layoutY: 0.3,
@@ -123,6 +126,8 @@ export const ecosystemEdges: EcosystemEdge[] = [
   { from: "bo-account-opening", to: "cdbl", kind: "ONBOARDING" },
   { from: "bo-account-opening", to: "dms", kind: "OPERATIONS" },
   { from: "dms", to: "operations", kind: "OPERATIONS" },
+  { from: "oms", to: "back-office", kind: "OPERATIONS" },
+  { from: "back-office", to: "operations", kind: "OPERATIONS" },
   { from: "xfl", to: "smart-stock", kind: "DATA" },
   { from: "smart-stock", to: "investors", kind: "DATA" },
   { from: "xfl", to: "ost", kind: "DATA" },

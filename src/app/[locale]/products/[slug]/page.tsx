@@ -7,6 +7,7 @@ import { ecosystemLabels, ecosystemModules, GhostButton, moduleForSlug, PrimaryB
 import { EcosystemMap } from "@/components/flagship/EcosystemMap";
 import OmsPreview from "@/components/products/oms-preview/OmsPreview";
 import { getFlagshipData } from "@/lib/public/flagship";
+import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { omsLabels } from "@/lib/public/labels";
 import { CapabilityVisual, type VisualKind } from "@/components/flagship/Visuals";
 import { Icon } from "@/components/ui/Icon";
@@ -99,7 +100,9 @@ export default async function ProductPage({ params }: Props) {
   const url = `${SITE_URL}/${found.locale}/products/${tr.slug}`;
   const enSlug = offering.translations.find((x) => x.locale === "en")?.slug ?? tr.slug;
   const ecoModule = moduleForSlug(enSlug);
-  const flagship = ecoModule ? await getFlagshipData(found.locale) : null;
+  const [flagship, eco, ecoInDb] = ecoModule
+    ? await Promise.all([getFlagshipData(found.locale), getEcosystem(found.locale), ecosystemInDatabase()])
+    : [null, { nodes: [], edges: [], flows: [] }, false];
   const showOmsPreview = offering.key === "trading-platform";
 
   return (
@@ -315,7 +318,7 @@ export default async function ProductPage({ params }: Props) {
         <Band title={t.whereItFits} alt>
           <p data-reveal className="-mt-6 max-w-2xl text-lg text-text-secondary">{t.whereItFitsBody}</p>
           <div data-reveal className="glass rounded-3xl p-4 md:p-8">
-            <EcosystemMap labels={ecosystemLabels(t)} modules={ecosystemModules(flagship.offerings, found.locale)} focus={ecoModule} />
+            <EcosystemMap labels={ecosystemLabels(t)} modules={withEcosystem(ecosystemModules(flagship.offerings, found.locale), eco, ecoInDb)} focus={ecoModule} />
           </div>
         </Band>
       )}

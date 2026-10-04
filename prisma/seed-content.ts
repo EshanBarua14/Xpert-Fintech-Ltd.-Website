@@ -19,6 +19,7 @@
  * agreement). Remove a key from PUBLISH below to keep it as a draft.
  */
 import { PrismaClient, type Locale, type OfferingItemKind, type OfferingType } from "@prisma/client";
+import { ecosystemEdges, ecosystemFlows, ecosystemNodes } from "../src/content/xfl2/ecosystem";
 
 const db = new PrismaClient();
 const EN: Locale = "en";
@@ -607,6 +608,92 @@ async function seedMarketsLinks() {
   if (added) console.log(`• Added the Markets link to ${added} menu(s)`);
 }
 
+// ── Ecosystem (nodes, links and flows behind the ecosystem map) ─────────────
+
+/**
+ * Loads the ecosystem from src/content/xfl2/ecosystem.ts into the database
+ * the first time. After that the database is the source of truth: nodes,
+ * links and flows that already exist (by key) are never overwritten, so
+ * edits made in Admin → Ecosystem are kept. New seed items are added.
+ */
+async function seedEcosystem() {
+  const T = (v: { en?: string; bn?: string } | undefined) => v ?? {};
+  let nodesAdded = 0;
+  let edgesAdded = 0;
+  let flowsAdded = 0;
+  const ids = new Map<string, string>();
+  for (const [i, n] of ecosystemNodes.entries()) {
+    const existing = await db.ecosystemNode.findUnique({ where: { key: n.key } });
+    if (existing) {
+      ids.set(n.key, existing.id);
+      continue;
+    }
+    const offering = n.offeringKey ? await db.offering.findUnique({ where: { key: n.offeringKey } }) : null;
+    const translations = (["en", "bn"] as const)
+      .filter((l) => T(n.label)[l])
+      .map((l) => ({ locale: l === "en" ? EN : BN, label: T(n.label)[l]!, description: T(n.description)[l] ?? null }));
+    const row = await db.ecosystemNode.create({
+      data: {
+        key: n.key,
+        layer: n.layer,
+        status: n.status,
+        offeringId: offering?.id ?? null,
+        layoutX: n.layoutX ?? null,
+        layoutY: n.layoutY ?? null,
+        mobileOrder: n.mobileOrder,
+        editorNote: n.editorNote ?? null,
+        sortOrder: i,
+        translations: { create: translations },
+      },
+    });
+    ids.set(n.key, row.id);
+    nodesAdded++;
+  }
+  const edgeIds = new Map<string, string>();
+  for (const [i, e] of ecosystemEdges.entries()) {
+    const from = ids.get(e.from);
+    const to = ids.get(e.to);
+    if (!from || !to) continue;
+    const existing = await db.ecosystemEdge.findFirst({ where: { fromNodeId: from, toNodeId: to } });
+    if (existing) {
+      edgeIds.set(`${e.from}>${e.to}`, existing.id);
+      continue;
+    }
+    const row = await db.ecosystemEdge.create({ data: { fromNodeId: from, toNodeId: to, kind: e.kind, sortOrder: i } });
+    edgeIds.set(`${e.from}>${e.to}`, row.id);
+    edgesAdded++;
+  }
+  for (const [i, f] of ecosystemFlows.entries()) {
+    if (await db.ecosystemFlow.findUnique({ where: { key: f.key } })) continue;
+    const flow = await db.ecosystemFlow.create({
+      data: {
+        key: f.key,
+        status: f.status,
+        isPlayback: f.isPlayback,
+        sortOrder: i,
+        translations: { create: (["en", "bn"] as const).filter((l) => f.name[l]).map((l) => ({ locale: l === "en" ? EN : BN, name: f.name[l]! })) },
+      },
+    });
+    for (const [k, st] of f.steps.entries()) {
+      const nodeId = ids.get(st.node);
+      if (!nodeId) continue;
+      await db.ecosystemFlowStep.create({
+        data: {
+          flowId: flow.id,
+          nodeId,
+          edgeId: st.edge ? (edgeIds.get(st.edge) ?? null) : null,
+          sortOrder: k,
+          translations: {
+            create: (["en", "bn"] as const).filter((l) => st.title[l]).map((l) => ({ locale: l === "en" ? EN : BN, title: st.title[l]!, body: st.body?.[l] ?? null })),
+          },
+        },
+      });
+    }
+    flowsAdded++;
+  }
+  if (nodesAdded || edgesAdded || flowsAdded) console.log(`• Ecosystem: added ${nodesAdded} node(s), ${edgesAdded} link(s), ${flowsAdded} flow(s)`);
+}
+
 async function main() {
   const ids = new Map<string, string>();
   for (const c of CONTENT) ids.set(c.key, (await upsertOffering(c)).id);
@@ -623,6 +710,7 @@ async function main() {
   await syncPendingProductLinks();
   await seedInsightsLinks();
   await seedMarketsLinks();
+  await seedEcosystem();
   console.log("Content seed complete.");
 }
 

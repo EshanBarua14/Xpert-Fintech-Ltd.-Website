@@ -185,12 +185,18 @@ export function EcosystemMap({
   className,
   modules,
   focus,
+  highlight,
 }: {
   labels: EcosystemLabels;
   className?: string;
   modules?: Partial<Record<ModuleKey, EcosystemModuleInfo>>;
   /** Pins one module in focus (used on product pages); hover still explores the others. */
   focus?: ModuleKey;
+  /**
+   * Controlled highlight, used by the ecosystem tour: a module key lights that
+   * module, null clears it. Leave undefined for the map's own behaviour.
+   */
+  highlight?: ModuleKey | null;
 }) {
   const router = useRouter();
   const [scene, setScene] = useState(0);
@@ -201,6 +207,10 @@ export function EcosystemMap({
   const [focusModule, setFocusModuleRaw] = useState<ModuleKey | null>(pinned);
   // Leaving a module returns to the pinned one (product pages) or to the scenes.
   const setFocusModule = (m: ModuleKey | null) => setFocusModuleRaw(m ?? pinned);
+  useEffect(() => {
+    if (highlight !== undefined) setFocusModuleRaw(highlight && modules?.[highlight]?.available !== false ? highlight : pinned);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- follow the tour only
+  }, [highlight]);
   const rootRef = useRef<HTMLDivElement>(null);
   const exploreRef = useRef<HTMLAnchorElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);

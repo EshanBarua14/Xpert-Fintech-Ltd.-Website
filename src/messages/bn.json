@@ -478,5 +478,20 @@
   "searchKindResource": "রিসোর্স",
   "searchKindAlbum": "ছবির অ্যালবাম",
   "searchKindVideo": "ভিডিও",
-  "searchKindSymbol": "বাজারের সিম্বল"
+  "searchKindSymbol": "বাজারের সিম্বল",
+  "ecoTourStart": "ইকোসিস্টেম ঘুরে দেখুন",
+  "ecoTourMeta": "{n}টি ধাপ · প্রায় {s} সেকেন্ড",
+  "ecoTourStep": "ধাপ {i} / {n}",
+  "ecoTourPrev": "আগের ধাপ",
+  "ecoTourNext": "পরের ধাপ",
+  "ecoTourPause": "থামান",
+  "ecoTourPlay": "চালান",
+  "ecoTourEnd": "ট্যুর শেষ করুন",
+  "ecoTourReplay": "আবার চালান",
+  "ecoWorksWith": "যাদের সাথে কাজ করে",
+  "ecoLayerMarket": "বাজার অবকাঠামো",
+  "ecoLayerXfl": "এক্সপার্ট ফিনটেক",
+  "ecoLayerProduct": "পণ্য",
+  "ecoLayerInstitution": "প্রতিষ্ঠান",
+  "ecoLayerUser": "বিনিয়োগকারী ও টিম"
 }

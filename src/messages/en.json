@@ -478,5 +478,20 @@
   "searchKindResource": "Resources",
   "searchKindAlbum": "Photo albums",
   "searchKindVideo": "Videos",
-  "searchKindSymbol": "Market symbols"
+  "searchKindSymbol": "Market symbols",
+  "ecoTourStart": "Explore the ecosystem",
+  "ecoTourMeta": "{n} steps · about {s} seconds",
+  "ecoTourStep": "Step {i} of {n}",
+  "ecoTourPrev": "Previous step",
+  "ecoTourNext": "Next step",
+  "ecoTourPause": "Pause",
+  "ecoTourPlay": "Play",
+  "ecoTourEnd": "End tour",
+  "ecoTourReplay": "Replay",
+  "ecoWorksWith": "Works with",
+  "ecoLayerMarket": "Market infrastructure",
+  "ecoLayerXfl": "Xpert Fintech",
+  "ecoLayerProduct": "Products",
+  "ecoLayerInstitution": "Institutions",
+  "ecoLayerUser": "Investors and teams"
 }

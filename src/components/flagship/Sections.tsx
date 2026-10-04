@@ -6,6 +6,8 @@ import type { AppLocale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils/cn";
 import { EcosystemMap, type EcosystemLabels, type EcosystemModuleInfo } from "./EcosystemMap";
+import { EcosystemExplorer, type TourLabels } from "./EcosystemExplorer";
+import type { EcoGraph } from "@/lib/public/ecosystem";
 import { ECOSYSTEM_MODULES, type EcosystemModuleKey } from "./ecosystem-modules";
 import { pick } from "@/lib/public/text";
 import { CapabilityVisual, type VisualKind } from "./Visuals";
@@ -105,6 +107,31 @@ export function ecosystemLabels(t: Messages): EcosystemLabels {
   };
 }
 
+/** Labels for the ecosystem tour and the phone layout. */
+export function tourLabels(t: Messages): TourLabels {
+  return {
+    start: t.ecoTourStart,
+    meta: t.ecoTourMeta,
+    step: t.ecoTourStep,
+    prev: t.ecoTourPrev,
+    next: t.ecoTourNext,
+    pause: t.ecoTourPause,
+    play: t.ecoTourPlay,
+    end: t.ecoTourEnd,
+    replay: t.ecoTourReplay,
+    worksWith: t.ecoWorksWith,
+    explore: t.exploreProduct,
+    close: t.close,
+    layers: { MARKET: t.ecoLayerMarket, XFL: t.ecoLayerXfl, PRODUCT: t.ecoLayerProduct, INSTITUTION: t.ecoLayerInstitution, USER: t.ecoLayerUser },
+  };
+}
+
+/** The ecosystem map with its tour and phone layout when the CMS has a graph; the map alone otherwise. */
+export function Ecosystem({ t, modules, graph, focus }: { t: Messages; modules?: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>>; graph?: EcoGraph; focus?: EcosystemModuleKey }) {
+  if (graph && graph.nodes.length && !focus) return <EcosystemExplorer labels={ecosystemLabels(t)} modules={modules} graph={graph} tour={tourLabels(t)} />;
+  return <EcosystemMap labels={ecosystemLabels(t)} modules={modules} focus={focus} className="relative" />;
+}
+
 /** Which product page each ecosystem module opens. */
 const MODULE_SLUG: Record<EcosystemModuleKey, string> = {
   OMS: "trading-platform",
@@ -155,6 +182,7 @@ export function FlagshipHero({
   ticker,
   status,
   modules,
+  graph,
 }: {
   t: Messages;
   locale: AppLocale;
@@ -166,6 +194,8 @@ export function FlagshipHero({
   ticker?: ReactNode;
   /** Live market status line above the headline (only when market data is on). */
   status?: ReactNode;
+  /** Admin → Ecosystem graph: adds the guided tour and the phone layout. */
+  graph?: EcoGraph;
 }) {
   return (
     <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
@@ -198,7 +228,7 @@ export function FlagshipHero({
           )}
         </div>
         <div data-reveal style={delay(2)} className="relative w-full">
-          <EcosystemMap labels={ecosystemLabels(t)} modules={modules} className="relative" />
+          <Ecosystem t={t} modules={modules} graph={graph} />
         </div>
       </div>
       {ticker && <div className="relative">{ticker}</div>}

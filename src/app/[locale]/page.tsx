@@ -29,6 +29,7 @@ import { getMessages } from "@/lib/i18n/messages";
 import { mediaIdsOf, toSections } from "@/lib/public/blocks";
 import { getEvents, getPageByKey, getSeo } from "@/lib/public/content";
 import { getFlagshipData } from "@/lib/public/flagship";
+import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
 import { MarketTicker } from "@/components/market/MarketTicker";
@@ -76,7 +77,7 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   const [data, events, market, showcase] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale)]);
-  const apps = await getLiveApps(locale);
+  const [apps, eco, ecoInDb] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase()]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -96,7 +97,8 @@ export default async function HomePage({ params }: Props) {
         t={t}
         locale={locale}
         memberCount={data.members.length}
-        modules={ecosystemModules(data.offerings, locale)}
+        modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)}
+        graph={eco}
         ticker={market.snapshot ? <MarketTicker initial={market} t={t} locale={locale} /> : undefined}
         status={market.snapshot ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
       />

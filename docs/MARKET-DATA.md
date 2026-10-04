@@ -27,10 +27,13 @@ only from figures entered in **Admin → Market data** (or written there by the 
 
 With `licensed`, prices appear only after **Show the licensed feed on the website** is ticked in Admin → Market data (after *Test connection* succeeds).
 
-If CSE's certificate chain cannot be verified by Node.js on your server, the CSE
-board is skipped (DSE still shows). Fix it by giving Node the missing
-intermediate certificate with `NODE_EXTRA_CA_CERTS=/path/to/chain.pem` — never
-by turning certificate checks off.
+If an exchange's server sends an incomplete certificate chain (CSE's does at
+times: "unable to verify the first certificate"), the site downloads the missing
+intermediate certificate from the address written in the server's certificate,
+checks it is a valid CA certificate signed by a root Node.js already trusts, and
+connects again with full verification, as browsers do. Certificate checks are
+never turned off. If even that fails (e.g. a company proxy re-signs traffic),
+give Node your proxy's root with `NODE_EXTRA_CA_CERTS=/path/to/root.pem`.
 
 ```
 MARKET_DATA_MODE=licensed

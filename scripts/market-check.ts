@@ -10,7 +10,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { exchangeSnapshot, parseCseSummary, parseDseStrip, parseDseSummary, parsePriceTable } from "../src/lib/market/exchange";
+import { exchangeSnapshot, getHtml, parseCseSummary, parseDseStrip, parseDseSummary, parsePriceTable } from "../src/lib/market/exchange";
 
 // Load .env (only the MARKET_* lines matter here).
 const envFile = path.resolve(process.cwd(), ".env");
@@ -49,13 +49,17 @@ async function main() {
   if (SAVE) fs.mkdirSync("market-debug", { recursive: true });
   for (const p of pages) {
     try {
-      const res = await fetch(p.url, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; XpertFintechWebsite/1.0; +https://www.xpertfintech.com)", Accept: "text/html" },
-        signal: AbortSignal.timeout(15000),
-      });
-      const html = await res.text();
+      const html = await getHtml(p.url);
       if (SAVE) fs.writeFileSync(path.join("market-debug", `${p.name}.html`), html);
-      console.log(`${res.ok ? "✔" : "✖"} ${p.name}  HTTP ${res.status}, ${Math.round(html.length / 1024)} KB → ${p.read(html)}`);
+      console.log(`✔ ${p.name}  ${Math.round(html.length / 1024)} KB → ${p.read(html)}`);
+      // Show the text around the index names and totals, so the reader can be matched to the page.
+      if (/^dse-(home|markets)$/.test(p.name)) {
+        const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]*>/g, " ").replace(/&nbsp;|&#160;/g, " ").replace(/\s+/g, " ");
+        for (const word of ["DSEX", "DSES", "DS30", "Total Trade", "Total Volume", "Total Value", "Market Status"]) {
+          const at = text.indexOf(word);
+          if (at >= 0) console.log(`     ${word}: …${text.slice(Math.max(0, at - 40), at + 120).trim()}…`);
+        }
+      }
     } catch (error) {
       console.log(`✖ ${p.name}  could not connect: ${(error as Error).message}${(error as { cause?: Error }).cause ? ` (${(error as { cause: Error }).cause.message})` : ""}`);
     }

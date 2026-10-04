@@ -1,5 +1,6 @@
 import "server-only";
 import type { ExchangeSnapshot, IndexValue, MarketSnapshot, Quote } from "./types";
+import { getWithCompletedChain, isChainError } from "./fetch-chain";
 
 /*
  * Reads the public price boards of the Dhaka and Chittagong stock exchanges
@@ -221,12 +222,18 @@ function withBreadth(exchange: "DSE" | "CSE", quotes: Quote[]): ExchangeSnapshot
   };
 }
 
-async function getHtml(url: string): Promise<string> {
-  const res = await fetch(url, {
-    headers: { "User-Agent": USER_AGENT, Accept: "text/html,application/xhtml+xml" },
-    cache: "no-store",
-    signal: AbortSignal.timeout(9000),
-  });
+export async function getHtml(url: string): Promise<string> {
+  const headers = { "User-Agent": USER_AGENT, Accept: "text/html,application/xhtml+xml" };
+  let res: Response;
+  try {
+    res = await fetch(url, { headers, cache: "no-store", signal: AbortSignal.timeout(9000) });
+  } catch (error) {
+    // The server left out its intermediate certificate: fetch it, verify it, try again.
+    if (!isChainError(error)) throw error;
+    const r = await getWithCompletedChain(url, headers);
+    if (r.status < 200 || r.status >= 300) throw new Error(`HTTP ${r.status} from ${url}`);
+    return r.body;
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
   return res.text();
 }

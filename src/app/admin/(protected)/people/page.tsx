@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/admin/AdminUi";
 import { AdminList, formatDhaka, Notice } from "@/components/admin/AdminList";
 import { PERSON_GROUP_LABELS, PERSON_GROUPS, type PersonGroupKey } from "@/lib/validation/people";
 
-type Search = { q?: string; group?: string; view?: string; trashed?: string; deleted?: string };
+type Search = { q?: string; group?: string; view?: string; trashed?: string; deleted?: string; placeholder?: string };
 
 export default async function PeoplePage({ searchParams }: { searchParams: Promise<Search> }) {
   await requireAdmin();
@@ -17,6 +17,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   const where: Prisma.PersonWhereInput = {
     deletedAt: inTrash ? { not: null } : null,
     ...(group && { roles: { some: { group } } }),
+    ...(params.placeholder === "1" && { isPlaceholder: true }),
     ...(q && { translations: { some: { name: { contains: q, mode: "insensitive" } } } }),
   };
   const [people, trashCount] = await Promise.all([
@@ -38,8 +39,9 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
       trashCount={trashCount}
       q={q}
       filters={[
-        { label: "All", param: "group", active: !group },
+        { label: "All", param: "group", active: !group && params.placeholder !== "1" },
         ...PERSON_GROUPS.map((g) => ({ label: PERSON_GROUP_LABELS[g], value: g, param: "group", active: group === g })),
+        { label: "Placeholders", value: "1", param: "placeholder", active: params.placeholder === "1" },
       ]}
       columns={["Roles", "Status", "Updated"]}
       notices={
@@ -52,7 +54,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         id: p.id,
         href: `/admin/people/${p.id}`,
         title: p.translations.find((t) => t.locale === "en")?.name ?? "(no English name)",
-        subtitle: p.translations.some((t) => t.locale === "bn") ? null : "No Bangla name yet",
+        subtitle: [p.isPlaceholder ? "Placeholder — replace with the real profile" : null, p.translations.some((t) => t.locale === "bn") ? null : "No Bangla name yet"].filter(Boolean).join(" · ") || null,
         cells: [
           p.roles
             .map((r) => `${r.translations[0]?.title || "(no title)"} · ${PERSON_GROUP_LABELS[r.group].split(" ")[0]}`)

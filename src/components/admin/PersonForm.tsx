@@ -16,6 +16,7 @@ export type PersonFormValues = {
   photoMediaId: string;
   linkedinUrl: string;
   email: string;
+  isPlaceholder: boolean;
   enName: string;
   bnName: string;
   enBio: string;
@@ -97,6 +98,13 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Publishing</legend>
           <PublishFields status={values.status} publishAt={values.publishAt} error={e.publishAt} />
+          <label className="flex items-start gap-3 text-sm">
+            <input type="checkbox" name="isPlaceholder" defaultChecked={values.isPlaceholder} className="mt-0.5 h-4 w-4 accent-brand-royal" />
+            <span>
+              Placeholder profile
+              <span className="block text-xs text-text-secondary">A stand-in until the real name, photo and bio arrive. Untick once the real profile is in.</span>
+            </span>
+          </label>
           <SubmitButton pending={pending}>Save</SubmitButton>
         </fieldset>
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">

@@ -96,7 +96,7 @@ export function PeopleGrid({
       photo: photo ? { url: photo.url, width: photo.width, height: photo.height } : null,
       linkedinUrl: p.linkedinUrl,
       email: p.email,
-      isPlaceholder: (p.key ?? "").startsWith("placeholder-"),
+      isPlaceholder: p.isPlaceholder,
     };
   });
   return (

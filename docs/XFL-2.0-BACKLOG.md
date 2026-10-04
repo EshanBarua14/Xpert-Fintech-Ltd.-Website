@@ -12,6 +12,29 @@ Source of truth for current state: `README.md` (phase status) and `docs/ERD.md`.
 
 ---
 
+## Status — 4 October 2026
+
+Built (branch `feature/xfl2-patch-1`):
+
+- **Ecosystem (section 1):** tables seeded from `src/content/xfl2/ecosystem.ts` by `npm run db:seed:content`; Admin → Ecosystem edits nodes, links and flows; the map follows the CMS (unpublished products drop out, e.g. eKYC); guided tour of the playback flow (under 30 s, pause/step/end, reduced-motion stepper); phone layout with a layered flow and bottom sheet; mini map focused on the product on product pages.
+- **Public pages (section 2):** News (categories, article pages, share links, JSON-LD), Careers with applications and CV upload, Case studies, Resources, Gallery (photo albums and videos), Team, Board and Management with photo popups, email and LinkedIn, placeholder badges outside production.
+- **Product experience (section 3):** product showcase, product pages, live branded apps, OMS preview, workflow visuals.
+- **Market experience (section 4):** `/markets`, `/markets/dse`, `/markets/cse`, symbol pages, sortable/searchable boards, watchlist (browser storage), states for feed off; DSE and CSE market share every trading day (admin form or `POST /api/market-share`).
+- **Platform (section 5):** site search (Ctrl/⌘+K, `/search`).
+- **Admin (section 6):** Activity log (every admin change), lead email alerts, three-step demo request, admin screens for news, careers, applications, case studies, resources, albums, videos, ecosystem.
+- **Responsive QA (section 7, partly):** every public page checked at 320–1920 px in English and Bangla with no sideways scrolling.
+
+Waiting on XFL decisions or content (not built on purpose — see Ground rule 2):
+
+- Roles and permissions (only if XFL approves the role list).
+- "Ask XFL" assistant (architecture only; nothing shown until approved knowledge exists).
+- Interactive architecture diagram (needs the components XFL approves for publication).
+- Analytics events (needs an analytics provider).
+- Real content: the 16 clients, 2 remaining member details, logos and permissions, leadership photos and bios, Smart Stock / OST / eKYC details, live-site page text (use `scripts/capture-live-site.js`).
+- Lighthouse run on the deployed site (cannot be measured before deployment).
+
+---
+
 ## Ground rules (apply to every item)
 
 1. **Preserve, don't replace.** Keep the stack: Next.js App Router, Prisma, Tailwind v4, no animation library. Extend the existing ecosystem animation; do not rewrite it into a new one.

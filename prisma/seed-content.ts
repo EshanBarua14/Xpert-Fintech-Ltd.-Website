@@ -357,7 +357,7 @@ const BOARD_PLACEHOLDERS = [
 
 async function seedPeople() {
   for (const [i, p] of BOARD_PLACEHOLDERS.entries()) {
-    const person = await db.person.upsert({ where: { key: p.key }, update: {}, create: { key: p.key, sortOrder: i, status: "PUBLISHED" } });
+    const person = await db.person.upsert({ where: { key: p.key }, update: {}, create: { key: p.key, sortOrder: i, status: "PUBLISHED", isPlaceholder: true } });
     for (const locale of [EN, BN]) {
       await db.personTranslation.upsert({
         where: { personId_locale: { personId: person.id, locale } },
@@ -694,6 +694,12 @@ async function seedEcosystem() {
   if (nodesAdded || edgesAdded || flowsAdded) console.log(`• Ecosystem: added ${nodesAdded} node(s), ${edgesAdded} link(s), ${flowsAdded} flow(s)`);
 }
 
+/** Older databases: mark seeded stand-in profiles as placeholders (until an editor changes that). */
+async function markPlaceholders() {
+  const res = await db.person.updateMany({ where: { key: { startsWith: "placeholder-" }, isPlaceholder: false, translations: { some: { name: "Name to be confirmed" } } }, data: { isPlaceholder: true } });
+  if (res.count) console.log(`• Marked ${res.count} stand-in profile(s) as placeholders`);
+}
+
 async function main() {
   const ids = new Map<string, string>();
   for (const c of CONTENT) ids.set(c.key, (await upsertOffering(c)).id);
@@ -711,6 +717,7 @@ async function main() {
   await seedInsightsLinks();
   await seedMarketsLinks();
   await seedEcosystem();
+  await markPlaceholders();
   console.log("Content seed complete.");
 }
 

@@ -3,6 +3,7 @@ import { getNavMenu } from "@/lib/content/navigation";
 import { getMessages } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/i18n/config";
 import { HeaderClient } from "./HeaderClient";
+import { searchLabels } from "@/lib/public/labels";
 
 /** Header: menu from Admin → Navigation ("header" menu), logo from the brand asset. */
 export async function SiteHeader({ locale }: { locale: AppLocale }) {
@@ -12,7 +13,7 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
     <HeaderClient
       locale={locale}
       items={items}
-      labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language, overview: t.overview, toLight: t.themeToLight, toDark: t.themeToDark }}
+      labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language, overview: t.overview, toLight: t.themeToLight, toDark: t.themeToDark, search: searchLabels(t) }}
       logo={<Logo height={40} priority />}
     />
   );

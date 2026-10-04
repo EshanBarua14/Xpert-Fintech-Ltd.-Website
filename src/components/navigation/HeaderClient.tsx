@@ -8,9 +8,10 @@ import type { AppLocale } from "@/lib/i18n/config";
 import { Icon } from "@/components/ui/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { ThemeToggle } from "./ThemeToggle";
+import { SearchDialog, type SearchLabels } from "./SearchDialog";
 import { cn } from "@/lib/utils/cn";
 
-type Labels = { menu: string; closeMenu: string; mainNavigation: string; language: string; overview: string; toLight: string; toDark: string };
+type Labels = { menu: string; closeMenu: string; mainNavigation: string; language: string; overview: string; toLight: string; toDark: string; search?: SearchLabels };
 
 /** Picks an icon for a menu link from where it goes. */
 function iconFor(href: string | null): string {
@@ -227,6 +228,7 @@ export function HeaderClient({
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          {labels.search && <SearchDialog locale={locale} labels={labels.search} />}
           <ThemeToggle labels={{ toLight: labels.toLight, toDark: labels.toDark }} />
           <LanguageSwitch current={locale} label={labels.language} className="hidden md:inline-flex" />
           {cta?.href && (

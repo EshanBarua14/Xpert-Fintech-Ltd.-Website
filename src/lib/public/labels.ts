@@ -43,3 +43,29 @@ export function omsLabels(t: Messages): OmsPreviewLabels {
 export function employmentLabel(t: Messages, type: string) {
   return ({ FULL_TIME: t.jobFullTime, PART_TIME: t.jobPartTime, CONTRACT: t.jobContract, INTERNSHIP: t.jobInternship } as Record<string, string>)[type] ?? type;
 }
+
+/** Labels for the site search dialog and the /search page. */
+export function searchLabels(t: Messages) {
+  return {
+    search: t.searchLabel,
+    placeholder: t.searchPlaceholder,
+    noResults: t.searchNoResults,
+    hint: t.searchHint,
+    seeAll: t.searchSeeAll,
+    close: t.close,
+    kinds: {
+      product: t.searchKindProduct,
+      page: t.searchKindPage,
+      news: t.searchKindNews,
+      event: t.searchKindEvent,
+      person: t.searchKindPerson,
+      organization: t.searchKindOrganization,
+      career: t.searchKindCareer,
+      caseStudy: t.searchKindCaseStudy,
+      resource: t.searchKindResource,
+      album: t.searchKindAlbum,
+      video: t.searchKindVideo,
+      symbol: t.searchKindSymbol,
+    },
+  };
+}

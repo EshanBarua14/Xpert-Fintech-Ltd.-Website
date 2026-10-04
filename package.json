@@ -24,7 +24,8 @@
     "test:a11y": "playwright test a11y",
     "db:seed:content": "tsx prisma/seed-content.ts",
     "assets:import": "tsx scripts/import-assets.ts",
-    "admin:password": "tsx scripts/reset-admin-password.ts"
+    "admin:password": "tsx scripts/reset-admin-password.ts",
+    "setup": "tsx scripts/setup.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

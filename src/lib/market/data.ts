@@ -105,7 +105,8 @@ export async function getMarketPayload(): Promise<MarketPayload> {
   if (mode === "demo") snapshot = demoSnapshot();
   // A licensed feed is shown only once an admin switches it on in Admin → Market data.
   if (mode === "licensed" && source?.isActive) snapshot = await licensedSnapshot();
-  if (mode === "exchange" && source?.isActive) snapshot = await boardSnapshot();
+  // DSE/CSE public pages: MARKET_DATA_MODE=exchange alone switches them on.
+  if (mode === "exchange") snapshot = await boardSnapshot();
   return {
     mode: snapshot ? mode : "none",
     providerName: source?.providerName ?? (mode === "exchange" ? "DSE, CSE" : null),

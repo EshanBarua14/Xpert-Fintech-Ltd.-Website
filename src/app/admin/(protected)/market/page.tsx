@@ -7,7 +7,7 @@ import { deleteMarketShare } from "./actions";
 
 const MODE_TEXT = {
   licensed: "Licensed feed (MARKET_DATA_MODE=licensed)",
-  exchange: "DSE and CSE public pages (MARKET_DATA_MODE=exchange): every listed stock's price, top gainers and losers, advanced/declined; CSE's five indices, trades, volume and value. DSE's indices and turnover need the licensed feed.",
+  exchange: "DSE and CSE public pages (MARKET_DATA_MODE=exchange): every listed stock's price, top gainers and losers, advanced/declined; CSE's five indices, trades, volume and value. DSE's indices and turnover need the licensed feed. Shown as soon as this mode is set (no tick needed).",
   demo: "Demo data — generated prices, clearly labelled on the site. Never use on the live website.",
   none: "Off (MARKET_DATA_MODE=none). Only market-share figures entered below are shown.",
 } as const;

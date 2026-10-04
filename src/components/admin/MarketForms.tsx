@@ -36,8 +36,10 @@ export function MarketSourceForm({ values }: { values: SourceValues }) {
       <label className="flex items-start gap-3 text-sm">
         <input type="checkbox" name="isActive" defaultChecked={values.isActive} className="mt-0.5 size-4 accent-brand-royal" />
         <span>
-          <span className="font-medium">Show market data on the website</span>
-          <span className="block text-text-secondary">Turn on once the licence is confirmed and “Test connection” succeeds.</span>
+          <span className="font-medium">Show the licensed feed on the website</span>
+          <span className="block text-text-secondary">
+            For MARKET_DATA_MODE=licensed: turn on once the licence is confirmed and “Test connection” succeeds. DSE/CSE public data (exchange mode) shows without this.
+          </span>
         </span>
       </label>
       <FormMessage message={state.message} isError={!state.ok} />

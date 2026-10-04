@@ -69,3 +69,35 @@ pg_restore --clean --if-exists --no-owner -d "$DATABASE_URL" backups/db_2026-10-
 
 Items in the trash are deleted automatically after 30 days, and expired admin
 sessions are cleaned up — no manual work needed.
+
+
+## Email alerts for new leads
+
+Every demo request and contact message is emailed to the addresses in
+Admin → Settings → "Send new leads to" (or `LEAD_ALERT_EMAILS` in `.env` when
+that is empty). The email is sent in the background after the visitor sees
+"thank you", with up to three attempts; the lead's history in Admin → Leads
+notes when it was sent. The subject names only the kind of enquiry and the
+organisation, never the visitor's message.
+
+`.env`:
+
+```
+SMTP_HOST=smtp.office365.com      # or your mail provider
+SMTP_PORT=587                      # 465 with SMTP_SECURE=true
+SMTP_SECURE=false
+SMTP_USER=alerts@xpertfintech.com
+SMTP_PASSWORD=…
+MAIL_FROM="Xpert Fintech <alerts@xpertfintech.com>"
+```
+
+The password is never sent unencrypted: on port 587 the connection is
+upgraded with STARTTLS, or sending stops.
+
+## Activity log
+
+Admin → Activity log lists every create, update and delete made by an admin:
+who, what, which record, which fields (and values for status, trash and
+publish dates), when and from which IP. It is recorded centrally in
+`src/lib/db/client.ts`, so new admin screens are logged automatically.
+Visitors' own submissions are not logged there.

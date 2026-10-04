@@ -31,6 +31,7 @@ const NAV = [
   { href: "/admin/media", label: "Media" },
   { href: "/admin/settings", label: "Settings" },
   { href: "/admin/users", label: "Admins" },
+  { href: "/admin/audit", label: "Activity log" },
 ] as const;
 
 export function AdminNav() {

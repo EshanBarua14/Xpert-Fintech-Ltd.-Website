@@ -493,5 +493,17 @@
   "ecoLayerXfl": "Xpert Fintech",
   "ecoLayerProduct": "Products",
   "ecoLayerInstitution": "Institutions",
-  "ecoLayerUser": "Investors and teams"
+  "ecoLayerUser": "Investors and teams",
+  "demoStep1": "Your organisation",
+  "demoStep2": "What you're interested in",
+  "demoStep3": "How to reach you",
+  "demoStepOf": "Step {i} of {n}",
+  "formContinue": "Continue",
+  "formBack": "Back",
+  "formAlsoInterested": "Also interested in (optional)",
+  "formPreferredTime": "Best time for a call",
+  "ptAny": "Any time",
+  "ptMorning": "Morning (10:00–13:00)",
+  "ptAfternoon": "Afternoon (13:00–17:00)",
+  "ptEvening": "Evening (17:00–20:00)"
 }

@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
 import { requestMeta } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/auth/rate-limit";
 import { verifyTurnstile } from "@/lib/public/turnstile";
+import { notifyNewLead } from "@/lib/leads/notify";
 import { publicLeadSchema, type LeadFormState } from "@/lib/validation/lead";
 
 const MIN_FILL_MS = 2500; // humans take longer than this to fill in a form
@@ -72,6 +74,26 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
       ? ((await db.offering.findFirst({ where: { id: v.interestedOfferingId, ...publishedWhere() }, select: { id: true } }))?.id ?? null)
       : null;
 
+    // Demo form extras: other products of interest and a preferred time, kept
+    // with the requirement text so the sales team sees them in one place.
+    let requirement = v.expectedRequirement ?? null;
+    if (mode === "demo") {
+      const also = formData
+        .getAll("alsoInterested")
+        .map(String)
+        .filter((id) => /^[0-9a-f-]{36}$/.test(id) && id !== offeringId)
+        .slice(0, 10);
+      const names = also.length
+        ? (await db.offering.findMany({ where: { id: { in: also }, ...publishedWhere() }, include: { translations: { where: { locale: "en" } } } }))
+            .map((o) => o.translations[0]?.name)
+            .filter((x): x is string => Boolean(x))
+        : [];
+      const TIMES: Record<string, string> = { morning: "Morning (10:00–13:00 Dhaka)", afternoon: "Afternoon (13:00–17:00 Dhaka)", evening: "Evening (17:00–20:00 Dhaka)" };
+      const time = TIMES[str(formData.get("preferredTime"))];
+      const extra = [names.length ? `Also interested in: ${names.join(", ")}` : null, time ? `Preferred time for a call: ${time}` : null].filter(Boolean).join("\n");
+      if (extra) requirement = [requirement, extra].filter(Boolean).join("\n\n").slice(0, 3000);
+    }
+
     // Double-click / resubmit guard: same person and form within 10 minutes.
     const recent = await db.lead.findFirst({
       where: {
@@ -90,7 +112,7 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
     }
     const pageUrl = str(formData.get("page_path")).slice(0, 500);
 
-    await db.lead.create({
+    const lead = await db.lead.create({
       data: {
         source: mode === "demo" ? "DEMO_REQUEST" : "CONTACT_FORM",
         name: v.name,
@@ -100,7 +122,7 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
         designation: v.designation,
         businessType: v.businessType,
         interestedOfferingId: offeringId,
-        expectedRequirement: v.expectedRequirement,
+        expectedRequirement: requirement,
         message: v.message,
         preferredContact: v.preferredContact,
         consent: true,
@@ -111,7 +133,10 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
         ip,
         userAgent,
       },
+      select: { id: true },
     });
+    // Email the sales team after the visitor has their answer (retries in the background).
+    after(() => notifyNewLead(lead.id));
   } catch (error) {
     console.error("[leads] could not save enquiry", error);
     return { status: "error", message: "generic" };

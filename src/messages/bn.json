@@ -493,5 +493,17 @@
   "ecoLayerXfl": "এক্সপার্ট ফিনটেক",
   "ecoLayerProduct": "পণ্য",
   "ecoLayerInstitution": "প্রতিষ্ঠান",
-  "ecoLayerUser": "বিনিয়োগকারী ও টিম"
+  "ecoLayerUser": "বিনিয়োগকারী ও টিম",
+  "demoStep1": "আপনার প্রতিষ্ঠান",
+  "demoStep2": "আপনি যা জানতে চান",
+  "demoStep3": "যোগাযোগের উপায়",
+  "demoStepOf": "ধাপ {i} / {n}",
+  "formContinue": "এগিয়ে যান",
+  "formBack": "পেছনে",
+  "formAlsoInterested": "আরও আগ্রহ আছে (ঐচ্ছিক)",
+  "formPreferredTime": "কল করার উপযুক্ত সময়",
+  "ptAny": "যেকোনো সময়",
+  "ptMorning": "সকাল (১০:০০–১৩:০০)",
+  "ptAfternoon": "দুপুর (১৩:০০–১৭:০০)",
+  "ptEvening": "সন্ধ্যা (১৭:০০–২০:০০)"
 }

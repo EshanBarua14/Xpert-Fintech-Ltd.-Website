@@ -144,6 +144,20 @@ export const getOrganizations = cache(async (kind: OrganizationKind) => {
   });
 });
 
+/**
+ * Institutions running one of Xpert's apps (a published deployment), whatever
+ * their kind. Used for the client logos until clients are entered as such in
+ * Admin → Organizations: an organization with a live Xpert app is a client.
+ */
+export const getOrganizationsWithLiveApps = cache(async () => {
+  const now = new Date();
+  return db.organization.findMany({
+    where: { ...publishedWhere(now), deployments: { some: publishedWhere(now) } },
+    orderBy: { sortOrder: "asc" },
+    include: { translations: true },
+  });
+});
+
 // ── Redirects ────────────────────────────────────────────────────────────────
 
 /** Looks up an old-site URL (with or without trailing slash). */

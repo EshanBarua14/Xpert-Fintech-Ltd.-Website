@@ -10,13 +10,10 @@ const LAYER = { MARKET: "Market infrastructure", XFL: "Xpert Fintech", PRODUCT: 
 export default async function EcosystemAdmin({ searchParams }: { searchParams: Promise<{ deleted?: string }> }) {
   await requireAdmin();
   const flags = await searchParams;
-  const [nodes, flows] = await Promise.all([
-    db.ecosystemNode.findMany({
-      orderBy: [{ mobileOrder: "asc" }, { sortOrder: "asc" }],
-      include: { translations: true, _count: { select: { outgoing: true, incoming: true } } },
-    }),
-    db.ecosystemFlow.findMany({ orderBy: { sortOrder: "asc" }, include: { translations: true, _count: { select: { steps: true } } } }),
-  ]);
+  const nodes = await db.ecosystemNode.findMany({
+    orderBy: [{ mobileOrder: "asc" }, { sortOrder: "asc" }],
+    include: { translations: true, _count: { select: { outgoing: true, incoming: true } } },
+  });
   const offeringIds = nodes.map((n) => n.offeringId).filter((x): x is string => Boolean(x));
   const offerings = await db.offering.findMany({ where: { id: { in: offeringIds } }, select: { id: true, status: true, deletedAt: true, translations: { where: { locale: "en" }, select: { name: true } } } });
   type OfferingSummary = { id: string; status: string; deletedAt: Date | null; translations: { name: string }[] };
@@ -28,56 +25,23 @@ export default async function EcosystemAdmin({ searchParams }: { searchParams: P
         <div>
           <h1 className="font-display text-3xl font-semibold">Ecosystem</h1>
           <p className="mt-1 max-w-3xl text-sm text-text-secondary">
-            What the ecosystem map, its guided tour and the phone layout show. Publish a node to show it; a product node links to its page once the product is
-            published. Unpublished nodes drop out of every flow automatically (for example eKYC until it launches).
+            What the ecosystem map and its phone layout show. Publish a node to show it; a product node links to its page once the product is
+            published (for example eKYC stays hidden until it launches).
           </p>
         </div>
         <div className="flex gap-2">
           <Link href="/admin/ecosystem/nodes/new" className={buttonClasses({ variant: "secondary" })}>
             New node
           </Link>
-          <Link href="/admin/ecosystem/flows/new" className={buttonClasses({})}>
-            New flow
-          </Link>
         </div>
       </div>
       {flags.deleted && <Notice>Deleted.</Notice>}
       {nodes.length === 0 && (
         <Notice>
-          No ecosystem yet. Run <code>npm run db:seed:content</code> once to load the starting nodes, links and flows, then edit them here.
+          No ecosystem yet. Run <code>npm run db:seed:content</code> once to load the starting nodes and links, then edit them here.
         </Notice>
       )}
 
-      <section className="flex flex-col gap-4">
-        <h2 className="font-display text-xl font-semibold">Flows</h2>
-        <div className="overflow-x-auto rounded-card border border-fg/10">
-          <table className="w-full min-w-[40rem] text-left text-sm">
-            <thead className="border-b border-fg/10 text-xs tracking-wide text-text-secondary uppercase">
-              <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Steps</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-fg/10">
-              {flows.map((f) => (
-                <tr key={f.id}>
-                  <td className="px-4 py-3">
-                    <Link href={`/admin/ecosystem/flows/${f.id}`} className="font-semibold hover:text-brand-sky">
-                      {f.translations.find((t) => t.locale === "en")?.name ?? f.key}
-                    </Link>
-                    {f.isPlayback && <span className="ml-2 rounded-full border border-gold/40 px-2 py-0.5 text-[11px] text-gold">Guided tour</span>}
-                  </td>
-                  <td className="px-4 py-3 font-mono">{f._count.steps}</td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={f.status} publishAt={f.publishAt} deletedAt={f.deletedAt} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
 
       {(Object.keys(LAYER) as (keyof typeof LAYER)[]).map((layer) => {
         const list = nodes.filter((n) => n.layer === layer);

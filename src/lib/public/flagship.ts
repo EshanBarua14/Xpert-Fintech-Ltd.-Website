@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import type { AppLocale } from "@/lib/i18n/config";
-import { getOfferings, getOrganizations, mediaMap } from "./content";
+import { getOfferings, getOrganizations, getOrganizationsWithLiveApps, mediaMap } from "./content";
 import { pick } from "./text";
 
 export type MemberLogo = { url: string; width: number | null; height: number | null };
@@ -9,12 +9,15 @@ export type Member = { id: string; name: string; shortName: string | null; websi
 
 /** Real data the flagship sections show: consortium members, exchanges, published products. */
 export const getFlagshipData = cache(async (locale: AppLocale) => {
-  const [members, exchanges, clients, offerings] = await Promise.all([
+  const [members, exchanges, clientRows, offerings] = await Promise.all([
     getOrganizations("CONSORTIUM_MEMBER"),
     getOrganizations("EXCHANGE"),
     getOrganizations("CLIENT"),
     getOfferings(),
   ]);
+  // Clients entered in Admin → Organizations (kind: Client) win; until there are
+  // any, the institutions running a live Xpert app are shown.
+  const clients = clientRows.length ? clientRows : await getOrganizationsWithLiveApps();
   // A logo is shown only when it is uploaded AND written permission is on file.
   const logos = await mediaMap(
     [...members, ...exchanges, ...clients].map((o) => (o.logoPermission ? o.logoMediaId : null)),

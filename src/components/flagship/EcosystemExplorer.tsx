@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { EcosystemMap, type EcosystemLabels, type EcosystemModuleInfo, type EcosystemModuleKey } from "./EcosystemMap";
 
@@ -25,15 +25,12 @@ export type TourLabels = {
   layers: Record<EcoNode["layer"], string>;
 };
 
-const NODE_MODULE: Record<string, EcosystemModuleKey> = { oms: "OMS", rms: "RMS", dms: "DMS", "bo-account-opening": "BO", ekyc: "eKYC", "back-office": "Back office" };
 const LAYERS: EcoNode["layer"][] = ["MARKET", "XFL", "PRODUCT", "INSTITUTION", "USER"];
 
 /**
- * The ecosystem experience: the map (tablets and up), a guided tour that plays
- * Admin → Ecosystem's "playback" flow in under 30 seconds, and on phones a
- * vertical flow (market → Xpert → products → institutions → users) whose
- * nodes open a bottom sheet. The tour can be paused, stepped and ended; with
- * reduced motion it never plays by itself.
+ * The ecosystem: the interactive map on tablets and up; on phones a vertical
+ * flow (market → Xpert → products → institutions → users) whose nodes open a
+ * bottom sheet with details and links.
  */
 export function EcosystemExplorer({
   labels,
@@ -48,106 +45,12 @@ export function EcosystemExplorer({
   tour: TourLabels;
   className?: string;
 }) {
-  const flow = graph.flows.find((f) => f.isPlayback);
-  const steps = flow?.steps ?? [];
-  const [step, setStep] = useState<number | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [reduce, setReduce] = useState(false);
-  const stepMs = steps.length ? Math.min(3600, Math.floor(28_000 / steps.length)) : 3600;
-  const current = step === null ? null : steps[step];
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduce(mq.matches);
-    const on = () => setReduce(mq.matches);
-    mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
-  }, []);
-
-  useEffect(() => {
-    if (step === null || !playing || reduce) return;
-    const id = setTimeout(() => {
-      if (step + 1 < steps.length) setStep(step + 1);
-      else setPlaying(false); // end: stay on the last step, offer Replay
-    }, stepMs);
-    return () => clearTimeout(id);
-  }, [step, playing, reduce, steps.length, stepMs]);
-
-  const start = () => {
-    setStep(0);
-    setPlaying(!reduce);
-  };
-  const end = () => {
-    setStep(null);
-    setPlaying(false);
-  };
-  const highlight = step === null ? undefined : current ? (NODE_MODULE[current.node] ?? null) : null;
-  const done = step !== null && step === steps.length - 1 && !playing;
-
   return (
     <div className={cn("flex flex-col gap-4", className)}>
       <div className="hidden md:block">
-        <EcosystemMap labels={labels} modules={modules} highlight={highlight} />
+        <EcosystemMap labels={labels} modules={modules} />
       </div>
-      <MobileFlow graph={graph} tour={tour} activeKey={current?.node ?? null} />
-
-      {steps.length > 0 && (
-        <div className="glass rounded-3xl p-4 sm:p-5" aria-live="polite">
-          {step === null ? (
-            <div className="flex flex-wrap items-center gap-4">
-              <button type="button" onClick={start} className="btn-glow inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm font-semibold text-white">
-                <span aria-hidden="true">▶</span> {flow?.name ?? tour.start}
-              </button>
-              <span className="text-sm text-text-secondary">
-                {tour.meta.replace("{n}", String(steps.length)).replace("{s}", String(Math.round((stepMs * steps.length) / 1000)))}
-              </span>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              <ol className="flex gap-1.5" aria-hidden="true">
-                {steps.map((s, i) => (
-                  <li key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-fg/10">
-                    <span
-                      key={`${i}-${step}-${playing}`}
-                      className={cn("block h-full rounded-full bg-gradient-to-r from-brand-sky to-cyan-300", i < step ? "w-full" : i > step ? "w-0" : playing && !reduce ? "eco-tour-fill" : "w-full")}
-                      style={i === step && playing && !reduce ? { animationDuration: `${stepMs}ms` } : undefined}
-                    />
-                  </li>
-                ))}
-              </ol>
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <p className="font-mono text-xs tracking-widest text-accent">{tour.step.replace("{i}", String(step + 1)).replace("{n}", String(steps.length))}</p>
-                  <p className="mt-1 font-display text-xl font-semibold">{current?.title}</p>
-                  {current?.body && <p className="mt-1 text-sm text-text-secondary">{current.body}</p>}
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0} className="h-10 rounded-full border border-fg/15 px-4 text-sm font-semibold disabled:opacity-40" aria-label={tour.prev}>
-                    ←
-                  </button>
-                  {done ? (
-                    <button type="button" onClick={start} className="h-10 rounded-full border border-brand-sky/50 px-4 text-sm font-semibold text-brand-sky">
-                      ↺ {tour.replay}
-                    </button>
-                  ) : (
-                    !reduce && (
-                      <button type="button" onClick={() => setPlaying((p) => !p)} className="h-10 rounded-full border border-fg/15 px-4 text-sm font-semibold" aria-pressed={!playing}>
-                        {playing ? `❚❚ ${tour.pause}` : `▶ ${tour.play}`}
-                      </button>
-                    )
-                  )}
-                  <button type="button" onClick={() => setStep(Math.min(steps.length - 1, step + 1))} disabled={step === steps.length - 1} className="h-10 rounded-full border border-fg/15 px-4 text-sm font-semibold disabled:opacity-40" aria-label={tour.next}>
-                    →
-                  </button>
-                  <button type="button" onClick={end} className="h-10 rounded-full px-3 text-sm text-text-secondary hover:text-fg">
-                    {tour.end}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      <MobileFlow graph={graph} tour={tour} activeKey={null} />
     </div>
   );
 }

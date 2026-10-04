@@ -62,7 +62,7 @@ function ItemLink({
 function MegaPanel({ item, id, overview, onNavigate }: { item: NavLink; id: string; overview: string; onNavigate: () => void }) {
   return (
     <div id={id} className="absolute inset-x-0 top-full pt-3">
-      <div className="glass-strong mega-in grid gap-2 rounded-3xl p-2 shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8)] md:grid-cols-[17rem_1fr]">
+      <div className="glass-strong menu-drawer mega-in grid gap-2 rounded-3xl p-2 shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8)] md:grid-cols-[17rem_1fr]">
         <div className="relative hidden overflow-hidden rounded-2xl border border-fg/10 bg-gradient-to-br from-brand-royal/40 via-navy-800 to-ink-950 p-6 md:flex md:flex-col md:justify-end">
           <div className="grid-fade pointer-events-none absolute inset-0 opacity-50" />
           <span className="relative mb-auto flex size-11 items-center justify-center rounded-2xl bg-fg/10 text-cyan-300">

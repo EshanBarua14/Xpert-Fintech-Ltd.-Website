@@ -88,7 +88,7 @@
   --glass-a: rgb(255 255 255 / 0.055);
   --glass-b: rgb(255 255 255 / 0.015);
   --glass-line: rgb(255 255 255 / 0.08);
-  --glass-strong: rgb(8 13 26 / 0.72);
+  --glass-strong: rgb(8 13 26 / 0.86);
   --grad-a: #ffffff;
   --grad-b: #9fb3cf;
   --grain: 0.035;
@@ -136,7 +136,7 @@
   --glass-a: rgb(255 255 255 / 0.85);
   --glass-b: rgb(255 255 255 / 0.6);
   --glass-line: rgb(10 20 40 / 0.09);
-  --glass-strong: rgb(255 255 255 / 0.82);
+  --glass-strong: rgb(255 255 255 / 0.92);
   --grad-a: #0a1428;
   --grad-b: #2d4d7a;
   --grain: 0.02;
@@ -449,11 +449,16 @@ body::before {
 }
 
 /* The phone menu sits over busy page content: keep the glass, but nearly opaque. */
+/* Menus, the phone menu and the search box: solid enough that the page behind never shows through the text */
 .menu-drawer {
-  background: rgb(5 8 15 / 0.94);
+  background: #0b1424;
+  border-color: rgb(255 255 255 / 0.12);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 [data-theme="light"] .menu-drawer {
-  background: rgb(255 255 255 / 0.96);
+  background: #ffffff;
+  border-color: rgb(10 20 40 / 0.12);
 }
 
 /* Cards that light up under the pointer (--mx/--my set by SiteEffects) */

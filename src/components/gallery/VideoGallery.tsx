@@ -120,7 +120,7 @@ export function FeaturedVideo({ v, labels }: { v: VideoItem; labels: VideoLabels
         )}
       </div>
       <div className="flex flex-col justify-center gap-4 p-6 sm:p-8 lg:p-10">
-        <span className="w-fit rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 font-mono text-[11px] tracking-[0.18em] text-cyan-200 uppercase">
+        <span className="w-fit rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 font-mono text-[11px] tracking-[0.18em] text-accent uppercase">
           {labels.featured}
         </span>
         <h3 className="font-display text-2xl leading-tight font-semibold tracking-tight text-balance sm:text-3xl">{v.title}</h3>

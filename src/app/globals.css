@@ -121,12 +121,12 @@
   --color-graphite-700: #d6dfeb;
   --color-text-primary: #0b1324;
   --color-text-secondary: #4a5873;
-  --color-brand-sky: #0a78ad;
+  --color-brand-sky: #065f8f;
   --color-brand-mid: #1f6fae;
-  --color-cyan-300: #0e7490;
-  --color-accent: #0b6f8a;
+  --color-cyan-300: #0b6480;
+  --color-accent: #0b6480;
   --color-fg: #0a1428;
-  --color-gold: #8a5d0b;
+  --color-gold: #7a520a;
   --color-market-up: #11692f;
   --color-market-down: #c81e1e;
   --hairline: rgb(10 20 40 / 0.07);
@@ -718,8 +718,15 @@ body::before {
   }
 }
 
-[data-theme="light"] .text-gradient-brand {
-  background-image: linear-gradient(90deg, #0a78ad, #1f6fae 35%, #2a5fae 60%, #0a78ad 100%);
+/* Gradient text in light mode (plain colour where clipping is unsupported) */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  [data-theme="light"] .text-gradient-brand {
+    background-image: linear-gradient(90deg, #065f8f, #1f5f9e 40%, #2a5fae 70%, #065f8f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
 }
 [data-theme="light"] .glass,
 [data-theme="light"] .glass-strong {

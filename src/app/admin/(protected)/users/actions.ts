@@ -73,6 +73,46 @@ export async function setAdminActive(formData: FormData) {
   revalidatePath("/admin/users");
 }
 
+/** Change an admin's name or sign-in email (yours or another admin's). */
+export async function updateAdmin(_prev: AccountState, formData: FormData): Promise<AccountState> {
+  const admin = await requireAdmin();
+  const parsed = z
+    .object({
+      id: z.string().uuid(),
+      name: z.string().trim().min(1, "Enter a name.").max(120),
+      email: z.string().trim().toLowerCase().email("Enter a valid email address.").max(254),
+    })
+    .safeParse({ id: formData.get("id") ?? "", name: formData.get("name") ?? "", email: formData.get("email") ?? "" });
+  if (!parsed.success) return { errors: toFieldErrors(parsed.error) };
+  const { id, name, email } = parsed.data;
+  const clash = await db.adminUser.findFirst({ where: { email, id: { not: id } }, select: { id: true } });
+  if (clash) return { errors: { email: "Another admin already uses this email." } };
+  const before = await db.adminUser.findUniqueOrThrow({ where: { id }, select: { email: true } });
+  await db.adminUser.update({ where: { id }, data: { name, email } });
+  // A changed sign-in email signs that admin out everywhere else.
+  if (before.email !== email) {
+    if (id === admin.id) await revokeOtherSessions(id);
+    else await revokeAllSessions(id);
+  }
+  revalidatePath("/admin/users");
+  return { message: "Saved.", savedAt: Date.now() };
+}
+
+/**
+ * Remove an admin account for good. Their sessions go with it; leads they owned
+ * become unassigned; the activity log keeps their past changes. You cannot
+ * remove yourself or the last active admin.
+ */
+export async function deleteAdmin(formData: FormData) {
+  const admin = await requireAdmin();
+  const id = z.string().uuid().parse(formData.get("id"));
+  if (id === admin.id) throw new Error("You cannot remove your own account.");
+  const others = await db.adminUser.count({ where: { isActive: true, id: { not: id } } });
+  if (others === 0) throw new Error("At least one active admin is required.");
+  await db.adminUser.delete({ where: { id } });
+  revalidatePath("/admin/users");
+}
+
 export async function resetAdminPassword(_prev: AccountState, formData: FormData): Promise<AccountState> {
   const admin = await requireAdmin();
   const id = z.string().uuid().parse(formData.get("id"));

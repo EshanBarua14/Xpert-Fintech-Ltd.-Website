@@ -12,8 +12,9 @@ const MODE_TEXT = {
   none: "Off (MARKET_DATA_MODE=none). Only market-share figures entered below are shown.",
 } as const;
 
-export default async function MarketAdminPage() {
+export default async function MarketAdminPage({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
   await requireAdmin();
+  const { edit } = await searchParams;
   const [source, shares] = await Promise.all([
     db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }),
     db.marketShare.findMany({ orderBy: [{ tradeDate: "desc" }, { exchange: "asc" }], take: 60 }),
@@ -23,6 +24,22 @@ export default async function MarketAdminPage() {
   const [liveDse, liveCse] = await Promise.all([liveMarketTurnover("DSE").catch(() => null), liveMarketTurnover("CSE").catch(() => null)]);
   const latest = (ex: "DSE" | "CSE") => shares.find((s) => s.exchange === ex)?.tradeDate.toISOString().slice(0, 10) ?? null;
   const apiOn = (process.env.MARKET_SHARE_API_TOKEN ?? "").length >= 24;
+  // "Edit" on a row loads that day's DSE and CSE figures into the form.
+  const editDay = edit && /^\d{4}-\d{2}-\d{2}$/.test(edit) ? edit : null;
+  const editRows = editDay
+    ? await db.marketShare.findMany({ where: { tradeDate: new Date(`${editDay}T00:00:00.000Z`) } })
+    : [];
+  const num = (v: unknown) => (v === null || v === undefined ? "" : String(Number(v)));
+  const initial = editDay
+    ? {
+        tradeDate: editDay,
+        sourceNote: editRows[0]?.sourceNote ?? "",
+        dseXpert: num(editRows.find((r) => r.exchange === "DSE")?.xpertTurnover),
+        dseMarket: num(editRows.find((r) => r.exchange === "DSE")?.marketTurnover),
+        cseXpert: num(editRows.find((r) => r.exchange === "CSE")?.xpertTurnover),
+        cseMarket: num(editRows.find((r) => r.exchange === "CSE")?.marketTurnover),
+      }
+    : undefined;
   const bdt = (v: unknown) => `৳${(Number(v) / 1e7).toLocaleString("en-US", { maximumFractionDigits: 2 })} cr`;
 
   return (
@@ -38,7 +55,7 @@ export default async function MarketAdminPage() {
         <h2 className="font-display text-xl font-semibold">Feed</h2>
         <p className="text-sm">
           <span className="text-text-secondary">Current mode: </span>
-          <span className={mode === "demo" ? "font-semibold text-amber-300" : "font-semibold"}>{MODE_TEXT[mode]}</span>
+          <span className={mode === "demo" ? "font-semibold text-gold" : "font-semibold"}>{MODE_TEXT[mode]}</span>
         </p>
         <p className="text-xs text-text-secondary">
           The mode, feed address and key are set in the server&rsquo;s <code>.env</code> (MARKET_DATA_MODE, MARKET_DATA_API_URL, MARKET_DATA_API_KEY) so secrets never live in the
@@ -60,7 +77,7 @@ export default async function MarketAdminPage() {
         )}
       </section>
 
-      <section className="flex flex-col gap-4 rounded-card border border-fg/10 p-6">
+      <section id="share-form" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">
         <h2 className="font-display text-xl font-semibold">Xpert market share</h2>
         <p className="text-sm text-text-secondary">
           Enter the day&rsquo;s turnover traded through Xpert and the exchange&rsquo;s total turnover. The website shows the latest figure for each exchange with its source. Saving the
@@ -70,13 +87,18 @@ export default async function MarketAdminPage() {
           {(["DSE", "CSE"] as const).map((ex) => {
             const d = latest(ex);
             return (
-              <li key={ex} className={"rounded-full border px-3 py-1 " + (d === today ? "border-market-up/40 text-market-up" : "border-amber-400/40 text-amber-300")}>
+              <li key={ex} className={"rounded-full border px-3 py-1 " + (d === today ? "border-market-up/40 text-market-up" : "border-gold/40 text-gold")}>
                 {ex}: {d ? (d === today ? "today's figure saved" : `latest is ${d}`) : "no figure yet"}
               </li>
             );
           })}
         </ul>
-        <MarketShareForm today={today} live={{ DSE: liveDse, CSE: liveCse }} />
+        {initial && (
+          <p className="rounded-control border border-brand-sky/30 bg-brand-sky/10 px-4 py-3 text-sm">
+            Editing {initial.tradeDate}. Change the figures and save; <a href="/admin/market#share-form" className="text-brand-sky underline">cancel</a>.
+          </p>
+        )}
+        <MarketShareForm key={editDay ?? "new"} today={today} live={{ DSE: liveDse, CSE: liveCse }} initial={initial} />
         <p className="text-xs text-text-secondary">
           Automatic daily update: {apiOn ? "on" : "off"}. Xpert&rsquo;s OMS or back office can send the day&rsquo;s figures to <code>POST /api/market-share</code> with the
           token in <code>MARKET_SHARE_API_TOKEN</code> (see docs/MARKET-DATA.md); CSE&rsquo;s total is filled in automatically.
@@ -110,7 +132,10 @@ export default async function MarketAdminPage() {
                   <td className="px-4 py-3 font-mono">{bdt(s.marketTurnover)}</td>
                   <td className="px-4 py-3 font-mono font-semibold">{((Number(s.xpertTurnover) / Number(s.marketTurnover)) * 100).toFixed(2)}%</td>
                   <td className="px-4 py-3 text-text-secondary">{s.sourceNote ?? "—"}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="flex items-center justify-end gap-4 px-4 py-3">
+                    <a href={`/admin/market?edit=${s.tradeDate.toISOString().slice(0, 10)}#share-form`} className="text-xs text-brand-sky hover:underline">
+                      Edit
+                    </a>
                     <form action={deleteMarketShare}>
                       <input type="hidden" name="id" value={s.id} />
                       <ConfirmButton message="Delete this figure?" className="text-xs text-text-secondary hover:text-market-down">

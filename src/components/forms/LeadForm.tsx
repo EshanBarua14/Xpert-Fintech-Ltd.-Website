@@ -243,7 +243,7 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
       {turnstileSiteKey && (
         <>
           <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" async defer />
-          <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="dark" data-language={locale} aria-label={t.securityCheck} />
+          <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="auto" data-language={locale} aria-label={t.securityCheck} />
         </>
       )}
     </>

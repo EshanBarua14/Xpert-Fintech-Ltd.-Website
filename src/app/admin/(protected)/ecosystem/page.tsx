@@ -101,7 +101,7 @@ export default async function EcosystemAdmin({ searchParams }: { searchParams: P
                         {off && ` · product: ${off.translations[0]?.name ?? "?"}${off.status !== "PUBLISHED" || off.deletedAt ? " (not published)" : ""}`}
                         {!n.translations.some((t) => t.locale === "bn") && " · no Bangla yet"}
                       </span>
-                      {n.editorNote && <span className="text-xs text-amber-300">Note: {n.editorNote}</span>}
+                      {n.editorNote && <span className="text-xs text-gold">Note: {n.editorNote}</span>}
                     </Link>
                   </li>
                 );

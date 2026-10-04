@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { THEME_SCRIPT } from "@/lib/theme-script";
 import { Anek_Bangla, Hind_Siliguri, JetBrains_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
@@ -28,11 +29,6 @@ export const metadata: Metadata = {
 // Publishing from the admin portal will also trigger an immediate refresh (Phase 3).
 export const revalidate = 300;
 
-/* Runs before first paint: marks JS as available (for scroll reveals) and
-   applies the saved theme, or the device's light/dark preference. */
-const THEME_SCRIPT =
-  "(function(){var d=document.documentElement;d.classList.add('js');var t=null;try{t=localStorage.getItem('theme')}catch(e){}" +
-  "if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}d.dataset.theme=t})()";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));

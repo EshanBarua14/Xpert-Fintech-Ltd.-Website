@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function JobRow({ j, t, i }: { j: JobCard; t: Messages; i: number }) {
   return (
     <li data-reveal style={{ "--d": i % 4 } as CSSProperties}>
-      <Link href={j.href} className={cn("spotlight glass group grid gap-4 rounded-3xl p-6 transition-transform duration-500 hover:-translate-y-0.5 md:grid-cols-[1fr_auto] md:items-center md:p-7", !j.open && "opacity-70")}>
+      <Link href={j.href} className={cn("spotlight glass group grid gap-4 rounded-3xl p-6 transition-transform duration-500 hover:-translate-y-0.5 md:grid-cols-[1fr_auto] md:items-center md:p-7")}>
         <span className="flex flex-col gap-2">
           <span className="flex flex-wrap items-center gap-2 text-xs">
             {j.department && <span className="rounded-full bg-brand-sky/10 px-2.5 py-1 font-semibold text-cyan-300">{j.department}</span>}

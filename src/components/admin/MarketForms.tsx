@@ -64,7 +64,9 @@ export function TestFeedButton() {
   );
 }
 
-export function MarketShareForm({ today, live }: { today: string; live: { DSE: number | null; CSE: number | null } }) {
+type ShareInitial = { tradeDate: string; sourceNote: string; dseXpert: string; dseMarket: string; cseXpert: string; cseMarket: string };
+
+export function MarketShareForm({ today, live, initial }: { today: string; live: { DSE: number | null; CSE: number | null }; initial?: ShareInitial }) {
   const { state, pending, onSubmit } = useActionForm<MarketState>(saveMarketShare, {});
   const e = state.errors ?? {};
   const liveHint = (ex: "DSE" | "CSE") =>
@@ -74,8 +76,8 @@ export function MarketShareForm({ today, live }: { today: string; live: { DSE: n
   return (
     <form key={state.ok ? state.savedAt : "form"} onSubmit={onSubmit} className="flex flex-col gap-5">
       <div className="grid gap-5 md:grid-cols-2">
-        <TextInput id="tradeDate" type="date" label="Trading day" required defaultValue={today} max={today} error={e.tradeDate} />
-        <TextInput id="sourceNote" label="Source" hint="Shown on the website, e.g. DSE and CSE daily broker turnover reports" error={e.sourceNote} />
+        <TextInput id="tradeDate" type="date" label="Trading day" required defaultValue={initial?.tradeDate ?? today} max={today} error={e.tradeDate} />
+        <TextInput id="sourceNote" label="Source" defaultValue={initial?.sourceNote} hint="Shown on the website, e.g. DSE and CSE daily broker turnover reports" error={e.sourceNote} />
       </div>
       <div className="grid gap-5 md:grid-cols-2">
         {(["DSE", "CSE"] as const).map((ex) => {
@@ -83,8 +85,8 @@ export function MarketShareForm({ today, live }: { today: string; live: { DSE: n
           return (
             <fieldset key={ex} className="flex flex-col gap-4 rounded-card border border-fg/10 p-4">
               <legend className="px-2 font-mono text-sm font-semibold">{ex}</legend>
-              <TextInput id={`${k}Xpert`} inputMode="decimal" label="Xpert turnover (BDT)" hint="Total traded through Xpert members. Leave empty to skip this exchange." error={e[`${k}Xpert`]} />
-              <TextInput id={`${k}Market`} inputMode="decimal" label="Market turnover (BDT)" placeholder={live[ex] ? String(live[ex]) : undefined} hint={liveHint(ex)} error={e[`${k}Market`]} />
+              <TextInput id={`${k}Xpert`} inputMode="decimal" defaultValue={initial?.[`${k}Xpert` as "dseXpert"]} label="Xpert turnover (BDT)" hint="Total traded through Xpert members. Leave empty to skip this exchange." error={e[`${k}Xpert`]} />
+              <TextInput id={`${k}Market`} inputMode="decimal" defaultValue={initial?.[`${k}Market` as "dseMarket"]} label="Market turnover (BDT)" placeholder={live[ex] ? String(live[ex]) : undefined} hint={liveHint(ex)} error={e[`${k}Market`]} />
             </fieldset>
           );
         })}

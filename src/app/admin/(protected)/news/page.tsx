@@ -64,9 +64,14 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
           ],
         }))}
       />
-      <Link href="/admin/news/categories" className="self-start text-sm text-brand-sky hover:underline">
-        Manage categories →
-      </Link>
+      <div className="flex flex-wrap gap-6">
+        <Link href="/admin/news/categories" className="text-sm text-brand-sky hover:underline">
+          Manage categories →
+        </Link>
+        <Link href="/admin/news/tags" className="text-sm text-brand-sky hover:underline">
+          Manage tags →
+        </Link>
+      </div>
     </div>
   );
 }

@@ -200,3 +200,60 @@ export async function deleteCategory(formData: FormData) {
   refresh();
   redirect("/admin/news/categories?deleted=1");
 }
+
+// ── Tags ─────────────────────────────────────────────────────────────────────
+
+export type TagState = { errors?: FieldErrors; message?: string; savedAt?: number };
+
+const tagSchema = z.object({
+  id: z.string().uuid().optional(),
+  enName: z.string().trim().min(1, "Enter the English name.").max(60),
+  bnName: z.string().trim().max(60),
+});
+
+/** Adds a tag, or renames one (its articles keep it). */
+export async function saveTag(_prev: TagState, formData: FormData): Promise<TagState> {
+  await requireAdmin();
+  const parsed = tagSchema.safeParse(formInput(tagSchema.shape, formData));
+  if (!parsed.success) return { errors: toFieldErrors(parsed.error), message: "Please fix the highlighted fields." };
+  const v = parsed.data;
+  const slug = slugify(v.enName);
+  if (!slug) return { errors: { enName: "Use English letters for the name." } };
+  try {
+    await db.$transaction(async (tx) => {
+      const id = v.id ?? (await tx.tag.create({ data: { key: slug } })).id;
+      await tx.tagTranslation.upsert({
+        where: { tagId_locale: { tagId: id, locale: "en" } },
+        update: { name: v.enName, slug },
+        create: { tagId: id, locale: "en", name: v.enName, slug },
+      });
+      if (v.bnName) {
+        await tx.tagTranslation.upsert({
+          where: { tagId_locale: { tagId: id, locale: "bn" } },
+          update: { name: v.bnName, slug },
+          create: { tagId: id, locale: "bn", name: v.bnName, slug },
+        });
+      } else {
+        await tx.tagTranslation.deleteMany({ where: { tagId: id, locale: "bn" } });
+      }
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return { errors: { enName: "A tag with this name already exists." } };
+    }
+    console.error("[admin] saveTag failed", error);
+    return { message: "Could not save. Please try again." };
+  }
+  refresh();
+  revalidatePath("/admin/news/tags");
+  return { message: "Saved.", savedAt: Date.now() };
+}
+
+/** Deletes a tag; it is removed from its articles, which stay as they are. */
+export async function deleteTag(formData: FormData) {
+  await requireAdmin();
+  const id = uuid.parse(formData.get("id"));
+  await db.tag.delete({ where: { id } });
+  refresh();
+  redirect("/admin/news/tags?deleted=1");
+}

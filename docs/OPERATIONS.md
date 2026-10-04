@@ -101,3 +101,15 @@ who, what, which record, which fields (and values for status, trash and
 publish dates), when and from which IP. It is recorded centrally in
 `src/lib/db/client.ts`, so new admin screens are logged automatically.
 Visitors' own submissions are not logged there.
+
+## Redirects from the old website
+
+Admin → Redirects sends visitors and search engines from an old address (for example a page of the previous www.xpertfintech.com) to its new home. Enter the old address without /en or /bn (a pasted full URL is cleaned up), and choose Permanent (301) unless the move is temporary. A redirect is used only when no page exists at that address. Each redirect shows how often it has been used; switch it off or delete it when the count stays at zero.
+
+## Admin accounts
+
+Admin → Admins: add an admin, edit any admin's name or sign-in email, reset a password, switch off two-factor for someone who lost their phone, deactivate (keeps the account, blocks sign-in) or remove for good. You cannot deactivate or remove yourself or the last active admin. The activity log keeps a removed admin's past changes. Forgotten your own password? On the server: `npm run admin:password -- you@xpertfintech.com`.
+
+## Light and dark mode
+
+Visitors and admins get their device's setting on the first visit; the sun/moon button switches it and is remembered on that device (for both the website and the admin portal). Photo and video cards, the video player and the photo viewer stay dark in both modes on purpose, so pictures read well.

@@ -82,6 +82,7 @@
 .field input:focus-visible { outline: 2px solid var(--o-accent); outline-offset: 1px; border-color: transparent; }
 .primary { font: inherit; font-weight: 600; cursor: pointer; padding: 0.625rem; border-radius: 4px; border: 1px solid transparent; color: #08121f; background: var(--o-up); }
 .primary[data-side="SELL"] { background: var(--o-down); }
+:global([data-theme="light"]) .primary { color: #ffffff; }
 .primary:focus-visible { outline: 2px solid var(--o-accent); outline-offset: 2px; }
 .primary:active { transform: translateY(1px); }
 .ghost { font: inherit; font-size: 0.8125rem; cursor: pointer; color: var(--o-text); background: transparent; border: 1px solid var(--o-line); border-radius: 4px; padding: 0.3125rem 0.625rem; }

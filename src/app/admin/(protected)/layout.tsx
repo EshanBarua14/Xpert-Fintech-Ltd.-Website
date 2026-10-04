@@ -2,6 +2,7 @@ import Link from "next/link";
 import { after } from "next/server";
 import { Logo } from "@/components/brand/Logo";
 import { AdminNav } from "@/components/admin/AdminUi";
+import { ThemeToggle } from "@/components/navigation/ThemeToggle";
 import { requireAdmin } from "@/lib/auth/session";
 import { logoutAction } from "@/app/admin/auth-actions";
 import { purgeOldTrash } from "@/lib/admin/purge";
@@ -32,6 +33,7 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
           <Link href="/admin/users" className="text-text-secondary hover:text-text-primary" title={`${admin.email} — change password`}>
             {admin.name}
           </Link>
+          <ThemeToggle labels={{ toLight: "Switch to light mode", toDark: "Switch to dark mode" }} className="size-9" />
           <form action={logoutAction}>
             <button type="submit" className="rounded-control border border-fg/15 px-3 py-1.5 hover:border-brand-sky">
               Sign out

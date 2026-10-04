@@ -62,7 +62,7 @@ export default async function GalleryPage({ params }: Props) {
               href={s.href}
               className="glass group flex items-center gap-3 rounded-full py-2 pr-5 pl-2 text-sm font-semibold transition-colors hover:border-brand-sky/60"
             >
-              <span className="flex h-9 min-w-9 items-center justify-center rounded-full bg-brand-sky/15 px-2 font-mono text-xs text-cyan-200">{nf.format(s.n)}</span>
+              <span className="flex h-9 min-w-9 items-center justify-center rounded-full bg-brand-sky/15 px-2 font-mono text-xs text-accent">{nf.format(s.n)}</span>
               <span className="flex flex-col leading-tight">
                 {s.label}
                 <span className="text-xs font-normal text-text-secondary">{s.sub}</span>

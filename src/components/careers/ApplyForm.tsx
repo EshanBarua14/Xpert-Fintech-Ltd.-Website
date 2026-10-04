@@ -64,7 +64,7 @@ export function ApplyForm({ careerId, t, locale, turnstileSiteKey }: { careerId:
       {turnstileSiteKey && (
         <>
           <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" async defer />
-          <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="dark" data-language={locale} aria-label={t.securityCheck} />
+          <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="auto" data-language={locale} aria-label={t.securityCheck} />
         </>
       )}
       <button type="submit" disabled={pending} className="btn-glow inline-flex h-12 items-center justify-center rounded-full px-6 text-sm font-semibold text-white disabled:opacity-60">

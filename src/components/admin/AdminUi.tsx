@@ -28,6 +28,7 @@ const NAV = [
   { href: "/admin/organizations", label: "Organizations" },
   { href: "/admin/deployments", label: "App deployments" },
   { href: "/admin/navigation", label: "Navigation" },
+  { href: "/admin/redirects", label: "Redirects" },
   { href: "/admin/media", label: "Media" },
   { href: "/admin/settings", label: "Settings" },
   { href: "/admin/users", label: "Admins" },

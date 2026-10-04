@@ -15,6 +15,7 @@ const NAV = [
   { href: "/admin/market", label: "Market data" },
   { href: "/admin/pages", label: "Pages" },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/ecosystem", label: "Ecosystem" },
   { href: "/admin/news", label: "News" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/albums", label: "Photo albums" },

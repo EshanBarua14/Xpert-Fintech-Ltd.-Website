@@ -34,6 +34,8 @@ import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/e
 import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
 import { MarketStatusLine } from "@/components/market/MarketStatusLine";
+import { MarketReach } from "@/components/market/MarketReach";
+import { getMarketGoal } from "@/lib/content/leaders";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -77,7 +79,7 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   const [data, events, market, showcase] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale)]);
-  const [apps, eco, ecoInDb, testimonials] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale)]);
+  const [apps, eco, ecoInDb, testimonials, goal] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal()]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -86,6 +88,10 @@ export default async function HomePage({ params }: Props) {
     { value: data.exchanges.length, label: t.proofExchanges },
   ].filter((p) => p.value > 0);
   const hasMarket = market.mode !== "none" || market.shares.length > 0;
+  // Market share and client base, with the goal (Admin → Market data). Replaces the plain figures grid.
+  const showReach = market.shares.length > 0 || goal !== null;
+  // Client institutions first: the client base is what this panel shows off.
+  const clientBase = [...proof.filter((p) => p.label === t.proofClients), ...proof.filter((p) => p.label !== t.proofClients && p.label !== t.proofProducts)];
   const sections = page ? toSections(page, locale) : [];
   const ctx = sections.length ? await blockContext(locale, mediaIdsOf(sections)) : null;
   const caps = capabilities(t, locale, data.publishedSlugs);
@@ -110,6 +116,32 @@ export default async function HomePage({ params }: Props) {
           </div>
           <ClientMarquee clients={data.clients} label={t.clientsEyebrow} />
         </section>
+      )}
+
+      {showReach && (
+        <Shell id="reach" className="py-20 md:py-28">
+          <div className="flex flex-col gap-12">
+            <SectionHeader title={t.reachTitle} body={t.reachBody} />
+            <MarketReach
+              shares={market.shares}
+              goal={goal ? { targetPct: goal.targetPct, year: goal.year, note: (locale === "bn" ? goal.bn : goal.en) || goal.en || null } : null}
+              clientBase={clientBase}
+              locale={locale}
+              labels={{
+                share: t.reachShareLabel,
+                combined: t.reachCombined,
+                goal: t.reachGoal,
+                goalLead: t.reachGoalLead,
+                goalNote: t.reachGoalNote,
+                toGo: t.reachToGo,
+                reached: t.reachReached,
+                now: t.reachNow,
+                clients: t.reachClients,
+                progress: t.reachProgressLabel,
+              }}
+            />
+          </div>
+        </Shell>
       )}
 
       {showcase.length > 0 && (
@@ -152,11 +184,11 @@ export default async function HomePage({ params }: Props) {
         </Shell>
       )}
 
-      {(proof.length > 0 || apps.length > 0) && (
+      {((!showReach && proof.length > 0) || apps.length > 0) && (
         <Shell id="proof" className="py-20 md:py-28">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.proofEyebrow} title={t.proofTitle} body={t.proofBody} />
-            {proof.length > 0 && <StatGrid items={proof} locale={locale} />}
+            {!showReach && proof.length > 0 && <StatGrid items={proof} locale={locale} />}
             {apps.length > 0 && (
               <div className="flex flex-col gap-5">
                 <p className="text-xs font-semibold text-text-secondary">{t.liveAppsTitle}</p>

@@ -2,8 +2,9 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { dhakaToday, liveMarketTurnover, marketMode } from "@/lib/market/data";
 import { ConfirmButton } from "@/components/admin/AdminUi";
-import { MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
-import { deleteMarketShare } from "./actions";
+import { MarketGoalForm, MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
+import { readGoal } from "@/lib/content/leaders";
+import { clearMarketGoal, deleteMarketShare } from "./actions";
 
 const MODE_TEXT = {
   licensed: "Licensed feed (MARKET_DATA_MODE=licensed)",
@@ -15,10 +16,12 @@ const MODE_TEXT = {
 export default async function MarketAdminPage({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
   await requireAdmin();
   const { edit } = await searchParams;
-  const [source, shares] = await Promise.all([
+  const [source, shares, goalRow] = await Promise.all([
     db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }),
     db.marketShare.findMany({ orderBy: [{ tradeDate: "desc" }, { exchange: "asc" }], take: 60 }),
+    db.siteSetting.findUnique({ where: { key: "market.goal" } }),
   ]);
+  const goal = goalRow ? readGoal(goalRow.value) : null;
   const mode = marketMode();
   const today = dhakaToday();
   const [liveDse, liveCse] = await Promise.all([liveMarketTurnover("DSE").catch(() => null), liveMarketTurnover("CSE").catch(() => null)]);
@@ -148,6 +151,26 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section id="goal" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="font-display text-xl font-semibold">Market-share goal</h2>
+          {goal && (
+            <form action={clearMarketGoal}>
+              <ConfirmButton message="Remove the goal from the website?" className="text-xs text-text-secondary hover:text-market-down">
+                Remove goal
+              </ConfirmButton>
+            </form>
+          )}
+        </div>
+        <p className="text-sm text-text-secondary">
+          Shown on the home page next to the latest market share, as a progress bar towards the target. {goal ? `Now: ${goal.targetPct}% by ${goal.year}.` : "No goal set: the home page shows market share without a target."}
+        </p>
+        <MarketGoalForm
+          key={goal ? `${goal.targetPct}-${goal.year}` : "none"}
+          values={{ targetPct: goal ? String(goal.targetPct) : "", year: goal ? String(goal.year) : "", goalEn: goal?.en ?? "", goalBn: goal?.bn ?? "" }}
+        />
       </section>
     </div>
   );

@@ -26,6 +26,11 @@ const schema = z.object({
     .max(254)
     .refine((v) => v === "" || z.string().email().safeParse(v).success, "Enter a valid email address.")
     .transform((v) => v || null),
+  department: z
+    .string()
+    .trim()
+    .max(60, "Keep the department under 60 characters.")
+    .transform((v) => v || null),
   isPlaceholder: z.boolean(),
   enName: z.string().trim().min(1, "English name is required.").max(120),
   bnName: z.string().trim().max(120),
@@ -54,6 +59,7 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
     photoMediaId: get("photoMediaId"),
     linkedinUrl: get("linkedinUrl"),
     email: get("email"),
+    department: get("department"),
     isPlaceholder: formData.get("isPlaceholder") === "on",
     enName: get("enName"),
     bnName: get("bnName"),
@@ -85,6 +91,7 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
     photoMediaId: v.photoMediaId,
     linkedinUrl: v.linkedinUrl,
     email: v.email,
+    department: v.department,
     isPlaceholder: v.isPlaceholder,
     updatedById: admin.id,
   };

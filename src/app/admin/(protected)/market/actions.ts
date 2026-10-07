@@ -103,3 +103,36 @@ export async function deleteMarketShare(formData: FormData) {
   await db.marketShare.delete({ where: { id } }).catch(() => null);
   refresh();
 }
+
+const goalSchema = z.object({
+  targetPct: z.coerce.number({ invalid_type_error: "Enter a percentage." }).gt(0, "Enter a percentage above 0.").max(100, "100% at most."),
+  year: z.coerce.number().int("Enter a year.").min(2024, "Enter a year from 2024.").max(2100),
+  en: z.string().trim().max(300),
+  bn: z.string().trim().max(300),
+});
+
+/** The market-share goal shown on the home page ("70% by 2028"). */
+export async function saveMarketGoal(_prev: MarketState, formData: FormData): Promise<MarketState> {
+  const admin = await requireAdmin();
+  const parsed = goalSchema.safeParse({
+    targetPct: formData.get("targetPct") ?? "",
+    year: formData.get("year") ?? "",
+    en: formData.get("goalEn") ?? "",
+    bn: formData.get("goalBn") ?? "",
+  });
+  if (!parsed.success) {
+    const errors = toFieldErrors(parsed.error);
+    return { errors: { ...errors, ...(errors.en && { goalEn: errors.en }), ...(errors.bn && { goalBn: errors.bn }) }, message: "Please fix the highlighted fields." };
+  }
+  const value = parsed.data;
+  await db.siteSetting.upsert({ where: { key: "market.goal" }, update: { value, updatedById: admin.id }, create: { key: "market.goal", value, updatedById: admin.id } });
+  refresh();
+  return { message: "Goal saved.", savedAt: Date.now(), ok: true };
+}
+
+/** Removes the goal: the home page then shows market share without a target. */
+export async function clearMarketGoal() {
+  await requireAdmin();
+  await db.siteSetting.deleteMany({ where: { key: "market.goal" } });
+  refresh();
+}

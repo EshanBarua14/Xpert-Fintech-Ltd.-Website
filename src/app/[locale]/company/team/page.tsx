@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PeopleGrid } from "@/components/blocks/DataBlocks";
+import { TeamDirectory, type TeamMember } from "@/components/people/TeamDirectory";
 import { CtaBand, PageHero, SectionHeader, Shell } from "@/components/flagship/Sections";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getPeople, mediaMap } from "@/lib/public/content";
+import { pick } from "@/lib/public/text";
 import { buildMetadata } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -19,7 +21,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * The people who build and run Xpert's products: Admin → People, groups
- * "Leadership" and "Team". Each card opens a full profile. Until profiles are
+ * "Leadership" (full profile cards) and "Team" (everyone, in order of
+ * position, colour-coded and filterable by department). Until profiles are
  * published, the page points to management and the board instead of looking empty.
  */
 export default async function TeamPage({ params }: Props) {
@@ -29,6 +32,20 @@ export default async function TeamPage({ params }: Props) {
   const [leadership, team] = await Promise.all([getPeople("LEADERSHIP"), getPeople("TEAM")]);
   const photos = await mediaMap([...leadership, ...team].map((p) => p.photoMediaId), locale as AppLocale);
   const empty = leadership.length === 0 && team.length === 0;
+  const members: TeamMember[] = team
+    .map((p) => {
+      const photo = photos.get(p.photoMediaId ?? "");
+      return {
+        id: p.id,
+        name: pick(p.translations, locale as AppLocale)?.name ?? "",
+        title: pick(p.roles[0]?.translations ?? [], locale as AppLocale)?.title ?? null,
+        department: p.department?.trim() || null,
+        photo: photo ? { url: photo.url } : null,
+        email: p.email,
+        linkedinUrl: p.linkedinUrl,
+      };
+    })
+    .filter((m) => m.name);
 
   return (
     <>
@@ -47,7 +64,11 @@ export default async function TeamPage({ params }: Props) {
         <Shell className="pb-16 md:pb-24">
           <div className="flex flex-col gap-12">
             {leadership.length > 0 && <SectionHeader title={t.teamMembersTitle} />}
-            <PeopleGrid people={team} photos={photos} locale={locale as AppLocale} group="TEAM" />
+            <TeamDirectory
+              people={members}
+              locale={locale}
+              labels={{ filter: t.teamFilterLabel, everyone: t.teamEveryone, showing: t.teamShowing, email: t.emailPerson, linkedin: t.linkedinProfile }}
+            />
           </div>
         </Shell>
       )}

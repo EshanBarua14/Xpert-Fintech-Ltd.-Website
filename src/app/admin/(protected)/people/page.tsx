@@ -28,6 +28,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
     }),
     db.person.count({ where: { deletedAt: { not: null } } }),
   ]);
+  // Within one group, list people in that group's order (their position).
+  if (group) people.sort((a, b) => (a.roles.find((r) => r.group === group)?.sortOrder ?? 0) - (b.roles.find((r) => r.group === group)?.sortOrder ?? 0));
 
   return (
     <AdminList
@@ -54,7 +56,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         id: p.id,
         href: `/admin/people/${p.id}`,
         title: p.translations.find((t) => t.locale === "en")?.name ?? "(no English name)",
-        subtitle: [p.isPlaceholder ? "Placeholder — replace with the real profile" : null, p.translations.some((t) => t.locale === "bn") ? null : "No Bangla name yet"].filter(Boolean).join(" · ") || null,
+        subtitle: [p.department, p.isPlaceholder ? "Placeholder — replace with the real profile" : null, p.translations.some((t) => t.locale === "bn") ? null : "No Bangla name yet"].filter(Boolean).join(" · ") || null,
         cells: [
           p.roles
             .map((r) => `${r.translations[0]?.title || "(no title)"} · ${PERSON_GROUP_LABELS[r.group].split(" ")[0]}`)

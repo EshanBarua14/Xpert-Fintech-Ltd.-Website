@@ -6,6 +6,7 @@ import { FormMessage, PublishFields } from "@/components/admin/EditorParts";
 import { ImagePicker } from "@/components/admin/ImagePicker";
 import { TextArea, TextInput } from "@/components/ui/Field";
 import type { ImageOption } from "@/lib/admin/media";
+import { DEPARTMENT_NAMES } from "@/lib/people/departments";
 import { PERSON_GROUP_LABELS, PERSON_GROUPS, type PersonGroupKey } from "@/lib/validation/people";
 
 export type PersonFormValues = {
@@ -16,6 +17,7 @@ export type PersonFormValues = {
   photoMediaId: string;
   linkedinUrl: string;
   email: string;
+  department: string;
   isPlaceholder: boolean;
   enName: string;
   bnName: string;
@@ -59,6 +61,21 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
             defaultValue={values.linkedinUrl}
             error={e.linkedinUrl}
           />
+          <TextInput
+            id="department"
+            label="Department"
+            list="department-options"
+            placeholder="Engineering"
+            hint="Optional. Colours the card and sets the filter on the Team page. Pick one or type a new one."
+            defaultValue={values.department}
+            error={e.department}
+            autoComplete="off"
+          />
+          <datalist id="department-options">
+            {DEPARTMENT_NAMES.map((d) => (
+              <option key={d} value={d} />
+            ))}
+          </datalist>
         </fieldset>
 
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">

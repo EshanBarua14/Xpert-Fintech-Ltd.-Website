@@ -1,6 +1,6 @@
 "use client";
 
-import { saveMarketShare, saveMarketSource, testMarketFeed, type MarketState } from "@/app/admin/(protected)/market/actions";
+import { saveMarketGoal, saveMarketShare, saveMarketSource, testMarketFeed, type MarketState } from "@/app/admin/(protected)/market/actions";
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
 import { TextInput } from "@/components/ui/Field";
@@ -94,6 +94,28 @@ export function MarketShareForm({ today, live, initial }: { today: string; live:
       <FormMessage message={state.message} isError={!state.ok} />
       <div>
         <SubmitButton pending={pending}>Save the day&rsquo;s figures</SubmitButton>
+      </div>
+    </form>
+  );
+}
+
+export type GoalValues = { targetPct: string; year: string; goalEn: string; goalBn: string };
+
+/** Market-share goal: target percentage, year, and an optional line shown under it. */
+export function MarketGoalForm({ values }: { values: GoalValues }) {
+  const { state, pending, onSubmit } = useActionForm<MarketState>(saveMarketGoal, {});
+  const e = state.errors ?? {};
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+      <FormMessage message={state.message} isError={Boolean(state.errors)} />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <TextInput id="targetPct" type="number" inputMode="decimal" min={1} max={100} step="0.1" label="Target share (%)" defaultValue={values.targetPct} error={e.targetPct} />
+        <TextInput id="year" type="number" inputMode="numeric" min={2024} max={2100} label="By the end of" defaultValue={values.year} error={e.year} />
+        <TextInput id="goalEn" label="Line under the goal (English, optional)" placeholder="Our goal for the share of DSE and CSE turnover traded through Xpert." defaultValue={values.goalEn} error={e.goalEn} />
+        <TextInput id="goalBn" label="Line under the goal (বাংলা, optional)" lang="bn" defaultValue={values.goalBn} error={e.goalBn} />
+      </div>
+      <div>
+        <SubmitButton pending={pending}>Save goal</SubmitButton>
       </div>
     </form>
   );

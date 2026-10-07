@@ -965,6 +965,8 @@ model Person {
   linkedinUrl   String?
   /// Work email shown on the person's card (optional).
   email         String?
+  /// Department, e.g. "Engineering" (Team page colour and filter).
+  department    String?
   status        ContentStatus @default(DRAFT)
   publishAt     DateTime?
   sortOrder     Int           @default(0)

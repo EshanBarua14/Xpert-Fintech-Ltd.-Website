@@ -18,8 +18,15 @@
  * (EcoSoftBD/back-office history, DSE/CSE display licence, DSE FIX certification, CSE API
  * agreement). Remove a key from PUBLISH below to keep it as a draft.
  */
-import { PrismaClient, type Locale, type OfferingItemKind, type OfferingType } from "@prisma/client";
+import { PrismaClient, type Locale, type PersonGroup, type OfferingItemKind, type OfferingType } from "@prisma/client";
+import { createHash, randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { ecosystemEdges, ecosystemFlows, ecosystemNodes } from "../src/content/xfl2/ecosystem";
+import { BOARD, MANAGEMENT, TEAM, type RosterPerson } from "../src/content/xfl2/people";
+import { LEADER_MESSAGES, MARKET_GOAL } from "../src/content/xfl2/messages";
+import { sniff } from "../src/lib/media/inspect";
 
 const db = new PrismaClient();
 const EN: Locale = "en";
@@ -346,46 +353,155 @@ async function upsertOffering(c: OfferingContent) {
 
 // ── People ───────────────────────────────────────────────────────────────────
 
-/** Real management names come from prisma/seed.ts. These fill the board until XFL sends details. */
-const BOARD_PLACEHOLDERS = [
-  { key: "placeholder-chairman", title: t("Chairman", "চেয়ারম্যান") },
-  { key: "placeholder-director-1", title: t("Director", "পরিচালক") },
-  { key: "placeholder-director-2", title: t("Director", "পরিচালক") },
-  { key: "placeholder-director-3", title: t("Director", "পরিচালক") },
-  { key: "placeholder-independent-director", title: t("Independent Director", "স্বতন্ত্র পরিচালক") },
-];
-
 async function seedPeople() {
-  for (const [i, p] of BOARD_PLACEHOLDERS.entries()) {
-    const person = await db.person.upsert({ where: { key: p.key }, update: {}, create: { key: p.key, sortOrder: i, status: "PUBLISHED", isPlaceholder: true } });
-    for (const locale of [EN, BN]) {
-      await db.personTranslation.upsert({
-        where: { personId_locale: { personId: person.id, locale } },
-        update: {},
-        create: { personId: person.id, locale, name: locale === EN ? "Name to be confirmed" : "নাম নিশ্চিত করা হবে" },
-      });
-    }
-    const role = await db.personRole.upsert({
-      where: { personId_group: { personId: person.id, group: "BOARD" } },
-      update: {},
-      create: { personId: person.id, group: "BOARD", sortOrder: i },
-    });
-    for (const locale of [EN, BN]) {
-      const title = p.title[locale];
-      if (!title) continue;
-      await db.personRoleTranslation.upsert({
-        where: { roleId_locale: { roleId: role.id, locale } },
-        update: {},
-        create: { roleId: role.id, locale, title },
-      });
-    }
-  }
   // Publish the management team already in the database (names from Xpert's own site).
   const updated = await db.person.updateMany({
     where: { status: "DRAFT", deletedAt: null, roles: { some: { group: "MANAGEMENT" } } },
     data: { status: "PUBLISHED" },
   });
   if (updated.count) console.log(`• Published ${updated.count} management profiles`);
+}
+
+// ── Roster (Board, ManCom and the whole team, from XFL) ──────────────────────
+
+const BN_TITLES: Record<string, string> = {
+  Chairman: "চেয়ারম্যান",
+  Director: "পরিচালক",
+  "Managing Director": "ব্যবস্থাপনা পরিচালক",
+  "Executive Director": "নির্বাহী পরিচালক",
+  "CFO & Company Secretary": "সিএফও ও কোম্পানি সচিব",
+};
+
+/** A portrait in prisma/seed-media/people/<key>.(png|jpg) → media library id (same file twice = one item). */
+async function portraitFor(key: string, name: string): Promise<string | null> {
+  const dir = path.join(process.cwd(), "prisma", "seed-media", "people");
+  const file = ["png", "jpg", "jpeg", "webp"].map((ext) => path.join(dir, `${key}.${ext}`)).find((f) => existsSync(f));
+  if (!file) return null;
+  const data = await readFile(file);
+  const type = sniff(data);
+  if (!type || type.kind !== "IMAGE") return null;
+  const checksum = createHash("sha256").update(data).digest("hex");
+  const existing = await db.media.findFirst({ where: { checksum, deletedAt: null }, select: { id: true } });
+  if (existing) return existing.id;
+  const storageKey = `${randomUUID()}.${type.ext}`;
+  const store = path.join(process.cwd(), "storage", "media");
+  await mkdir(store, { recursive: true });
+  await writeFile(path.join(store, storageKey), data, { flag: "wx" });
+  const media = await db.media.create({
+    data: {
+      kind: "IMAGE",
+      storageKey,
+      originalName: path.basename(file),
+      mimeType: type.mimeType,
+      sizeBytes: data.length,
+      width: type.width ?? null,
+      height: type.height ?? null,
+      checksum,
+      isScanned: true,
+      tags: ["portrait"],
+      translations: { create: { locale: EN, altText: name } },
+    },
+  });
+  return media.id;
+}
+
+/**
+ * Adds everyone XFL listed, in order of position. Matches existing profiles by
+ * key or by English name (e.g. people the importer created), and only fills in
+ * what is empty: a name, title, department, photo or order changed in
+ * Admin → People is never overwritten. Profiles no admin has edited yet are
+ * published.
+ */
+async function seedRoster() {
+  const groups: [PersonGroup, RosterPerson[]][] = [
+    ["BOARD", BOARD],
+    ["MANAGEMENT", MANAGEMENT],
+    ["TEAM", TEAM],
+  ];
+  const byKey = new Map<string, RosterPerson & { department?: string | null }>();
+  for (const [, list] of groups) for (const p of list) byKey.set(p.key, { ...byKey.get(p.key), ...p, department: p.department ?? byKey.get(p.key)?.department ?? null });
+  let added = 0;
+  let photos = 0;
+  const ids = new Map<string, string>();
+  for (const p of byKey.values()) {
+    let person =
+      (await db.person.findUnique({ where: { key: p.key } })) ??
+      (await db.person.findFirst({ where: { deletedAt: null, translations: { some: { locale: EN, name: { equals: p.name, mode: "insensitive" } } } } }));
+    if (!person) {
+      person = await db.person.create({ data: { key: p.key, status: "PUBLISHED", sortOrder: p.rank, department: p.department ?? null } });
+      added++;
+    } else {
+      const fresh = !person.updatedById; // never saved in Admin → People
+      await db.person.update({
+        where: { id: person.id },
+        data: {
+          ...(!person.key && { key: p.key }),
+          ...(!person.department && p.department && { department: p.department }),
+          ...(fresh && person.status === "DRAFT" && !person.deletedAt && { status: "PUBLISHED" as const }),
+          ...(fresh && { isPlaceholder: false }),
+        },
+      });
+    }
+    ids.set(p.key, person.id);
+    await db.personTranslation.upsert({
+      where: { personId_locale: { personId: person.id, locale: EN } },
+      update: {},
+      create: { personId: person.id, locale: EN, name: p.name },
+    });
+    if (!person.photoMediaId) {
+      const photo = await portraitFor(p.key, p.name);
+      if (photo) {
+        await db.person.update({ where: { id: person.id }, data: { photoMediaId: photo } });
+        await db.mediaUsage.deleteMany({ where: { entityType: "PERSON", entityId: person.id, field: "photo" } });
+        await db.mediaUsage.create({ data: { mediaId: photo, entityType: "PERSON", entityId: person.id, field: "photo" } });
+        photos++;
+      }
+    }
+  }
+  for (const [group, list] of groups) {
+    for (const p of list) {
+      const personId = ids.get(p.key)!;
+      const role = await db.personRole.upsert({
+        where: { personId_group: { personId, group } },
+        update: {},
+        create: { personId, group, sortOrder: p.rank },
+      });
+      if (!p.title) continue;
+      const titles: [Locale, string | undefined][] = [
+        [EN, p.title],
+        [BN, BN_TITLES[p.title]],
+      ];
+      for (const [locale, title] of titles) {
+        if (!title) continue;
+        const existing = await db.personRoleTranslation.findUnique({ where: { roleId_locale: { roleId: role.id, locale } } });
+        if (!existing) await db.personRoleTranslation.create({ data: { roleId: role.id, locale, title } });
+        else if (!existing.title.trim()) await db.personRoleTranslation.update({ where: { id: existing.id }, data: { title } });
+      }
+    }
+  }
+  // The stand-in board cards are no longer needed once the real board is in: move untouched ones to the trash.
+  const trashed = await db.person.updateMany({
+    where: { key: { startsWith: "placeholder-" }, isPlaceholder: true, deletedAt: null, updatedById: null },
+    data: { deletedAt: new Date() },
+  });
+  console.log(`• People: ${byKey.size} from XFL's list (${added} new, ${photos} photo${photos === 1 ? "" : "s"} added)${trashed.count ? `, ${trashed.count} stand-in profile(s) moved to the trash` : ""}`);
+}
+
+/**
+ * Chairman's and Managing Director's messages and the market-share goal.
+ * The messages are drafts for XFL to approve: they are saved unpublished and
+ * appear on the site only after "Publish" is ticked in Admin → Messages.
+ */
+async function seedMessagesAndGoal() {
+  for (const m of LEADER_MESSAGES) {
+    await db.siteSetting.upsert({
+      where: { key: `message.${m.key}` },
+      update: {},
+      create: { key: `message.${m.key}`, value: { personKey: m.personKey, published: false, en: m.en, bn: m.bn } },
+    });
+  }
+  await db.siteSetting.upsert({ where: { key: "market.goal" }, update: {}, create: { key: "market.goal", value: MARKET_GOAL } });
+  console.log("• Chairman's and MD's messages saved as drafts (publish in Admin → Messages); market-share goal set");
 }
 
 // ── Consortium and apps ──────────────────────────────────────────────────────
@@ -709,7 +825,10 @@ async function main() {
     }
   }
   console.log(`• Products: ${[...PUBLISH].join(", ")} published`);
+  await markPlaceholders();
   await seedPeople();
+  await seedRoster();
+  await seedMessagesAndGoal();
   await seedDeployments();
   await seedTeamLinks();
   await seedMilestones();
@@ -717,7 +836,6 @@ async function main() {
   await seedInsightsLinks();
   await seedMarketsLinks();
   await seedEcosystem();
-  await markPlaceholders();
   console.log("Content seed complete.");
 }
 

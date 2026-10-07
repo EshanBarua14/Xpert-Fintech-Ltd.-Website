@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LeaderMessage } from "@/components/people/LeaderMessage";
+import { getLeaderMessage } from "@/lib/content/leaders";
 import { Sections } from "@/components/blocks/BlockRenderer";
 import { CtaBand, PageHero, SectionHeader, Shell } from "@/components/flagship/Sections";
 import { LogoMarquee } from "@/components/organizations/LogoWall";
@@ -50,6 +52,7 @@ export default async function AboutPage({ params }: Props) {
     getFlagshipData(loc),
     getPageByPath(loc, "company/about"),
   ]);
+  const [chairman, md] = await Promise.all([getLeaderMessage("chairman", loc), getLeaderMessage("md", loc)]);
   const sections = page ? toSections(page, loc) : [];
   const ctx = sections.length ? await blockContext(loc, mediaIdsOf(sections)) : null;
   const tr = page ? pick(page.translations, loc) : undefined;
@@ -92,6 +95,16 @@ export default async function AboutPage({ params }: Props) {
                 </div>
               )}
             </div>
+          </div>
+        </Shell>
+      )}
+
+      {/* Chairman's and MD's messages (Admin → Messages, once published) */}
+      {(chairman || md) && (
+        <Shell className="pb-20 md:pb-28">
+          <div className="flex flex-col gap-20 md:gap-28">
+            {chairman && <LeaderMessage message={chairman} heading={t.chairmanMessage} compact />}
+            {md && <LeaderMessage message={md} heading={t.mdMessage} compact />}
           </div>
         </Shell>
       )}

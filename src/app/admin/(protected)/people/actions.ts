@@ -36,6 +36,8 @@ const schema = z.object({
   bnName: z.string().trim().max(120),
   enBio: optionalText(3000),
   bnBio: optionalText(3000),
+  enAffiliation: optionalText(200),
+  bnAffiliation: optionalText(200),
 });
 
 const role = z.object({
@@ -65,6 +67,8 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
     bnName: get("bnName"),
     enBio: get("enBio"),
     bnBio: get("bnBio"),
+    enAffiliation: get("enAffiliation"),
+    bnAffiliation: get("bnAffiliation"),
   });
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), message: "Please fix the highlighted fields." };
   const v = parsed.data;
@@ -105,14 +109,14 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
 
       await tx.personTranslation.upsert({
         where: { personId_locale: { personId, locale: "en" } },
-        update: { name: v.enName, bio: v.enBio ?? null },
-        create: { personId, locale: "en", name: v.enName, bio: v.enBio ?? null },
+        update: { name: v.enName, bio: v.enBio ?? null, affiliation: v.enAffiliation ?? null },
+        create: { personId, locale: "en", name: v.enName, bio: v.enBio ?? null, affiliation: v.enAffiliation ?? null },
       });
       if (v.bnName) {
         await tx.personTranslation.upsert({
           where: { personId_locale: { personId, locale: "bn" } },
-          update: { name: v.bnName, bio: v.bnBio ?? null },
-          create: { personId, locale: "bn", name: v.bnName, bio: v.bnBio ?? null },
+          update: { name: v.bnName, bio: v.bnBio ?? null, affiliation: v.bnAffiliation ?? null },
+          create: { personId, locale: "bn", name: v.bnName, bio: v.bnBio ?? null, affiliation: v.bnAffiliation ?? null },
         });
       } else {
         await tx.personTranslation.deleteMany({ where: { personId, locale: "bn" } });

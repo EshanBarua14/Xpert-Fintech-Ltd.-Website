@@ -92,6 +92,7 @@ export function PeopleGrid({
       id: p.id,
       name: tr?.name ?? "",
       title: pick(p.roles[0]?.translations ?? [], locale)?.title ?? null,
+      affiliation: tr?.affiliation ?? null,
       bio: tr?.bio ?? null,
       photo: photo ? { url: photo.url, width: photo.width, height: photo.height } : null,
       linkedinUrl: p.linkedinUrl,
@@ -104,7 +105,7 @@ export function PeopleGrid({
       people={rows.filter((r) => r.name)}
       groupLabel={groupLabel}
       showPlaceholderBadge={process.env.APP_ENV !== "production"}
-      featureFirst={group === "BOARD"}
+      featureFirst={group === "BOARD" || group === "MANAGEMENT"}
       labels={{
         viewProfile: t.viewProfile,
         close: t.close,

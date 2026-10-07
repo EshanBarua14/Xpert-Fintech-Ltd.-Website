@@ -18,6 +18,8 @@ export type GalleryPerson = {
   id: string;
   name: string;
   title: string | null;
+  /** Position outside Xpert, e.g. "Managing Director, Apex Investments Ltd.". */
+  affiliation: string | null;
   bio: string | null;
   photo: { url: string; width: number | null; height: number | null } | null;
   linkedinUrl: string | null;
@@ -39,6 +41,9 @@ export type GalleryLabels = {
 };
 
 const PLACEHOLDER_PHOTO = "/placeholders/person.svg";
+
+/** One card's width: 1, 2, 3 or 4 across with 1.25rem gaps. */
+const COLUMN = "w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-3.75rem)/4)]";
 
 /** Email and LinkedIn as round icon links. */
 function ContactLinks({ p, labels, size = "sm" }: { p: GalleryPerson; labels: GalleryLabels; size?: "sm" | "lg" }) {
@@ -130,6 +135,7 @@ function PersonCard({
             </button>
           </h3>
           <p className="text-sm font-medium text-brand-sky">{role}</p>
+          {p.affiliation && <p className="text-sm leading-snug text-text-secondary">{p.affiliation}</p>}
         </div>
         {p.bio && <p className={cn("text-sm leading-relaxed text-text-secondary", featured ? "line-clamp-5 lg:text-base" : "line-clamp-3")}>{p.bio}</p>}
         {(p.email || p.linkedinUrl) && (
@@ -176,7 +182,7 @@ export function PeopleGallery({
   showPlaceholderBadge: boolean;
   /** Shown as the role when a person has no title yet, e.g. "Management". */
   groupLabel: string;
-  /** Board: the first person (the chair) gets a wide card. */
+  /** Board and management: the first person (Chairman, MD) sits alone on the top row, same card size, centred. */
   featureFirst?: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -196,15 +202,21 @@ export function PeopleGallery({
 
   return (
     <>
-      <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {people.map((p, i) => {
-          const featured = featureFirst && i === 0 && people.length > 2;
-          return (
-            <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className={cn(featured && "sm:col-span-2")}>
-              <PersonCard p={p} labels={labels} groupLabel={groupLabel} showPlaceholderBadge={showPlaceholderBadge} featured={featured} onOpen={(t) => show(p, t)} />
-            </li>
-          );
-        })}
+      {featureFirst && people.length > 2 && (
+        <ul className="mb-5 flex justify-center">
+          {/* Exactly one grid column wide, so the lead card matches the others. */}
+          <li data-reveal className={COLUMN}>
+            <PersonCard p={people[0]!} labels={labels} groupLabel={groupLabel} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(people[0]!, t)} />
+          </li>
+        </ul>
+      )}
+      {/* Centred rows, so a short last row (e.g. three managers under the MD) sits in the middle. */}
+      <ul className="flex flex-wrap justify-center gap-5">
+        {(featureFirst && people.length > 2 ? people.slice(1) : people).map((p, i) => (
+          <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className={COLUMN}>
+            <PersonCard p={p} labels={labels} groupLabel={groupLabel} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(p, t)} />
+          </li>
+        ))}
       </ul>
 
       <dialog
@@ -255,6 +267,7 @@ export function PeopleGallery({
               <dl className="grid gap-1 border-l-2 border-gold/60 pl-5">
                 <dt className="text-xs text-text-secondary">{labels.role}</dt>
                 <dd className="text-text-primary">{open.title ?? groupLabel}</dd>
+                {open.affiliation && <dd className="text-text-secondary">{open.affiliation}</dd>}
               </dl>
               <section className="flex flex-col gap-3">
                 <h3 className="text-xs text-text-secondary">{labels.biography}</h3>

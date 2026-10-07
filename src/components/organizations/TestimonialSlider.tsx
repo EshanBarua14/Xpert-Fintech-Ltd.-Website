@@ -112,6 +112,9 @@ export function TestimonialSlider({ items, labels }: { items: TestimonialCard[];
           >
             <figure className="testimonial-card relative flex h-full flex-col gap-6 overflow-hidden rounded-3xl border border-fg/10 bg-navy-900 p-6 md:p-7">
               <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-royal via-brand-sky to-gold/80" />
+              {t.draft && (
+                <span className="absolute top-3 right-3 rounded-md border border-gold/50 bg-gold/10 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-gold">Draft</span>
+              )}
               <figcaption className="flex items-center gap-4">
                 {t.photo ? (
                   <Image

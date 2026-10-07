@@ -182,13 +182,20 @@ export type TestimonialCard = {
   organization: string | null;
   photo: MediaInfo | null;
   logo: MediaInfo | null;
+  /** Not published or no written approval yet: only shown outside production, marked as a draft. */
+  draft?: boolean;
 };
 
-/** Published quotes with written approval on file, in the order set in the admin. */
+/**
+ * Published quotes with written approval on file, in the order set in the
+ * admin. Outside production, drafts are included too (marked), so editors can
+ * see how they will look before publishing.
+ */
 export const getTestimonials = cache(async (locale: AppLocale): Promise<TestimonialCard[]> => {
   try {
+    const preview = process.env.APP_ENV !== "production";
     const rows = await db.testimonial.findMany({
-      where: { ...publishedWhere(), hasApproval: true },
+      where: preview ? { deletedAt: null } : { ...publishedWhere(), hasApproval: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       include: { translations: true, organization: { include: { translations: true } } },
     });
@@ -209,6 +216,7 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           organization: org ? (pick(org.translations, locale)?.name ?? null) : null,
           photo: media.get(r.photoMediaId ?? "") ?? null,
           logo: org?.logoPermission ? (media.get(org.logoMediaId ?? "") ?? null) : null,
+          draft: preview && !(r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date())),
         },
       ];
     });

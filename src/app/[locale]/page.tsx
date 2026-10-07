@@ -154,6 +154,25 @@ export default async function HomePage({ params }: Props) {
         </Shell>
       )}
 
+      {/* Outside production, an empty reviews section says how to fill it instead of disappearing. */}
+      {testimonials.length === 0 && process.env.APP_ENV !== "production" && (
+        <Shell id="testimonials" className="py-16 md:py-24">
+          <div className="flex flex-col gap-8">
+            <SectionHeader title={t.testimonialsTitle} body={t.testimonialsBody} />
+            <div className="flex flex-col items-start gap-3 rounded-3xl border border-dashed border-gold/50 bg-gold/[0.04] p-6 md:p-8">
+              <p className="font-semibold text-gold">Only visible outside the live site: no client reviews yet.</p>
+              <p className="max-w-2xl text-sm leading-relaxed text-text-secondary">
+                Add one in Admin → Testimonials with the client&rsquo;s photo, name, job title, company and quote. Tick &ldquo;Written approval on file&rdquo; and publish it, and this
+                section shows the review cards on the live site.
+              </p>
+              <a href="/admin/testimonials/new" className="inline-flex h-10 items-center rounded-full border border-gold/50 px-4 text-sm font-semibold text-gold hover:bg-gold/10">
+                Add a client review
+              </a>
+            </div>
+          </div>
+        </Shell>
+      )}
+
       {testimonials.length > 0 && (
         <Shell id="testimonials" className="py-16 md:py-24">
           <div className="flex flex-col gap-14">

@@ -23,6 +23,8 @@ export type PersonFormValues = {
   bnName: string;
   enBio: string;
   bnBio: string;
+  enAffiliation: string;
+  bnAffiliation: string;
   roles: Record<PersonGroupKey, { enabled: boolean; enTitle: string; bnTitle: string; order: number }>;
 };
 
@@ -41,6 +43,15 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
           <legend className="px-2 text-sm font-semibold">Person</legend>
           <TextInput id="enName" label="Name (English)" required defaultValue={values.enName} error={e.enName} />
           <TextInput id="bnName" label="Name (বাংলা)" lang="bn" defaultValue={values.bnName} error={e.bnName} />
+          <TextInput
+            id="enAffiliation"
+            label="Position at their organisation (English)"
+            placeholder="Managing Director, Apex Investments Ltd."
+            hint="Optional. Shown under the title on the card, e.g. for directors nominated by a member brokerage."
+            defaultValue={values.enAffiliation}
+            error={e.enAffiliation}
+          />
+          <TextInput id="bnAffiliation" label="Position at their organisation (বাংলা)" lang="bn" defaultValue={values.bnAffiliation} error={e.bnAffiliation} />
           <TextArea id="enBio" label="Short bio (English)" rows={5} defaultValue={values.enBio} error={e.enBio} />
           <TextArea id="bnBio" label="Short bio (বাংলা)" rows={5} lang="bn" defaultValue={values.bnBio} error={e.bnBio} />
           <TextInput

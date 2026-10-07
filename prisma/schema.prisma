@@ -988,6 +988,8 @@ model PersonTranslation {
   person   Person  @relation(fields: [personId], references: [id], onDelete: Cascade)
   locale   Locale
   name     String
+  /// Position outside Xpert, e.g. "Managing Director, Apex Investments Ltd." (shown under the title).
+  affiliation String?
   bio      String?
 
   @@unique([personId, locale])

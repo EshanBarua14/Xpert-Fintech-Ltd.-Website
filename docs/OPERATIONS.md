@@ -142,3 +142,11 @@ Admin → Settings → Contact: “Google Maps location” takes a Google Maps s
 - **Department**: set on the person's page. It colours the card and adds a filter chip on the Team page. Leadership, Engineering, Support, Infrastructure, Marketing and Operations have their own colours; any other name gets a neutral one.
 - **Chairman's and MD's messages**: Admin → Messages. The text supplied at setup is a draft for them to approve; it appears on the About page and on the Board or Management page only after "Publish on the website" is ticked.
 - **Market-share goal**: Admin → Market data → Market-share goal (set to 70% by 2028). The home page shows the latest DSE and CSE share combined, a progress bar towards the goal, and the client base.
+
+## Contact details and outside positions
+
+Admin → People → *Fill in contact details for everyone* opens one table with every person's work email, LinkedIn and position at their organisation (for example a director's role at their brokerage). Email and LinkedIn show as icons on the cards and in each profile; the position shows under the title. Empty boxes are simply hidden.
+
+## Drafts you can see before publishing
+
+Outside production (`APP_ENV` not `production`), unpublished Chairman's/MD's messages and client reviews appear on the site with a "Draft" label, and an empty reviews section shows how to add the first one. On the live site only published, approved content appears.

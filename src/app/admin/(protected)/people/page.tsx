@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
@@ -48,6 +49,14 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
       columns={["Roles", "Status", "Updated"]}
       notices={
         <>
+          {!inTrash && (
+            <p className="text-sm">
+              <Link href="/admin/people/contacts" className="font-semibold text-brand-sky hover:underline">
+                Fill in contact details for everyone
+              </Link>
+              <span className="text-text-secondary"> (email, LinkedIn, position at their organisation) in one table.</span>
+            </p>
+          )}
           {params.trashed && <Notice>Moved to trash.</Notice>}
           {params.deleted && <Notice>Deleted permanently.</Notice>}
         </>

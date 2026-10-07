@@ -535,6 +535,42 @@ async function seedLegalDrafts() {
   if (added) console.log(`• ${added} legal page draft(s) added (Privacy, Terms, Accessibility): review and publish in Admin → Pages`);
 }
 
+/**
+ * One "Products" menu instead of "Platform" and "Products" side by side (both
+ * listed the same modules). The platform overview becomes the first link
+ * under Products and the separate Platform item is hidden (not deleted: an
+ * admin can show it again in Admin → Navigation). Runs once; skipped if an
+ * admin has already hidden or removed either item.
+ */
+async function mergePlatformIntoProducts() {
+  const menu = await db.navMenu.findUnique({ where: { key: "header" } });
+  if (!menu) return;
+  const platform = await db.navItem.findFirst({ where: { menuId: menu.id, parentId: null, href: "platform", isHidden: false } });
+  const products = await db.navItem.findFirst({ where: { menuId: menu.id, parentId: null, href: "products", isHidden: false } });
+  if (!platform || !products) return;
+  const exists = await db.navItem.findFirst({ where: { menuId: menu.id, parentId: products.id, href: "platform" } });
+  if (!exists) {
+    const first = await db.navItem.aggregate({ where: { menuId: menu.id, parentId: products.id }, _min: { sortOrder: true } });
+    await db.navItem.create({
+      data: {
+        menuId: menu.id,
+        parentId: products.id,
+        linkType: "INTERNAL",
+        href: "platform",
+        sortOrder: (first._min.sortOrder ?? 1) - 1,
+        translations: {
+          create: [
+            { locale: EN, label: "Platform overview", description: "How trading, risk, onboarding and back office work as one." },
+            { locale: BN, label: "প্ল্যাটফর্ম পরিচিতি", description: "ট্রেডিং, ঝুঁকি, অনবোর্ডিং ও ব্যাক অফিস যেভাবে এক সঙ্গে কাজ করে।" },
+          ],
+        },
+      },
+    });
+  }
+  await db.navItem.update({ where: { id: platform.id }, data: { isHidden: true } });
+  console.log("• Header menu: Platform merged into Products (Platform overview is now the first Products link)");
+}
+
 // ── Consortium and apps ──────────────────────────────────────────────────────
 
 async function seedDeployments() {
@@ -861,6 +897,7 @@ async function main() {
   await seedRoster();
   await seedMessagesAndGoal();
   await seedLegalDrafts();
+  await mergePlatformIntoProducts();
   await seedDeployments();
   await seedTeamLinks();
   await seedMilestones();

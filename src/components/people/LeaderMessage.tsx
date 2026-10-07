@@ -42,6 +42,11 @@ export function LeaderMessage({ message, heading, compact = false }: { message: 
       </figure>
 
       <div className="flex min-w-0 flex-col gap-6">
+        {message.draft && (
+          <p className="self-start rounded-md border border-gold/50 bg-gold/10 px-3 py-1.5 text-xs font-semibold text-gold">
+            Draft preview: not on the live site until it is approved and published in Admin → Messages.
+          </p>
+        )}
         <h2 id={id} data-reveal className="font-display text-3xl leading-tight tracking-[-0.015em] text-balance md:text-4xl">
           {heading}
         </h2>

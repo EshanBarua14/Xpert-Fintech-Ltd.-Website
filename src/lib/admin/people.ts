@@ -18,6 +18,8 @@ export const emptyPerson: PersonFormValues = {
   bnName: "",
   enBio: "",
   bnBio: "",
+  enAffiliation: "",
+  bnAffiliation: "",
   roles: Object.fromEntries(PERSON_GROUPS.map((g) => [g, { enabled: false, enTitle: "", bnTitle: "", order: 0 }])) as PersonFormValues["roles"],
 };
 
@@ -31,7 +33,7 @@ export function toPersonFormValues(p: {
   email: string | null;
   department: string | null;
   isPlaceholder: boolean;
-  translations: { locale: string; name: string; bio: string | null }[];
+  translations: { locale: string; name: string; bio: string | null; affiliation?: string | null }[];
   roles: Role[];
 }): PersonFormValues {
   const t = (l: string) => p.translations.find((x) => x.locale === l);
@@ -58,6 +60,8 @@ export function toPersonFormValues(p: {
     bnName: t("bn")?.name ?? "",
     enBio: t("en")?.bio ?? "",
     bnBio: t("bn")?.bio ?? "",
+    enAffiliation: t("en")?.affiliation ?? "",
+    bnAffiliation: t("bn")?.affiliation ?? "",
     roles,
   };
 }

@@ -4,6 +4,7 @@ import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
 import type { AppLocale } from "@/lib/i18n/config";
 import { mediaMap } from "@/lib/public/content";
+import { LEADER_MESSAGES } from "@/content/xfl2/messages";
 
 export const LEADER_KEYS = ["chairman", "md"] as const;
 export type LeaderKey = (typeof LEADER_KEYS)[number];
@@ -36,18 +37,26 @@ export type LeaderMessage = {
   name: string | null;
   title: string | null;
   photo: { url: string; width: number | null; height: number | null } | null;
+  /** Not published yet: shown only outside production, marked as a draft, so editors can review it in place. */
+  draft: boolean;
 };
 
+/** Outside production, unpublished messages are shown (marked as drafts) so they can be reviewed on the page. */
+const previewDrafts = () => process.env.APP_ENV !== "production";
+
 /**
- * A published leader's message with the signatory's name, title and photo
- * from Admin → People. Null until it is published in Admin → Messages.
+ * A leader's message with the signatory's name, title and photo from
+ * Admin → People. On the live site, null until it is published in
+ * Admin → Messages; elsewhere drafts come back marked `draft`.
  */
 export const getLeaderMessage = cache(async (key: LeaderKey, locale: AppLocale): Promise<LeaderMessage | null> => {
   const row = await db.siteSetting.findUnique({ where: { key: `message.${key}` } }).catch(() => null);
-  if (!row) return null;
-  const m = readLeaderSetting(row.value);
+  // Not set up yet (the content seed has not run): outside production, preview the starting draft.
+  const seed = LEADER_MESSAGES.find((x) => x.key === key);
+  if (!row && !(previewDrafts() && seed)) return null;
+  const m = row ? readLeaderSetting(row.value) : { personKey: seed!.personKey, published: false, en: seed!.en, bn: seed!.bn };
   const text = (locale === "bn" && m.bn.trim()) || m.en.trim();
-  if (!m.published || !text) return null;
+  if (!text || (!m.published && !previewDrafts())) return null;
   const person = m.personKey
     ? await db.person.findFirst({
         where: { ...publishedWhere(), key: m.personKey },
@@ -65,6 +74,7 @@ export const getLeaderMessage = cache(async (key: LeaderKey, locale: AppLocale):
     name: tr?.name ?? null,
     title,
     photo: photo ? { url: photo.url, width: photo.width, height: photo.height } : null,
+    draft: !m.published,
   };
 });
 

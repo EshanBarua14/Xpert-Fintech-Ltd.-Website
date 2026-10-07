@@ -1,5 +1,5 @@
 import "server-only";
-import type { ExchangeSnapshot, IndexValue, MarketSnapshot, Quote } from "./types";
+import { uniqueQuotes, type ExchangeSnapshot, type IndexValue, type MarketSnapshot, type Quote } from "./types";
 import { getWithCompletedChain, isChainError } from "./fetch-chain";
 
 /*
@@ -211,7 +211,9 @@ export function parseDseSummary(html: string): DseSummary {
   };
 }
 
-function withBreadth(exchange: "DSE" | "CSE", quotes: Quote[]): ExchangeSnapshot {
+function withBreadth(exchange: "DSE" | "CSE", rows: Quote[]): ExchangeSnapshot {
+  // A symbol listed twice on the exchange's page (e.g. in two boards) counts once.
+  const quotes = uniqueQuotes(rows);
   return {
     exchange,
     indices: [],

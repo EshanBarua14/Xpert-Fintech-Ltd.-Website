@@ -45,3 +45,17 @@ export function movers(ex: ExchangeSnapshot, n = 5) {
     losers: (ex.losers ?? [...sorted].reverse().filter((q) => q.changePct < 0)).slice(0, n),
   };
 }
+
+/** One entry per symbol (the first wins): exchange pages can list a stock twice. */
+export function uniqueQuotes(rows: Quote[]): Quote[] {
+  const seen = new Set<string>();
+  return rows.filter((q) => {
+    const k = q.symbol.trim().toUpperCase();
+    if (!k || seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
+/** The three indices shown for each exchange (hero, cards), in this order. */
+export const INDEX_SLOTS = { DSE: ["DSEX", "DSES", "DS30"], CSE: ["CASPI", "CSE30", "CSCX"] } as const;

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Messages } from "@/lib/i18n/messages";
 import { compact, crore, dhakaTime, fmt, signed } from "@/lib/market/format";
-import { movers, type ExchangeSnapshot, type MarketPayload, type Quote, type ShareFigure } from "@/lib/market/types";
+import { INDEX_SLOTS, movers, type ExchangeSnapshot, type MarketPayload, type Quote, type ShareFigure } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
 import { MarketBadge } from "./MarketBadge";
 import { useMarket } from "./useMarket";
@@ -145,8 +145,6 @@ function ShareBlock({ share, t, locale }: { share: ShareFigure; t: Messages; loc
   );
 }
 
-/** The three indices each card shows, in this order, so DSE and CSE cards line up. */
-const INDEX_SLOTS = { DSE: ["DSEX", "DSES", "DS30"], CSE: ["CASPI", "CSE30", "CSCX"] } as const;
 const DASH = "—";
 
 /** Xpert's share before a figure is entered: the same block as ShareBlock, with the ring empty. */

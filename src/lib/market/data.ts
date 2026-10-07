@@ -3,7 +3,7 @@ import { db } from "@/lib/db/client";
 import { demoSnapshot } from "./demo";
 import { exchangeSnapshot } from "./exchange";
 import { snapshotSchema } from "./schema";
-import type { MarketPayload, MarketSnapshot, ShareFigure } from "./types";
+import { uniqueQuotes, type MarketPayload, type MarketSnapshot, type ShareFigure } from "./types";
 
 type Mode = MarketPayload["mode"];
 
@@ -154,6 +154,18 @@ export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = 
   if (mode === "licensed" && source?.isActive) snapshot = await licensedSnapshot();
   // DSE/CSE public pages: MARKET_DATA_MODE=exchange alone switches them on.
   if (mode === "exchange") snapshot = await boardSnapshot(waitMs);
+  // Every source: one row per symbol, so lists keyed by symbol never repeat one.
+  if (snapshot) {
+    snapshot = {
+      ...snapshot,
+      exchanges: snapshot.exchanges.map((e) => ({
+        ...e,
+        quotes: uniqueQuotes(e.quotes),
+        ...(e.gainers && { gainers: uniqueQuotes(e.gainers) }),
+        ...(e.losers && { losers: uniqueQuotes(e.losers) }),
+      })),
+    };
+  }
   return {
     // "none" only when prices are really off; a board still loading keeps its
     // mode so the page's widgets go on to fetch it from /api/market.

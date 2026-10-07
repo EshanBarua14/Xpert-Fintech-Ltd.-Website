@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { crore, fmt, signed } from "@/lib/market/format";
-import type { ExchangeSnapshot, MarketPayload } from "@/lib/market/types";
+import { fmt, signed } from "@/lib/market/format";
+import { uniqueQuotes, type ExchangeSnapshot, type MarketPayload } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
 import { useMarket } from "./useMarket";
 
@@ -27,33 +27,23 @@ export type TickerLabels = {
 
 type Item = {
   key: string;
-  kind: "exchange" | "index" | "breadth" | "turnover" | "quote";
+  kind: "exchange" | "quote";
   label: string;
   value?: string;
   pct?: number;
   move?: "up" | "down";
-  breadth?: [number, number, number];
   title?: string;
 };
 
 const QUOTES_PER_EXCHANGE = 60;
 
-function itemsFor(ex: Ex, snap: ExchangeSnapshot | undefined, locale: Locale, labels: TickerLabels, moves: Record<string, "up" | "down">, skipLeadIndex: boolean): Item[] {
-  const out: Item[] = [];
-  if (snap) {
-    snap.indices.slice(skipLeadIndex ? 1 : 0).forEach((i) => out.push({ key: `${ex}-i-${i.name}`, kind: "index", label: i.name, value: fmt(locale, i.value), pct: i.changePct }));
-    const total = (snap.advancers ?? 0) + (snap.decliners ?? 0) + (snap.unchanged ?? 0);
-    if (total > 0) out.push({ key: `${ex}-breadth`, kind: "breadth", label: labels.breadthShort, title: labels.breadth, breadth: [snap.advancers ?? 0, snap.decliners ?? 0, snap.unchanged ?? 0] });
-    if (snap.turnover) out.push({ key: `${ex}-turnover`, kind: "turnover", label: labels.turnover, value: crore(locale, snap.turnover) });
-    // The day's biggest movers first, so the strip is worth watching.
-    [...snap.quotes]
-      .sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct))
-      .slice(0, QUOTES_PER_EXCHANGE)
-      .forEach((q) =>
-        out.push({ key: `${ex}-${q.symbol}`, kind: "quote", label: q.symbol, value: fmt(locale, q.ltp, q.ltp >= 1000 ? 0 : 1), pct: q.changePct, move: moves[`${ex}:${q.symbol}`] }),
-      );
-  }
-  return out;
+/** A price ticker: each listed stock's symbol, last price and change, biggest movers first. Indices live in the hero and the market cards. */
+function itemsFor(ex: Ex, snap: ExchangeSnapshot | undefined, locale: Locale, moves: Record<string, "up" | "down">): Item[] {
+  if (!snap) return [];
+  return uniqueQuotes(snap.quotes)
+    .sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct))
+    .slice(0, QUOTES_PER_EXCHANGE)
+    .map((q) => ({ key: `${ex}-${q.symbol}`, kind: "quote" as const, label: q.symbol, value: fmt(locale, q.ltp, q.ltp >= 1000 ? 0 : 1), pct: q.changePct, move: moves[`${ex}:${q.symbol}`] }));
 }
 
 function Pct({ pct, locale }: { pct: number; locale: Locale }) {
@@ -72,14 +62,8 @@ function Cell({ it, locale }: { it: Item; locale: Locale }) {
   }
   return (
     <>
-      <span className={cn("font-semibold", it.kind === "quote" ? "text-fg" : "text-gold")}>{it.label}</span>
-      {it.breadth ? (
-        <span className="text-text-secondary">
-          <span className="text-market-up">▲{fmt(locale, it.breadth[0], 0)}</span> <span className="text-market-down">▼{fmt(locale, it.breadth[1], 0)}</span> •{fmt(locale, it.breadth[2], 0)}
-        </span>
-      ) : (
-        it.value && <span className={"text-text-secondary"}>{it.value}</span>
-      )}
+      <span className="font-semibold text-fg">{it.label}</span>
+      {it.value && <span className="text-text-secondary">{it.value}</span>}
       {it.pct !== undefined && Number.isFinite(it.pct) && <Pct pct={it.pct} locale={locale} />}
     </>
   );
@@ -119,9 +103,8 @@ function StatusDot({ status }: { status?: ExchangeSnapshot["status"] }) {
   return <span aria-hidden="true" className={cn("size-1.5 shrink-0 rounded-full", status === "OPEN" ? "animate-pulse bg-market-up" : status === "PRE_OPEN" ? "bg-gold" : "bg-text-secondary/60")} />;
 }
 
-/** Fixed head of a lane: exchange name (links to its price board), status, and its main index. */
-function LaneHead({ ex, snap, locale, labels, showIndex }: { ex: Ex; snap?: ExchangeSnapshot; locale: Locale; labels: TickerLabels; showIndex: boolean }) {
-  const lead = snap?.indices[0];
+/** Fixed head of a lane: exchange name (links to its price board) and its status. */
+function LaneHead({ ex, snap, locale, labels }: { ex: Ex; snap?: ExchangeSnapshot; locale: Locale; labels: TickerLabels }) {
   return (
     <Link
       href={`/${locale}/markets/${ex.toLowerCase()}`}
@@ -131,25 +114,18 @@ function LaneHead({ ex, snap, locale, labels, showIndex }: { ex: Ex; snap?: Exch
       <StatusDot status={snap?.status} />
       <span className="font-semibold tracking-widest text-fg">{ex}</span>
       {snap?.status && <span className="sr-only">{labels.status[snap.status]}</span>}
-      {showIndex && lead && (
-        <span className="hidden items-center gap-1.5 xl:flex">
-          <span className="text-gold">{lead.name}</span>
-          <span className="text-fg">{fmt(locale, lead.value)}</span>
-          <Pct pct={lead.changePct} locale={locale} />
-        </span>
-      )}
     </Link>
   );
 }
 
 /**
- * The DSE · CSE ticker bar at the very top of every page. Wide screens show
- * the two exchanges side by side, each with its own lane (status, main index,
- * the other indices, breadth, turnover, then the day's
- * biggest movers); phones and tablets show one lane with both. Pauses on
- * hover or focus and with its pause button; with reduced motion it does not
- * move and can be scrolled sideways instead. Data: /api/market (refreshed
- * every 20 s, shared with the other market widgets on the page).
+ * The DSE · CSE price ticker at the very top of every page: each exchange's
+ * stocks with last price and change, the day's biggest movers first. Wide
+ * screens show the two exchanges side by side, each in its own lane; phones
+ * and tablets show one lane with both. Indices are in the hero and the market
+ * cards. Pauses on hover or focus and with its pause button; with reduced
+ * motion it does not move and can be scrolled sideways instead. Data:
+ * /api/market (refreshed every 20 s, shared with the other market widgets).
  */
 export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"]; locale: Locale; labels: TickerLabels }) {
   const [initial] = useState<MarketPayload>(() => ({ mode, providerName: null, delayMinutes: 0, snapshot: null, shares: [] }));
@@ -162,7 +138,7 @@ export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"
 
   const combined = exchanges.flatMap((ex) => [
     { key: `${ex}-ex`, kind: "exchange" as const, label: ex },
-    ...itemsFor(ex, byEx(ex), locale, labels, moves, false),
+    ...itemsFor(ex, byEx(ex), locale, moves),
   ]);
 
   return (
@@ -186,8 +162,8 @@ export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"
             {/* Wide screens: DSE and CSE side by side */}
             {exchanges.map((ex, i) => (
               <div key={ex} className={cn("hidden min-w-0 flex-1 lg:flex", i > 0 && "border-l border-fg/[0.08]")}>
-                <LaneHead ex={ex} snap={byEx(ex)} locale={locale} labels={labels} showIndex />
-                <Lane items={itemsFor(ex, byEx(ex), locale, labels, moves, true)} locale={locale} />
+                <LaneHead ex={ex} snap={byEx(ex)} locale={locale} labels={labels} />
+                <Lane items={itemsFor(ex, byEx(ex), locale, moves)} locale={locale} />
               </div>
             ))}
           </>

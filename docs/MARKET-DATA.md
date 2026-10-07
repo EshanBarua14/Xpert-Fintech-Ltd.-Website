@@ -1,16 +1,19 @@
 # Market data
 
-The public site shows DSE and CSE data in three places:
+The public site shows DSE and CSE data in four places:
 
-- **Ticker bar** at the very top of every page, above the navigation (on as soon
-  as `MARKET_DATA_MODE` is not `none`). Wide screens show DSE and CSE side by
-  side, each with its status, main index, Xpert's market share, the other
-  indices, breadth, turnover and then the day's biggest movers; phones and
-  tablets show one lane with both. It pauses on hover/focus and with its pause
-  button, and does not move for visitors who ask for reduced motion.
-- **Market at a glance** on the home page (and on /markets): DSE and CSE side by
-  side (a DSE/CSE switch on phones): indices, breadth, turnover, volume, trades,
-  Xpert's market share, and the top 5 gainers and losers.
+- **Price ticker** at the very top of every page, above the navigation (on as
+  soon as `MARKET_DATA_MODE` is not `none`): each stock's symbol, last price and
+  change, the day's biggest movers first. Wide screens show DSE and CSE side by
+  side; phones and tablets show one lane with both. It pauses on hover/focus and
+  with its pause button, and does not move for visitors who ask for reduced
+  motion. A symbol an exchange lists twice is shown once.
+- **Indices in the home hero**: DSE (DSEX, DSES, DS30) and CSE (CASPI, CSE30,
+  CSCX) with status, value and change; an index an exchange does not publish is
+  left out.
+- **Market at a glance** on the home page (and on /markets): identical DSE and
+  CSE cards (a DSE/CSE switch on phones): status, Xpert's market share, three
+  indices, breadth, turnover, volume, trades, and the top 5 gainers and losers.
 - **Price boards** at /markets/dse and /markets/cse, and a page per stock.
 
 Nothing is invented. Prices come only from the licensed feed; market share comes

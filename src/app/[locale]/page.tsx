@@ -32,6 +32,7 @@ import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/e
 import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
 import { MarketReach } from "@/components/market/MarketReach";
+import { HeroIndices } from "@/components/market/HeroIndices";
 import { getMarketGoal } from "@/lib/content/leaders";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
@@ -101,8 +102,9 @@ export default async function HomePage({ params }: Props) {
         memberCount={data.members.length}
         modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)}
         graph={eco}
-        // The ticker above already shows the market; the figures follow right below in "Our share of the market".
+        // The figures follow right below in "Our share of the market".
         facts={showReach ? [] : proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
+        market={market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} /> : undefined}
       />
 
       {data.clients.length > 0 && (

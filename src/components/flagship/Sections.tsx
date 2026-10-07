@@ -189,6 +189,7 @@ export function FlagshipHero({
   memberCount,
   ticker,
   status,
+  market,
   modules,
   graph,
   facts,
@@ -205,6 +206,8 @@ export function FlagshipHero({
   ticker?: ReactNode;
   /** Live market status line above the headline (only when market data is on). */
   status?: ReactNode;
+  /** Live DSE and CSE indices under the buttons (only when market data is on). */
+  market?: ReactNode;
   /** Admin → Ecosystem graph: adds the guided tour and the phone layout. */
   graph?: EcoGraph;
 }) {
@@ -227,6 +230,11 @@ export function FlagshipHero({
             <PrimaryButton href={`/${locale}/request-demo`}>{t.requestDemo}</PrimaryButton>
             <GhostButton href={`/${locale}/platform`}>{t.explorePlatform}</GhostButton>
           </div>
+          {market && (
+            <div data-reveal style={delay(4)}>
+              {market}
+            </div>
+          )}
           {facts && facts.length > 0 ? (
             <dl data-reveal style={delay(4)} className="mt-2 grid max-w-[34rem] grid-cols-3 border-t border-fg/10 pt-5">
               {facts.slice(0, 3).map((f, i) => (

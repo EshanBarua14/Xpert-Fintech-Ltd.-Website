@@ -201,8 +201,18 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       include: { translations: true, organization: { include: { translations: true } } },
     });
+    // A review without its own photo uses the photo of the person with the same name in Admin → People (e.g. a director).
+    const names = rows.filter((r) => !r.photoMediaId).map((r) => r.personName);
+    const people = names.length
+      ? await db.person.findMany({
+          where: { deletedAt: null, photoMediaId: { not: null }, translations: { some: { locale: "en", name: { in: names } } } },
+          select: { photoMediaId: true, translations: { where: { locale: "en" }, select: { name: true } } },
+        })
+      : [];
+    const photoOf = (r: (typeof rows)[number]) =>
+      r.photoMediaId ?? people.find((p) => p.translations.some((t) => t.name.toLowerCase() === r.personName.toLowerCase()))?.photoMediaId ?? null;
     const media = await mediaMap(
-      rows.flatMap((r) => [r.photoMediaId, r.organization?.logoPermission ? r.organization.logoMediaId : null]),
+      rows.flatMap((r) => [photoOf(r), r.organization?.logoPermission ? r.organization.logoMediaId : null]),
       locale,
     );
     return rows.flatMap((r) => {
@@ -216,7 +226,7 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           name: r.personName,
           role: tr.personTitle,
           organization: org ? (pick(org.translations, locale)?.name ?? null) : null,
-          photo: media.get(r.photoMediaId ?? "") ?? null,
+          photo: media.get(photoOf(r) ?? "") ?? null,
           logo: org?.logoPermission ? (media.get(org.logoMediaId ?? "") ?? null) : null,
           rating: r.rating && r.rating >= 1 && r.rating <= 5 ? r.rating : null,
           draft: preview && !(r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date())),

@@ -5,6 +5,7 @@ import { publishedWhere } from "@/lib/db/publishing";
 import type { AppLocale } from "@/lib/i18n/config";
 import { mediaMap } from "@/lib/public/content";
 import { LEADER_MESSAGES } from "@/content/xfl2/messages";
+import { BOARD, MANAGEMENT } from "@/content/xfl2/people";
 
 export const LEADER_KEYS = ["chairman", "md"] as const;
 export type LeaderKey = (typeof LEADER_KEYS)[number];
@@ -46,7 +47,7 @@ const previewDrafts = () => process.env.APP_ENV !== "production";
 
 /**
  * A leader's message with the signatory's name, title and photo from
- * Admin → People. On the live site, null until it is published in
+ * Admin → People (shown on the About page). On the live site, null until it is published in
  * Admin → Messages; elsewhere drafts come back marked `draft`.
  */
 export const getLeaderMessage = cache(async (key: LeaderKey, locale: AppLocale): Promise<LeaderMessage | null> => {
@@ -57,11 +58,15 @@ export const getLeaderMessage = cache(async (key: LeaderKey, locale: AppLocale):
   const m = row ? readLeaderSetting(row.value) : { personKey: seed!.personKey, published: false, en: seed!.en, bn: seed!.bn };
   const text = (locale === "bn" && m.bn.trim()) || m.en.trim();
   if (!text || (!m.published && !previewDrafts())) return null;
+  // The signatory by key; failing that (a profile created by the old-site importer
+  // under another key), by the name XFL gave for that person.
+  const include = { translations: true, roles: { where: { group: ROLE_GROUP[key] }, include: { translations: true } } } as const;
+  const rosterName = [...BOARD, ...MANAGEMENT].find((p) => p.key === m.personKey)?.name;
   const person = m.personKey
-    ? await db.person.findFirst({
-        where: { ...publishedWhere(), key: m.personKey },
-        include: { translations: true, roles: { where: { group: ROLE_GROUP[key] }, include: { translations: true } } },
-      })
+    ? ((await db.person.findFirst({ where: { ...publishedWhere(), key: m.personKey }, include })) ??
+      (rosterName
+        ? await db.person.findFirst({ where: { ...publishedWhere(), translations: { some: { locale: "en", name: { equals: rosterName, mode: "insensitive" } } } }, include })
+        : null))
     : null;
   const tr = person?.translations.find((t) => t.locale === locale) ?? person?.translations.find((t) => t.locale === "en");
   const roleTr = person?.roles[0]?.translations;

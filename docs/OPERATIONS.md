@@ -140,7 +140,7 @@ Admin → Settings → Contact: “Google Maps location” takes a Google Maps s
 
 - **Order**: each group (Board, Management, Team) has its own order number on the person's page in Admin → People; lower comes first.
 - **Department**: set on the person's page. It colours the card and adds a filter chip on the Team page. Leadership, Engineering, Support, Infrastructure, Marketing and Operations have their own colours; any other name gets a neutral one.
-- **Chairman's and MD's messages**: Admin → Messages. The text supplied at setup is a draft for them to approve; it appears on the About page and on the Board or Management page only after "Publish on the website" is ticked.
+- **Chairman's and MD's messages**: Admin → Messages. The text supplied at setup is a draft for them to approve; it appears on the About page only after "Publish on the website" is ticked.
 - **Market-share goal**: Admin → Market data → Market-share goal (set to 70% by 2028). The home page shows the latest DSE and CSE share combined, a progress bar towards the goal, and the client base.
 
 ## Contact details and outside positions

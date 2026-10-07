@@ -43,7 +43,7 @@ export async function saveLeaderMessage(_prev: MessageState, formData: FormData)
   });
   revalidatePath("/", "layout");
   return {
-    message: value.published ? "Saved and published. It shows on the About page and the Board or Management page." : "Saved as a draft. It is not on the website until you tick Publish.",
+    message: value.published ? "Saved and published. It shows on the About page." : "Saved as a draft. It is not on the website until you tick Publish.",
     savedAt: Date.now(),
   };
 }

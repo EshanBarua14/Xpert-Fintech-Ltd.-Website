@@ -4,7 +4,7 @@ import { LeaderMessageForm } from "@/components/admin/LeaderMessageForm";
 import { LEADER_KEYS, readLeaderSetting } from "@/lib/content/leaders";
 
 const TITLES = { chairman: "Chairman's message", md: "Managing Director's message" } as const;
-const WHERE = { chairman: "About page and Board page", md: "About page and Management page" } as const;
+const WHERE = { chairman: "About page", md: "About page" } as const;
 
 export default async function MessagesPage() {
   await requireAdmin();

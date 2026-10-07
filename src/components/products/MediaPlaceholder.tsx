@@ -7,7 +7,7 @@
 export function DemoPlaceholder({ adminHref, name }: { adminHref: string; name: string }) {
   return (
     <figure className="flex flex-col gap-4">
-      <div className="demo-frame relative flex aspect-video flex-col items-center justify-center gap-5 overflow-hidden rounded-2xl border border-dashed border-gold/50 bg-[#06111f] p-6 text-center">
+      <div className="demo-frame relative flex min-h-[15rem] aspect-video flex-col items-center justify-center gap-5 overflow-hidden rounded-2xl border border-dashed border-gold/50 bg-[#06111f] p-6 text-center">
         <span aria-hidden="true" className="demo-placeholder absolute inset-0 opacity-60" />
         <span aria-hidden="true" className="relative flex size-16 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white">
           <svg viewBox="0 0 12 12" className="ml-1 size-6 fill-current">
@@ -29,8 +29,8 @@ export function DemoPlaceholder({ adminHref, name }: { adminHref: string; name: 
 export function ScreensPlaceholder({ adminHref }: { adminHref: string }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
-        <div className="flex aspect-[16/10] items-center justify-center rounded-2xl border border-dashed border-gold/50 bg-fg/[0.03] p-6 text-center">
+      <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="flex min-h-[16rem] min-w-0 items-center justify-center rounded-2xl border border-dashed border-gold/50 bg-fg/[0.03] p-6 text-center md:aspect-[16/10] md:min-h-0">
           <span className="flex flex-col items-center gap-3">
             <svg aria-hidden="true" viewBox="0 0 24 24" className="size-9 fill-none stroke-text-secondary stroke-[1.5]">
               <rect x="3" y="4" width="18" height="14" rx="2" />
@@ -44,9 +44,9 @@ export function ScreensPlaceholder({ adminHref }: { adminHref: string }) {
             </a>
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-1">
+        <div className="grid min-w-0 grid-cols-2 gap-4 md:grid-cols-1">
           {["Screen 2", "Screen 3"].map((l) => (
-            <div key={l} className="flex aspect-[16/10] items-center justify-center rounded-2xl border border-dashed border-gold/40 bg-fg/[0.03] text-sm text-text-secondary">
+            <div key={l} className="flex aspect-[16/10] min-w-0 items-center justify-center rounded-2xl border border-dashed border-gold/40 bg-fg/[0.03] text-sm text-text-secondary">
               {l}
             </div>
           ))}

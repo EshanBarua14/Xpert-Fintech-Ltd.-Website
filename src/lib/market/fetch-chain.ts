@@ -141,7 +141,7 @@ export async function getWithCompletedChain(url: string, headers: Record<string,
   const extra = await missingIntermediates(u.hostname, port);
   const ca = [...trustedRoots().pems, ...extra];
   return new Promise((resolve, reject) => {
-    const req = https.get({ host: u.hostname, port, path: u.pathname + u.search, servername: u.hostname, headers, ca, timeout: 9000 }, (res) => {
+    const req = https.get({ host: u.hostname, port, path: u.pathname + u.search, servername: u.hostname, headers, ca, timeout: 15_000 }, (res) => {
       if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirects > 0) {
         res.resume();
         return resolve(getWithCompletedChain(new URL(res.headers.location, url).toString(), headers, redirects - 1));

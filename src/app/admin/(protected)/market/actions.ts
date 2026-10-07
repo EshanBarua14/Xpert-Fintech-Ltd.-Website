@@ -4,13 +4,14 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { dhakaToday, testFeed } from "@/lib/market/data";
+import { clearMarketInfoCache, dhakaToday, testFeed } from "@/lib/market/data";
 import { saveShares, type ShareInput } from "@/lib/market/share";
 import { checkbox, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 
 export type MarketState = { errors?: FieldErrors; message?: string; savedAt?: number; ok?: boolean };
 
 const refresh = () => {
+  clearMarketInfoCache();
   revalidatePath("/", "layout");
   revalidatePath("/admin/market");
 };

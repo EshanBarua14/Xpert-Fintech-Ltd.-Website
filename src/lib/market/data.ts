@@ -123,16 +123,31 @@ export async function latestShares(): Promise<ShareFigure[]> {
   }
 }
 
+// Admin settings and share figures change rarely: read them at most every 30 s
+// (browsers poll /api/market every 20 s; saving in the admin clears this at once).
+let infoCache: { at: number; value: Promise<{ source: Awaited<ReturnType<typeof db.marketDataSource.findFirst>>; shares: ShareFigure[] }> } | null = null;
+function settingsAndShares() {
+  if (!infoCache || Date.now() - infoCache.at > 30_000) {
+    infoCache = {
+      at: Date.now(),
+      value: Promise.all([db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }).catch(() => null), latestShares()]).then(([source, shares]) => ({ source, shares })),
+    };
+  }
+  return infoCache.value;
+}
+
+/** Forget cached settings and share figures (after an admin saves them). */
+export function clearMarketInfoCache() {
+  infoCache = null;
+}
+
 /**
  * What the site shows. Pages call it with the default short wait so a slow
  * exchange never delays them; /api/market (polled by browsers) waits longer.
  */
 export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = {}): Promise<MarketPayload> {
   const mode = marketMode();
-  const [source, shares] = await Promise.all([
-    db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }).catch(() => null),
-    latestShares(),
-  ]);
+  const { source, shares } = await settingsAndShares();
   let snapshot: MarketSnapshot | null = null;
   if (mode === "demo") snapshot = demoSnapshot();
   // A licensed feed is shown only once an admin switches it on in Admin → Market data.

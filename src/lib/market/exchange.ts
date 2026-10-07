@@ -226,7 +226,7 @@ export async function getHtml(url: string): Promise<string> {
   const headers = { "User-Agent": USER_AGENT, Accept: "text/html,application/xhtml+xml" };
   let res: Response;
   try {
-    res = await fetch(url, { headers, cache: "no-store", signal: AbortSignal.timeout(9000) });
+    res = await fetch(url, { headers, cache: "no-store", signal: AbortSignal.timeout(15_000) });
   } catch (error) {
     // The server left out its intermediate certificate: fetch it, verify it, try again.
     if (!isChainError(error)) throw error;

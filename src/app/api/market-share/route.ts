@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { dhakaToday } from "@/lib/market/data";
+import { clearMarketInfoCache, dhakaToday } from "@/lib/market/data";
 import { saveShares } from "@/lib/market/share";
 
 /**
@@ -56,6 +56,9 @@ export async function POST(request: Request) {
   const tradeDate = v.tradeDate ?? dhakaToday();
   if (tradeDate > dhakaToday()) return Response.json({ error: "tradeDate is in the future" }, { status: 400 });
   const results = await saveShares(tradeDate, v.figures, v.source ?? null, null);
-  if (results.some((r) => r.ok)) revalidatePath("/", "layout");
+  if (results.some((r) => r.ok)) {
+    clearMarketInfoCache();
+    revalidatePath("/", "layout");
+  }
   return Response.json({ tradeDate, results }, { status: results.every((r) => r.ok) ? 200 : 207 });
 }

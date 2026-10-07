@@ -1,58 +1,90 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { TestimonialCard } from "@/lib/public/content";
 import { cn } from "@/lib/utils/cn";
 
 type Labels = { region: string; prev: string; next: string; pause: string; play: string; slide: string };
 
-const AUTO_MS = 9000;
+const AUTO_MS = 7000;
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join("");
+}
 
 /**
- * Client quotes, one at a time. Swipe, drag the scrollbar-free track, use the
- * arrows or the dots; it moves on by itself every few seconds, pausing on
- * hover, keyboard focus, a hidden tab, the pause button and reduced motion.
+ * Client reviews as cards: the client's photo, name and title, their
+ * company (logo when permitted) and the quote. One card on phones, two on
+ * tablets, three on desktop. Swipe, use the arrows or the progress bars; it
+ * moves on by itself, pausing on hover, keyboard focus, a hidden tab, the
+ * pause button and reduced motion.
  */
 export function TestimonialSlider({ items, labels }: { items: TestimonialCard[]; labels: Labels }) {
   const track = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState(0);
+  const [stops, setStops] = useState(items.length);
   const [paused, setPaused] = useState(false);
   const [hover, setHover] = useState(false);
   const [reduce, setReduce] = useState(false);
-  const many = items.length > 1;
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduce(mq.matches);
+    setReduce(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
+
+  /** Distance between two cards, and how many positions the track can stop at. */
+  const measure = useCallback(() => {
+    const el = track.current;
+    const first = el?.children[0] as HTMLElement | undefined;
+    const second = el?.children[1] as HTMLElement | undefined;
+    if (!el || !first) return { step: 1, count: 1 };
+    const step = second ? second.offsetLeft - first.offsetLeft : first.offsetWidth;
+    const perView = Math.max(1, Math.round(el.clientWidth / step));
+    return { step, count: Math.max(1, items.length - perView + 1) };
+  }, [items.length]);
 
   const go = useCallback(
     (i: number) => {
       const el = track.current;
       if (!el) return;
-      const n = (i + items.length) % items.length;
-      el.scrollTo({ left: n * el.clientWidth, behavior: reduce ? "auto" : "smooth" });
+      const { step, count } = measure();
+      const n = ((i % count) + count) % count;
+      el.scrollTo({ left: n * step, behavior: reduce ? "auto" : "smooth" });
     },
-    [items.length, reduce],
+    [measure, reduce],
   );
 
-  // Which slide is showing (also after a swipe).
   useEffect(() => {
     const el = track.current;
     if (!el) return;
-    const onScroll = () => setActive(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)));
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
+    const update = () => {
+      const { step, count } = measure();
+      setStops(count);
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+      setActive(atEnd ? count - 1 : Math.min(count - 1, Math.round(el.scrollLeft / Math.max(1, step))));
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [measure]);
 
+  const moving = stops > 1 && !paused && !hover && !reduce;
   useEffect(() => {
-    if (!many || paused || hover || reduce) return;
+    if (!moving) return;
     const id = setTimeout(() => {
       if (!document.hidden) go(active + 1);
     }, AUTO_MS);
     return () => clearTimeout(id);
-  }, [active, paused, hover, reduce, many, go]);
+  }, [active, moving, go]);
 
   if (!items.length) return null;
 
@@ -67,45 +99,60 @@ export function TestimonialSlider({ items, labels }: { items: TestimonialCard[];
       onFocusCapture={() => setHover(true)}
       onBlurCapture={() => setHover(false)}
     >
-      <ul ref={track} className="testimonial-track flex snap-x snap-mandatory overflow-x-auto">
+      <ul ref={track} className="testimonial-track -mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-4 px-4 pb-2 md:mx-0 md:scroll-px-0 md:px-0">
         {items.map((t, i) => (
           <li
             key={t.id}
             role="group"
             aria-roledescription="slide"
             aria-label={labels.slide.replace("{i}", String(i + 1)).replace("{n}", String(items.length))}
-            aria-hidden={i !== active ? true : undefined}
-            className="w-full shrink-0 snap-start"
+            data-reveal
+            style={{ "--d": i % 3 } as CSSProperties}
+            className="w-[86%] shrink-0 snap-start sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)]"
           >
-            <figure className="grid gap-10 lg:grid-cols-12 lg:items-end">
-              <blockquote className="lg:col-span-9">
-                <p className="testimonial-quote font-display text-[1.6rem] leading-[1.3] text-balance text-text-primary md:text-[2.25rem] md:leading-[1.25]">{t.quote}</p>
-              </blockquote>
-              <figcaption className="flex items-center gap-4 lg:col-span-3 lg:flex-col lg:items-start">
+            <figure className="testimonial-card relative flex h-full flex-col gap-6 overflow-hidden rounded-3xl border border-fg/10 bg-navy-900 p-6 md:p-7">
+              <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-royal via-brand-sky to-gold/80" />
+              <figcaption className="flex items-center gap-4">
                 {t.photo ? (
-                  <Image src={t.photo.url} alt="" width={64} height={64} className="size-14 rounded-full object-cover ring-1 ring-fg/10 lg:size-16" />
+                  <Image
+                    src={t.photo.url}
+                    alt={t.name}
+                    width={160}
+                    height={160}
+                    className="size-20 shrink-0 rounded-2xl object-cover object-top ring-1 ring-fg/10"
+                  />
                 ) : (
-                  <span aria-hidden="true" className="flex size-14 items-center justify-center rounded-full bg-brand-royal/15 font-display text-xl text-brand-sky lg:size-16">
-                    {t.name.charAt(0)}
+                  <span aria-hidden="true" className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-brand-royal font-display text-2xl text-white">
+                    {initials(t.name)}
                   </span>
                 )}
-                <span className="flex flex-col gap-0.5">
-                  <span className="font-semibold text-text-primary">{t.name}</span>
-                  {t.role && <span className="text-sm text-text-secondary">{t.role}</span>}
-                  {t.logo ? (
-                    <Image src={t.logo.url} alt={t.organization ?? ""} width={t.logo.width ?? 160} height={t.logo.height ?? 48} className="member-logo mt-2 h-8 w-auto max-w-[10rem] object-contain object-left" />
-                  ) : (
-                    t.organization && <span className="text-sm font-medium text-brand-sky">{t.organization}</span>
-                  )}
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span className="font-display text-lg leading-tight text-text-primary">{t.name}</span>
+                  {t.role && <span className="text-sm leading-snug text-text-secondary">{t.role}</span>}
+                  {t.organization && !t.logo && <span className="text-sm font-medium text-brand-sky">{t.organization}</span>}
                 </span>
               </figcaption>
+              <blockquote className="flex-1">
+                <p className="testimonial-quote text-[1.0625rem] leading-relaxed text-text-primary">{t.quote}</p>
+              </blockquote>
+              {t.logo && (
+                <div className="flex items-center border-t border-fg/[0.08] pt-5">
+                  <Image
+                    src={t.logo.url}
+                    alt={t.organization ?? ""}
+                    width={t.logo.width ?? 160}
+                    height={t.logo.height ?? 48}
+                    className="member-logo h-8 w-auto max-w-[10rem] object-contain object-left"
+                  />
+                </div>
+              )}
             </figure>
           </li>
         ))}
       </ul>
 
-      {many && (
-        <div className="mt-10 flex items-center gap-4">
+      {stops > 1 && (
+        <div className="mt-8 flex items-center gap-4">
           <div className="flex gap-2">
             <button type="button" onClick={() => go(active - 1)} aria-label={labels.prev} className="flex size-11 items-center justify-center rounded-full border border-fg/15 text-text-primary transition-colors hover:border-brand-sky hover:text-brand-sky">
               <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 fill-none stroke-current stroke-[1.6]"><path d="M10 3 5 8l5 5" /></svg>
@@ -115,11 +162,11 @@ export function TestimonialSlider({ items, labels }: { items: TestimonialCard[];
             </button>
           </div>
           <ol className="flex flex-1 gap-1.5" aria-hidden="true">
-            {items.map((t, i) => (
-              <li key={t.id} className="h-0.5 flex-1 overflow-hidden rounded-full bg-fg/10">
+            {Array.from({ length: stops }, (_, i) => (
+              <li key={i} className="h-0.5 flex-1 overflow-hidden rounded-full bg-fg/10">
                 <span
-                  key={`${i}-${active}-${paused || hover || reduce}`}
-                  className={cn("block h-full bg-brand-sky", i < active ? "w-full" : i > active ? "w-0" : !paused && !hover && !reduce ? "testimonial-progress" : "w-full")}
+                  key={`${i}-${active}-${moving}`}
+                  className={cn("block h-full bg-brand-sky", i < active ? "w-full" : i > active ? "w-0" : moving ? "testimonial-progress" : "w-full")}
                   style={i === active ? { animationDuration: `${AUTO_MS}ms` } : undefined}
                 />
               </li>
@@ -141,7 +188,7 @@ export function TestimonialSlider({ items, labels }: { items: TestimonialCard[];
             </button>
           )}
           <span className="font-mono text-sm text-text-secondary tabular-nums" aria-live="polite">
-            {active + 1} / {items.length}
+            {active + 1} / {stops}
           </span>
         </div>
       )}

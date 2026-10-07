@@ -418,7 +418,7 @@ async function seedRoster() {
     ["MANAGEMENT", MANAGEMENT],
     ["TEAM", TEAM],
   ];
-  const byKey = new Map<string, RosterPerson & { department?: string | null }>();
+  const byKey = new Map<string, RosterPerson>();
   for (const [, list] of groups) for (const p of list) byKey.set(p.key, { ...byKey.get(p.key), ...p, department: p.department ?? byKey.get(p.key)?.department ?? null });
   let added = 0;
   let photos = 0;
@@ -426,7 +426,9 @@ async function seedRoster() {
   for (const p of byKey.values()) {
     let person =
       (await db.person.findUnique({ where: { key: p.key } })) ??
-      (await db.person.findFirst({ where: { deletedAt: null, translations: { some: { locale: EN, name: { equals: p.name, mode: "insensitive" } } } } }));
+      (await db.person.findFirst({
+        where: { deletedAt: null, translations: { some: { locale: EN, name: { in: [p.name, ...(p.formerName ? [p.formerName] : [])], mode: "insensitive" } } } },
+      }));
     if (!person) {
       person = await db.person.create({ data: { key: p.key, status: "PUBLISHED", sortOrder: p.rank, department: p.department ?? null } });
       added++;
@@ -448,6 +450,10 @@ async function seedRoster() {
       update: {},
       create: { personId: person.id, locale: EN, name: p.name },
     });
+    // Correct an older spelling (e.g. from the previous website) unless an admin has edited the profile.
+    if (p.formerName && !person.updatedById) {
+      await db.personTranslation.updateMany({ where: { personId: person.id, locale: EN, name: p.formerName }, data: { name: p.name } });
+    }
     if (!person.photoMediaId) {
       const photo = await portraitFor(p.key, p.name);
       if (photo) {

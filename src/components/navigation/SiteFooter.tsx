@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "@/components/brand/Logo";
+import { BrandLockup } from "@/components/brand/BrandLockup";
 import { Container } from "@/components/ui/Layout";
 import { Icon } from "@/components/ui/Icon";
 import { SocialIcon, socialKind } from "@/components/ui/SocialIcon";
@@ -46,7 +46,9 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
       <Container className="relative flex flex-col gap-16 pt-20 pb-10">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="flex flex-col gap-6 md:col-span-4">
-            <Logo height={56} />
+            <a href={`/${locale}`} className="group self-start" aria-label="Xpert Fintech Ltd. — home">
+              <BrandLockup size="lg" />
+            </a>
             {info.summary && <p className="max-w-sm text-sm leading-relaxed text-text-secondary">{info.summary}</p>}
             <address className="flex flex-col gap-3 text-sm not-italic">
               {info.address && (

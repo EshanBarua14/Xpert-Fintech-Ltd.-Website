@@ -182,7 +182,7 @@ export function HeaderClient({
         )}
         onMouseLeave={scheduleClose}
       >
-        <Link href={`/${locale}`} className="flex shrink-0 items-center gap-3" aria-label="Xpert Fintech Ltd. — home">
+        <Link href={`/${locale}`} className="group flex shrink-0 items-center gap-3 rounded-full focus-visible:outline-offset-4" aria-label="Xpert Fintech Ltd. — home">
           {logo}
         </Link>
 
@@ -191,7 +191,7 @@ export function HeaderClient({
             {links.map((item) => {
               const active = isActive(item);
               const itemClass = cn(
-                "relative inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors",
+                "relative inline-flex h-10 items-center gap-1.5 rounded-full px-2 text-sm font-medium whitespace-nowrap xl:px-3 transition-colors",
                 active || openId === item.id ? "text-fg" : "text-text-secondary hover:text-fg",
                 openId === item.id && "bg-fg/[0.06]",
               );
@@ -235,7 +235,9 @@ export function HeaderClient({
         <div className="ml-auto flex items-center gap-2">
           {labels.search && <SearchDialog locale={locale} labels={labels.search} />}
           <ThemeToggle labels={{ toLight: labels.toLight, toDark: labels.toDark }} />
-          <LanguageSwitch current={locale} label={labels.language} className="hidden md:inline-flex" />
+          <span className="hidden md:block">
+            <LanguageSwitch current={locale} label={labels.language} compact />
+          </span>
           {cta?.href && (
             <Link
               href={cta.href}

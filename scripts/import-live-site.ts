@@ -434,7 +434,8 @@ async function savePeople(found: FoundPerson[]) {
   log(`\n## People\n\n${unique.length} recognised.`);
   for (const [i, p] of unique.entries()) {
     const existing = await db.person.findFirst({
-      where: { deletedAt: null, translations: { some: { locale: "en", name: { equals: p.name, mode: "insensitive" } } } },
+      // By name, or by the key the content seed gives the same person (catches spelling differences such as Muhammad/Mohammad).
+      where: { deletedAt: null, OR: [{ key: slugify(p.name) }, { translations: { some: { locale: "en", name: { equals: p.name, mode: "insensitive" } } } }] },
       include: { roles: true },
     });
     const photo = p.photo ? await imageFromUrl(p.photo, p.name, ["imported", "old-site", "portrait"]) : null;

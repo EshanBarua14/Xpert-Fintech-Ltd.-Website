@@ -257,7 +257,7 @@ async function seedPeople() {
     { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman" },
     { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony" },
     { key: "md-abul-moshad-chowdhury", name: "Md. Abul Moshad Chowdhury" },
-    { key: "muhammad-shamsul-maruf", name: "Muhammad Shamsul Maruf" },
+    { key: "muhammad-shamsul-maruf", name: "Mohammad Shamsul Maruf" },
   ];
   for (const [i, p] of management.entries()) {
     const person = await db.person.upsert({ where: { key: p.key }, update: {}, create: { key: p.key, sortOrder: i } });

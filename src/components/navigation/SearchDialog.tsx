@@ -104,13 +104,13 @@ export function SearchDialog({ locale, labels }: { locale: "en" | "bn"; labels: 
         onClick={open}
         aria-label={labels.search}
         aria-keyshortcuts="Control+K Meta+K /"
-        className="inline-flex size-10 items-center justify-center gap-2 rounded-full border border-fg/15 bg-fg/[0.04] text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-fg xl:w-auto xl:px-3.5"
+        title={`${labels.search} (${mac ? "⌘K" : "Ctrl K"})`}
+        className="inline-flex size-10 items-center justify-center gap-2 rounded-full border border-fg/15 bg-fg/[0.04] text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-fg"
       >
         <svg viewBox="0 0 24 24" className="size-[18px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
           <circle cx="11" cy="11" r="7" />
           <path d="M20 20l-3.5-3.5" />
         </svg>
-        <kbd className="hidden rounded-md border border-fg/15 px-1.5 font-mono text-[11px] xl:inline">{mac ? "⌘K" : "Ctrl K"}</kbd>
       </button>
 
       <dialog

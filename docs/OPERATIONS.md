@@ -126,6 +126,8 @@ Imported testimonials arrive as drafts: open each in Admin → Testimonials, tic
 
 ## Testimonials
 
+Client reviews appear on the home page as cards (photo, name, title, company logo and quote) once at least one is **published with “Written approval on file” ticked** in Admin → Testimonials. Reviews brought in by the old-site importer arrive as drafts for this reason.
+
 Admin → Testimonials: name, organization (its name and logo appear with the quote), the person's title and quote in English and Bangla, an optional photo, and the order. A quote can be published only with the person's written approval on file. Published quotes appear in the slider on the home page.
 
 ## Office map and registration details

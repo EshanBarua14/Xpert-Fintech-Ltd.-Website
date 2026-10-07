@@ -4,8 +4,9 @@ import { cn } from "@/lib/utils/cn";
 /**
  * The official Xpert Fintech logo, used exactly as supplied
  * (public/brand/xpert-logo.png, 419 × 437, transparent background).
- * Never recolour, redraw, stretch or add effects — only its size changes,
- * always keeping the original aspect ratio.
+ * Never recolour, redraw or stretch it — only its size changes, always
+ * keeping the original aspect ratio. Its one motion (a full turn, approved by
+ * XFL) lives in BrandLockup.
  *
  * TODO(brand): replace with the SVG master when Xpert provides it.
  */

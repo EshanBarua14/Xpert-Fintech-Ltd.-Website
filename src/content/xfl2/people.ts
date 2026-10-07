@@ -16,6 +16,8 @@ export type RosterPerson = {
   title: string | null;
   department?: Department | null;
   rank: number;
+  /** An older spelling to correct in profiles no admin has edited yet. */
+  formerName?: string;
 };
 
 /** Board of Directors, in the order the previous website listed them. */
@@ -36,7 +38,7 @@ export const MANAGEMENT: RosterPerson[] = [
   { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman", title: "Managing Director", department: "Leadership", rank: 1 },
   { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 2 },
   { key: "md-abul-moshad-chowdhury", name: "Md. Abul Moshad Chowdhury", title: "Head of Application Support and Development", department: "Engineering", rank: 3 },
-  { key: "muhammad-shamsul-maruf", name: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 4 },
+  { key: "muhammad-shamsul-maruf", name: "Mohammad Shamsul Maruf", formerName: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 4 },
 ];
 
 /**
@@ -50,7 +52,7 @@ export const TEAM: RosterPerson[] = [
   { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 3 },
   { key: "md-abul-moshad-chowdhury", name: "Md. Abul Moshad Chowdhury", title: "Head of Application Support and Development", department: "Engineering", rank: 4 },
   { key: "saikat-biswas", name: "Saikat Biswas", title: "Senior Principal Software Engineer", department: "Engineering", rank: 5 },
-  { key: "muhammad-shamsul-maruf", name: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 6 },
+  { key: "muhammad-shamsul-maruf", name: "Mohammad Shamsul Maruf", formerName: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 6 },
   { key: "mohammad-mehrabul-ferdous", name: "Mohammad Mehrabul Ferdous", title: "Principal Software Engineer", department: "Engineering", rank: 7 },
   { key: "md-sirajul-islam", name: "Md. Sirajul Islam", title: "Support Manager", department: "Support", rank: 8 },
   { key: "shaleh-akram", name: "Shaleh Akram", title: "Marketing Manager", department: "Marketing", rank: 9 },

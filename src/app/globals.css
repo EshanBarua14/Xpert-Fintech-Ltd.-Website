@@ -1112,3 +1112,25 @@ html {
   .eco-mobile-link > span { animation: none; top: 45%; }
   .eco-sheet[open] { animation: none; }
 }
+
+/* Brand lockup: the logo turns a full circle once on page load, and again on hover or focus of its link. */
+@keyframes logo-spin {
+  from { transform: rotate(-360deg); }
+  to { transform: rotate(0deg); }
+}
+.logo-spin > img {
+  animation: logo-spin 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+.logo-spin {
+  transition: transform 0s;
+}
+.group:hover .logo-spin,
+.group:focus-visible .logo-spin {
+  transform: rotate(360deg);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-spin > img { animation: none; }
+  .group:hover .logo-spin,
+  .group:focus-visible .logo-spin { transform: none; transition: none; }
+}

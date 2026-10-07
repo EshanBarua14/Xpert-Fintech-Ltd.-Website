@@ -1,4 +1,4 @@
-import { Logo } from "@/components/brand/Logo";
+import { BrandLockup } from "@/components/brand/BrandLockup";
 import { getNavMenu } from "@/lib/content/navigation";
 import { getMessages } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/i18n/config";
@@ -39,7 +39,7 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
       locale={locale}
       items={items}
       labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language, overview: t.overview, toLight: t.themeToLight, toDark: t.themeToDark, search: searchLabels(t) }}
-      logo={<Logo height={40} priority />}
+      logo={<BrandLockup text="roomy" priority />}
       ticker={ticker}
     />
   );

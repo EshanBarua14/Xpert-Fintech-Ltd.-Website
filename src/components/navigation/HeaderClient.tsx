@@ -1,5 +1,6 @@
 "use client";
 
+import { TickerBar, type TickerProps } from "@/components/market/TickerBar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
@@ -26,7 +27,13 @@ function iconFor(href: string | null): string {
   if (/market-data|#data/.test(h)) return "globe";
   if (/board|management|people|consortium/.test(h)) return "users";
   if (/contact/.test(h)) return "mail";
-  if (/events|news|insights/.test(h)) return "bolt";
+  if (/#videos|videos/.test(h)) return "video";
+  if (/gallery/.test(h)) return "image";
+  if (/news|insights/.test(h)) return "newspaper";
+  if (/events/.test(h)) return "calendar";
+  if (/careers/.test(h)) return "briefcase";
+  if (/resources/.test(h)) return "book";
+  if (/case-studies/.test(h)) return "document";
   if (/about|company/.test(h)) return "globe";
   return "network";
 }
@@ -79,7 +86,9 @@ function MegaPanel({ item, id, overview, onNavigate }: { item: NavLink; id: stri
         <ul className="grid content-start gap-1 p-2 sm:grid-cols-2">
           {item.children.map((child) => (
             <li key={child.id}>
-              <ItemLink item={child} onNavigate={onNavigate} className="group flex gap-3 rounded-2xl p-3 transition-colors hover:bg-fg/[0.06]">
+              <ItemLink item={child} onNavigate={onNavigate} className="group relative flex gap-3 rounded-2xl p-3 transition-colors hover:bg-fg/[0.06] focus-visible:bg-fg/[0.06]">
+                {/* The same glowing line as the active top menu item, drawn in on hover. */}
+                <span aria-hidden="true" className="nav-glow absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-fg/10 bg-fg/[0.04] text-brand-sky transition-colors group-hover:border-brand-sky/50 group-hover:text-cyan-300">
                   <Icon name={iconFor(child.href)} className="size-[18px]" />
                 </span>
@@ -107,8 +116,8 @@ export function HeaderClient({
   items: NavLink[];
   labels: Labels;
   logo: ReactNode;
-  /** DSE · CSE ticker bar, shown above the navigation when market data is on. */
-  ticker?: ReactNode;
+  /** DSE · CSE ticker settings; the ticker is shown above the navigation when market data is on. */
+  ticker?: TickerProps;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -173,8 +182,8 @@ export function HeaderClient({
 
   return (
     <header className="fixed inset-x-0 top-0 z-(--z-sticky)">
-      {ticker && <div key="ticker">{ticker}</div>}
-      <div key="bar" className="px-3 pt-3 md:px-6 md:pt-4">
+      {ticker && <TickerBar {...ticker} />}
+      <div className="px-3 pt-3 md:px-6 md:pt-4">
       <div
         className={cn(
           "relative mx-auto flex h-14 max-w-7xl items-center gap-2 rounded-full border px-2 pl-4 transition-[background-color,border-color,box-shadow] duration-500 md:h-16",
@@ -191,7 +200,7 @@ export function HeaderClient({
             {links.map((item) => {
               const active = isActive(item);
               const itemClass = cn(
-                "relative inline-flex h-10 items-center gap-1.5 rounded-full px-2 text-sm font-medium whitespace-nowrap xl:px-3 transition-colors",
+                "group relative inline-flex h-10 items-center gap-1.5 rounded-full px-2 text-sm font-medium whitespace-nowrap xl:px-3 transition-colors",
                 active || openId === item.id ? "text-fg" : "text-text-secondary hover:text-fg",
                 openId === item.id && "bg-fg/[0.06]",
               );
@@ -200,7 +209,7 @@ export function HeaderClient({
                   <li key={item.id} onMouseEnter={() => setOpenId(null)}>
                     <ItemLink item={item} className={itemClass}>
                       {item.label}
-                      {active && <span aria-hidden="true" className="absolute inset-x-4 -bottom-0.5 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />}
+                      <span aria-hidden="true" className={cn("absolute inset-x-4 -bottom-0.5 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent", active ? "" : "nav-glow")} />
                     </ItemLink>
                   </li>
                 );
@@ -219,7 +228,7 @@ export function HeaderClient({
                     <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" className={cn("transition-transform duration-300", openId === item.id && "rotate-180")}>
                       <path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" />
                     </svg>
-                    {active && <span aria-hidden="true" className="absolute inset-x-4 -bottom-0.5 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />}
+                    <span aria-hidden="true" className={cn("absolute inset-x-4 -bottom-0.5 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent", active || openId === item.id ? "" : "nav-glow")} />
                   </button>
                   {openId === item.id && (
                     <div onMouseEnter={() => open(item.id)}>

@@ -1165,3 +1165,19 @@ html {
   .group:hover .logo-spin,
   .group:focus-visible .logo-spin { transform: none; transition: none; }
 }
+
+/* Menu hover line: the active item's glowing underline, drawn from the centre on hover or keyboard focus. */
+.nav-glow {
+  transform: scaleX(0);
+  opacity: 0;
+  transition: transform 320ms var(--ease-ui), opacity 320ms var(--ease-ui);
+}
+.group:hover > .nav-glow,
+.group:focus-visible > .nav-glow {
+  transform: scaleX(1);
+  opacity: 1;
+  filter: drop-shadow(0 0 4px rgb(103 232 249 / 0.8));
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-glow { transition: none; }
+}

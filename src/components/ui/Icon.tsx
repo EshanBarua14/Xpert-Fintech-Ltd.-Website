@@ -17,6 +17,12 @@ const PATHS: Record<string, string> = {
   mail: "M3 5h18v14H3zM3 6l9 7 9-7",
   phone: "M5 3h4l2 5-3 2a11 11 0 006 6l2-3 5 2v4a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2z",
   id: "M3 5h18v14H3zM8 11a2 2 0 100-.01M6 16c.5-1.5 3.5-1.5 4 0M13 10h5M13 14h4",
+  newspaper: "M4 5h13v14H6a2 2 0 01-2-2zM17 9h3v8a2 2 0 01-2 2M7 9h7M7 13h7M7 16h4",
+  calendar: "M4 6h16v14H4zM4 10h16M8 3v4M16 3v4M8 14h3",
+  image: "M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 6M15.5 9a1.5 1.5 0 100-.01",
+  video: "M3 6h12v12H3zM15 10l6-3v10l-6-3",
+  briefcase: "M3 8h18v12H3zM8 8V5h8v3M3 13h18",
+  book: "M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h11",
 };
 
 export const ICON_NAMES = Object.keys(PATHS);

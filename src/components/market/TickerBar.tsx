@@ -127,7 +127,9 @@ function LaneHead({ ex, snap, locale, labels }: { ex: Ex; snap?: ExchangeSnapsho
  * motion it does not move and can be scrolled sideways instead. Data:
  * /api/market (refreshed every 20 s, shared with the other market widgets).
  */
-export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"]; locale: Locale; labels: TickerLabels }) {
+export type TickerProps = { mode: MarketPayload["mode"]; locale: Locale; labels: TickerLabels };
+
+export function TickerBar({ mode, locale, labels }: TickerProps) {
   const [initial] = useState<MarketPayload>(() => ({ mode, providerName: null, delayMinutes: 0, snapshot: null, shares: [] }));
   const { data, moves, loaded } = useMarket(initial);
   const [paused, setPaused] = useState(false);

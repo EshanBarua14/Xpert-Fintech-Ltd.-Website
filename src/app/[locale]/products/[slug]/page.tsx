@@ -21,6 +21,7 @@ import { getOfferingBySlug, getSeo, mediaMap } from "@/lib/public/content";
 import { breadcrumbLd, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 import { parseVideoUrl, pick, videoEmbedUrl } from "@/lib/public/text";
 import { ProductDemo } from "@/components/products/ProductDemo";
+import { DemoPlaceholder, ScreensPlaceholder } from "@/components/products/MediaPlaceholder";
 import { Lightbox } from "@/components/gallery/Lightbox";
 import type { GalleryPhoto } from "@/lib/public/insights";
 
@@ -96,6 +97,7 @@ export default async function ProductPage({ params }: Props) {
   const faqs = itemsOf(offering, "FAQ", found.locale);
   const screenshots = offering.media.filter((m) => m.kind !== "VIDEO" && m.mediaId && images.has(m.mediaId));
   // The first playable video is the product demo (a link, or an uploaded file).
+  const preview = process.env.APP_ENV !== "production";
   const demo = offering.media.find((m) => m.kind === "VIDEO" && (videoEmbedUrl(m.videoUrl) || (m.mediaId && images.has(m.mediaId))));
   const demoPoster = demo ? (images.get(demo.posterMediaId ?? "")?.url ?? parseVideoUrl(demo.videoUrl)?.thumbnail ?? null) : null;
   const shots: GalleryPhoto[] = screenshots.map((m) => {
@@ -228,6 +230,15 @@ export default async function ProductPage({ params }: Props) {
         </Band>
       )}
 
+      {/* Until the demo video and screens are added, outside production show where they go. */}
+      {!demo && preview && (
+        <Band title={t.demoTitle} body={t.demoBody}>
+          <div className="mx-auto w-full max-w-5xl">
+            <DemoPlaceholder name={tr.name} adminHref={`/admin/products/${offering.id}#media`} />
+          </div>
+        </Band>
+      )}
+
       {capabilities.length > 0 && (
         <Band title={t.capabilities} alt>
           <ItemGrid items={capabilities} />
@@ -259,6 +270,12 @@ export default async function ProductPage({ params }: Props) {
           <div>
             <Lightbox layout="feature" photos={shots} labels={{ open: t.openPhoto, close: t.close, prev: t.prevPhoto, next: t.nextPhoto, counter: t.photoCounter }} />
           </div>
+        </Band>
+      )}
+
+      {shots.length === 0 && preview && (
+        <Band title={t.screensTitle} body={t.screensBody} alt>
+          <ScreensPlaceholder adminHref={`/admin/products/${offering.id}#media`} />
         </Band>
       )}
 

@@ -123,7 +123,7 @@ export default async function EditProductPage({
             <OfferingItemsEditor offeringId={offering.id} items={items} />
           </section>
 
-          <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
+          <section id="media" className="flex scroll-mt-24 flex-col gap-4 border-t border-fg/10 pt-8">
             <div>
               <h2 className="font-display text-2xl font-semibold">Screens and demo video</h2>
               <p className="mt-1 text-sm text-text-secondary">Shown on the product page as “See it working” and “Inside the product”.</p>

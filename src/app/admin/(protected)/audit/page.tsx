@@ -57,7 +57,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
       <form className="flex flex-wrap items-end gap-3 text-sm" action="/admin/audit">
         <label className="flex flex-col gap-1">
           <span className="text-xs text-text-secondary">Admin</span>
-          <select name="actor" defaultValue={params.actor ?? ""} className="h-10 rounded-control border border-fg/15 bg-ink-950/60 px-3">
+          <select name="actor" defaultValue={params.actor ?? ""} className="field-select h-10 rounded-control border border-fg/15 bg-ink-950/60 px-3">
             <option value="">Everyone</option>
             {admins.map((a) => (
               <option key={a.id} value={a.id}>
@@ -68,7 +68,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         </label>
         <label className="flex flex-col gap-1">
           <span className="text-xs text-text-secondary">Area</span>
-          <select name="area" defaultValue={params.area ?? ""} className="h-10 rounded-control border border-fg/15 bg-ink-950/60 px-3">
+          <select name="area" defaultValue={params.area ?? ""} className="field-select h-10 rounded-control border border-fg/15 bg-ink-950/60 px-3">
             <option value="">Everything</option>
             {areas.map((m) => (
               <option key={m} value={m}>

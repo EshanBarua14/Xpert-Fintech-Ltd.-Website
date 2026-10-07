@@ -109,7 +109,7 @@ export function Select({
           required={required}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={cn(control, "h-12 border-fg/15", className)}
+          className={cn(control, "field-select h-12 cursor-pointer border-fg/15", className)}
           {...initial}
           {...props}
         >

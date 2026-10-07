@@ -216,9 +216,34 @@ html[lang="bn"] .font-display {
   font-variant-numeric: tabular-nums;
 }
 
-:focus-visible {
-  outline: 2px solid var(--color-brand-sky);
-  outline-offset: 2px;
+/* Base focus ring. In the base layer so a component's own focus style (form
+   fields, the search box) wins instead of getting a second ring on top. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-brand-sky);
+    outline-offset: 2px;
+  }
+}
+
+/* Drop-downs: the same surface, text and focus ring as text fields in both
+   themes, a drawn chevron instead of the operating system's, and options
+   that follow the theme (no white-on-white list in dark mode). */
+select.field-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%2385a0c2' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 0.75rem;
+}
+select.field-select option {
+  background-color: var(--color-navy-900);
+  color: var(--color-text-primary);
+}
+select.field-select:invalid,
+select.field-select option[value=""] {
+  color: var(--color-text-secondary);
 }
 
 /* Visible only when focused by keyboard: the "Skip to content" link */

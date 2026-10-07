@@ -156,7 +156,7 @@ export function FlowForm({ values, nodes }: { values: FlowFormValues; nodes: Opt
                 </div>
                 <label className="flex flex-col gap-1 text-sm md:col-span-2">
                   <span className="font-medium">Node</span>
-                  <select value={s.nodeId} onChange={(ev) => set(i, { nodeId: ev.target.value })} className={field}>
+                  <select value={s.nodeId} onChange={(ev) => set(i, { nodeId: ev.target.value })} className={`${field} field-select`}>
                     <option value="">Choose…</option>
                     {nodes.map((n) => (
                       <option key={n.value} value={n.value}>

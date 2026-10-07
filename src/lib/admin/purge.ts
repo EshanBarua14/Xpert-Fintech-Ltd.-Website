@@ -136,6 +136,13 @@ export async function purgeVideo(id: string) {
   });
 }
 
+export async function purgeTestimonial(id: string) {
+  await db.$transaction(async (tx) => {
+    await clearMediaUsage(tx, "TESTIMONIAL", id);
+    await tx.testimonial.delete({ where: { id } });
+  });
+}
+
 export async function purgeLead(id: string) {
   await db.lead.delete({ where: { id } });
 }
@@ -190,6 +197,7 @@ export async function purgeOldTrash(force = false): Promise<number> {
     await run(await db.caseStudy.findMany({ where: old, select: { id: true } }), purgeCaseStudy);
     await run(await db.album.findMany({ where: old, select: { id: true } }), purgeAlbum);
     await run(await db.video.findMany({ where: old, select: { id: true } }), purgeVideo);
+    await run(await db.testimonial.findMany({ where: old, select: { id: true } }), purgeTestimonial);
     await run(await db.person.findMany({ where: old, select: { id: true } }), purgePerson);
     await run(await db.offering.findMany({ where: old, select: { id: true } }), purgeOffering);
     await run(await db.organization.findMany({ where: old, select: { id: true } }), purgeOrganization);

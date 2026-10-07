@@ -10,7 +10,7 @@ const VERB: Record<string, string> = { create: "Created", createMany: "Created",
 const NAME: Record<string, string> = {
   Offering: "product", Page: "page", PageSection: "page section", ContentBlock: "content block", Organization: "organisation", Deployment: "app deployment",
   CaseStudy: "case study", Person: "person", PersonRole: "person's role", Career: "job", CareerApplication: "job application", Article: "news story",
-  ArticleCategory: "news category", Event: "event", Resource: "resource", Album: "photo album", Video: "video", Lead: "lead", Media: "media file",
+  ArticleCategory: "news category", Event: "event", Resource: "resource", Album: "photo album", Video: "video", Testimonial: "testimonial", Tag: "news tag", Lead: "lead", Media: "media file",
   NavItem: "menu link", NavMenu: "menu", SiteSetting: "setting", Office: "office", AdminUser: "admin", MarketShare: "market-share figure",
   MarketDataSource: "market data source", EcosystemNode: "ecosystem node", EcosystemEdge: "ecosystem link", EcosystemFlow: "ecosystem flow",
   Redirect: "redirect", SeoMetadata: "SEO settings", OfferingItem: "product item", OfferingMedia: "product media",
@@ -18,7 +18,7 @@ const NAME: Record<string, string> = {
 const LINK: Record<string, string> = {
   Offering: "/admin/products/", Page: "/admin/pages/", Organization: "/admin/organizations/", Deployment: "/admin/deployments/", CaseStudy: "/admin/case-studies/",
   Person: "/admin/people/", Career: "/admin/careers/", CareerApplication: "/admin/applications/", Article: "/admin/news/", Event: "/admin/events/",
-  Resource: "/admin/resources/", Album: "/admin/albums/", Video: "/admin/videos/", Lead: "/admin/leads/", Media: "/admin/media/",
+  Resource: "/admin/resources/", Album: "/admin/albums/", Video: "/admin/videos/", Testimonial: "/admin/testimonials/", Lead: "/admin/leads/", Media: "/admin/media/",
   EcosystemNode: "/admin/ecosystem/nodes/", EcosystemFlow: "/admin/ecosystem/flows/",
 };
 

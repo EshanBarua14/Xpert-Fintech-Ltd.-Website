@@ -113,3 +113,21 @@ Admin → Admins: add an admin, edit any admin's name or sign-in email, reset a 
 ## Light and dark mode
 
 Visitors and admins get their device's setting on the first visit; the sun/moon button switches it and is remembered on that device (for both the website and the admin portal). Photo and video cards, the video player and the photo viewer stay dark in both modes on purpose, so pictures read well.
+
+## Importing the old website
+
+`npm run import:live-site` copies www.xpertfintech.com (WordPress) into this site once: every image into the media library, news posts into News with redirects from their old addresses, and the people, client logos and testimonials it can recognise from the page layouts. It also adds the portraits in `prisma/seed-media/people/` to the media library. Re-running only adds what is new. Check `live-site-import/report.md` afterwards; each old page's text is saved next to it.
+
+- `-- --dry` shows what would be imported without changing anything.
+- `-- --allow-expired-certificate` reads the old site although its security certificate has expired (renew it: visitors see a warning).
+- `-- --logos-approved` shows imported client logos straight away (only if XFL has permission to display them).
+
+Imported testimonials arrive as drafts: open each in Admin → Testimonials, tick “Written approval from this person is on file” and publish.
+
+## Testimonials
+
+Admin → Testimonials: name, organization (its name and logo appear with the quote), the person's title and quote in English and Bangla, an optional photo, and the order. A quote can be published only with the person's written approval on file. Published quotes appear in the slider on the home page.
+
+## Office map and registration details
+
+Admin → Settings → Contact: “Google Maps location” takes a Google Maps share link (the pin is taken from it) or the address from Share → Embed a map; empty, the map shows the office address. Office hours appear beside the map on the Contact page. Settings → Registration and regulation: shown in the footer of every page.

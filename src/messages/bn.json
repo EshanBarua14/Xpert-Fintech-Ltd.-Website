@@ -518,5 +518,17 @@
   "demoTitle": "কাজ করতে দেখুন",
   "demoBody": "ব্যবহারের সময় পণ্যটির একটি সংক্ষিপ্ত পরিচিতি।",
   "screensTitle": "পণ্যের ভেতরে",
-  "screensBody": "চালু পণ্যের স্ক্রিন। বড় করে দেখতে যেকোনোটি বেছে নিন।"
+  "screensBody": "চালু পণ্যের স্ক্রিন। বড় করে দেখতে যেকোনোটি বেছে নিন।",
+  "testimonialsTitle": "গ্রাহকদের ভাষায়",
+  "testimonialsBody": "এক্সপার্টে আসার পর কী বদলেছে, ব্রোকারেজ হাউসগুলোর কথায়।",
+  "testimonialsRegion": "গ্রাহকদের মতামত",
+  "testimonialPrev": "আগের মতামত",
+  "testimonialNext": "পরের মতামত",
+  "testimonialPause": "মতামত থামান",
+  "testimonialPlay": "মতামত চালু করুন",
+  "testimonialSlide": "{n}টির মধ্যে {i} নম্বর মতামত",
+  "visitUsTitle": "আমাদের অফিসে আসুন",
+  "officeHours": "অফিস সময়",
+  "getDirections": "পথনির্দেশ দেখুন",
+  "mapTitle": "এক্সপার্ট ফিনটেক অফিসের মানচিত্র"
 }

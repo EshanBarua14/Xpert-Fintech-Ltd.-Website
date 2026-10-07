@@ -27,7 +27,8 @@ import { showcaseLabels } from "@/lib/public/labels";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { mediaIdsOf, toSections } from "@/lib/public/blocks";
-import { getEvents, getPageByKey, getSeo } from "@/lib/public/content";
+import { getEvents, getPageByKey, getSeo, getTestimonials } from "@/lib/public/content";
+import { TestimonialSlider } from "@/components/organizations/TestimonialSlider";
 import { getFlagshipData } from "@/lib/public/flagship";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { getMarketPayload } from "@/lib/market/data";
@@ -76,7 +77,7 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   const [data, events, market, showcase] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale)]);
-  const [apps, eco, ecoInDb] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase()]);
+  const [apps, eco, ecoInDb, testimonials] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale)]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -102,13 +103,13 @@ export default async function HomePage({ params }: Props) {
         status={market.mode !== "none" ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
       />
 
-      {hasMarket && (
-        <Shell id="market" className="py-20 md:py-28">
-          <div className="flex flex-col gap-12">
-            <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} body={t.marketBody} />
-            <MarketPulse initial={market} t={t} locale={locale} />
+      {data.clients.length > 0 && (
+        <section id="clients" className="relative scroll-mt-28 overflow-hidden border-y border-fg/[0.06] py-12 md:py-16">
+          <div className="mx-auto mb-8 w-full max-w-7xl px-4 md:px-8">
+            <SectionHeader eyebrow={t.clientsEyebrow} title={t.clientsTitle.replace("{n}", new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(data.clients.length))} body={t.clientsBody} />
           </div>
-        </Shell>
+          <ClientMarquee clients={data.clients} label={t.clientsEyebrow} />
+        </section>
       )}
 
       {showcase.length > 0 && (
@@ -119,6 +120,34 @@ export default async function HomePage({ params }: Props) {
               <GhostButton href={`/${locale}/products`}>{t.exploreProducts}</GhostButton>
             </div>
             <ProductShowcase products={showcase} labels={showcaseLabels(t)} />
+          </div>
+        </Shell>
+      )}
+
+      {testimonials.length > 0 && (
+        <Shell id="testimonials" className="py-20 md:py-28">
+          <div className="flex flex-col gap-14">
+            <SectionHeader title={t.testimonialsTitle} body={t.testimonialsBody} />
+            <TestimonialSlider
+              items={testimonials}
+              labels={{
+                region: t.testimonialsRegion,
+                prev: t.testimonialPrev,
+                next: t.testimonialNext,
+                pause: t.testimonialPause,
+                play: t.testimonialPlay,
+                slide: t.testimonialSlide,
+              }}
+            />
+          </div>
+        </Shell>
+      )}
+
+      {hasMarket && (
+        <Shell id="market" className="py-20 md:py-28">
+          <div className="flex flex-col gap-12">
+            <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} body={t.marketBody} />
+            <MarketPulse initial={market} t={t} locale={locale} />
           </div>
         </Shell>
       )}
@@ -184,15 +213,6 @@ export default async function HomePage({ params }: Props) {
             <EventCards events={events} locale={locale} />
           </div>
         </Shell>
-      )}
-
-      {data.clients.length > 0 && (
-        <section id="clients" className="relative scroll-mt-28 overflow-hidden py-16 md:py-24">
-          <div className="mx-auto mb-10 w-full max-w-7xl px-4 md:px-8">
-            <SectionHeader eyebrow={t.clientsEyebrow} title={t.clientsTitle.replace("{n}", new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(data.clients.length))} body={t.clientsBody} />
-          </div>
-          <ClientMarquee clients={data.clients} label={t.clientsEyebrow} />
-        </section>
       )}
 
       <CtaBand t={t} locale={locale} />

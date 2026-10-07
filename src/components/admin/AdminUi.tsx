@@ -26,6 +26,7 @@ const NAV = [
   { href: "/admin/case-studies", label: "Case studies" },
   { href: "/admin/people", label: "People" },
   { href: "/admin/organizations", label: "Organizations" },
+  { href: "/admin/testimonials", label: "Testimonials" },
   { href: "/admin/deployments", label: "App deployments" },
   { href: "/admin/navigation", label: "Navigation" },
   { href: "/admin/redirects", label: "Redirects" },

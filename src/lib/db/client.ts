@@ -28,6 +28,7 @@ const ENTITY: Record<string, string> = {
   Resource: "RESOURCE",
   Album: "ALBUM",
   Video: "VIDEO",
+  Testimonial: "TESTIMONIAL",
 };
 
 function summarize(data: unknown): Record<string, unknown> | undefined {

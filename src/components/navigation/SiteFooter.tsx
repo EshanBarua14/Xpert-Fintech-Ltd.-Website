@@ -52,9 +52,16 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
               {info.address && (
                 <span className="flex gap-3 text-text-secondary">
                   <Icon name="globe" className="mt-0.5 size-4 shrink-0 text-brand-sky" />
-                  <span>
-                    <span className="sr-only">{t.address}: </span>
-                    {info.address}
+                  <span className="flex flex-col gap-1">
+                    <span>
+                      <span className="sr-only">{t.address}: </span>
+                      {info.address}
+                    </span>
+                    {info.mapLink && (
+                      <a href={info.mapLink} target="_blank" rel="noopener noreferrer" className="self-start font-semibold text-brand-sky hover:text-fg">
+                        {t.getDirections}
+                      </a>
+                    )}
                   </span>
                 </span>
               )}
@@ -78,7 +85,7 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-8 md:justify-items-end">
             {columns.map((column) => (
               <nav key={column.id} aria-label={column.label} className="min-w-40">
-                <h2 className="mb-5 font-mono text-[11px] text-text-secondary">{column.label}</h2>
+                <h2 className="mb-4 text-sm font-semibold text-text-primary">{column.label}</h2>
                 <ul className="flex flex-col gap-1.5">
                   {column.children.map((item) => (
                     <li key={item.id}>
@@ -92,6 +99,15 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
         </div>
       </Container>
 
+
+      {(info.registration || info.regulatory) && (
+        <Container className="relative border-t border-fg/[0.06] py-6">
+          <div className="grid gap-3 text-xs leading-relaxed text-text-secondary md:grid-cols-2 md:gap-10">
+            {info.registration && <p>{info.registration}</p>}
+            {info.regulatory && <p>{info.regulatory}</p>}
+          </div>
+        </Container>
+      )}
 
       <div className="relative border-t border-fg/[0.06] bg-ink-950/60 backdrop-blur">
         <Container className="flex flex-col gap-5 py-6 text-xs text-text-secondary md:flex-row md:items-center md:justify-between">

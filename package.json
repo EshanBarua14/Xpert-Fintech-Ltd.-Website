@@ -28,7 +28,8 @@
     "admin:password": "tsx scripts/reset-admin-password.ts",
     "setup": "tsx scripts/setup.ts",
     "market:check": "tsx --conditions=react-server scripts/market-check.ts",
-    "db:permissions": "tsx scripts/db-permissions.ts"
+    "db:permissions": "tsx scripts/db-permissions.ts",
+    "import:live-site": "tsx scripts/import-live-site.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

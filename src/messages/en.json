@@ -518,5 +518,17 @@
   "demoTitle": "See it working",
   "demoBody": "A short walkthrough of the product in use.",
   "screensTitle": "Inside the product",
-  "screensBody": "Screens from the live product. Select one to see it full size."
+  "screensBody": "Screens from the live product. Select one to see it full size.",
+  "testimonialsTitle": "In our clients’ words",
+  "testimonialsBody": "Brokerage houses on what changed after moving to Xpert.",
+  "testimonialsRegion": "Client testimonials",
+  "testimonialPrev": "Previous testimonial",
+  "testimonialNext": "Next testimonial",
+  "testimonialPause": "Pause testimonials",
+  "testimonialPlay": "Play testimonials",
+  "testimonialSlide": "Testimonial {i} of {n}",
+  "visitUsTitle": "Visit us",
+  "officeHours": "Office hours",
+  "getDirections": "Get directions",
+  "mapTitle": "Map of the Xpert Fintech office"
 }

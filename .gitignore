@@ -35,3 +35,6 @@ npm-debug.log*
 assets/*
 !assets/README.md
 market-debug/
+
+# Report and page text written by npm run import:live-site
+/live-site-import/

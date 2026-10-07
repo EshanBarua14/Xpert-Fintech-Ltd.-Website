@@ -598,6 +598,37 @@ body::before {
 .marquee:hover .marquee-track {
   animation-play-state: paused;
 }
+/* The office map follows the site theme: darkened in dark mode */
+[data-theme="dark"] .office-map {
+  filter: invert(0.9) hue-rotate(180deg) saturate(0.6) brightness(0.95);
+}
+
+/* Testimonials: a track without a visible scrollbar; the active slide's bar fills over its time */
+.testimonial-track {
+  scrollbar-width: none;
+}
+.testimonial-track::-webkit-scrollbar {
+  display: none;
+}
+.testimonial-quote::before {
+  content: "“";
+  display: block;
+  height: 0.55em;
+  margin-bottom: 0.15em;
+  font-size: 2.6em;
+  line-height: 1;
+  color: var(--color-brand-sky);
+}
+.testimonial-progress {
+  width: 0;
+  animation: testimonial-progress linear forwards;
+}
+@keyframes testimonial-progress {
+  to {
+    width: 100%;
+  }
+}
+
 /* Product demo: a framed player; without a still, a quiet brand field with a fine grid */
 .demo-frame {
   box-shadow: 0 40px 100px -50px rgb(6 17 31 / 0.9);

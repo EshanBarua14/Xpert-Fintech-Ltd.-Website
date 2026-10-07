@@ -18,7 +18,8 @@ const csp = [
   "img-src 'self' data: blob: https://i.ytimg.com",
   "font-src 'self' data:",
   `connect-src 'self' https://challenges.cloudflare.com${isDev ? " ws: wss:" : ""}`,
-  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com https://challenges.cloudflare.com",
+  // www.google.com: the office map on the contact page.
+  "frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com https://www.google.com https://challenges.cloudflare.com",
   "media-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",

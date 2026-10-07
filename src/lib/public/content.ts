@@ -171,3 +171,49 @@ export async function findRedirect(path: string) {
 export async function countRedirectHit(id: string) {
   await db.redirect.update({ where: { id }, data: { hits: { increment: 1 } } }).catch(() => {});
 }
+
+// ── Testimonials ─────────────────────────────────────────────────────────────
+
+export type TestimonialCard = {
+  id: string;
+  quote: string;
+  name: string;
+  role: string | null;
+  organization: string | null;
+  photo: MediaInfo | null;
+  logo: MediaInfo | null;
+};
+
+/** Published quotes with written approval on file, in the order set in the admin. */
+export const getTestimonials = cache(async (locale: AppLocale): Promise<TestimonialCard[]> => {
+  try {
+    const rows = await db.testimonial.findMany({
+      where: { ...publishedWhere(), hasApproval: true },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      include: { translations: true, organization: { include: { translations: true } } },
+    });
+    const media = await mediaMap(
+      rows.flatMap((r) => [r.photoMediaId, r.organization?.logoPermission ? r.organization.logoMediaId : null]),
+      locale,
+    );
+    return rows.flatMap((r) => {
+      const tr = pick(r.translations, locale);
+      if (!tr) return [];
+      const org = r.organization && !r.organization.deletedAt ? r.organization : null;
+      return [
+        {
+          id: r.id,
+          quote: tr.quote,
+          name: r.personName,
+          role: tr.personTitle,
+          organization: org ? (pick(org.translations, locale)?.name ?? null) : null,
+          photo: media.get(r.photoMediaId ?? "") ?? null,
+          logo: org?.logoPermission ? (media.get(org.logoMediaId ?? "") ?? null) : null,
+        },
+      ];
+    });
+  } catch (error) {
+    console.error("[testimonials] could not load", error);
+    return [];
+  }
+});

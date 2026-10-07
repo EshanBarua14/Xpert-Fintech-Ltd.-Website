@@ -138,6 +138,20 @@ function PersonCard({
           {p.affiliation && <p className="text-sm leading-snug text-text-secondary">{p.affiliation}</p>}
         </div>
         {p.bio && <p className={cn("text-sm leading-relaxed text-text-secondary", featured ? "line-clamp-5 lg:text-base" : "line-clamp-3")}>{p.bio}</p>}
+        {/* Outside production, a card without contact details shows where they go. */}
+        {!p.email && !p.linkedinUrl && showPlaceholderBadge && (
+          <div className="mt-auto flex items-center gap-3 border-t border-fg/[0.08] pt-4">
+            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-dashed border-gold/50 text-gold/70">
+              <SocialIcon kind="email" className="size-4" />
+            </span>
+            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-dashed border-gold/50 text-gold/70">
+              <SocialIcon kind="linkedin" className="size-4" />
+            </span>
+            <a href="/admin/people/contacts" className="ml-auto text-xs font-semibold text-gold hover:underline">
+              Add email &amp; LinkedIn
+            </a>
+          </div>
+        )}
         {(p.email || p.linkedinUrl) && (
           <div className="mt-auto flex items-center gap-3 border-t border-fg/[0.08] pt-4">
             {p.email && (

@@ -380,6 +380,15 @@ async function portraitFor(key: string, name: string): Promise<string | null> {
 }
 
 /** An image in prisma/seed-media/<folder>/<key>.(png|jpg|webp) → media library id; the same file is stored once. */
+let repairedFiles = 0;
+
+/** True when a person's current photo can actually be shown (record live and file on disk). */
+async function photoWorks(mediaId: string | null): Promise<boolean> {
+  if (!mediaId) return false;
+  const m = await db.media.findUnique({ where: { id: mediaId }, select: { deletedAt: true, isScanned: true, storageKey: true, kind: true } });
+  return !!m && !m.deletedAt && m.isScanned && m.kind === "IMAGE" && existsSync(path.join(process.cwd(), "storage", "media", m.storageKey));
+}
+
 async function seedImage(folder: string, key: string, name: string, tags: string[]): Promise<string | null> {
   const dir = path.join(process.cwd(), "prisma", "seed-media", folder);
   const file = ["png", "jpg", "jpeg", "webp"].map((ext) => path.join(dir, `${key}.${ext}`)).find((f) => existsSync(f));
@@ -388,8 +397,18 @@ async function seedImage(folder: string, key: string, name: string, tags: string
   const type = sniff(data);
   if (!type || type.kind !== "IMAGE") return null;
   const checksum = createHash("sha256").update(data).digest("hex");
-  const existing = await db.media.findFirst({ where: { checksum, deletedAt: null }, select: { id: true } });
-  if (existing) return existing.id;
+  const existing = await db.media.findFirst({ where: { checksum, deletedAt: null }, select: { id: true, storageKey: true, isScanned: true } });
+  if (existing) {
+    // The record exists but its file may not (e.g. a database copied without the storage folder): put it back.
+    const onDisk = path.join(process.cwd(), "storage", "media", existing.storageKey);
+    if (!existsSync(onDisk)) {
+      await mkdir(path.dirname(onDisk), { recursive: true });
+      await writeFile(onDisk, data);
+      repairedFiles++;
+    }
+    if (!existing.isScanned) await db.media.update({ where: { id: existing.id }, data: { isScanned: true } });
+    return existing.id;
+  }
   const storageKey = `${randomUUID()}.${type.ext}`;
   const store = path.join(process.cwd(), "storage", "media");
   await mkdir(store, { recursive: true });
@@ -461,7 +480,8 @@ async function seedRoster() {
     if (p.formerName && !person.updatedById) {
       await db.personTranslation.updateMany({ where: { personId: person.id, locale: EN, name: p.formerName }, data: { name: p.name } });
     }
-    if (!person.photoMediaId) {
+    // No photo, or one that cannot be shown (deleted, unapproved or its file missing): use XFL's portrait.
+    if (!(await photoWorks(person.photoMediaId))) {
       const photo = await portraitFor(p.key, p.name);
       if (photo) {
         await db.person.update({ where: { id: person.id }, data: { photoMediaId: photo } });
@@ -502,7 +522,8 @@ async function seedRoster() {
     where: { key: { startsWith: "placeholder-" }, isPlaceholder: true, deletedAt: null, updatedById: null },
     data: { deletedAt: new Date() },
   });
-  console.log(`• People: ${byKey.size} from XFL's list (${added} new, ${photos} photo${photos === 1 ? "" : "s"} added)${trashed.count ? `, ${trashed.count} stand-in profile(s) moved to the trash` : ""}`);
+  const withPhoto = await db.person.count({ where: { deletedAt: null, photoMediaId: { not: null }, roles: { some: { group: { in: ["BOARD", "MANAGEMENT"] } } } } });
+  console.log(`• People: ${byKey.size} from XFL's list (${added} new, ${photos} photo${photos === 1 ? "" : "s"} added${repairedFiles ? `, ${repairedFiles} missing image file(s) restored` : ""}; ${withPhoto} board/management profiles have a photo)${trashed.count ? `, ${trashed.count} stand-in profile(s) moved to the trash` : ""}`);
 }
 
 /**

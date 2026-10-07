@@ -252,12 +252,20 @@ function ExchangeGlance({ exchange, ex, share, t, locale, className }: { exchang
  * market share and the top gainers and losers. Refreshes itself every 20 s.
  */
 export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t: Messages; locale: Locale }) {
-  const { data } = useMarket(initial);
+  const { data, loaded } = useMarket(initial);
   const snapOf = (x: "DSE" | "CSE") => data.snapshot?.exchanges.find((e) => e.exchange === x);
   const shareOf = (x: "DSE" | "CSE") => data.shares.find((f) => f.exchange === x);
   const list = (["DSE", "CSE"] as const).filter((x) => snapOf(x) || shareOf(x));
   const [tab, setTab] = useState<"DSE" | "CSE">(list[0] ?? "DSE");
-  if (!list.length) return null;
+  if (!list.length) {
+    // Prices are on but not here yet (the exchange answered slowly): say so; they appear by themselves.
+    if (data.mode === "none") return null;
+    return (
+      <p className="glass rounded-3xl p-6 text-sm text-text-secondary" aria-live="polite">
+        {loaded ? t.tickerUnavailable : t.tickerLoading}
+      </p>
+    );
+  }
   const active = list.includes(tab) ? tab : list[0]!;
 
   return (

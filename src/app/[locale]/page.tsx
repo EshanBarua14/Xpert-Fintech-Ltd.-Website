@@ -84,7 +84,7 @@ export default async function HomePage({ params }: Props) {
     { value: apps.length, label: t.proofApps },
     { value: data.exchanges.length, label: t.proofExchanges },
   ].filter((p) => p.value > 0);
-  const hasMarket = !!market.snapshot || market.shares.length > 0;
+  const hasMarket = market.mode !== "none" || market.shares.length > 0;
   const sections = page ? toSections(page, locale) : [];
   const ctx = sections.length ? await blockContext(locale, mediaIdsOf(sections)) : null;
   const caps = capabilities(t, locale, data.publishedSlugs);
@@ -98,7 +98,7 @@ export default async function HomePage({ params }: Props) {
         memberCount={data.members.length}
         modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)}
         graph={eco}
-        status={market.snapshot ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
+        status={market.mode !== "none" ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
       />
 
       {hasMarket && (

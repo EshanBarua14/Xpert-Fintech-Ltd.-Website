@@ -577,6 +577,40 @@ body::before {
 .marquee:hover .marquee-track {
   animation-play-state: paused;
 }
+/* Page-change bar (NavProgress) */
+.nav-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: calc(var(--z-toast) + 1);
+  pointer-events: none;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--color-brand-royal), var(--color-brand-sky));
+  box-shadow: 0 0 10px var(--color-brand-sky);
+  transition: opacity 200ms ease;
+}
+.nav-progress.is-active {
+  opacity: 1;
+  animation: nav-progress 10s cubic-bezier(0.08, 0.8, 0.2, 1) forwards;
+}
+@keyframes nav-progress {
+  0% { transform: scaleX(0); }
+  8% { transform: scaleX(0.35); }
+  100% { transform: scaleX(0.94); }
+}
+html.nav-busy,
+html.nav-busy * {
+  cursor: progress;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress.is-active {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
 /* DSE · CSE ticker bar (top of every public page) */
 html.has-ticker {
   --ticker-h: 2.25rem;

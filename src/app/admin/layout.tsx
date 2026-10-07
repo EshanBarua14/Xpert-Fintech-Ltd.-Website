@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import { THEME_SCRIPT } from "@/lib/theme-script";
+import { NavProgress } from "@/components/navigation/NavProgress";
 
 // The admin portal is a separate root layout: English-only UI, never indexed.
 export const metadata: Metadata = {
@@ -15,7 +16,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="min-h-dvh bg-navy-900 text-text-primary">{children}</body>
+      <body className="min-h-dvh bg-navy-900 text-text-primary">
+        {children}
+        <NavProgress />
+      </body>
     </html>
   );
 }

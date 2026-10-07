@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { THEME_SCRIPT } from "@/lib/theme-script";
+import { NavProgress } from "@/components/navigation/NavProgress";
 import { marketMode } from "@/lib/market/data";
 import { Anek_Bangla, Hind_Siliguri, JetBrains_Mono } from "next/font/google";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
@@ -63,6 +64,7 @@ export default async function LocaleLayout({
         </main>
         <SiteFooter locale={locale} />
         <SiteEffects />
+        <NavProgress />
       </body>
     </html>
   );

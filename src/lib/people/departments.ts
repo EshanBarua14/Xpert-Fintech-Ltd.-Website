@@ -7,7 +7,7 @@
  * read on both the light and the dark theme.
  */
 
-export const DEPARTMENT_NAMES = ["Leadership", "Engineering", "Support", "Infrastructure", "Marketing", "Operations"] as const;
+export const DEPARTMENT_NAMES = ["Leadership", "Engineering", "Support", "Infrastructure", "Marketing", "HR & Admin", "Operations"] as const;
 
 type DeptStyle = { color: string; bn: string };
 
@@ -17,6 +17,7 @@ const STYLES: Record<string, DeptStyle> = {
   support: { color: "#0b6e5d", bn: "সাপোর্ট" },
   infrastructure: { color: "#5a46c2", bn: "ইনফ্রাস্ট্রাকচার" },
   marketing: { color: "#b03a22", bn: "মার্কেটিং" },
+  "hr & admin": { color: "#0e7490", bn: "এইচআর ও অ্যাডমিন" },
   operations: { color: "#8b2f6b", bn: "অপারেশনস" },
 };
 

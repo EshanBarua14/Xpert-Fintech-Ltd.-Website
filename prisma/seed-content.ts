@@ -474,12 +474,17 @@ async function seedRoster() {
   for (const [group, list] of groups) {
     for (const p of list) {
       const personId = ids.get(p.key)!;
+      // Profiles nobody has saved in Admin → People follow XFL's list: position order and corrected titles.
+      const fresh = !(await db.person.findUnique({ where: { id: personId }, select: { updatedById: true } }))?.updatedById;
       const role = await db.personRole.upsert({
         where: { personId_group: { personId, group } },
-        update: {},
+        update: fresh ? { sortOrder: p.rank } : {},
         create: { personId, group, sortOrder: p.rank },
       });
       if (!p.title) continue;
+      if (fresh && p.formerTitle) {
+        await db.personRoleTranslation.updateMany({ where: { roleId: role.id, locale: EN, title: p.formerTitle }, data: { title: p.title } });
+      }
       const titles: [Locale, string | undefined][] = [
         [EN, p.title],
         [BN, BN_TITLES[p.title]],
@@ -607,6 +612,38 @@ async function seedClientLogos() {
     attached++;
   }
   if (attached || added) console.log(`• Client logos: ${attached} attached${added ? `, ${added} new client(s) added` : ""}`);
+}
+
+/**
+ * One review card per board director, ready to complete in Admin → Testimonials:
+ * photo and name from Admin → People, everything else left for XFL to fill in
+ * with the director's own words (title, institution, rating, quote). Saved as
+ * drafts without approval, so nothing appears on the live site until each one
+ * is completed, approved and published. Created once per director.
+ */
+async function seedReviewDrafts() {
+  let added = 0;
+  for (const [i, b] of BOARD.entries()) {
+    const person = await db.person.findUnique({ where: { key: b.key } });
+    if (!person) continue;
+    const exists = await db.testimonial.findFirst({ where: { personName: b.name } });
+    if (exists) continue;
+    const review = await db.testimonial.create({
+      data: {
+        personName: b.name,
+        photoMediaId: person.photoMediaId,
+        status: "DRAFT",
+        hasApproval: false,
+        sortOrder: i,
+        translations: {
+          create: { locale: EN, personTitle: null, quote: `[Review from ${b.name}: to be written in their own words, with their title, institution and rating, and approved before publishing.]` },
+        },
+      },
+    });
+    if (person.photoMediaId) await db.mediaUsage.create({ data: { mediaId: person.photoMediaId, entityType: "TESTIMONIAL", entityId: review.id, field: "photo" } });
+    added++;
+  }
+  if (added) console.log(`• ${added} review card draft(s) for the board: complete and publish them in Admin → Testimonials`);
 }
 
 // ── Consortium and apps ──────────────────────────────────────────────────────
@@ -937,6 +974,7 @@ async function main() {
   await seedLegalDrafts();
   await mergePlatformIntoProducts();
   await seedClientLogos();
+  await seedReviewDrafts();
   await seedDeployments();
   await seedTeamLinks();
   await seedMilestones();

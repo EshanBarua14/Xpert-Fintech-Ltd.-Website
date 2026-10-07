@@ -864,6 +864,8 @@ model Testimonial {
   photoMediaId   String?       @db.Uuid
   /// Written approval from the quoted person is on file.
   hasApproval    Boolean       @default(false)
+  /// Star rating the client gave, 1–5 (optional).
+  rating         Int?
   status         ContentStatus @default(DRAFT)
   publishAt      DateTime?
   sortOrder      Int           @default(0)

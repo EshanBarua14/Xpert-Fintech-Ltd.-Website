@@ -18,6 +18,7 @@ export type TestimonialFormValues = {
   organizationId: string;
   photoMediaId: string;
   hasApproval: boolean;
+  rating: string;
   en: Text;
   bn: Text;
 };
@@ -45,6 +46,14 @@ export function TestimonialForm({ values, images, organizations }: { values: Tes
             defaultValue={values.organizationId}
             hint="Its name and logo are shown with the quote."
             error={e.organizationId}
+          />
+          <Select
+            id="rating"
+            label="Rating"
+            options={[{ value: "", label: "No rating" }, ...[5, 4, 3, 2, 1].map((n) => ({ value: String(n), label: `${"★".repeat(n)}${"☆".repeat(5 - n)}  ${n} out of 5` }))]}
+            defaultValue={values.rating}
+            hint="Only the rating the client gave."
+            error={e.rating}
           />
         </fieldset>
         <TranslatedFieldset l="en" values={values.en} errors={e} fields={FIELDS} />

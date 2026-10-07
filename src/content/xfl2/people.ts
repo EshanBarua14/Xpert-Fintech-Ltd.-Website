@@ -8,7 +8,7 @@
  * card colour and the filter on the Team page.
  */
 
-export type Department = "Leadership" | "Engineering" | "Support" | "Infrastructure" | "Marketing" | "Operations";
+export type Department = "Leadership" | "Engineering" | "Support" | "Infrastructure" | "Marketing" | "HR & Admin" | "Operations";
 
 export type RosterPerson = {
   key: string;
@@ -18,6 +18,8 @@ export type RosterPerson = {
   rank: number;
   /** An older spelling to correct in profiles no admin has edited yet. */
   formerName?: string;
+  /** An older title to correct in profiles no admin has edited yet. */
+  formerTitle?: string;
 };
 
 /** Board of Directors, in the order the previous website listed them. */
@@ -41,11 +43,7 @@ export const MANAGEMENT: RosterPerson[] = [
   { key: "muhammad-shamsul-maruf", name: "Mohammad Shamsul Maruf", formerName: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 4 },
 ];
 
-/**
- * Everyone at Xpert, by position. Two people have no title in the staff list,
- * and the two Officers' department is not stated: their department is left
- * empty for an editor to set in Admin → People.
- */
+/** Everyone at Xpert, by position (XFL's staff list, with titles confirmed by XFL). */
 export const TEAM: RosterPerson[] = [
   { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman", title: "Managing Director", department: "Leadership", rank: 1 },
   { key: "sowkot-osman", name: "Sowkot Osman", title: "Executive Director", department: "Leadership", rank: 2 },
@@ -62,16 +60,16 @@ export const TEAM: RosterPerson[] = [
   { key: "shamsher-morshed", name: "Shamsher Morshed", title: "Network Administrator", department: "Infrastructure", rank: 13 },
   { key: "nafis-hasan-khan", name: "Nafis Hasan Khan", title: "System and Network Engineer", department: "Infrastructure", rank: 14 },
   { key: "talukder-juhaer-hakim", name: "Talukder Juhaer Hakim", title: "Software Engineer", department: "Engineering", rank: 15 },
-  { key: "najmul-hasan-rifat", name: "Najmul Hasan Rifat", title: "React Native App Developer", department: "Engineering", rank: 16 },
-  { key: "md-hasan-uddin", name: "Md. Hasan Uddin", title: "QA Software Engineer", department: "Engineering", rank: 17 },
-  { key: "eshan-barua", name: "Eshan Barua", title: "Support Engineer", department: "Support", rank: 18 },
-  { key: "md-anzirul-islam", name: "Md. Anzirul Islam", title: "Support Engineer", department: "Support", rank: 19 },
-  { key: "md-wahidul-alam", name: "Md. Wahidul Alam", title: "Support Engineer", department: "Support", rank: 20 },
-  { key: "toha-hossain", name: "Toha Hossain", title: "Officer", department: null, rank: 21 },
-  { key: "mahmuda-yasmin-farah", name: "Mahmuda Yasmin Farah", title: "Officer", department: null, rank: 22 },
-  { key: "ali-hossain-maruf", name: "Ali Hossain Maruf", title: null, department: null, rank: 23 },
-  { key: "kazi-farzana-hamid", name: "Kazi Farzana Hamid", title: null, department: null, rank: 24 },
+  { key: "toha-hossain", name: "Toha Hossain", title: "Software Engineer", formerTitle: "Officer", department: "Engineering", rank: 16 },
+  { key: "mahmuda-yasmin-farah", name: "Mahmuda Yasmin Farah", title: "Software Engineer", formerTitle: "Officer", department: "Engineering", rank: 17 },
+  { key: "najmul-hasan-rifat", name: "Najmul Hasan Rifat", title: "React Native App Developer", department: "Engineering", rank: 18 },
+  { key: "md-hasan-uddin", name: "Md. Hasan Uddin", title: "QA Software Engineer", department: "Engineering", rank: 19 },
+  { key: "eshan-barua", name: "Eshan Barua", title: "Support Engineer", department: "Support", rank: 20 },
+  { key: "md-anzirul-islam", name: "Md. Anzirul Islam", title: "Support Engineer", department: "Support", rank: 21 },
+  { key: "md-wahidul-alam", name: "Md. Wahidul Alam", title: "Support Engineer", department: "Support", rank: 22 },
+  { key: "ali-hossain-maruf", name: "Ali Hossain Maruf", title: "Senior Executive, HR & Admin", department: "HR & Admin", rank: 23 },
+  { key: "kazi-farzana-hamid", name: "Kazi Farzana Hamid", title: "Receptionist", department: "HR & Admin", rank: 24 },
 ];
 
 /** Departments in display order, as offered in Admin → People. */
-export const DEPARTMENTS: Department[] = ["Leadership", "Engineering", "Support", "Infrastructure", "Marketing", "Operations"];
+export const DEPARTMENTS: Department[] = ["Leadership", "Engineering", "Support", "Infrastructure", "Marketing", "HR & Admin", "Operations"];

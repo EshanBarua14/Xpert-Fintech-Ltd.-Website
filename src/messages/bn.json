@@ -549,5 +549,6 @@
   "teamEveryone": "সবাই",
   "teamShowing": "{n} জন",
   "teamDepartment": "বিভাগ",
-  "notPublished": "প্রকাশিত হয়নি"
+  "notPublished": "প্রকাশিত হয়নি",
+  "testimonialRating": "৫-এর মধ্যে {n} রেটিং"
 }

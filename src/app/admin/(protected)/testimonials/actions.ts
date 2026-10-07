@@ -21,6 +21,11 @@ const base = z.object({
     organizationId: optionalId,
     photoMediaId: optionalId,
     hasApproval: checkbox,
+    rating: z
+      .string()
+      .optional()
+      .transform((v) => (v ? Number(v) : null))
+      .refine((v) => v === null || (Number.isInteger(v) && v >= 1 && v <= 5), "Choose 1 to 5 stars, or none."),
     enRole: optionalText(160),
     enQuote: z.string().trim().min(10, "Enter the quote (at least a sentence).").max(1200),
     bnRole: optionalText(160),
@@ -51,6 +56,7 @@ export async function saveTestimonial(_prev: TestimonialState, formData: FormDat
     organizationId: v.organizationId,
     photoMediaId: v.photoMediaId,
     hasApproval: v.hasApproval,
+    rating: v.rating,
     updatedById: admin.id,
   };
   let id = v.id;

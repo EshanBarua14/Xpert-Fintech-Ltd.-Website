@@ -549,5 +549,6 @@
   "teamEveryone": "Everyone",
   "teamShowing": "{n} people",
   "teamDepartment": "Department",
-  "notPublished": "Not published"
+  "notPublished": "Not published",
+  "testimonialRating": "Rated {n} out of 5"
 }

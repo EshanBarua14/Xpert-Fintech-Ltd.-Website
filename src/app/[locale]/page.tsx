@@ -186,6 +186,7 @@ export default async function HomePage({ params }: Props) {
                 pause: t.testimonialPause,
                 play: t.testimonialPlay,
                 slide: t.testimonialSlide,
+                rating: t.testimonialRating,
               }}
             />
           </div>

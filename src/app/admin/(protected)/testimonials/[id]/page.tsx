@@ -39,6 +39,7 @@ export default async function TestimonialPage({ params, searchParams }: { params
       organizationId: "",
       photoMediaId: "",
       hasApproval: false,
+      rating: "",
       en: { role: "", quote: "" },
       bn: { role: "", quote: "" },
     };
@@ -82,6 +83,7 @@ export default async function TestimonialPage({ params, searchParams }: { params
             organizationId: row.organizationId ?? "",
             photoMediaId: row.photoMediaId ?? "",
             hasApproval: row.hasApproval,
+            rating: row.rating ? String(row.rating) : "",
             en: text("en"),
             bn: text("bn"),
           }}

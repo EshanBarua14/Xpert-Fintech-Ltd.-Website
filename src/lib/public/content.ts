@@ -182,6 +182,8 @@ export type TestimonialCard = {
   organization: string | null;
   photo: MediaInfo | null;
   logo: MediaInfo | null;
+  /** 1–5 stars, when the client gave a rating. */
+  rating: number | null;
   /** Not published or no written approval yet: only shown outside production, marked as a draft. */
   draft?: boolean;
 };
@@ -216,6 +218,7 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           organization: org ? (pick(org.translations, locale)?.name ?? null) : null,
           photo: media.get(r.photoMediaId ?? "") ?? null,
           logo: org?.logoPermission ? (media.get(org.logoMediaId ?? "") ?? null) : null,
+          rating: r.rating && r.rating >= 1 && r.rating <= 5 ? r.rating : null,
           draft: preview && !(r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date())),
         },
       ];

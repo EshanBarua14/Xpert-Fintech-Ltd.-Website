@@ -79,6 +79,8 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
   const [q, setQ] = useState("");
   const [onlyWatch, setOnlyWatch] = useState(false);
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "changePct", dir: -1 });
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
   const hasVolume = !!ex?.quotes.some((x) => x.volume !== undefined);
 
   const rows = useMemo(() => {
@@ -105,7 +107,18 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
   const { gainers, losers } = movers(ex, 5);
   const active = hasVolume ? [...ex.quotes].sort((a, b) => (b.volume ?? 0) - (a.volume ?? 0)).slice(0, 5) : [];
   const breadth = (ex.advancers ?? 0) + (ex.decliners ?? 0) + (ex.unchanged ?? 0);
-  const shown = rows.slice(0, 400);
+  // Pagination: back to page 1 whenever the search, filter, sort or page size changes (see the handlers).
+  const pages = Math.max(1, Math.ceil(rows.length / perPage));
+  const current = Math.min(page, pages);
+  const from = (current - 1) * perPage;
+  const shown = rows.slice(from, from + perPage);
+  const pageList = pageNumbers(current, pages);
+  // Changing page brings the top of the table back into view.
+  const goTo = (n: number) => {
+    setPage(n);
+    const top = document.getElementById("board-title");
+    if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  };
   const columns: { key: SortKey; label: string; align: "left" | "right"; hide?: boolean }[] = [
     { key: "symbol", label: t.colSymbol, align: "left" },
     { key: "ltp", label: t.colLtp, align: "right" },
@@ -203,7 +216,7 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
 
       <section aria-labelledby="board-title" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-3">
-          <h2 id="board-title" className="mr-auto font-display text-2xl font-semibold">
+          <h2 id="board-title" className="mr-auto scroll-mt-[calc(7rem+var(--ticker-h))] font-display text-2xl font-semibold">
             {t.priceBoard}
           </h2>
           <label className="relative">
@@ -211,7 +224,10 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
             <input
               type="search"
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(1);
+              }}
               placeholder={t.searchSymbols}
               autoCapitalize="characters"
               className="h-11 w-56 rounded-full border border-fg/15 bg-ink-950/60 px-4 font-mono text-sm placeholder:normal-case focus:border-brand-sky focus:outline-none"
@@ -220,7 +236,10 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
           <button
             type="button"
             aria-pressed={onlyWatch}
-            onClick={() => setOnlyWatch((v) => !v)}
+            onClick={() => {
+              setOnlyWatch((v) => !v);
+              setPage(1);
+            }}
             className={cn("inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold", onlyWatch ? "border-gold/60 bg-gold/10 text-gold" : "border-fg/15 text-text-secondary hover:text-fg")}
           >
             ★ {t.watchOnly} ({fmt(locale, watch.list.filter((id) => id.startsWith(`${exchange}:`)).length, 0)})
@@ -246,7 +265,10 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
                         <th key={c.key} scope="col" aria-sort={on ? (sort.dir === 1 ? "ascending" : "descending") : "none"} className={cn("px-3 py-3 font-medium", c.align === "right" ? "text-right" : "text-left")}>
                           <button
                             type="button"
-                            onClick={() => setSort((s) => ({ key: c.key, dir: s.key === c.key ? (s.dir === 1 ? -1 : 1) : c.key === "symbol" ? 1 : -1 }))}
+                            onClick={() => {
+                              setSort((s) => ({ key: c.key, dir: s.key === c.key ? (s.dir === 1 ? -1 : 1) : c.key === "symbol" ? 1 : -1 }));
+                              setPage(1);
+                            }}
                             className={cn("inline-flex items-center gap-1 hover:text-fg", on && "text-fg")}
                             aria-label={t.sortBy.replace("{column}", c.label)}
                           >
@@ -288,10 +310,86 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
             </table>
           </div>
         )}
-        <p className="text-xs text-text-secondary">
-          {t.showing.replace("{n}", fmt(locale, shown.length, 0)).replace("{total}", fmt(locale, ex.quotes.length, 0))} · {t.dataNotice}
-        </p>
+        {rows.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+            <p className="text-sm text-text-secondary" aria-live="polite">
+              {t.showingRange
+                .replace("{from}", fmt(locale, from + 1, 0))
+                .replace("{to}", fmt(locale, from + shown.length, 0))
+                .replace("{total}", fmt(locale, rows.length, 0))}
+            </p>
+            <label className="flex items-center gap-2 text-sm text-text-secondary">
+              {t.rowsPerPage}
+              <select
+                value={perPage}
+                onChange={(e) => {
+                  setPerPage(Number(e.target.value));
+                  setPage(1);
+                }}
+                className="field-select h-9 rounded-full border border-fg/15 bg-fg/[0.03] pl-3 text-sm text-text-primary focus:border-brand-sky focus:outline-none"
+              >
+                {[25, 50, 100].map((n) => (
+                  <option key={n} value={n}>
+                    {fmt(locale, n, 0)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {pages > 1 && (
+              <nav aria-label={t.pageNav} className="ml-auto flex items-center gap-1">
+                <PageButton label={t.pagePrev} disabled={current === 1} onClick={() => goTo(current - 1)}>
+                  <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 fill-none stroke-current stroke-[1.6]"><path d="M10 3 5 8l5 5" /></svg>
+                </PageButton>
+                {pageList.map((n, i) =>
+                  n === null ? (
+                    <span key={`gap-${i}`} aria-hidden="true" className="px-1 text-text-secondary">…</span>
+                  ) : (
+                    <PageButton key={n} label={t.pageN.replace("{n}", String(n))} current={n === current} onClick={() => goTo(n)}>
+                      {fmt(locale, n, 0)}
+                    </PageButton>
+                  ),
+                )}
+                <PageButton label={t.pageNext} disabled={current === pages} onClick={() => goTo(current + 1)}>
+                  <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 fill-none stroke-current stroke-[1.6]"><path d="m6 3 5 5-5 5" /></svg>
+                </PageButton>
+              </nav>
+            )}
+          </div>
+        )}
+        <p className="text-xs text-text-secondary">{t.dataNotice}</p>
       </section>
     </div>
+  );
+}
+
+/** 1 … 4 5 6 … 17: first, last, and the pages around the current one. */
+function pageNumbers(current: number, total: number): (number | null)[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const set = new Set([1, total, current - 1, current, current + 1].filter((n) => n >= 1 && n <= total));
+  const sorted = [...set].sort((a, b) => a - b);
+  const out: (number | null)[] = [];
+  sorted.forEach((n, i) => {
+    if (i > 0 && n - sorted[i - 1]! > 1) out.push(null);
+    out.push(n);
+  });
+  return out;
+}
+
+function PageButton({ label, current = false, disabled = false, onClick, children }: { label: string; current?: boolean; disabled?: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      aria-current={current ? "page" : undefined}
+      className={cn(
+        "flex h-9 min-w-9 items-center justify-center rounded-full px-2.5 font-mono text-sm tabular-nums transition-colors",
+        current ? "bg-brand-royal text-white" : "text-text-secondary hover:bg-fg/[0.06] hover:text-fg",
+        disabled && "pointer-events-none opacity-35",
+      )}
+    >
+      {children}
+    </button>
   );
 }

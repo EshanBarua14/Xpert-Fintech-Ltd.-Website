@@ -550,5 +550,11 @@
   "teamShowing": "{n} জন",
   "teamDepartment": "বিভাগ",
   "notPublished": "প্রকাশিত হয়নি",
-  "testimonialRating": "৫-এর মধ্যে {n} রেটিং"
+  "testimonialRating": "৫-এর মধ্যে {n} রেটিং",
+  "pageNav": "মূল্য তালিকার পাতা",
+  "pagePrev": "আগের পাতা",
+  "pageNext": "পরের পাতা",
+  "pageN": "পাতা {n}",
+  "rowsPerPage": "প্রতি পাতায় সারি",
+  "showingRange": "{total}টির মধ্যে {from}–{to} দেখানো হচ্ছে"
 }

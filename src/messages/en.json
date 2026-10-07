@@ -550,5 +550,11 @@
   "teamShowing": "{n} people",
   "teamDepartment": "Department",
   "notPublished": "Not published",
-  "testimonialRating": "Rated {n} out of 5"
+  "testimonialRating": "Rated {n} out of 5",
+  "pageNav": "Price board pages",
+  "pagePrev": "Previous page",
+  "pageNext": "Next page",
+  "pageN": "Page {n}",
+  "rowsPerPage": "Rows per page",
+  "showingRange": "Showing {from}–{to} of {total}"
 }

@@ -1,4 +1,5 @@
 import { BrandLockup } from "@/components/brand/BrandLockup";
+import { getSiteInfo } from "@/lib/content/settings";
 import { getNavMenu } from "@/lib/content/navigation";
 import { getMessages } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/i18n/config";
@@ -9,7 +10,7 @@ import type { TickerProps } from "@/components/market/TickerBar";
 
 /** Header: menu from Admin → Navigation ("header" menu), logo from the brand asset. */
 export async function SiteHeader({ locale }: { locale: AppLocale }) {
-  const items = await getNavMenu("header", locale);
+  const [items, info] = await Promise.all([getNavMenu("header", locale), getSiteInfo(locale)]);
   const t = getMessages(locale);
   const mode = marketMode();
   // The ticker's settings, not an element: HeaderClient renders the ticker itself,
@@ -40,7 +41,7 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
       locale={locale}
       items={items}
       labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language, overview: t.overview, toLight: t.themeToLight, toDark: t.themeToDark, search: searchLabels(t) }}
-      logo={<BrandLockup text="roomy" priority />}
+      logo={<BrandLockup text="roomy" priority name={info.companyName} tagline={t.brandTagline} />}
       ticker={ticker}
     />
   );

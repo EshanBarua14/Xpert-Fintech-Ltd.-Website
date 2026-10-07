@@ -14,11 +14,11 @@ export const workflowSeeds: WorkflowSeed[] = [
     label: { en: "OMS order workflow", bn: "ওএমএস অর্ডার প্রক্রিয়া" },
     steps: [
       { id: "order", title: { en: "Order entry", bn: "অর্ডার প্রদান" }, body: { en: "A trader or investor enters an order on web, desktop or mobile.", bn: "ট্রেডার বা বিনিয়োগকারী ওয়েব, ডেস্কটপ বা মোবাইলে অর্ডার দেন।" } },
-      { id: "risk", title: { en: "Pre-trade risk check", bn: "ট্রেডের আগে ঝুঁকি যাচাই" }, body: { en: "RMS checks the order against limits before it leaves the brokerage.", bn: "ব্রোকারেজ থেকে পাঠানোর আগে আরএমএস সীমার সাথে অর্ডার যাচাই করে।" } },
+      { id: "risk", title: { en: "Pre-trade risk check", bn: "ট্রেডের আগে ঝুঁকি যাচাই" }, body: { en: "RMS checks the order against limits before it leaves the brokerage.", bn: "ব্রোকারেজ থেকে পাঠানোর আগে আরএমএস সীমার সঙ্গে অর্ডার যাচাই করে।" } },
       { id: "exchange", title: { en: "Exchange", bn: "এক্সচেঞ্জ" }, body: { en: "The order is routed to DSE or CSE.", bn: "অর্ডার ডিএসই বা সিএসইতে পাঠানো হয়।" } },
       { id: "execution", title: { en: "Execution", bn: "সম্পাদন" }, body: { en: "Executions are reported back to the OMS.", bn: "সম্পাদনের তথ্য ওএমএসে ফেরত আসে।" } },
       { id: "position", title: { en: "Position update", bn: "পজিশন হালনাগাদ" }, body: { en: "Holdings and buying power update.", bn: "হোল্ডিং ও ক্রয়ক্ষমতা হালনাগাদ হয়।" } },
-      { id: "backoffice", title: { en: "Back office", bn: "ব্যাক অফিস" }, body: { en: "Trades flow to settlement and reporting.", bn: "লেনদেন নিষ্পত্তি ও প্রতিবেদনে যায়।" } },
+      { id: "backoffice", title: { en: "Back office", bn: "ব্যাক অফিস" }, body: { en: "Trades flow to settlement and reporting.", bn: "লেনদেন সেটেলমেন্ট ও রিপোর্টিংয়ে যায়।" } },
     ],
   },
   {

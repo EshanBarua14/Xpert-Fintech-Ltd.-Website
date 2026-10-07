@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ensureTextOverrides } from "@/lib/i18n/overrides";
 import { notFound } from "next/navigation";
 import { THEME_SCRIPT } from "@/lib/theme-script";
 import { NavProgress } from "@/components/navigation/NavProgress";
@@ -48,6 +49,8 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  // Admin → Site text edits (loaded at start-up; refreshed here at most once a minute).
+  await ensureTextOverrides();
   const t = getMessages(locale);
 
   return (

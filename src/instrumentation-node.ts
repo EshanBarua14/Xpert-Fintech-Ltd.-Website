@@ -6,6 +6,13 @@ import { checkEnv, reportEnv } from "./lib/env/check";
 
 export async function onNodeStart() {
   reportEnv(checkEnv());
+  // Interface text edited in Admin → Site text, in memory before the first page is served.
+  try {
+    const { loadTextOverrides } = await import("./lib/i18n/overrides");
+    await loadTextOverrides();
+  } catch {
+    /* database not reachable yet: the defaults are used */
+  }
   // Pre-launch reminder: stand-in leadership profiles still on the website.
   try {
     const { db } = await import("./lib/db/client");

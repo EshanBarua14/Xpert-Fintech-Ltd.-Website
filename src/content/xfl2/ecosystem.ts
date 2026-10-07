@@ -87,7 +87,7 @@ export const ecosystemNodes: EcosystemNode[] = [
     description: { en: "Digital application and approval of investor BO accounts.", bn: "বিনিয়োগকারীর বিও অ্যাকাউন্টের ডিজিটাল আবেদন ও অনুমোদন।" } },
   { key: "back-office", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "back-office", mobileOrder: 24, layoutX: 0.6, layoutY: 0.68,
     label: { en: "Back office", bn: "ব্যাক অফিস" },
-    description: { en: "Accounts, settlement and reporting for the brokerage back office.", bn: "ব্রোকারেজ ব্যাক অফিসের হিসাব, নিষ্পত্তি ও রিপোর্টিং।" } },
+    description: { en: "Accounts, settlement and reporting for the brokerage back office.", bn: "ব্রোকারেজ ব্যাক অফিসের হিসাব, সেটেলমেন্ট ও রিপোর্টিং।" } },
   { key: "smart-stock", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "smart-stock", mobileOrder: 25, layoutX: 0.6, layoutY: 0.75,
     label: { en: "Smart Stock", bn: "স্মার্ট স্টক" },
     editorNote: "Description pending from XFL. Node shows label only until then." },

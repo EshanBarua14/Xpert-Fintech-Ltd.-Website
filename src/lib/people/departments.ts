@@ -27,8 +27,21 @@ export function departmentColor(name: string | null | undefined): string {
   return (name && STYLES[name.trim().toLowerCase()]?.color) || NEUTRAL;
 }
 
-export function departmentLabel(name: string, locale: string): string {
-  return (locale === "bn" && STYLES[name.trim().toLowerCase()]?.bn) || name;
+/** Message key holding a known department's name (editable in Admin → Site text). */
+export const DEPARTMENT_TEXT_KEYS: Record<string, string> = {
+  leadership: "deptLeadership",
+  engineering: "deptEngineering",
+  support: "deptSupport",
+  infrastructure: "deptInfrastructure",
+  marketing: "deptMarketing",
+  "hr & admin": "deptHrAdmin",
+  operations: "deptOperations",
+};
+
+/** A department's display name: from Site text when known (in `labels`), else the Bangla default, else as typed. */
+export function departmentLabel(name: string, locale: string, labels?: Record<string, string>): string {
+  const key = name.trim().toLowerCase();
+  return labels?.[key] || (locale === "bn" && STYLES[key]?.bn) || name;
 }
 
 /** Order departments appear in the filter: the known ones first, then any others A–Z. */

@@ -16,7 +16,7 @@ export type TeamMember = {
   linkedinUrl: string | null;
 };
 
-export type TeamLabels = { filter: string; everyone: string; showing: string; email: string; linkedin: string };
+export type TeamLabels = { filter: string; everyone: string; showing: string; email: string; linkedin: string; /** Department names by lower-case department, from Site text. */ departments: Record<string, string> };
 
 function initials(name: string) {
   return name
@@ -52,7 +52,7 @@ export function TeamDirectory({ people, locale, labels }: { people: TeamMember[]
           <div role="group" aria-label={labels.filter} className="flex flex-wrap gap-2">
             <Chip pressed={active === null} onClick={() => setActive(null)} label={labels.everyone} count={nf.format(people.length)} />
             {departments.map(([d, n]) => (
-              <Chip key={d} pressed={active === d} onClick={() => setActive(active === d ? null : d)} label={departmentLabel(d, locale)} count={nf.format(n)} color={departmentColor(d)} />
+              <Chip key={d} pressed={active === d} onClick={() => setActive(active === d ? null : d)} label={departmentLabel(d, locale, labels.departments)} count={nf.format(n)} color={departmentColor(d)} />
             ))}
           </div>
           <p aria-live="polite" className="text-sm text-text-secondary">
@@ -118,7 +118,7 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
         {p.department && (
           <span className="flex min-w-0 items-center gap-2 text-xs font-medium text-text-secondary">
             <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-[var(--dept)]" />
-            <span className="truncate">{departmentLabel(p.department, locale)}</span>
+            <span className="truncate">{departmentLabel(p.department, locale, labels.departments)}</span>
           </span>
         )}
         <span className="ml-auto flex items-center gap-2">

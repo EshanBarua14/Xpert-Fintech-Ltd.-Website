@@ -556,5 +556,13 @@
   "pageNext": "Next page",
   "pageN": "Page {n}",
   "rowsPerPage": "Rows per page",
-  "showingRange": "Showing {from}–{to} of {total}"
+  "showingRange": "Showing {from}–{to} of {total}",
+  "brandTagline": "Connect The Future",
+  "deptLeadership": "Leadership",
+  "deptEngineering": "Engineering",
+  "deptSupport": "Support",
+  "deptInfrastructure": "Infrastructure",
+  "deptMarketing": "Marketing",
+  "deptHrAdmin": "HR & Admin",
+  "deptOperations": "Operations"
 }

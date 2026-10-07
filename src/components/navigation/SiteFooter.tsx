@@ -47,7 +47,7 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
         <div className="grid gap-12 md:grid-cols-12">
           <div className="flex flex-col gap-6 md:col-span-4">
             <a href={`/${locale}`} className="group self-start" aria-label="Xpert Fintech Ltd. — home">
-              <BrandLockup size="lg" />
+              <BrandLockup size="lg" name={info.companyName} tagline={t.brandTagline} />
             </a>
             {info.summary && <p className="max-w-sm text-sm leading-relaxed text-text-secondary">{info.summary}</p>}
             <address className="flex flex-col gap-3 text-sm not-italic">

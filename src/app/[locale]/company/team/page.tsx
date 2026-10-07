@@ -8,6 +8,7 @@ import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getPeople, mediaMap } from "@/lib/public/content";
 import { pick } from "@/lib/public/text";
+import { DEPARTMENT_TEXT_KEYS } from "@/lib/people/departments";
 import { buildMetadata } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -67,7 +68,14 @@ export default async function TeamPage({ params }: Props) {
             <TeamDirectory
               people={members}
               locale={locale}
-              labels={{ filter: t.teamFilterLabel, everyone: t.teamEveryone, showing: t.teamShowing, email: t.emailPerson, linkedin: t.linkedinProfile }}
+              labels={{
+                filter: t.teamFilterLabel,
+                everyone: t.teamEveryone,
+                showing: t.teamShowing,
+                email: t.emailPerson,
+                linkedin: t.linkedinProfile,
+                departments: Object.fromEntries(Object.entries(DEPARTMENT_TEXT_KEYS).map(([d, k]) => [d, t[k as keyof typeof t] as string])),
+              }}
             />
           </div>
         </Shell>

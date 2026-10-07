@@ -150,3 +150,11 @@ Admin → People → *Fill in contact details for everyone* opens one table with
 ## Drafts you can see before publishing
 
 Outside production (`APP_ENV` not `production`), unpublished Chairman's/MD's messages and client reviews appear on the site with a "Draft" label, and an empty reviews section shows how to add the first one. On the live site only published, approved content appears.
+
+## Site text (every interface word, English and Bangla)
+
+Admin → Site text lists every button, label, heading and message on the website (566 texts) in English and Bangla side by side, grouped by area (Home, Markets, Products, Company, Forms…), with search and filters for edited texts and Bangla that still reads like English. Type in a box to replace the default; clear it to go back. Words in braces such as `{n}` or `{exchange}` are filled in by the site and must stay in the text; the save refuses a translation that drops one.
+
+Edits are stored in the database (setting `site.text`), loaded into memory when the server starts and refreshed at most once a minute, so with several server processes every one picks an edit up within a minute. The defaults stay in `src/messages/en.json` and `bn.json`.
+
+The company name in the header and footer comes from Admin → Settings; the tagline ("Connect The Future") and department names are in Site text.

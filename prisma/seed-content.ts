@@ -86,43 +86,43 @@ const CONTENT: OfferingContent[] = [
     solution: t(
       "One shared platform, run by Xpert for the consortium: order entry and management, watchlists, charts and market depth, connected to DSE and CSE and to risk checks before orders leave the brokerage. Each brokerage can offer its own branded app on top.",
     ),
-    targetCustomers: t("TREC-holder brokerage houses, their dealers and their investors."),
+    targetCustomers: t("TREC-holder brokerage houses, their dealers and their investors.", "ট্রেক (TREC) হোল্ডার ব্রোকারেজ হাউস, তাদের ডিলার ও বিনিয়োগকারীরা।"),
     items: {
       WORKFLOW_STEP: [
-        { title: t("Order entry", "অর্ডার প্রদান"), body: t("A dealer or investor enters an order on web, desktop or mobile.") },
-        { title: t("Pre-trade risk check", "প্রি-ট্রেড ঝুঁকি যাচাই"), body: t("RMS checks the order against configured limits before it leaves the brokerage.") },
-        { title: t("Exchange", "এক্সচেঞ্জ"), body: t("The order is routed to DSE or CSE.") },
-        { title: t("Execution", "সম্পাদন"), body: t("Executions are reported back to the platform.") },
-        { title: t("Portfolio update", "পোর্টফোলিও হালনাগাদ"), body: t("Holdings and balances update for the investor.") },
-        { title: t("Back office", "ব্যাক অফিস"), body: t("Trades flow on to settlement and reporting.") },
+        { title: t("Order entry", "অর্ডার প্রদান"), body: t("A dealer or investor enters an order on web, desktop or mobile.", "ডিলার বা বিনিয়োগকারী ওয়েব, ডেস্কটপ বা মোবাইল থেকে অর্ডার দেন।") },
+        { title: t("Pre-trade risk check", "প্রি-ট্রেড ঝুঁকি যাচাই"), body: t("RMS checks the order against configured limits before it leaves the brokerage.", "অর্ডার ব্রোকারেজ থেকে বের হওয়ার আগে আরএমএস নির্ধারিত সীমার সঙ্গে তা যাচাই করে।") },
+        { title: t("Exchange", "এক্সচেঞ্জ"), body: t("The order is routed to DSE or CSE.", "অর্ডারটি ডিএসই বা সিএসই-তে পাঠানো হয়।") },
+        { title: t("Execution", "সম্পাদন"), body: t("Executions are reported back to the platform.", "সম্পাদিত লেনদেনের তথ্য প্ল্যাটফর্মে ফিরে আসে।") },
+        { title: t("Portfolio update", "পোর্টফোলিও হালনাগাদ"), body: t("Holdings and balances update for the investor.", "বিনিয়োগকারীর হোল্ডিং ও ব্যালান্স হালনাগাদ হয়।") },
+        { title: t("Back office", "ব্যাক অফিস"), body: t("Trades flow on to settlement and reporting.", "লেনদেন সেটেলমেন্ট ও রিপোর্টিংয়ে চলে যায়।") },
       ],
       ARCHITECTURE_LAYER: [
-        { title: t("Channels"), body: t("Web, desktop and branded mobile apps for investors and dealers.") },
-        { title: t("Order management"), body: t("Order entry, amendment, cancellation and order book.") },
-        { title: t("Risk controls"), body: t("Pre-trade limit checks through RMS.") },
-        { title: t("Market connectivity"), body: t("Connections to Dhaka Stock Exchange and Chittagong Stock Exchange.") },
-        { title: t("Back office"), body: t("Settlement, accounts and reporting downstream.") },
+        { title: t("Channels", "চ্যানেল"), body: t("Web, desktop and branded mobile apps for investors and dealers.", "বিনিয়োগকারী ও ডিলারদের জন্য ওয়েব, ডেস্কটপ ও নিজস্ব ব্র্যান্ডের মোবাইল অ্যাপ।") },
+        { title: t("Order management", "অর্ডার ব্যবস্থাপনা"), body: t("Order entry, amendment, cancellation and order book.", "অর্ডার দেওয়া, সংশোধন, বাতিল এবং অর্ডার বুক।") },
+        { title: t("Risk controls", "ঝুঁকি নিয়ন্ত্রণ"), body: t("Pre-trade limit checks through RMS.", "আরএমএস-এর মাধ্যমে লেনদেনের আগে সীমা যাচাই।") },
+        { title: t("Market connectivity", "বাজার সংযোগ"), body: t("Connections to Dhaka Stock Exchange and Chittagong Stock Exchange.", "ঢাকা স্টক এক্সচেঞ্জ ও চট্টগ্রাম স্টক এক্সচেঞ্জের সঙ্গে সংযোগ।") },
+        { title: t("Back office", "ব্যাক অফিস"), body: t("Settlement, accounts and reporting downstream.", "পরবর্তী ধাপে সেটেলমেন্ট, হিসাব ও রিপোর্টিং।") },
       ],
       INTEGRATION: [
-        { title: t("Dhaka Stock Exchange"), body: t("Order routing and market data for DSE."), icon: "exchange" },
-        { title: t("Chittagong Stock Exchange"), body: t("Order routing and market data for CSE."), icon: "exchange" },
-        { title: t("Brokerage back office"), body: t("Executed trades handed to back-office systems."), icon: "chart" },
-        { title: t("APIs"), body: t("API-driven, so it can work with a brokerage's existing back-office, risk or reporting systems."), icon: "network" },
+        { title: t("Dhaka Stock Exchange", "ঢাকা স্টক এক্সচেঞ্জ"), body: t("Order routing and market data for DSE.", "ডিএসই-র জন্য অর্ডার রাউটিং ও বাজার তথ্য।"), icon: "exchange" },
+        { title: t("Chittagong Stock Exchange", "চট্টগ্রাম স্টক এক্সচেঞ্জ"), body: t("Order routing and market data for CSE.", "সিএসই-র জন্য অর্ডার রাউটিং ও বাজার তথ্য।"), icon: "exchange" },
+        { title: t("Brokerage back office", "ব্রোকারেজ ব্যাক অফিস"), body: t("Executed trades handed to back-office systems.", "সম্পাদিত লেনদেন ব্যাক অফিস সিস্টেমে পাঠানো হয়।"), icon: "chart" },
+        { title: t("APIs", "এপিআই"), body: t("API-driven, so it can work with a brokerage's existing back-office, risk or reporting systems.", "এপিআই-ভিত্তিক, তাই ব্রোকারেজের বিদ্যমান ব্যাক অফিস, ঝুঁকি বা রিপোর্টিং সিস্টেমের সঙ্গে কাজ করতে পারে।"), icon: "network" },
       ],
       SECURITY: [
-        { title: t("Role-based access"), body: t("Dealers, supervisors and investors see only what their role allows.") },
-        { title: t("Risk checks on every order"), body: t("Orders pass RMS checks before reaching the exchange.") },
-        { title: t("Activity records"), body: t("Order actions are recorded for review.") },
+        { title: t("Role-based access", "ভূমিকাভিত্তিক প্রবেশাধিকার"), body: t("Dealers, supervisors and investors see only what their role allows.", "ডিলার, সুপারভাইজার ও বিনিয়োগকারীরা শুধু নিজ নিজ ভূমিকায় অনুমোদিত তথ্যই দেখেন।") },
+        { title: t("Risk checks on every order", "প্রতিটি অর্ডারে ঝুঁকি যাচাই"), body: t("Orders pass RMS checks before reaching the exchange.", "এক্সচেঞ্জে পৌঁছানোর আগে প্রতিটি অর্ডার আরএমএস যাচাই পার হয়।") },
+        { title: t("Activity records", "কার্যক্রমের রেকর্ড"), body: t("Order actions are recorded for review.", "পর্যালোচনার জন্য অর্ডার-সংক্রান্ত প্রতিটি কাজ রেকর্ড করা হয়।") },
       ],
       TARGET_USER: [
-        { title: t("Investors"), body: t("Trade and follow their portfolio from mobile, web or desktop.") },
-        { title: t("Dealers"), body: t("Place and manage orders for clients.") },
-        { title: t("Brokerage management"), body: t("Oversee trading activity across the house.") },
+        { title: t("Investors", "বিনিয়োগকারী"), body: t("Trade and follow their portfolio from mobile, web or desktop.", "মোবাইল, ওয়েব বা ডেস্কটপ থেকে লেনদেন করেন ও পোর্টফোলিও দেখেন।") },
+        { title: t("Dealers", "ডিলার"), body: t("Place and manage orders for clients.", "গ্রাহকের পক্ষে অর্ডার দেন ও পরিচালনা করেন।") },
+        { title: t("Brokerage management", "ব্রোকারেজ ব্যবস্থাপনা"), body: t("Oversee trading activity across the house.", "পুরো প্রতিষ্ঠানের লেনদেন কার্যক্রম তদারকি করেন।") },
       ],
       FAQ: [
-        { title: t("Which exchanges does it connect to?"), body: t("Dhaka Stock Exchange and Chittagong Stock Exchange.") },
-        { title: t("Can it work with our existing systems?"), body: t("Yes. The platform is API-driven and can be fitted to existing back-office, risk or reporting systems.") },
-        { title: t("Can we offer our own branded app?"), body: t("Yes. Several consortium brokerages already offer branded trading apps built on the platform.") },
+        { title: t("Which exchanges does it connect to?", "এটি কোন কোন এক্সচেঞ্জের সঙ্গে যুক্ত?"), body: t("Dhaka Stock Exchange and Chittagong Stock Exchange.", "ঢাকা স্টক এক্সচেঞ্জ ও চট্টগ্রাম স্টক এক্সচেঞ্জ।") },
+        { title: t("Can it work with our existing systems?", "এটি কি আমাদের বিদ্যমান সিস্টেমের সঙ্গে কাজ করবে?"), body: t("Yes. The platform is API-driven and can be fitted to existing back-office, risk or reporting systems.", "হ্যাঁ। প্ল্যাটফর্মটি এপিআই-ভিত্তিক এবং বিদ্যমান ব্যাক অফিস, ঝুঁকি বা রিপোর্টিং সিস্টেমের সঙ্গে যুক্ত করা যায়।") },
+        { title: t("Can we offer our own branded app?", "আমরা কি নিজস্ব ব্র্যান্ডের অ্যাপ দিতে পারব?"), body: t("Yes. Several consortium brokerages already offer branded trading apps built on the platform.", "হ্যাঁ। কনসোর্টিয়ামের কয়েকটি ব্রোকারেজ ইতিমধ্যে এই প্ল্যাটফর্মে তৈরি নিজস্ব ব্র্যান্ডের ট্রেডিং অ্যাপ চালু করেছে।") },
       ],
     },
   },
@@ -137,28 +137,28 @@ const CONTENT: OfferingContent[] = [
       "The risk management system inside the trading platform. It checks each order against the limits a brokerage sets before the order leaves, and lets risk teams follow exposure afterwards.",
       "ট্রেডিং প্ল্যাটফর্মের ভেতরের ঝুঁকি ব্যবস্থাপনা ব্যবস্থা। প্রতিটি অর্ডার পাঠানোর আগে ব্রোকারেজের নির্ধারিত সীমার সঙ্গে যাচাই করে এবং পরে ঝুঁকির মাত্রা পর্যবেক্ষণে সহায়তা করে।",
     ),
-    problem: t("Without automatic checks, an order that breaches a client's limits can reach the exchange before anyone notices."),
-    solution: t("Limits are configured once and applied to every order automatically. Orders that fail a check are stopped with a reason, so dealers and clients know why."),
-    targetCustomers: t("Brokerage risk and compliance teams, and supervisors."),
+    problem: t("Without automatic checks, an order that breaches a client's limits can reach the exchange before anyone notices.", "স্বয়ংক্রিয় যাচাই না থাকলে গ্রাহকের সীমা ছাড়ানো অর্ডার কারও নজরে আসার আগেই এক্সচেঞ্জে পৌঁছে যেতে পারে।"),
+    solution: t("Limits are configured once and applied to every order automatically. Orders that fail a check are stopped with a reason, so dealers and clients know why.", "সীমা একবার নির্ধারণ করলেই প্রতিটি অর্ডারে স্বয়ংক্রিয়ভাবে প্রয়োগ হয়। যাচাইয়ে আটকে যাওয়া অর্ডার কারণসহ থামানো হয়, ফলে ডিলার ও গ্রাহক কারণটা জানতে পারেন।"),
+    targetCustomers: t("Brokerage risk and compliance teams, and supervisors.", "ব্রোকারেজের ঝুঁকি ও কমপ্লায়েন্স টিম এবং সুপারভাইজাররা।"),
     items: {
       WORKFLOW_STEP: [
         { title: t("Order", "অর্ডার") },
-        { title: t("Pre-trade check", "প্রি-ট্রেড যাচাই"), body: t("Each order is checked before submission.") },
-        { title: t("Limits", "সীমা"), body: t("Configured limits are applied per client and per brokerage.") },
-        { title: t("Decision", "সিদ্ধান্ত"), body: t("The order is accepted, or rejected with a reason.") },
+        { title: t("Pre-trade check", "প্রি-ট্রেড যাচাই"), body: t("Each order is checked before submission.", "জমা দেওয়ার আগে প্রতিটি অর্ডার যাচাই করা হয়।") },
+        { title: t("Limits", "সীমা"), body: t("Configured limits are applied per client and per brokerage.", "নির্ধারিত সীমা প্রতিটি গ্রাহক ও প্রতিটি ব্রোকারেজ অনুযায়ী প্রয়োগ হয়।") },
+        { title: t("Decision", "সিদ্ধান্ত"), body: t("The order is accepted, or rejected with a reason.", "অর্ডারটি গৃহীত হয়, অথবা কারণসহ প্রত্যাখ্যাত হয়।") },
         { title: t("Execution", "সম্পাদন") },
-        { title: t("Monitoring", "পর্যবেক্ষণ"), body: t("Exposure is followed after execution.") },
+        { title: t("Monitoring", "পর্যবেক্ষণ"), body: t("Exposure is followed after execution.", "লেনদেন সম্পাদনের পর এক্সপোজার পর্যবেক্ষণ করা হয়।") },
       ],
       CAPABILITY: [
-        { title: t("Pre-trade limit checks"), body: t("Every order is checked before it leaves the brokerage."), icon: "shield" },
-        { title: t("Configurable limits"), body: t("Limits set by the brokerage, per client and overall."), icon: "lock" },
-        { title: t("Clear rejection reasons"), body: t("Rejected orders carry the reason, for dealers and clients."), icon: "check" },
-        { title: t("Exposure monitoring"), body: t("Risk teams follow positions and exposure after execution."), icon: "chart" },
+        { title: t("Pre-trade limit checks", "লেনদেনের আগে সীমা যাচাই"), body: t("Every order is checked before it leaves the brokerage.", "ব্রোকারেজ থেকে বের হওয়ার আগে প্রতিটি অর্ডার যাচাই করা হয়।"), icon: "shield" },
+        { title: t("Configurable limits", "নিজের মতো নির্ধারণযোগ্য সীমা"), body: t("Limits set by the brokerage, per client and overall.", "ব্রোকারেজ নিজেই সীমা ঠিক করে, গ্রাহকভিত্তিক ও সামগ্রিকভাবে।"), icon: "lock" },
+        { title: t("Clear rejection reasons", "প্রত্যাখ্যানের স্পষ্ট কারণ"), body: t("Rejected orders carry the reason, for dealers and clients.", "প্রত্যাখ্যাত অর্ডারে ডিলার ও গ্রাহকের জন্য কারণ উল্লেখ থাকে।"), icon: "check" },
+        { title: t("Exposure monitoring", "এক্সপোজার পর্যবেক্ষণ"), body: t("Risk teams follow positions and exposure after execution.", "লেনদেনের পর ঝুঁকি টিম পজিশন ও এক্সপোজার পর্যবেক্ষণ করে।"), icon: "chart" },
       ],
       TARGET_USER: [
-        { title: t("Risk teams") },
-        { title: t("Compliance officers") },
-        { title: t("Dealing supervisors") },
+        { title: t("Risk teams", "ঝুঁকি ব্যবস্থাপনা টিম") },
+        { title: t("Compliance officers", "কমপ্লায়েন্স কর্মকর্তা") },
+        { title: t("Dealing supervisors", "ডিলিং সুপারভাইজার") },
       ],
     },
   },
@@ -172,28 +172,28 @@ const CONTENT: OfferingContent[] = [
       "A digital application for new investors and a review desk for the brokerage. Applicants enter their details and upload documents online; operations staff review, request corrections and approve.",
       "নতুন বিনিয়োগকারীদের জন্য ডিজিটাল আবেদন এবং ব্রোকারেজের জন্য পর্যালোচনা ডেস্ক। আবেদনকারীরা অনলাইনে তথ্য দেন ও নথি আপলোড করেন; অপারেশনস কর্মীরা পর্যালোচনা, সংশোধনের অনুরোধ ও অনুমোদন করেন।",
     ),
-    problem: t("Paper forms mean office visits, missing documents and slow back-and-forth before an investor can trade."),
-    solution: t("Applications arrive complete and in one queue. Documents are stored with the application in DMS, and every review step is recorded."),
-    targetCustomers: t("New investors and brokerage operations teams."),
+    problem: t("Paper forms mean office visits, missing documents and slow back-and-forth before an investor can trade.", "কাগজের ফরম মানে অফিসে যাওয়া, কাগজপত্রের ঘাটতি আর লেনদেন শুরুর আগে দীর্ঘ আসা-যাওয়া।"),
+    solution: t("Applications arrive complete and in one queue. Documents are stored with the application in DMS, and every review step is recorded.", "আবেদন সম্পূর্ণ অবস্থায় এক সারিতে জমা হয়। কাগজপত্র আবেদনসহ ডিএমএস-এ সংরক্ষিত থাকে এবং যাচাইয়ের প্রতিটি ধাপ রেকর্ড হয়।"),
+    targetCustomers: t("New investors and brokerage operations teams.", "নতুন বিনিয়োগকারী ও ব্রোকারেজের অপারেশনস টিম।"),
     items: {
       WORKFLOW_STEP: [
         { title: t("Start application", "আবেদন শুরু") },
         { title: t("Personal details", "ব্যক্তিগত তথ্য") },
-        { title: t("Document upload", "নথি আপলোড"), body: t("Required documents are uploaded and kept in DMS.") },
-        { title: t("Review", "পর্যালোচনা"), body: t("Operations staff check the application.") },
+        { title: t("Document upload", "নথি আপলোড"), body: t("Required documents are uploaded and kept in DMS.", "প্রয়োজনীয় কাগজপত্র আপলোড করে ডিএমএস-এ রাখা হয়।") },
+        { title: t("Review", "পর্যালোচনা"), body: t("Operations staff check the application.", "অপারেশনস কর্মীরা আবেদন যাচাই করেন।") },
         { title: t("Approval", "অনুমোদন") },
         { title: t("BO account created", "বিও অ্যাকাউন্ট তৈরি") },
         { title: t("Ready to trade", "লেনদেনের জন্য প্রস্তুত") },
       ],
       CAPABILITY: [
-        { title: t("Online application"), body: t("Investors apply without visiting the office."), icon: "users" },
-        { title: t("Document upload"), body: t("Documents attached to the application and stored in DMS."), icon: "document" },
-        { title: t("Review queue"), body: t("One queue for operations staff, with correction requests."), icon: "check" },
-        { title: t("Status tracking"), body: t("Applicants and staff can see where each application stands."), icon: "chart" },
+        { title: t("Online application", "অনলাইনে আবেদন"), body: t("Investors apply without visiting the office.", "বিনিয়োগকারীরা অফিসে না এসেই আবেদন করেন।"), icon: "users" },
+        { title: t("Document upload", "কাগজপত্র আপলোড"), body: t("Documents attached to the application and stored in DMS.", "কাগজপত্র আবেদনের সঙ্গে যুক্ত হয়ে ডিএমএস-এ সংরক্ষিত থাকে।"), icon: "document" },
+        { title: t("Review queue", "যাচাইয়ের সারি"), body: t("One queue for operations staff, with correction requests.", "অপারেশনস কর্মীদের জন্য একটি সারি, সংশোধনের অনুরোধসহ।"), icon: "check" },
+        { title: t("Status tracking", "অবস্থা অনুসরণ"), body: t("Applicants and staff can see where each application stands.", "আবেদনকারী ও কর্মীরা প্রতিটি আবেদনের বর্তমান অবস্থা দেখতে পারেন।"), icon: "chart" },
       ],
       TARGET_USER: [
-        { title: t("New investors") },
-        { title: t("Operations teams") },
+        { title: t("New investors", "নতুন বিনিয়োগকারী") },
+        { title: t("Operations teams", "অপারেশনস টিম") },
       ],
     },
   },
@@ -207,26 +207,26 @@ const CONTENT: OfferingContent[] = [
       "Document management for brokerage operations: client documents are stored centrally, only authorised staff can open them, and every action on a document is recorded.",
       "ব্রোকারেজ অপারেশনসের জন্য নথি ব্যবস্থাপনা: গ্রাহকের নথি কেন্দ্রীয়ভাবে সংরক্ষিত হয়, শুধু অনুমোদিত কর্মীরা দেখতে পারেন এবং নথির প্রতিটি কাজ রেকর্ড করা হয়।",
     ),
-    problem: t("Client files spread across cabinets, inboxes and shared drives are hard to find, hard to protect and hard to audit."),
-    solution: t("One store for client documents, linked to the client and to the workflow that created them, with access control and a record of who did what."),
-    targetCustomers: t("Brokerage operations and compliance teams."),
+    problem: t("Client files spread across cabinets, inboxes and shared drives are hard to find, hard to protect and hard to audit.", "আলমারি, ইনবক্স আর শেয়ার্ড ড্রাইভে ছড়িয়ে থাকা গ্রাহকের ফাইল খুঁজে পাওয়া, সুরক্ষিত রাখা ও নিরীক্ষা করা কঠিন।"),
+    solution: t("One store for client documents, linked to the client and to the workflow that created them, with access control and a record of who did what.", "গ্রাহকের সব কাগজপত্রের জন্য একটি ভান্ডার, গ্রাহক ও সংশ্লিষ্ট কার্যপ্রবাহের সঙ্গে যুক্ত, প্রবেশাধিকার নিয়ন্ত্রণ এবং কে কী করেছেন তার রেকর্ডসহ।"),
+    targetCustomers: t("Brokerage operations and compliance teams.", "ব্রোকারেজের অপারেশনস ও কমপ্লায়েন্স টিম।"),
     items: {
       WORKFLOW_STEP: [
         { title: t("Capture", "সংগ্রহ") },
         { title: t("Secure storage", "নিরাপদ সংরক্ষণ") },
-        { title: t("Controlled access", "নিয়ন্ত্রিত প্রবেশাধিকার"), body: t("Only authorised staff can view or act on documents.") },
+        { title: t("Controlled access", "নিয়ন্ত্রিত প্রবেশাধিকার"), body: t("Only authorised staff can view or act on documents.", "শুধু অনুমোদিত কর্মীরাই কাগজপত্র দেখতে বা তাতে কাজ করতে পারেন।") },
         { title: t("Approval", "অনুমোদন") },
-        { title: t("Audit trail", "অডিট ট্রেইল"), body: t("Every action on a document is recorded.") },
+        { title: t("Audit trail", "অডিট ট্রেইল"), body: t("Every action on a document is recorded.", "কাগজপত্রে করা প্রতিটি কাজ রেকর্ড হয়।") },
       ],
       CAPABILITY: [
-        { title: t("Central document store"), icon: "document" },
-        { title: t("Role-based access"), icon: "lock" },
-        { title: t("Linked to client records"), icon: "users" },
-        { title: t("Audit trail"), icon: "shield" },
+        { title: t("Central document store", "কেন্দ্রীয় কাগজপত্র ভান্ডার"), icon: "document" },
+        { title: t("Role-based access", "ভূমিকাভিত্তিক প্রবেশাধিকার"), icon: "lock" },
+        { title: t("Linked to client records", "গ্রাহকের রেকর্ডের সঙ্গে যুক্ত"), icon: "users" },
+        { title: t("Audit trail", "নিরীক্ষার রেকর্ড"), icon: "shield" },
       ],
       SECURITY: [
-        { title: t("Access by role"), body: t("Staff only see documents their role allows.") },
-        { title: t("Recorded actions"), body: t("Views, uploads and changes are logged.") },
+        { title: t("Access by role", "ভূমিকা অনুযায়ী প্রবেশাধিকার"), body: t("Staff only see documents their role allows.", "কর্মীরা শুধু নিজ ভূমিকায় অনুমোদিত কাগজপত্র দেখেন।") },
+        { title: t("Recorded actions", "রেকর্ড করা কার্যক্রম"), body: t("Views, uploads and changes are logged.", "দেখা, আপলোড ও পরিবর্তন সবই লগে থাকে।") },
       ],
     },
   },
@@ -235,23 +235,23 @@ const CONTENT: OfferingContent[] = [
     type: "PRODUCT",
     slug: "back-office",
     name: t("Brokerage Back Office", "ব্রোকারেজ ব্যাক অফিস"),
-    tagline: t("Accounts, settlement and reporting after the trade.", "লেনদেনের পরে হিসাব, নিষ্পত্তি ও প্রতিবেদন।"),
+    tagline: t("Accounts, settlement and reporting after the trade.", "লেনদেনের পরে হিসাব, সেটেলমেন্ট ও রিপোর্টিং।"),
     summary: t(
       "The back-office system that takes over once trades are executed: client accounts, settlement with banks and the depository, and the reports brokerages and regulators need.",
-      "লেনদেন সম্পন্ন হওয়ার পর যে ব্যাক-অফিস ব্যবস্থা দায়িত্ব নেয়: গ্রাহকের হিসাব, ব্যাংক ও ডিপোজিটরির সঙ্গে নিষ্পত্তি এবং ব্রোকারেজ ও নিয়ন্ত্রকদের প্রয়োজনীয় প্রতিবেদন।",
+      "লেনদেন সম্পন্ন হওয়ার পর যে ব্যাক-অফিস ব্যবস্থা দায়িত্ব নেয়: গ্রাহকের হিসাব, ব্যাংক ও ডিপোজিটরির সঙ্গে সেটেলমেন্ট এবং ব্রোকারেজ ও নিয়ন্ত্রকদের প্রয়োজনীয় রিপোর্ট।",
     ),
-    targetCustomers: t("Brokerage accounts, settlement and reporting teams."),
+    targetCustomers: t("Brokerage accounts, settlement and reporting teams.", "ব্রোকারেজের হিসাব, সেটেলমেন্ট ও রিপোর্টিং টিম।"),
     items: {
       WORKFLOW_STEP: [
         { title: t("Executed trades", "সম্পাদিত লেনদেন") },
         { title: t("Client accounts", "গ্রাহকের হিসাব") },
-        { title: t("Settlement", "নিষ্পত্তি") },
+        { title: t("Settlement", "সেটেলমেন্ট") },
         { title: t("Reporting", "প্রতিবেদন") },
       ],
       CAPABILITY: [
-        { title: t("Client accounts and ledgers"), icon: "chart" },
-        { title: t("Settlement"), icon: "exchange" },
-        { title: t("Reports"), icon: "document" },
+        { title: t("Client accounts and ledgers", "গ্রাহকের হিসাব ও লেজার"), icon: "chart" },
+        { title: t("Settlement", "সেটেলমেন্ট"), icon: "exchange" },
+        { title: t("Reports", "রিপোর্ট"), icon: "document" },
       ],
     },
   },
@@ -267,10 +267,10 @@ const CONTENT: OfferingContent[] = [
     ),
     items: {
       CAPABILITY: [
-        { title: t("Prices and indices"), icon: "chart" },
-        { title: t("Market breadth"), icon: "globe" },
-        { title: t("Top gainers and losers"), icon: "exchange" },
-        { title: t("Watchlists and charts in the apps"), icon: "users" },
+        { title: t("Prices and indices", "মূল্য ও সূচক"), icon: "chart" },
+        { title: t("Market breadth", "বাজারের ব্যাপ্তি"), icon: "globe" },
+        { title: t("Top gainers and losers", "সর্বোচ্চ বৃদ্ধি ও হ্রাস"), icon: "exchange" },
+        { title: t("Watchlists and charts in the apps", "অ্যাপে ওয়াচলিস্ট ও চার্ট"), icon: "users" },
       ],
     },
   },
@@ -286,20 +286,22 @@ const CONTENT: OfferingContent[] = [
     ),
     items: {
       INTEGRATION: [
-        { title: t("DSE (FIX)"), body: t("FIX connectivity to Dhaka Stock Exchange."), icon: "exchange" },
-        { title: t("CSE (API)"), body: t("API connectivity to Chittagong Stock Exchange."), icon: "exchange" },
+        { title: t("DSE (FIX)", "ডিএসই (FIX)"), body: t("FIX connectivity to Dhaka Stock Exchange.", "ঢাকা স্টক এক্সচেঞ্জের সঙ্গে FIX সংযোগ।"), icon: "exchange" },
+        { title: t("CSE (API)", "সিএসই (API)"), body: t("API connectivity to Chittagong Stock Exchange.", "চট্টগ্রাম স্টক এক্সচেঞ্জের সঙ্গে API সংযোগ।"), icon: "exchange" },
       ],
     },
   },
   // Confirmed, details pending: created as drafts with names only.
   { key: "smart-stock", type: "PRODUCT", slug: "smart-stock", name: t("Smart Stock", "স্মার্ট স্টক") },
-  { key: "ost", type: "PRODUCT", slug: "ost", name: t("OST") },
+  { key: "ost", type: "PRODUCT", slug: "ost", name: t("OST", "ওএসটি") },
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 type TrFields = "tagline" | "summary" | "problem" | "solution" | "targetCustomers";
 const TR_FIELDS: TrFields[] = ["tagline", "summary", "problem", "solution", "targetCustomers"];
+
+let bnItemsAdded = 0;
 
 async function upsertOffering(c: OfferingContent) {
   const offering = await db.offering.upsert({
@@ -329,7 +331,21 @@ async function upsertOffering(c: OfferingContent) {
 
   for (const [kind, items] of Object.entries(c.items ?? {}) as [OfferingItemKind, Item[]][]) {
     const count = await db.offeringItem.count({ where: { offeringId: offering.id, kind } });
-    if (count > 0) continue;
+    if (count > 0) {
+      // Items already there: add a missing Bangla version to the ones that still read as seeded (same English title).
+      for (const item of items) {
+        if (!item.title.bn) continue;
+        const match = await db.offeringItem.findFirst({
+          where: { offeringId: offering.id, kind, translations: { some: { locale: EN, title: item.title.en } } },
+          include: { translations: { where: { locale: BN } } },
+        });
+        if (match && match.translations.length === 0) {
+          await db.offeringItemTranslation.create({ data: { itemId: match.id, locale: BN, title: item.title.bn, body: item.body?.bn ?? null } });
+          bnItemsAdded++;
+        }
+      }
+      continue;
+    }
     for (const [i, item] of items.entries()) {
       await db.offeringItem.create({
         data: {
@@ -372,6 +388,20 @@ const BN_TITLES: Record<string, string> = {
   "Managing Director": "ব্যবস্থাপনা পরিচালক",
   "Executive Director": "নির্বাহী পরিচালক",
   "CFO & Company Secretary": "সিএফও ও কোম্পানি সচিব",
+  "Head of Application Support and Development": "প্রধান, অ্যাপ্লিকেশন সাপোর্ট ও ডেভেলপমেন্ট",
+  "Senior Principal Software Engineer": "সিনিয়র প্রিন্সিপাল সফটওয়্যার ইঞ্জিনিয়ার",
+  "Principal Software Engineer": "প্রিন্সিপাল সফটওয়্যার ইঞ্জিনিয়ার",
+  "Senior Software Engineer": "সিনিয়র সফটওয়্যার ইঞ্জিনিয়ার",
+  "Software Engineer": "সফটওয়্যার ইঞ্জিনিয়ার",
+  "QA Software Engineer": "কিউএ সফটওয়্যার ইঞ্জিনিয়ার",
+  "React Native App Developer": "রিঅ্যাক্ট নেটিভ অ্যাপ ডেভেলপার",
+  "Support Manager": "সাপোর্ট ম্যানেজার",
+  "Support Engineer": "সাপোর্ট ইঞ্জিনিয়ার",
+  "Marketing Manager": "মার্কেটিং ম্যানেজার",
+  "Network Administrator": "নেটওয়ার্ক অ্যাডমিনিস্ট্রেটর",
+  "System and Network Engineer": "সিস্টেম ও নেটওয়ার্ক ইঞ্জিনিয়ার",
+  "Senior Executive, HR & Admin": "সিনিয়র এক্সিকিউটিভ, এইচআর ও অ্যাডমিন",
+  "Receptionist": "রিসেপশনিস্ট",
 };
 
 /** A portrait in prisma/seed-media/people/<key>.(png|jpg) → media library id (same file twice = one item). */
@@ -991,7 +1021,7 @@ async function main() {
       await db.offering.update({ where: { key: c.key }, data: { parentId: ids.get(c.parent) } });
     }
   }
-  console.log(`• Products: ${[...PUBLISH].join(", ")} published`);
+  console.log(`• Products: ${[...PUBLISH].join(", ")} published${bnItemsAdded ? `; Bangla added to ${bnItemsAdded} product item(s)` : ""}`);
   await markPlaceholders();
   await seedPeople();
   await seedRoster();

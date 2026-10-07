@@ -14,6 +14,13 @@ export type SettingsValues = {
   appSupportEmail: string;
   appSupportPhone: string;
   addressEn: string;
+  mapUrl: string;
+  hoursEn: string;
+  hoursBn: string;
+  registrationEn: string;
+  registrationBn: string;
+  regulatoryEn: string;
+  regulatoryBn: string;
   addressBn: string;
   socialLinks: string;
   alertEmails: string;
@@ -61,6 +68,23 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
         <TextInput id="appSupportPhone" type="tel" label="App support phone" defaultValue={values.appSupportPhone} error={e.appSupportPhone} />
         <TextArea id="addressEn" label="Office address (English)" rows={2} required defaultValue={values.addressEn} error={e.addressEn} />
         <TextArea id="addressBn" label="Office address (বাংলা)" rows={2} lang="bn" defaultValue={values.addressBn} error={e.addressBn} />
+        <TextInput
+          id="mapUrl"
+          type="url"
+          label="Google Maps location (optional)"
+          hint="In Google Maps: Share → Embed a map → copy the address inside src, or paste a share link. Empty = the map finds the office address."
+          defaultValue={values.mapUrl}
+          error={e.mapUrl}
+        />
+        <TextInput id="hoursEn" label="Office hours (English)" placeholder="Sunday–Thursday, 9:00–18:00" defaultValue={values.hoursEn} error={e.hoursEn} />
+        <TextInput id="hoursBn" label="Office hours (বাংলা)" lang="bn" defaultValue={values.hoursBn} error={e.hoursBn} />
+      </Group>
+
+      <Group title="Registration and regulation" hint="Shown in the footer of every page, so visitors and regulators can verify who you are.">
+        <TextArea id="registrationEn" label="Company registration (English)" rows={2} placeholder="Registered with RJSC, Bangladesh, No. …" defaultValue={values.registrationEn} error={e.registrationEn} />
+        <TextArea id="registrationBn" label="Company registration (বাংলা)" rows={2} lang="bn" defaultValue={values.registrationBn} error={e.registrationBn} />
+        <TextArea id="regulatoryEn" label="Regulatory note (English)" rows={3} placeholder="Technology provider to TREC holders of DSE and CSE. …" defaultValue={values.regulatoryEn} error={e.regulatoryEn} />
+        <TextArea id="regulatoryBn" label="Regulatory note (বাংলা)" rows={3} lang="bn" defaultValue={values.regulatoryBn} error={e.regulatoryBn} />
       </Group>
 
       <Group title="Social links and alerts">

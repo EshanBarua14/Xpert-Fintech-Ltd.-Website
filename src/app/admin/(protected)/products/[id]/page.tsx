@@ -5,6 +5,8 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { OfferingItemsEditor, type EditorItem } from "@/components/admin/OfferingItemsEditor";
+import { ProductMediaForm } from "@/components/admin/ProductMediaForm";
+import { imageOptions, videoFileOptions } from "@/lib/admin/media";
 import { ConfirmButton, StatusBadge } from "@/components/admin/AdminUi";
 import { buttonClasses } from "@/components/ui/Button";
 import { parentOptions, toProductFormValues } from "@/lib/admin/products";
@@ -30,9 +32,21 @@ export default async function EditProductPage({
     include: {
       translations: true,
       items: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], include: { translations: true } },
+      media: { orderBy: { sortOrder: "asc" }, include: { translations: true } },
     },
   });
   if (!offering) notFound();
+  const [images, files] = await Promise.all([imageOptions(), videoFileOptions()]);
+  const demo = offering.media.find((m) => m.kind === "VIDEO");
+  const mediaValues = {
+    screenshots: offering.media.filter((m) => m.kind !== "VIDEO" && m.mediaId).map((m) => m.mediaId!),
+    source: (demo ? (demo.videoUrl ? "LINK" : "FILE") : "NONE") as "NONE" | "LINK" | "FILE",
+    videoUrl: demo?.videoUrl ?? "",
+    videoFileId: demo?.mediaId ?? "",
+    posterMediaId: demo?.posterMediaId ?? "",
+    captionEn: demo?.translations.find((t) => t.locale === "en")?.caption ?? "",
+    captionBn: demo?.translations.find((t) => t.locale === "bn")?.caption ?? "",
+  };
 
   const en = offering.translations.find((t) => t.locale === "en");
   const items: EditorItem[] = offering.items.map((item) => {
@@ -107,6 +121,14 @@ export default async function EditProductPage({
               </p>
             </div>
             <OfferingItemsEditor offeringId={offering.id} items={items} />
+          </section>
+
+          <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
+            <div>
+              <h2 className="font-display text-2xl font-semibold">Screens and demo video</h2>
+              <p className="mt-1 text-sm text-text-secondary">Shown on the product page as “See it working” and “Inside the product”.</p>
+            </div>
+            <ProductMediaForm offeringId={offering.id} values={mediaValues} images={images} files={files} />
           </section>
 
           <section className="flex items-center justify-between gap-4 border-t border-fg/10 pt-8">

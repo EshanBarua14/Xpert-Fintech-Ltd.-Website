@@ -36,7 +36,7 @@ export function OrderFlow({
 
   // Geometry in SVG user units.
   const W = 1200;
-  const H = 200;
+  const H = 170;
   const margin = 90;
   const lineY = 92;
   const gap = (W - margin * 2) / (count - 1);
@@ -113,14 +113,23 @@ export function OrderFlow({
               >
                 {step.label}
               </text>
-              {step.note && (
-                <text x={x(i)} y={lineY + 82} textAnchor="middle" fontSize="14" className="fill-text-secondary">
-                  {step.note}
-                </text>
-              )}
             </g>
           ))}
         </svg>
+        {/* Notes wrap as text under each step (SVG text cannot wrap). Columns line up with the steps. */}
+        {steps.some((s) => s.note) && (
+          <ol
+            aria-hidden="true"
+            className="-mt-2 grid text-center text-sm leading-snug text-text-secondary"
+            style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))`, paddingInline: `${Math.max(0, ((margin - gap / 2) / W) * 100)}%` }}
+          >
+            {steps.map((s) => (
+              <li key={s.key} className="px-2">
+                {s.note}
+              </li>
+            ))}
+          </ol>
+        )}
       </MotionPause>
 
       {/* Phones: vertical list, same content */}

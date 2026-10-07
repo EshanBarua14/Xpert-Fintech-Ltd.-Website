@@ -13,7 +13,7 @@ function Trading() {
   // Orders travelling along three lanes into the OMS node.
   const lanes = [0, 1, 2, 3];
   return (
-    <div className="relative h-full min-h-44 w-full overflow-hidden">
+    <div className="relative h-full min-h-32 w-full overflow-hidden sm:min-h-44">
       <div className="absolute inset-y-6 right-6 flex w-24 items-center justify-center rounded-2xl border border-brand-sky/40 bg-brand-sky/10 font-mono text-xs tracking-widest text-cyan-300 shadow-[0_0_40px_-8px_rgb(34_188_235/0.6)]">
         OMS
       </div>
@@ -34,8 +34,8 @@ function Trading() {
 
 function Risk() {
   return (
-    <div className="relative flex h-full min-h-36 items-center justify-center">
-      <svg viewBox="0 0 200 120" className="w-56 max-w-full">
+    <div className="relative flex h-full min-h-28 sm:min-h-36 items-center justify-center">
+      <svg viewBox="0 0 200 120" className="w-44 max-w-full sm:w-56">
         <path d="M20 110 A80 80 0 0 1 180 110" fill="none" stroke="rgb(255 255 255 / 0.08)" strokeWidth="12" strokeLinecap="round" />
         <path
           d="M20 110 A80 80 0 0 1 180 110"
@@ -61,7 +61,7 @@ function Risk() {
 
 function Ekyc() {
   return (
-    <div className="relative flex h-full min-h-36 items-center justify-center">
+    <div className="relative flex h-full min-h-28 sm:min-h-36 items-center justify-center">
       <div className="relative h-24 w-40 overflow-hidden rounded-xl border border-fg/15 bg-fg/[0.04] p-3">
         <div className="flex gap-3">
           <div className="h-12 w-10 rounded-md bg-gradient-to-b from-brand-sky/40 to-brand-royal/30" />
@@ -82,7 +82,7 @@ function Ekyc() {
 
 function Bo() {
   return (
-    <div className="flex h-full min-h-36 items-center justify-center gap-2">
+    <div className="flex h-full min-h-28 sm:min-h-36 items-center justify-center gap-2">
       {[0, 1, 2, 3, 4].map((i) => (
         <span key={i} className="flex items-center gap-2">
           <span className="block size-3 rounded-full" style={{ animation: `fill-step 5s ease-in-out -${2.5 - i * 0.3}s infinite` }} />
@@ -95,7 +95,7 @@ function Bo() {
 
 function Dms() {
   return (
-    <div className="relative flex h-full min-h-36 items-center justify-center">
+    <div className="relative flex h-full min-h-28 sm:min-h-36 items-center justify-center">
       {[0, 1, 2].map((i) => (
         <div
           key={i}
@@ -114,7 +114,7 @@ function Dms() {
 
 function Back() {
   return (
-    <div className="flex h-full min-h-36 flex-col justify-center gap-2 px-2">
+    <div className="flex h-full min-h-28 sm:min-h-36 flex-col justify-center gap-2 px-2">
       {[0, 1, 2, 3].map((i) => (
         <div key={i} className="flex items-center gap-2">
           <span className="size-2 rounded-full bg-brand-sky/60" />
@@ -129,8 +129,8 @@ function Back() {
 function Data() {
   // Abstract signal lines (no axes, no values).
   return (
-    <div className="flex h-full min-h-36 items-center">
-      <svg viewBox="0 0 400 120" preserveAspectRatio="none" className="h-28 w-full">
+    <div className="flex h-full min-h-28 sm:min-h-36 items-center">
+      <svg viewBox="0 0 400 120" preserveAspectRatio="none" className="h-20 w-full sm:h-28">
         {[0, 1, 2].map((i) => (
           <path
             key={i}

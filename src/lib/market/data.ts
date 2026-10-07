@@ -33,12 +33,40 @@ const TTL_MS = 15_000;
 let boardCache: { at: number; value: MarketSnapshot | null } | null = null;
 const BOARD_TTL_MS = 60_000; // be a polite reader: at most one request per exchange per minute
 
-async function boardSnapshot(): Promise<MarketSnapshot | null> {
+let boardRefresh: Promise<MarketSnapshot | null> | null = null;
+
+/** Reads both exchanges once (concurrent callers share the same request). */
+function refreshBoard(): Promise<MarketSnapshot | null> {
+  if (!boardRefresh) {
+    boardRefresh = exchangeSnapshot()
+      .then(({ snapshot }) => snapshot)
+      .catch((error: unknown) => {
+        console.error("[market] exchange read failed", error);
+        return null;
+      })
+      .then((snapshot) => {
+        // Keep the last good board if both exchanges fail this time.
+        boardCache = { at: Date.now(), value: snapshot ?? boardCache?.value ?? null };
+        return boardCache.value;
+      })
+      .finally(() => {
+        boardRefresh = null;
+      });
+  }
+  return boardRefresh;
+}
+
+/**
+ * The exchanges' boards without making pages wait for DSE or CSE: a fresh copy
+ * is returned at once; a stale one is returned at once while a new read runs in
+ * the background; with nothing cached yet, the caller waits at most `waitMs`
+ * (pages render without prices and the browser fills them in a moment later).
+ */
+async function boardSnapshot(waitMs = 1500): Promise<MarketSnapshot | null> {
   if (boardCache && Date.now() - boardCache.at < BOARD_TTL_MS) return boardCache.value;
-  const { snapshot } = await exchangeSnapshot();
-  // Keep the last good board if both exchanges fail this time.
-  boardCache = { at: Date.now(), value: snapshot ?? boardCache?.value ?? null };
-  return boardCache.value;
+  const pending = refreshBoard();
+  if (boardCache) return boardCache.value;
+  return Promise.race([pending, new Promise<null>((r) => setTimeout(() => r(null), waitMs))]);
 }
 
 /** Calls the licensed feed adapter. Short cache so many visitors cause one upstream call. */
@@ -95,19 +123,41 @@ export async function latestShares(): Promise<ShareFigure[]> {
   }
 }
 
-export async function getMarketPayload(): Promise<MarketPayload> {
+// Admin settings and share figures change rarely: read them at most every 30 s
+// (browsers poll /api/market every 20 s; saving in the admin clears this at once).
+let infoCache: { at: number; value: Promise<{ source: Awaited<ReturnType<typeof db.marketDataSource.findFirst>>; shares: ShareFigure[] }> } | null = null;
+function settingsAndShares() {
+  if (!infoCache || Date.now() - infoCache.at > 30_000) {
+    infoCache = {
+      at: Date.now(),
+      value: Promise.all([db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }).catch(() => null), latestShares()]).then(([source, shares]) => ({ source, shares })),
+    };
+  }
+  return infoCache.value;
+}
+
+/** Forget cached settings and share figures (after an admin saves them). */
+export function clearMarketInfoCache() {
+  infoCache = null;
+}
+
+/**
+ * What the site shows. Pages call it with the default short wait so a slow
+ * exchange never delays them; /api/market (polled by browsers) waits longer.
+ */
+export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = {}): Promise<MarketPayload> {
   const mode = marketMode();
-  const [source, shares] = await Promise.all([
-    db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }).catch(() => null),
-    latestShares(),
-  ]);
+  const { source, shares } = await settingsAndShares();
   let snapshot: MarketSnapshot | null = null;
   if (mode === "demo") snapshot = demoSnapshot();
   // A licensed feed is shown only once an admin switches it on in Admin → Market data.
   if (mode === "licensed" && source?.isActive) snapshot = await licensedSnapshot();
-  if (mode === "exchange" && source?.isActive) snapshot = await boardSnapshot();
+  // DSE/CSE public pages: MARKET_DATA_MODE=exchange alone switches them on.
+  if (mode === "exchange") snapshot = await boardSnapshot(waitMs);
   return {
-    mode: snapshot ? mode : "none",
+    // "none" only when prices are really off; a board still loading keeps its
+    // mode so the page's widgets go on to fetch it from /api/market.
+    mode: snapshot || mode === "exchange" ? mode : "none",
     providerName: source?.providerName ?? (mode === "exchange" ? "DSE, CSE" : null),
     delayMinutes: source?.displayDelayMinutes ?? 0,
     snapshot,
@@ -131,4 +181,23 @@ export async function testFeed(): Promise<{ ok: boolean; message: string }> {
   if (!snap) return { ok: false, message: "The feed did not return valid data. See the server log for the reason." };
   const q = snap.exchanges.reduce((n, e) => n + e.quotes.length, 0);
   return { ok: true, message: `Connected. ${snap.exchanges.map((e) => e.exchange).join(" and ")}, ${q} quotes, as of ${snap.asOf}.` };
+}
+
+/**
+ * Today's total turnover of an exchange from the live source, when it reports
+ * one: CSE's home page in exchange mode, or the licensed feed. Used to fill
+ * in the market side of the daily market-share figure. Null when unknown.
+ */
+export async function liveMarketTurnover(exchange: "DSE" | "CSE"): Promise<number | null> {
+  const mode = marketMode();
+  let snapshot: MarketSnapshot | null = null;
+  if (mode === "exchange") snapshot = await boardSnapshot(12_000);
+  else if (mode === "licensed") snapshot = await licensedSnapshot();
+  const t = snapshot?.exchanges.find((e) => e.exchange === exchange)?.turnover;
+  return t && t > 0 ? t : null;
+}
+
+/** Today's date in Dhaka as YYYY-MM-DD. */
+export function dhakaToday(): string {
+  return new Date(Date.now() + 6 * 3600 * 1000).toISOString().slice(0, 10);
 }

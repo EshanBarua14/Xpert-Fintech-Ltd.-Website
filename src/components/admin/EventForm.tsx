@@ -5,6 +5,7 @@ import { saveEvent, type EventState } from "@/app/admin/(protected)/events/actio
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage, PublishFields } from "@/components/admin/EditorParts";
 import { ImagePicker } from "@/components/admin/ImagePicker";
+import { GalleryPicker } from "@/components/admin/GalleryPicker";
 import { TextArea, TextInput } from "@/components/ui/Field";
 import type { ImageOption } from "@/lib/admin/media";
 import { slugify } from "@/lib/validation/common";
@@ -23,6 +24,7 @@ export type EventFormValues = {
   videoUrl: string;
   legacyUrl: string | null;
   participants: string[];
+  gallery: string[];
   en: Text;
   bn: Text;
 };
@@ -85,6 +87,12 @@ export function EventForm({
         <Language l="en" values={values.en} errors={e} />
         <Language l="bn" values={values.bn} errors={e} />
         <fieldset className="flex flex-col gap-3 rounded-card border border-fg/10 p-5">
+          <legend className="px-2 text-sm font-semibold">Photo gallery</legend>
+          <p className="text-xs text-text-secondary">Shown on the event page and in the website&apos;s Gallery. Upload photos in Media first.</p>
+          <GalleryPicker name="gallery" options={images} defaultValue={values.gallery} />
+          {e.gallery && <p className="text-xs text-market-down">{e.gallery}</p>}
+        </fieldset>
+        <fieldset className="flex flex-col gap-3 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Participating organizations</legend>
           <p className="text-xs text-text-secondary">Shown on the event page. Only tick organizations you may name publicly.</p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -127,7 +135,7 @@ export function EventForm({
           <TextInput
             id="videoUrl"
             type="url"
-            label="Video (YouTube or Vimeo)"
+            label="Video (YouTube, Vimeo or Facebook)"
             placeholder="https://www.youtube.com/watch?v=…"
             defaultValue={values.videoUrl}
             error={e.videoUrl}

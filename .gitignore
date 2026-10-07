@@ -30,3 +30,11 @@ npm-debug.log*
 /test-results/
 /blob-report/
 /backups/
+
+# Real images for import (see assets/README.md)
+assets/*
+!assets/README.md
+market-debug/
+
+# Report and page text written by npm run import:live-site
+/live-site-import/

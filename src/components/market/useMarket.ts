@@ -11,7 +11,15 @@ const POLL_MS = 20_000;
  * visible, however many widgets are mounted.
  */
 type Moves = Record<string, "up" | "down">;
-type State = { data: MarketPayload; moves: Moves };
+type State = { data: MarketPayload; moves: Moves; /** a fresh answer from /api/market has arrived */ loaded?: boolean };
+
+/** Two payloads for the same moment: keep the one that knows more (newer prices, then more share figures). */
+function richer(a: MarketPayload, b: MarketPayload): MarketPayload {
+  const ta = a.snapshot ? Date.parse(a.snapshot.asOf) : 0;
+  const tb = b.snapshot ? Date.parse(b.snapshot.asOf) : 0;
+  if (ta !== tb) return ta > tb ? a : b;
+  return b.shares.length > a.shares.length ? b : a;
+}
 const listeners = new Set<(s: State) => void>();
 let state: State | null = null;
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -39,12 +47,13 @@ async function load() {
           if (before !== undefined && before !== q.ltp) moves[`${ex.exchange}:${q.symbol}`] = q.ltp > before ? "up" : "down";
         }
       }
-      emit({ data: next, moves });
+      emit({ data: next, moves, loaded: true });
     }
   } catch {
     /* keep the last good data */
   } finally {
     inFlight = false;
+    if (state && !state.loaded) emit({ ...state, loaded: true });
   }
   schedule();
 }
@@ -62,11 +71,12 @@ function onVisible() {
 }
 
 export function useMarket(initial: MarketPayload) {
-  const [current, setCurrent] = useState<State>(() => state ?? { data: initial, moves: {} });
+  const [current, setCurrent] = useState<State>(() => (state ? { ...state, data: richer(state.data, initial) } : { data: initial, moves: {} }));
 
   useEffect(() => {
     if (initial.mode === "none") return;
     if (!state) state = { data: initial, moves: {} };
+    else if (richer(state.data, initial) !== state.data) emit({ ...state, data: initial });
     listeners.add(setCurrent);
     if (listeners.size === 1) {
       document.addEventListener("visibilitychange", onVisible);

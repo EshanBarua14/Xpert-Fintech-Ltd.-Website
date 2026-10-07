@@ -6,11 +6,13 @@ import {
   changeOwnPassword,
   confirmTwoFactor,
   createAdmin,
+  deleteAdmin,
   disableOwnTwoFactor,
   resetAdminPassword,
   resetAdminTwoFactor,
   setAdminActive,
   startTwoFactorSetup,
+  updateAdmin,
   type AccountState,
   type TwoFactorState,
 } from "@/app/admin/(protected)/users/actions";
@@ -96,6 +98,47 @@ export type AdminRow = {
   twoFactor: boolean;
 };
 
+function EditAdmin({ row }: { row: AdminRow }) {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const { state, pending, onSubmit } = useActionForm<AccountState>(updateAdmin, {});
+  useEffect(() => {
+    if (state.savedAt) {
+      setOpen(false);
+      router.refresh();
+    }
+  }, [state.savedAt, router]);
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="rounded-control border border-fg/15 px-3 py-2 text-sm hover:border-brand-sky">
+        Edit name or email
+      </button>
+    );
+  }
+  const e = state.errors ?? {};
+  return (
+    <form onSubmit={onSubmit} className="flex w-full flex-wrap items-end gap-3" noValidate>
+      <input type="hidden" name="id" value={row.id} />
+      <TextInput id={`name-${row.id}`} name="name" label="Name" defaultValue={row.name} required error={e.name} />
+      <TextInput
+        id={`email-${row.id}`}
+        name="email"
+        type="email"
+        label="Sign-in email"
+        defaultValue={row.email}
+        required
+        autoComplete="off"
+        hint={row.isSelf ? "Changing it signs out your other devices." : "Changing it signs them out."}
+        error={e.email}
+      />
+      <SubmitButton pending={pending}>Save</SubmitButton>
+      <button type="button" onClick={() => setOpen(false)} className="h-11 px-3 text-sm text-text-secondary hover:text-fg">
+        Cancel
+      </button>
+    </form>
+  );
+}
+
 function ResetPassword({ id }: { id: string }) {
   const { state, pending, onSubmit } = useActionForm<AccountState>(resetAdminPassword, {});
   return (
@@ -124,6 +167,9 @@ export function AdminUsersTable({ rows }: { rows: AdminRow[] }) {
             {u.twoFactor ? <Badge tone="up">Two-factor on</Badge> : <Badge>Two-factor off</Badge>}
             <span className="ml-auto text-xs text-text-secondary">Last sign-in: {u.lastLogin}</span>
           </div>
+          <div>
+            <EditAdmin row={u} />
+          </div>
           {!u.isSelf && (
             <div className="flex flex-wrap items-end justify-between gap-4">
               <ResetPassword id={u.id} />
@@ -148,6 +194,12 @@ export function AdminUsersTable({ rows }: { rows: AdminRow[] }) {
                     Reactivate
                   </button>
                 )}
+              </form>
+              <form action={deleteAdmin}>
+                <input type="hidden" name="id" value={u.id} />
+                <ConfirmButton message={`Remove ${u.email} for good? Their sign-in stops working, leads they own become unassigned, and the activity log keeps their past changes.`}>
+                  Remove
+                </ConfirmButton>
               </form>
             </div>
           )}

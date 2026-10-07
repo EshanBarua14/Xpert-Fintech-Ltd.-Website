@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:fast": "next dev --turbopack",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
@@ -21,7 +22,14 @@
     "db:erd": "node scripts/generate-erd.mjs",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install --with-deps chromium",
-    "test:a11y": "playwright test a11y"
+    "test:a11y": "playwright test a11y",
+    "db:seed:content": "tsx prisma/seed-content.ts",
+    "assets:import": "tsx scripts/import-assets.ts",
+    "admin:password": "tsx scripts/reset-admin-password.ts",
+    "setup": "tsx scripts/setup.ts",
+    "market:check": "tsx --conditions=react-server scripts/market-check.ts",
+    "db:permissions": "tsx scripts/db-permissions.ts",
+    "import:live-site": "tsx scripts/import-live-site.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

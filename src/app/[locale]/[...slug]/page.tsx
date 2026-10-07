@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect, redirect as nextRedirect } from "next/navigation";
 import { Sections } from "@/components/blocks/BlockRenderer";
 import { PageHero } from "@/components/flagship/Sections";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
@@ -55,6 +55,7 @@ export default async function CmsPage({ params }: Props) {
     const redirect = await findRedirect(`/${slug.join("/")}`);
     if (redirect) {
       await countRedirectHit(redirect.id);
+      if (redirect.statusCode === 302) nextRedirect(redirect.toPath);
       permanentRedirect(redirect.toPath);
     }
     notFound();

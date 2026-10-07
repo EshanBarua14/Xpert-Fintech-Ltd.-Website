@@ -1,25 +1,48 @@
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { marketMode } from "@/lib/market/data";
+import { dhakaToday, liveMarketTurnover, marketMode } from "@/lib/market/data";
 import { ConfirmButton } from "@/components/admin/AdminUi";
-import { MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
-import { deleteMarketShare } from "./actions";
+import { MarketGoalForm, MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
+import { readGoal } from "@/lib/content/leaders";
+import { clearMarketGoal, deleteMarketShare } from "./actions";
 
 const MODE_TEXT = {
   licensed: "Licensed feed (MARKET_DATA_MODE=licensed)",
-  exchange: "DSE and CSE price boards (MARKET_DATA_MODE=exchange): last prices, changes, top movers and breadth for every listed stock. Index values need the licensed feed.",
+  exchange: "DSE and CSE public pages (MARKET_DATA_MODE=exchange): every listed stock's price, top gainers and losers, advanced/declined; CSE's five indices, trades, volume and value. DSE's indices and turnover need the licensed feed. Shown as soon as this mode is set (no tick needed).",
   demo: "Demo data — generated prices, clearly labelled on the site. Never use on the live website.",
   none: "Off (MARKET_DATA_MODE=none). Only market-share figures entered below are shown.",
 } as const;
 
-export default async function MarketAdminPage() {
+export default async function MarketAdminPage({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
   await requireAdmin();
-  const [source, shares] = await Promise.all([
+  const { edit } = await searchParams;
+  const [source, shares, goalRow] = await Promise.all([
     db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }),
     db.marketShare.findMany({ orderBy: [{ tradeDate: "desc" }, { exchange: "asc" }], take: 60 }),
+    db.siteSetting.findUnique({ where: { key: "market.goal" } }),
   ]);
+  const goal = goalRow ? readGoal(goalRow.value) : null;
   const mode = marketMode();
-  const today = new Date(Date.now() + 6 * 3600 * 1000).toISOString().slice(0, 10);
+  const today = dhakaToday();
+  const [liveDse, liveCse] = await Promise.all([liveMarketTurnover("DSE").catch(() => null), liveMarketTurnover("CSE").catch(() => null)]);
+  const latest = (ex: "DSE" | "CSE") => shares.find((s) => s.exchange === ex)?.tradeDate.toISOString().slice(0, 10) ?? null;
+  const apiOn = (process.env.MARKET_SHARE_API_TOKEN ?? "").length >= 24;
+  // "Edit" on a row loads that day's DSE and CSE figures into the form.
+  const editDay = edit && /^\d{4}-\d{2}-\d{2}$/.test(edit) ? edit : null;
+  const editRows = editDay
+    ? await db.marketShare.findMany({ where: { tradeDate: new Date(`${editDay}T00:00:00.000Z`) } })
+    : [];
+  const num = (v: unknown) => (v === null || v === undefined ? "" : String(Number(v)));
+  const initial = editDay
+    ? {
+        tradeDate: editDay,
+        sourceNote: editRows[0]?.sourceNote ?? "",
+        dseXpert: num(editRows.find((r) => r.exchange === "DSE")?.xpertTurnover),
+        dseMarket: num(editRows.find((r) => r.exchange === "DSE")?.marketTurnover),
+        cseXpert: num(editRows.find((r) => r.exchange === "CSE")?.xpertTurnover),
+        cseMarket: num(editRows.find((r) => r.exchange === "CSE")?.marketTurnover),
+      }
+    : undefined;
   const bdt = (v: unknown) => `৳${(Number(v) / 1e7).toLocaleString("en-US", { maximumFractionDigits: 2 })} cr`;
 
   return (
@@ -35,7 +58,7 @@ export default async function MarketAdminPage() {
         <h2 className="font-display text-xl font-semibold">Feed</h2>
         <p className="text-sm">
           <span className="text-text-secondary">Current mode: </span>
-          <span className={mode === "demo" ? "font-semibold text-amber-300" : "font-semibold"}>{MODE_TEXT[mode]}</span>
+          <span className={mode === "demo" ? "font-semibold text-gold" : "font-semibold"}>{MODE_TEXT[mode]}</span>
         </p>
         <p className="text-xs text-text-secondary">
           The mode, feed address and key are set in the server&rsquo;s <code>.env</code> (MARKET_DATA_MODE, MARKET_DATA_API_URL, MARKET_DATA_API_KEY) so secrets never live in the
@@ -57,13 +80,32 @@ export default async function MarketAdminPage() {
         )}
       </section>
 
-      <section className="flex flex-col gap-4 rounded-card border border-fg/10 p-6">
+      <section id="share-form" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">
         <h2 className="font-display text-xl font-semibold">Xpert market share</h2>
         <p className="text-sm text-text-secondary">
           Enter the day&rsquo;s turnover traded through Xpert and the exchange&rsquo;s total turnover. The website shows the latest figure for each exchange with its source. Saving the
           same day and exchange again replaces it.
         </p>
-        <MarketShareForm today={today} />
+        <ul className="flex flex-wrap gap-3 text-sm">
+          {(["DSE", "CSE"] as const).map((ex) => {
+            const d = latest(ex);
+            return (
+              <li key={ex} className={"rounded-full border px-3 py-1 " + (d === today ? "border-market-up/40 text-market-up" : "border-gold/40 text-gold")}>
+                {ex}: {d ? (d === today ? "today's figure saved" : `latest is ${d}`) : "no figure yet"}
+              </li>
+            );
+          })}
+        </ul>
+        {initial && (
+          <p className="rounded-control border border-brand-sky/30 bg-brand-sky/10 px-4 py-3 text-sm">
+            Editing {initial.tradeDate}. Change the figures and save; <a href="/admin/market#share-form" className="text-brand-sky underline">cancel</a>.
+          </p>
+        )}
+        <MarketShareForm key={editDay ?? "new"} today={today} live={{ DSE: liveDse, CSE: liveCse }} initial={initial} />
+        <p className="text-xs text-text-secondary">
+          Automatic daily update: {apiOn ? "on" : "off"}. Xpert&rsquo;s OMS or back office can send the day&rsquo;s figures to <code>POST /api/market-share</code> with the
+          token in <code>MARKET_SHARE_API_TOKEN</code> (see docs/MARKET-DATA.md); CSE&rsquo;s total is filled in automatically.
+        </p>
         <div className="overflow-x-auto rounded-card border border-fg/10">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-b border-fg/10 text-xs tracking-wide text-text-secondary uppercase">
@@ -93,7 +135,10 @@ export default async function MarketAdminPage() {
                   <td className="px-4 py-3 font-mono">{bdt(s.marketTurnover)}</td>
                   <td className="px-4 py-3 font-mono font-semibold">{((Number(s.xpertTurnover) / Number(s.marketTurnover)) * 100).toFixed(2)}%</td>
                   <td className="px-4 py-3 text-text-secondary">{s.sourceNote ?? "—"}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="flex items-center justify-end gap-4 px-4 py-3">
+                    <a href={`/admin/market?edit=${s.tradeDate.toISOString().slice(0, 10)}#share-form`} className="text-xs text-brand-sky hover:underline">
+                      Edit
+                    </a>
                     <form action={deleteMarketShare}>
                       <input type="hidden" name="id" value={s.id} />
                       <ConfirmButton message="Delete this figure?" className="text-xs text-text-secondary hover:text-market-down">
@@ -106,6 +151,26 @@ export default async function MarketAdminPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section id="goal" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="font-display text-xl font-semibold">Market-share goal</h2>
+          {goal && (
+            <form action={clearMarketGoal}>
+              <ConfirmButton message="Remove the goal from the website?" className="text-xs text-text-secondary hover:text-market-down">
+                Remove goal
+              </ConfirmButton>
+            </form>
+          )}
+        </div>
+        <p className="text-sm text-text-secondary">
+          Shown on the home page next to the latest market share, as a progress bar towards the target. {goal ? `Now: ${goal.targetPct}% by ${goal.year}.` : "No goal set: the home page shows market share without a target."}
+        </p>
+        <MarketGoalForm
+          key={goal ? `${goal.targetPct}-${goal.year}` : "none"}
+          values={{ targetPct: goal ? String(goal.targetPct) : "", year: goal ? String(goal.year) : "", goalEn: goal?.en ?? "", goalBn: goal?.bn ?? "" }}
+        />
       </section>
     </div>
   );

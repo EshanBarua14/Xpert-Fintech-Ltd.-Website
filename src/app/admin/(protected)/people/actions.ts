@@ -18,7 +18,20 @@ const schema = z.object({
   publishAt: z.string().optional(),
   sortOrder: z.coerce.number().int().min(0).max(9999),
   photoMediaId: optionalId,
-  linkedinUrl: optionalHttpsUrl,
+  linkedinUrl: optionalHttpsUrl.refine((v) => !v || /^https:\/\/([a-z]{2,3}\.)?(www\.)?linkedin\.com\//i.test(v), "Enter a LinkedIn address, e.g. https://www.linkedin.com/in/name"),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(254)
+    .refine((v) => v === "" || z.string().email().safeParse(v).success, "Enter a valid email address.")
+    .transform((v) => v || null),
+  department: z
+    .string()
+    .trim()
+    .max(60, "Keep the department under 60 characters.")
+    .transform((v) => v || null),
+  isPlaceholder: z.boolean(),
   enName: z.string().trim().min(1, "English name is required.").max(120),
   bnName: z.string().trim().max(120),
   enBio: optionalText(3000),
@@ -45,6 +58,9 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
     sortOrder: get("sortOrder") || 0,
     photoMediaId: get("photoMediaId"),
     linkedinUrl: get("linkedinUrl"),
+    email: get("email"),
+    department: get("department"),
+    isPlaceholder: formData.get("isPlaceholder") === "on",
     enName: get("enName"),
     bnName: get("bnName"),
     enBio: get("enBio"),
@@ -74,6 +90,9 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
     sortOrder: v.sortOrder,
     photoMediaId: v.photoMediaId,
     linkedinUrl: v.linkedinUrl,
+    email: v.email,
+    department: v.department,
+    isPlaceholder: v.isPlaceholder,
     updatedById: admin.id,
   };
 

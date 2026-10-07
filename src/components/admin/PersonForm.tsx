@@ -6,6 +6,7 @@ import { FormMessage, PublishFields } from "@/components/admin/EditorParts";
 import { ImagePicker } from "@/components/admin/ImagePicker";
 import { TextArea, TextInput } from "@/components/ui/Field";
 import type { ImageOption } from "@/lib/admin/media";
+import { DEPARTMENT_NAMES } from "@/lib/people/departments";
 import { PERSON_GROUP_LABELS, PERSON_GROUPS, type PersonGroupKey } from "@/lib/validation/people";
 
 export type PersonFormValues = {
@@ -15,6 +16,9 @@ export type PersonFormValues = {
   sortOrder: number;
   photoMediaId: string;
   linkedinUrl: string;
+  email: string;
+  department: string;
+  isPlaceholder: boolean;
   enName: string;
   bnName: string;
   enBio: string;
@@ -39,16 +43,39 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
           <TextInput id="bnName" label="Name (বাংলা)" lang="bn" defaultValue={values.bnName} error={e.bnName} />
           <TextArea id="enBio" label="Short bio (English)" rows={5} defaultValue={values.enBio} error={e.enBio} />
           <TextArea id="bnBio" label="Short bio (বাংলা)" rows={5} lang="bn" defaultValue={values.bnBio} error={e.bnBio} />
-          <div className="md:col-span-2">
-            <TextInput
-              id="linkedinUrl"
-              type="url"
-              label="LinkedIn profile"
-              placeholder="https://www.linkedin.com/in/…"
-              defaultValue={values.linkedinUrl}
-              error={e.linkedinUrl}
-            />
-          </div>
+          <TextInput
+            id="email"
+            type="email"
+            label="Work email"
+            placeholder="name@xpertfintech.com"
+            hint="Optional. Shown as an email icon on the card and in the profile."
+            defaultValue={values.email}
+            error={e.email}
+          />
+          <TextInput
+            id="linkedinUrl"
+            type="url"
+            label="LinkedIn profile"
+            placeholder="https://www.linkedin.com/in/…"
+            hint="Optional. Shown as a LinkedIn icon on the card and in the profile."
+            defaultValue={values.linkedinUrl}
+            error={e.linkedinUrl}
+          />
+          <TextInput
+            id="department"
+            label="Department"
+            list="department-options"
+            placeholder="Engineering"
+            hint="Optional. Colours the card and sets the filter on the Team page. Pick one or type a new one."
+            defaultValue={values.department}
+            error={e.department}
+            autoComplete="off"
+          />
+          <datalist id="department-options">
+            {DEPARTMENT_NAMES.map((d) => (
+              <option key={d} value={d} />
+            ))}
+          </datalist>
         </fieldset>
 
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
@@ -88,6 +115,13 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Publishing</legend>
           <PublishFields status={values.status} publishAt={values.publishAt} error={e.publishAt} />
+          <label className="flex items-start gap-3 text-sm">
+            <input type="checkbox" name="isPlaceholder" defaultChecked={values.isPlaceholder} className="mt-0.5 h-4 w-4 accent-brand-royal" />
+            <span>
+              Placeholder profile
+              <span className="block text-xs text-text-secondary">A stand-in until the real name, photo and bio arrive. Untick once the real profile is in.</span>
+            </span>
+          </label>
           <SubmitButton pending={pending}>Save</SubmitButton>
         </fieldset>
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">

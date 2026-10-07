@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Sections } from "@/components/blocks/BlockRenderer";
 import { LeadFormSection } from "@/components/forms/LeadFormSection";
 import { ContactDetails } from "@/components/layout/ContactDetails";
+import { OfficeMap } from "@/components/layout/OfficeMap";
 import { PageHero, Shell } from "@/components/flagship/Sections";
 import { getSiteInfo } from "@/lib/content/settings";
 import { isLocale } from "@/lib/i18n/config";
@@ -51,6 +52,11 @@ export default async function ContactPage({ params }: Props) {
           </aside>
         </div>
       </Shell>
+      {info.mapEmbed && (
+        <Shell className="pb-24">
+          <OfficeMap info={info} t={t} />
+        </Shell>
+      )}
       {ctx && <Sections sections={sections} ctx={ctx} />}
     </>
   );

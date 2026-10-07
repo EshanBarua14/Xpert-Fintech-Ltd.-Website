@@ -8,13 +8,15 @@ import type { AppLocale } from "@/lib/i18n/config";
 import { Icon } from "@/components/ui/Icon";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { ThemeToggle } from "./ThemeToggle";
+import { SearchDialog, type SearchLabels } from "./SearchDialog";
 import { cn } from "@/lib/utils/cn";
 
-type Labels = { menu: string; closeMenu: string; mainNavigation: string; language: string; overview: string; toLight: string; toDark: string };
+type Labels = { menu: string; closeMenu: string; mainNavigation: string; language: string; overview: string; toLight: string; toDark: string; search?: SearchLabels };
 
 /** Picks an icon for a menu link from where it goes. */
 function iconFor(href: string | null): string {
   const h = href ?? "";
+  if (/\/markets(\/|$)/.test(h)) return "chart";
   if (/trading|oms|#trading/.test(h)) return "exchange";
   if (/rms|risk/.test(h)) return "shield";
   if (/ekyc/.test(h)) return "id";
@@ -60,7 +62,7 @@ function ItemLink({
 function MegaPanel({ item, id, overview, onNavigate }: { item: NavLink; id: string; overview: string; onNavigate: () => void }) {
   return (
     <div id={id} className="absolute inset-x-0 top-full pt-3">
-      <div className="glass-strong mega-in grid gap-2 rounded-3xl p-2 shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8)] md:grid-cols-[17rem_1fr]">
+      <div className="glass-strong menu-drawer mega-in grid gap-2 rounded-3xl p-2 shadow-[0_30px_80px_-20px_rgb(0_0_0/0.8)] md:grid-cols-[17rem_1fr]">
         <div className="relative hidden overflow-hidden rounded-2xl border border-fg/10 bg-gradient-to-br from-brand-royal/40 via-navy-800 to-ink-950 p-6 md:flex md:flex-col md:justify-end">
           <div className="grid-fade pointer-events-none absolute inset-0 opacity-50" />
           <span className="relative mb-auto flex size-11 items-center justify-center rounded-2xl bg-fg/10 text-cyan-300">
@@ -99,11 +101,14 @@ export function HeaderClient({
   items,
   labels,
   logo,
+  ticker,
 }: {
   locale: AppLocale;
   items: NavLink[];
   labels: Labels;
   logo: ReactNode;
+  /** DSE · CSE ticker bar, shown above the navigation when market data is on. */
+  ticker?: ReactNode;
 }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -167,7 +172,9 @@ export function HeaderClient({
     [item, ...item.children].some((i) => !!i.href && i.href !== `/${locale}` && pathname.startsWith(i.href.split("#")[0]!));
 
   return (
-    <header className="fixed inset-x-0 top-0 z-(--z-sticky) px-3 pt-3 md:px-6 md:pt-4">
+    <header className="fixed inset-x-0 top-0 z-(--z-sticky)">
+      {ticker}
+      <div className="px-3 pt-3 md:px-6 md:pt-4">
       <div
         className={cn(
           "relative mx-auto flex h-14 max-w-7xl items-center gap-2 rounded-full border px-2 pl-4 transition-[background-color,border-color,box-shadow] duration-500 md:h-16",
@@ -226,12 +233,13 @@ export function HeaderClient({
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          {labels.search && <SearchDialog locale={locale} labels={labels.search} />}
           <ThemeToggle labels={{ toLight: labels.toLight, toDark: labels.toDark }} />
           <LanguageSwitch current={locale} label={labels.language} className="hidden md:inline-flex" />
           {cta?.href && (
             <Link
               href={cta.href}
-              className="btn-glow hidden h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold text-white sm:inline-flex"
+              className="btn-glow hidden h-10 items-center gap-2 rounded-full px-5 whitespace-nowrap text-sm font-semibold text-white sm:inline-flex"
             >
               {cta.label}
             </Link>
@@ -250,13 +258,14 @@ export function HeaderClient({
           </button>
         </div>
       </div>
+      </div>
 
       {/* Mobile menu */}
       <div
         id={drawerId}
         ref={drawerRef}
         hidden={!menuOpen}
-        className="glass-strong fixed inset-x-3 top-20 bottom-3 z-(--z-drawer) overflow-y-auto rounded-3xl p-6 lg:hidden"
+        className="glass-strong menu-drawer fixed inset-x-3 top-[calc(5rem+var(--ticker-h))] bottom-3 z-(--z-drawer) overflow-y-auto rounded-3xl p-6 lg:hidden"
       >
         <nav aria-label={labels.mainNavigation}>
           <ul className="flex flex-col">

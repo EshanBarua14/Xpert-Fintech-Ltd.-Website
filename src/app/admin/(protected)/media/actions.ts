@@ -18,6 +18,66 @@ const MAX_FILES_PER_UPLOAD = 10;
 const uuid = z.string().uuid();
 const mb = (bytes: number) => `${Math.round(bytes / 1024 / 1024)} MB`;
 
+/** Checks one uploaded file by its content, stores it and adds it to the library. */
+async function storeUpload(file: File, adminId: string, only?: "IMAGE"): Promise<{ problem: string } | { id: string; storageKey: string; name: string; width: number | null; height: number | null }> {
+  const name = cleanFileName(file.name);
+  const data = Buffer.from(await file.arrayBuffer());
+  const type = sniff(data);
+  if (!type || (only && type.kind !== only)) {
+    return { problem: only ? `${name}: not a PNG, JPEG, WebP or GIF image.` : `${name}: not a PNG, JPEG, WebP, GIF, PDF, MP4 or WebM file.` };
+  }
+  if (data.length > MAX_BYTES[type.kind]) return { problem: `${name}: larger than ${mb(MAX_BYTES[type.kind])}.` };
+
+  const storageKey = `${randomUUID()}.${type.ext}`;
+  const checksum = createHash("sha256").update(data).digest("hex");
+  try {
+    await storage().put(storageKey, data, type.mimeType);
+    const row = await db.media.create({
+      data: {
+        kind: type.kind,
+        storageKey,
+        originalName: name,
+        mimeType: type.mimeType,
+        sizeBytes: data.length,
+        width: type.width ?? null,
+        height: type.height ?? null,
+        checksum,
+        // Content type verified from the file itself. A virus-scan hook can
+        // flip this to false until a scanner approves the file.
+        isScanned: true,
+        createdById: adminId,
+        updatedById: adminId,
+      },
+    });
+    return { id: row.id, storageKey, name, width: row.width, height: row.height };
+  } catch (error) {
+    console.error("[media] upload failed", error);
+    await storage().remove(storageKey).catch(() => {});
+    return { problem: `${name}: could not be saved.` };
+  }
+}
+
+export type PhotoUploadResult = { added: { id: string; url: string; name: string; width: number | null; height: number | null }[]; problems: string[] };
+
+/**
+ * Uploads photos straight from an album or event editor. Returns the new
+ * library entries so the editor can add them to the gallery right away.
+ */
+export async function uploadPhotos(formData: FormData): Promise<PhotoUploadResult> {
+  const admin = await requireAdmin();
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length > MAX_FILES_PER_UPLOAD) return { added: [], problems: [`Upload at most ${MAX_FILES_PER_UPLOAD} photos at a time.`] };
+  const added: PhotoUploadResult["added"] = [];
+  const problems: string[] = [];
+  for (const file of files) {
+    const r = await storeUpload(file, admin.id, "IMAGE");
+    if ("problem" in r) problems.push(r.problem);
+    else added.push({ id: r.id, url: `/media/${r.storageKey}`, name: r.name, width: r.width, height: r.height });
+  }
+  if (added.length) revalidatePath("/admin/media");
+  return { added, problems };
+}
+
 export async function uploadMedia(_prev: UploadState, formData: FormData): Promise<UploadState> {
   const admin = await requireAdmin();
   const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
@@ -28,45 +88,9 @@ export async function uploadMedia(_prev: UploadState, formData: FormData): Promi
   let uploaded = 0;
 
   for (const file of files) {
-    const name = cleanFileName(file.name);
-    const data = Buffer.from(await file.arrayBuffer());
-    const type = sniff(data);
-    if (!type) {
-      problems.push(`${name}: not a PNG, JPEG, WebP, GIF or PDF file.`);
-      continue;
-    }
-    if (data.length > MAX_BYTES[type.kind]) {
-      problems.push(`${name}: larger than ${mb(MAX_BYTES[type.kind])}.`);
-      continue;
-    }
-
-    const storageKey = `${randomUUID()}.${type.ext}`;
-    const checksum = createHash("sha256").update(data).digest("hex");
-    try {
-      await storage().put(storageKey, data, type.mimeType);
-      await db.media.create({
-        data: {
-          kind: type.kind,
-          storageKey,
-          originalName: name,
-          mimeType: type.mimeType,
-          sizeBytes: data.length,
-          width: type.width ?? null,
-          height: type.height ?? null,
-          checksum,
-          // Content type verified from the file itself. A virus-scan hook can
-          // flip this to false until a scanner approves the file.
-          isScanned: true,
-          createdById: admin.id,
-          updatedById: admin.id,
-        },
-      });
-      uploaded++;
-    } catch (error) {
-      console.error("[media] upload failed", error);
-      await storage().remove(storageKey).catch(() => {});
-      problems.push(`${name}: could not be saved.`);
-    }
+    const result = await storeUpload(file, admin.id);
+    if ("problem" in result) problems.push(result.problem);
+    else uploaded++;
   }
 
   revalidatePath("/admin/media");

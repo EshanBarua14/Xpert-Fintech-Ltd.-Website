@@ -19,6 +19,7 @@ import {
   type FieldErrors,
 } from "@/lib/validation/common";
 import { parseDateOnly } from "@/lib/validation/organizations";
+import { parseVideoUrl } from "@/lib/public/text";
 import { purgeEvent } from "@/lib/admin/purge";
 
 export type EventState = { errors?: FieldErrors; message?: string };
@@ -61,12 +62,18 @@ export async function saveEvent(_prev: EventState, formData: FormData): Promise<
   const endsAt = parseDateOnly(v.endsAt);
   if (startsAt && endsAt && endsAt < startsAt) return { errors: { endsAt: "The end date is before the start date." } };
   if (!(await isUsableImage(v.coverMediaId))) return { errors: { coverMediaId: "That image is no longer in the media library." } };
+  if (v.videoUrl && !parseVideoUrl(v.videoUrl)) return { errors: { videoUrl: "Paste a YouTube, Vimeo or Facebook video address." }, message: "Please fix the highlighted fields." };
 
   const enSlug = v.enSlug || slugify(v.enTitle);
   if (!enSlug) return { errors: { enSlug: "Enter a URL slug using English letters." } };
   const bnSlug = v.bnSlug || enSlug;
 
   const participantIds = z.array(z.string().uuid()).parse(formData.getAll("participants").map(String));
+  const galleryIds = [...new Set(z.array(z.string().uuid()).max(200).parse(formData.getAll("gallery").map(String)))];
+  if (galleryIds.length) {
+    const usable = await db.media.count({ where: { id: { in: galleryIds }, kind: "IMAGE", deletedAt: null } });
+    if (usable !== galleryIds.length) return { errors: { gallery: "Some photos are no longer in the media library. Remove them and save again." } };
+  }
 
   const data = {
     status: v.status,
@@ -112,6 +119,17 @@ export async function saveEvent(_prev: EventState, formData: FormData): Promise<
         });
       }
       await syncMediaUsage(tx, "EVENT", eventId, "cover", v.coverMediaId);
+
+      // Gallery: replace the ordered photo list and record which files it uses.
+      await tx.eventMedia.deleteMany({ where: { eventId } });
+      await tx.mediaUsage.deleteMany({ where: { entityType: "EVENT", entityId: eventId, field: "gallery" } });
+      if (galleryIds.length) {
+        await tx.eventMedia.createMany({ data: galleryIds.map((mediaId, i) => ({ eventId, mediaId, sortOrder: i })) });
+        await tx.mediaUsage.createMany({
+          data: galleryIds.map((mediaId) => ({ mediaId, entityType: "EVENT" as const, entityId: eventId, field: "gallery" })),
+          skipDuplicates: true,
+        });
+      }
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

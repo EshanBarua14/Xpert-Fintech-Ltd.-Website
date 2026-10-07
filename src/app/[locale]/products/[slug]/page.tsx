@@ -3,7 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
-import { GhostButton, PrimaryButton, SectionHeader } from "@/components/flagship/Sections";
+import { ecosystemLabels, ecosystemModules, GhostButton, moduleForSlug, PrimaryButton, SectionHeader } from "@/components/flagship/Sections";
+import { EcosystemMap } from "@/components/flagship/EcosystemMap";
+import OmsPreview from "@/components/products/oms-preview/OmsPreview";
+import { getFlagshipData } from "@/lib/public/flagship";
+import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
+import { omsLabels } from "@/lib/public/labels";
 import { CapabilityVisual, type VisualKind } from "@/components/flagship/Visuals";
 import { Icon } from "@/components/ui/Icon";
 import { OrderFlow } from "@/components/diagrams/OrderFlow";
@@ -13,7 +18,10 @@ import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages, type Messages } from "@/lib/i18n/messages";
 import { getOfferingBySlug, getSeo, mediaMap } from "@/lib/public/content";
 import { breadcrumbLd, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
-import { pick, videoEmbedUrl } from "@/lib/public/text";
+import { parseVideoUrl, pick, videoEmbedUrl } from "@/lib/public/text";
+import { ProductDemo } from "@/components/products/ProductDemo";
+import { Lightbox } from "@/components/gallery/Lightbox";
+import type { GalleryPhoto } from "@/lib/public/insights";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 type Offering = NonNullable<Awaited<ReturnType<typeof getOfferingBySlug>>>;
@@ -73,7 +81,7 @@ export default async function ProductPage({ params }: Props) {
   const tr = pick(offering.translations, found.locale)!;
 
   const images = await mediaMap(
-    [offering.heroMediaId, ...offering.media.map((m) => m.mediaId), ...offering.items.map((i) => i.mediaId)],
+    [offering.heroMediaId, ...offering.media.flatMap((m) => [m.mediaId, m.posterMediaId]), ...offering.items.map((i) => i.mediaId)],
     found.locale,
   );
   const hero = images.get(offering.heroMediaId ?? "");
@@ -86,13 +94,25 @@ export default async function ProductPage({ params }: Props) {
   const targetUsers = itemsOf(offering, "TARGET_USER", found.locale);
   const faqs = itemsOf(offering, "FAQ", found.locale);
   const screenshots = offering.media.filter((m) => m.kind !== "VIDEO" && m.mediaId && images.has(m.mediaId));
-  const videos = offering.media.filter((m) => m.kind === "VIDEO" && videoEmbedUrl(m.videoUrl));
+  // The first playable video is the product demo (a link, or an uploaded file).
+  const demo = offering.media.find((m) => m.kind === "VIDEO" && (videoEmbedUrl(m.videoUrl) || (m.mediaId && images.has(m.mediaId))));
+  const demoPoster = demo ? (images.get(demo.posterMediaId ?? "")?.url ?? parseVideoUrl(demo.videoUrl)?.thumbnail ?? null) : null;
+  const shots: GalleryPhoto[] = screenshots.map((m) => {
+    const img = images.get(m.mediaId!)!;
+    return { id: m.id, url: img.url, alt: pick(m.translations, found.locale)?.caption ?? img.alt ?? tr.name, width: img.width, height: img.height };
+  });
   const parent = offering.parent && offering.parent.status === "PUBLISHED" && !offering.parent.deletedAt ? offering.parent : null;
   const parentTr = parent ? pick(parent.translations, found.locale) : null;
   const demoHref = `/${found.locale}/request-demo?product=${encodeURIComponent(tr.slug)}`;
   const ctaLabel = tr.ctaLabel ?? t.requestDemo;
 
   const url = `${SITE_URL}/${found.locale}/products/${tr.slug}`;
+  const enSlug = offering.translations.find((x) => x.locale === "en")?.slug ?? tr.slug;
+  const ecoModule = moduleForSlug(enSlug);
+  const [flagship, eco, ecoInDb] = ecoModule
+    ? await Promise.all([getFlagshipData(found.locale), getEcosystem(found.locale), ecosystemInDatabase()])
+    : [null, { nodes: [], edges: [], flows: [] }, false];
+  const showOmsPreview = offering.key === "trading-platform";
 
   return (
     <>
@@ -192,9 +212,33 @@ export default async function ProductPage({ params }: Props) {
         </Band>
       )}
 
+      {demo && (
+        <Band title={t.demoTitle} body={t.demoBody}>
+          <div data-reveal className="mx-auto w-full max-w-5xl">
+            <ProductDemo
+              title={pick(demo.translations, found.locale)?.caption ?? `${tr.name}: ${t.demoTitle}`}
+              caption={pick(demo.translations, found.locale)?.caption}
+              poster={demoPoster}
+              embedUrl={videoEmbedUrl(demo.videoUrl)}
+              fileUrl={!demo.videoUrl && demo.mediaId ? (images.get(demo.mediaId)?.url ?? null) : null}
+              playLabel={t.playVideo}
+            />
+          </div>
+        </Band>
+      )}
+
       {capabilities.length > 0 && (
         <Band title={t.capabilities} alt>
           <ItemGrid items={capabilities} />
+        </Band>
+      )}
+
+      {showOmsPreview && (
+        <Band title={t.omsPreviewTitle}>
+          <p data-reveal className="-mt-6 max-w-2xl text-lg text-text-secondary">{t.omsPreviewBody}</p>
+          <div data-reveal>
+            <OmsPreview labels={omsLabels(t)} />
+          </div>
         </Band>
       )}
 
@@ -210,35 +254,10 @@ export default async function ProductPage({ params }: Props) {
         </Band>
       )}
 
-      {(screenshots.length > 0 || videos.length > 0) && (
-        <Band title={t.screenshots} alt>
-          <div className="grid gap-4 md:grid-cols-2">
-            {screenshots.map((m) => {
-              const caption = pick(m.translations, found.locale)?.caption;
-              return (
-                <figure key={m.id} data-reveal className="glass flex flex-col gap-3 rounded-3xl p-2">
-                  <MediaImage media={images.get(m.mediaId!)} className="rounded-2xl" />
-                  {(caption || m.isConceptual) && (
-                    <figcaption className="px-3 pb-2 text-sm text-text-secondary">
-                      {caption}
-                      {m.isConceptual && <Badge className="ml-2">{t.conceptualPrototype}</Badge>}
-                    </figcaption>
-                  )}
-                </figure>
-              );
-            })}
-            {videos.map((m) => (
-              <div key={m.id} data-reveal className="glass aspect-video overflow-hidden rounded-3xl p-2 [&>iframe]:rounded-2xl">
-                <iframe
-                  src={videoEmbedUrl(m.videoUrl)!}
-                  title={pick(m.translations, found.locale)?.caption ?? `${tr.name} — ${t.video}`}
-                  loading="lazy"
-                  allow="encrypted-media; picture-in-picture; fullscreen"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  className="h-full w-full"
-                />
-              </div>
-            ))}
+      {shots.length > 0 && (
+        <Band title={t.screensTitle} body={t.screensBody} alt>
+          <div>
+            <Lightbox layout="feature" photos={shots} labels={{ open: t.openPhoto, close: t.close, prev: t.prevPhoto, next: t.nextPhoto, counter: t.photoCounter }} />
           </div>
         </Band>
       )}
@@ -290,6 +309,15 @@ export default async function ProductPage({ params }: Props) {
                 <ItemList items={targetUsers} />
               </div>
             )}
+          </div>
+        </Band>
+      )}
+
+      {ecoModule && flagship && (
+        <Band title={t.whereItFits} alt>
+          <p data-reveal className="-mt-6 max-w-2xl text-lg text-text-secondary">{t.whereItFitsBody}</p>
+          <div data-reveal className="glass rounded-3xl p-4 md:p-8">
+            <EcosystemMap labels={ecosystemLabels(t)} modules={withEcosystem(ecosystemModules(flagship.offerings, found.locale), eco, ecoInDb)} focus={ecoModule} />
           </div>
         </Band>
       )}
@@ -347,11 +375,11 @@ export default async function ProductPage({ params }: Props) {
   );
 }
 
-function Band({ title, alt, children }: { title?: string; alt?: boolean; children: React.ReactNode }) {
+function Band({ title, body, alt, children }: { title?: string; body?: string; alt?: boolean; children: React.ReactNode }) {
   return (
     <section className={alt ? "border-y border-fg/[0.06] bg-fg/[0.015]" : undefined}>
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-16 md:px-8 md:py-24">
-        {title && <SectionHeader title={title} />}
+        {title && <SectionHeader title={title} body={body} />}
         {children}
       </div>
     </section>
@@ -425,3 +453,4 @@ function Deployments({ offering, locale, t }: { offering: Offering; locale: AppL
     </Band>
   );
 }
+

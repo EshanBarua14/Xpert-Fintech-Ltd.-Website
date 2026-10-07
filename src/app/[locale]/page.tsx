@@ -7,24 +7,35 @@ import {
   capabilities,
   CapabilityBento,
   CtaBand,
+  ecosystemModules,
   FlagshipHero,
   FlowStory,
   GhostButton,
-  MemberBoard,
   Principles,
   SectionHeader,
   Shell,
+  StatGrid,
 } from "@/components/flagship/Sections";
 import { getSiteInfo } from "@/lib/content/settings";
+import { LogoWall } from "@/components/organizations/LogoWall";
+import { ClientMarquee } from "@/components/organizations/ClientMarquee";
+import { ProductShowcase } from "@/components/products/ProductShowcase";
+import { LiveApps } from "@/components/organizations/LiveApps";
+import { getLiveApps } from "@/lib/public/company";
+import { getShowcase } from "@/lib/public/showcase";
+import { showcaseLabels } from "@/lib/public/labels";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { mediaIdsOf, toSections } from "@/lib/public/blocks";
-import { getEvents, getPageByKey, getSeo } from "@/lib/public/content";
+import { getEvents, getPageByKey, getSeo, getTestimonials } from "@/lib/public/content";
+import { TestimonialSlider } from "@/components/organizations/TestimonialSlider";
 import { getFlagshipData } from "@/lib/public/flagship";
+import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
-import { MarketTicker } from "@/components/market/MarketTicker";
 import { MarketStatusLine } from "@/components/market/MarketStatusLine";
+import { MarketReach } from "@/components/market/MarketReach";
+import { getMarketGoal } from "@/lib/content/leaders";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -67,8 +78,20 @@ export default async function HomePage({ params }: Props) {
   );
 
   const t = getMessages(locale);
-  const [data, events, market] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload()]);
-  const hasMarket = !!market.snapshot || market.shares.length > 0;
+  const [data, events, market, showcase] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale)]);
+  const [apps, eco, ecoInDb, testimonials, goal] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal()]);
+  const proof = [
+    { value: data.members.length, label: t.proofMembers },
+    { value: data.clients.length, label: t.proofClients },
+    { value: data.offerings.length, label: t.proofProducts },
+    { value: apps.length, label: t.proofApps },
+    { value: data.exchanges.length, label: t.proofExchanges },
+  ].filter((p) => p.value > 0);
+  const hasMarket = market.mode !== "none" || market.shares.length > 0;
+  // Market share and client base, with the goal (Admin → Market data). Replaces the plain figures grid.
+  const showReach = market.shares.length > 0 || goal !== null;
+  // Client institutions first: the client base is what this panel shows off.
+  const clientBase = [...proof.filter((p) => p.label === t.proofClients), ...proof.filter((p) => p.label !== t.proofClients && p.label !== t.proofProducts)];
   const sections = page ? toSections(page, locale) : [];
   const ctx = sections.length ? await blockContext(locale, mediaIdsOf(sections)) : null;
   const caps = capabilities(t, locale, data.publishedSlugs);
@@ -80,15 +103,98 @@ export default async function HomePage({ params }: Props) {
         t={t}
         locale={locale}
         memberCount={data.members.length}
-        ticker={market.snapshot ? <MarketTicker initial={market} t={t} locale={locale} /> : undefined}
-        status={market.snapshot ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
+        modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)}
+        graph={eco}
+        facts={proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
+        status={market.mode !== "none" ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
       />
+
+      {data.clients.length > 0 && (
+        <section id="clients" className="relative scroll-mt-28 overflow-hidden border-y border-fg/[0.06] py-12 md:py-16">
+          <div className="mx-auto mb-8 w-full max-w-7xl px-4 md:px-8">
+            <SectionHeader eyebrow={t.clientsEyebrow} title={t.clientsTitle.replace("{n}", new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(data.clients.length))} body={t.clientsBody} />
+          </div>
+          <ClientMarquee clients={data.clients} label={t.clientsEyebrow} />
+        </section>
+      )}
+
+      {showReach && (
+        <Shell id="reach" className="py-20 md:py-28">
+          <div className="flex flex-col gap-12">
+            <SectionHeader title={t.reachTitle} body={t.reachBody} />
+            <MarketReach
+              shares={market.shares}
+              goal={goal ? { targetPct: goal.targetPct, year: goal.year, note: (locale === "bn" ? goal.bn : goal.en) || goal.en || null } : null}
+              clientBase={clientBase}
+              locale={locale}
+              labels={{
+                share: t.reachShareLabel,
+                combined: t.reachCombined,
+                goal: t.reachGoal,
+                goalLead: t.reachGoalLead,
+                goalNote: t.reachGoalNote,
+                toGo: t.reachToGo,
+                reached: t.reachReached,
+                now: t.reachNow,
+                clients: t.reachClients,
+                progress: t.reachProgressLabel,
+              }}
+            />
+          </div>
+        </Shell>
+      )}
+
+      {showcase.length > 0 && (
+        <Shell id="products" className="py-20 md:py-28">
+          <div className="flex flex-col gap-14">
+            <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+              <SectionHeader eyebrow={t.showcaseEyebrow} title={t.showcaseTitle} body={t.showcaseBody} />
+              <GhostButton href={`/${locale}/products`}>{t.exploreProducts}</GhostButton>
+            </div>
+            <ProductShowcase products={showcase} labels={showcaseLabels(t)} />
+          </div>
+        </Shell>
+      )}
+
+      {testimonials.length > 0 && (
+        <Shell id="testimonials" className="py-20 md:py-28">
+          <div className="flex flex-col gap-14">
+            <SectionHeader title={t.testimonialsTitle} body={t.testimonialsBody} />
+            <TestimonialSlider
+              items={testimonials}
+              labels={{
+                region: t.testimonialsRegion,
+                prev: t.testimonialPrev,
+                next: t.testimonialNext,
+                pause: t.testimonialPause,
+                play: t.testimonialPlay,
+                slide: t.testimonialSlide,
+              }}
+            />
+          </div>
+        </Shell>
+      )}
 
       {hasMarket && (
         <Shell id="market" className="py-20 md:py-28">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} body={t.marketBody} />
             <MarketPulse initial={market} t={t} locale={locale} />
+          </div>
+        </Shell>
+      )}
+
+      {((!showReach && proof.length > 0) || apps.length > 0) && (
+        <Shell id="proof" className="py-20 md:py-28">
+          <div className="flex flex-col gap-12">
+            <SectionHeader eyebrow={t.proofEyebrow} title={t.proofTitle} body={t.proofBody} />
+            {!showReach && proof.length > 0 && <StatGrid items={proof} locale={locale} />}
+            {apps.length > 0 && (
+              <div className="flex flex-col gap-5">
+                <p className="text-xs font-semibold text-text-secondary">{t.liveAppsTitle}</p>
+                <LiveApps apps={apps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp }} />
+              </div>
+            )}
           </div>
         </Shell>
       )}
@@ -113,7 +219,7 @@ export default async function HomePage({ params }: Props) {
             <SectionHeader eyebrow={t.consortiumEyebrow} title={t.consortiumTitle} body={t.consortiumBody} />
             <GhostButton href={`/${locale}/consortium`}>{t.meetConsortium}</GhostButton>
           </div>
-          <MemberBoard names={data.members.map((m) => m.name)} />
+          <LogoWall members={data.members} size="sm" />
         </div>
       </Shell>
 

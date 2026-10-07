@@ -33,7 +33,7 @@ export function MediaUpload() {
       className="flex flex-col gap-3 rounded-card border border-dashed border-fg/20 p-5"
     >
       <label htmlFor="files" className="text-sm font-medium">
-        Upload images or PDFs
+        Upload images, PDFs or short videos
       </label>
       <input
         key={round}
@@ -41,13 +41,14 @@ export function MediaUpload() {
         name="files"
         type="file"
         multiple
-        accept="image/png,image/jpeg,image/webp,image/gif,application/pdf"
+        accept="image/png,image/jpeg,image/webp,image/gif,application/pdf,video/mp4,video/webm"
         aria-describedby="files-hint"
         className="text-sm file:mr-4 file:rounded-control file:border-0 file:bg-brand-royal file:px-4 file:py-2 file:text-white"
       />
       <p id="files-hint" className="text-xs text-text-secondary">
-        PNG, JPEG, WebP or GIF up to 10 MB; PDF up to 25 MB; up to 10 files at a time. SVG is not accepted for security
-        reasons. Add videos as YouTube or Vimeo links on the product page.
+        PNG, JPEG, WebP or GIF up to 10 MB; PDF up to 25 MB; MP4 or WebM video up to 45 MB; up to 10 files at a time.
+        SVG is not accepted for security reasons. For longer videos, upload to YouTube, Vimeo or Facebook and add the
+        link in Admin → Videos.
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <SubmitButton pending={pending} pendingLabel="Uploading…">

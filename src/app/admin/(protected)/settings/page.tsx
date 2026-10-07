@@ -32,6 +32,13 @@ export default async function SettingsPage() {
     appSupportPhone: text(get("contact.appSupportPhone")),
     addressEn: office?.translations.find((t) => t.locale === "en")?.address ?? "",
     addressBn: office?.translations.find((t) => t.locale === "bn")?.address ?? "",
+    mapUrl: office?.mapUrl ?? "",
+    hoursEn: office?.translations.find((t) => t.locale === "en")?.hours ?? "",
+    hoursBn: office?.translations.find((t) => t.locale === "bn")?.hours ?? "",
+    registrationEn: text(get("company.registration"), "en"),
+    registrationBn: text(get("company.registration"), "bn"),
+    regulatoryEn: text(get("company.regulatory"), "en"),
+    regulatoryBn: text(get("company.regulatory"), "bn"),
     socialLinks: Array.isArray(social)
       ? social
           .map((s) => (s && typeof s === "object" ? `${(s as { label?: string }).label ?? ""} | ${(s as { url?: string }).url ?? ""}` : ""))

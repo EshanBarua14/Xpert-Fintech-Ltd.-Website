@@ -12,14 +12,14 @@
  */
 @theme {
   /* Surfaces */
-  --color-ink-950: #05080f;
-  --color-navy-900: #0a1428;
-  --color-navy-800: #0f1e3a;
-  --color-graphite-700: #1e2633;
+  --color-ink-950: #06111f;
+  --color-navy-900: #0b1c31;
+  --color-navy-800: #112744;
+  --color-graphite-700: #1c2f4a;
 
   /* Text */
-  --color-text-primary: #e8edf5;
-  --color-text-secondary: #9aa7ba;
+  --color-text-primary: #ebf1f8;
+  --color-text-secondary: #a3b4c9;
   --color-text-inverse: #0a1428;
 
   /*
@@ -42,14 +42,15 @@
 
   /* Market semantics — market data only, never decoration */
   --color-market-up: #22c55e;
-  --color-market-down: #ef4444;
+  --color-market-down: #f87171;
   --color-market-neutral: #94a3b8;
 
   /* Type */
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display-face), var(--font-body), ui-sans-serif, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
-  --font-bangla: var(--font-body), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-body), var(--font-body-bn), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-display-bn), Georgia, serif;
+  /* Figures use the text face with tabular digits (see .font-mono below), not a code font. */
+  --font-mono: var(--font-body), var(--font-body-bn), ui-sans-serif, system-ui, sans-serif;
+  --font-bangla: var(--font-body-bn), var(--font-body), ui-sans-serif, sans-serif;
 
   /* Radius */
   --radius-cell: 2px;
@@ -75,6 +76,8 @@
 }
 
 :root {
+  /* Height of the DSE/CSE ticker bar above the header (0 when market data is off). */
+  --ticker-h: 0px;
   --z-base: 0;
   --z-sticky: 100;
   --z-dropdown: 200;
@@ -86,7 +89,7 @@
   --glass-a: rgb(255 255 255 / 0.055);
   --glass-b: rgb(255 255 255 / 0.015);
   --glass-line: rgb(255 255 255 / 0.08);
-  --glass-strong: rgb(8 13 26 / 0.72);
+  --glass-strong: rgb(8 13 26 / 0.86);
   --grad-a: #ffffff;
   --grad-b: #9fb3cf;
   --grain: 0.035;
@@ -121,20 +124,20 @@
   --color-graphite-700: #d6dfeb;
   --color-text-primary: #0b1324;
   --color-text-secondary: #4a5873;
-  --color-brand-sky: #0a78ad;
+  --color-brand-sky: #065f8f;
   --color-brand-mid: #1f6fae;
-  --color-cyan-300: #0e7490;
-  --color-accent: #0b6f8a;
+  --color-cyan-300: #0b6480;
+  --color-accent: #0b6480;
   --color-fg: #0a1428;
-  --color-gold: #8a5d0b;
+  --color-gold: #7a520a;
   --color-market-up: #11692f;
-  --color-market-down: #c81e1e;
+  --color-market-down: #b91c1c;
   --hairline: rgb(10 20 40 / 0.07);
   --grid-line: rgb(10 20 40 / 0.06);
   --glass-a: rgb(255 255 255 / 0.85);
   --glass-b: rgb(255 255 255 / 0.6);
   --glass-line: rgb(10 20 40 / 0.09);
-  --glass-strong: rgb(255 255 255 / 0.82);
+  --glass-strong: rgb(255 255 255 / 0.92);
   --grad-a: #0a1428;
   --grad-b: #2d4d7a;
   --grain: 0.02;
@@ -167,6 +170,23 @@ html {
 
 html[lang="bn"] {
   font-family: var(--font-bangla);
+}
+
+/* Headlines: Spectral at a medium weight, lining figures, a touch of negative tracking. */
+.font-display {
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "kern", "liga";
+}
+html[lang="bn"] .font-display {
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+/* Figures: the text face with tabular digits so columns of prices line up. */
+.font-mono {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0;
 }
 
 /* Tabular numerals for all market figures */
@@ -427,23 +447,35 @@ body::before {
   align-items: center;
   gap: 0.5rem;
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--color-gold);
+  color: var(--color-brand-sky);
 }
 
 /* Glass surfaces */
+/* Cards: a solid sheet a step lighter than the page, with a hairline edge (no blur, no gradient). */
 .glass {
-  background: linear-gradient(180deg, var(--glass-a), var(--glass-b));
+  background: color-mix(in srgb, var(--color-navy-900) 94%, transparent);
   border: 1px solid var(--glass-line);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 .glass-strong {
   background: var(--glass-strong);
   border: 1px solid var(--glass-line);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* The phone menu sits over busy page content: keep the glass, but nearly opaque. */
+/* Menus, the phone menu and the search box: solid enough that the page behind never shows through the text */
+.menu-drawer {
+  background: #0b1424;
+  border-color: rgb(255 255 255 / 0.12);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+[data-theme="light"] .menu-drawer {
+  background: #ffffff;
+  border-color: rgb(10 20 40 / 0.12);
 }
 
 /* Cards that light up under the pointer (--mx/--my set by SiteEffects) */
@@ -507,33 +539,17 @@ body::before {
 
 /* Primary call-to-action: gradient with a light sweep */
 .btn-glow {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  background: linear-gradient(135deg, #24539c, #2a5fae 55%, #1f6fae);
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.08) inset,
-    0 10px 30px -10px rgb(34 188 235 / 0.6);
+  background: var(--color-brand-royal);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.12) inset;
+  transition: background-color 180ms var(--ease-ui), transform 180ms var(--ease-ui);
 }
-.btn-glow::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
-  transform: translateX(-120%);
+.btn-glow:hover {
+  background: var(--color-brand-royal-hover);
 }
-.btn-glow:hover::after {
-  animation: btn-sweep 900ms var(--ease-ui);
+.btn-glow:active {
+  transform: translateY(1px);
 }
-@keyframes btn-sweep {
-  0% {
-    transform: translateX(-120%);
-  }
-  100% {
-    transform: translateX(120%);
-  }
-}
+
 
 /* Scroll reveal: elements with data-reveal fade and rise into view (SiteEffects adds .is-in).
    Only hidden when JavaScript is running, so content never disappears without it. */
@@ -544,10 +560,30 @@ body::before {
 }
 [data-reveal] {
   transition:
-    opacity 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 900ms cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: calc(var(--d, 0) * 90ms);
+    filter 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    clip-path 1000ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--d, 0) * 80ms);
+}
+/* Below the hero: content settles in as it is reached; headlines rise out of a mask. */
+.js main [data-reveal]:not(.is-in) {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.js main .font-display[data-reveal]:not(.is-in),
+.js main [data-reveal]:not(.is-in) > .font-display:only-child {
+  opacity: 1;
+  transform: translateY(0.45em);
+  clip-path: inset(0 0 100% 0);
+}
+/* Bars that measure something grow to their value when they come into view. */
+.bar-grow > span {
+  transform-origin: left center;
+  transition: transform 1100ms cubic-bezier(0.16, 1, 0.3, 1) 150ms;
+}
+.js .bar-grow:not(.is-in) > span {
+  transform: scaleX(0);
 }
 
 /* Endless horizontal strip */
@@ -561,6 +597,102 @@ body::before {
 }
 .marquee:hover .marquee-track {
   animation-play-state: paused;
+}
+/* The office map follows the site theme: darkened in dark mode */
+[data-theme="dark"] .office-map {
+  filter: invert(0.9) hue-rotate(180deg) saturate(0.6) brightness(0.95);
+}
+
+/* Testimonials: a track without a visible scrollbar; the active slide's bar fills over its time */
+.testimonial-track {
+  scrollbar-width: none;
+}
+.testimonial-track::-webkit-scrollbar {
+  display: none;
+}
+.testimonial-quote::before {
+  content: "“";
+  display: block;
+  height: 0.55em;
+  margin-bottom: 0.15em;
+  font-size: 2.6em;
+  line-height: 1;
+  color: var(--color-brand-sky);
+}
+.testimonial-progress {
+  width: 0;
+  animation: testimonial-progress linear forwards;
+}
+@keyframes testimonial-progress {
+  to {
+    width: 100%;
+  }
+}
+
+/* Product demo: a framed player; without a still, a quiet brand field with a fine grid */
+.demo-frame {
+  box-shadow: 0 40px 100px -50px rgb(6 17 31 / 0.9);
+}
+.demo-placeholder {
+  background:
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
+    radial-gradient(120% 90% at 30% 20%, #1f4f8f 0%, #0b1c31 60%, #06111f 100%);
+}
+/* Page-change bar (NavProgress) */
+.nav-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: calc(var(--z-toast) + 1);
+  pointer-events: none;
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--color-brand-royal), var(--color-brand-sky));
+  box-shadow: 0 0 10px var(--color-brand-sky);
+  transition: opacity 200ms ease;
+}
+.nav-progress.is-active {
+  opacity: 1;
+  animation: nav-progress 10s cubic-bezier(0.08, 0.8, 0.2, 1) forwards;
+}
+@keyframes nav-progress {
+  0% { transform: scaleX(0); }
+  8% { transform: scaleX(0.35); }
+  100% { transform: scaleX(0.94); }
+}
+html.nav-busy,
+html.nav-busy * {
+  cursor: progress;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress.is-active {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
+/* DSE · CSE ticker bar (top of every public page) */
+html.has-ticker {
+  --ticker-h: 2.25rem;
+  scroll-padding-top: var(--ticker-h);
+}
+.ticker-lane {
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 94%, transparent);
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 80s linear infinite;
+}
+.ticker-lane:hover .ticker-track,
+.ticker-lane:focus-within .ticker-track,
+.ticker-paused .ticker-track {
+  animation-play-state: paused;
+}
+.marquee-reverse {
+  animation-direction: reverse;
 }
 @keyframes marquee {
   to {
@@ -707,9 +839,7 @@ body::before {
   }
 }
 
-[data-theme="light"] .text-gradient-brand {
-  background-image: linear-gradient(90deg, #0a78ad, #1f6fae 35%, #2a5fae 60%, #0a78ad 100%);
-}
+
 [data-theme="light"] .glass,
 [data-theme="light"] .glass-strong {
   box-shadow: 0 1px 2px rgb(10 20 40 / 0.04), 0 12px 32px -16px rgb(10 20 40 / 0.18);
@@ -836,10 +966,16 @@ html {
   .flow-packet-svg {
     display: none;
   }
-  .js .hero-seq [data-reveal]:not(.is-in) {
+  .js .hero-seq [data-reveal]:not(.is-in),
+  .js main [data-reveal]:not(.is-in),
+  .js main .font-display[data-reveal]:not(.is-in) {
     opacity: 1;
     transform: none;
     filter: none;
+    clip-path: none;
+  }
+  .js .bar-grow:not(.is-in) > span {
+    transform: none;
   }
   .ambient-orb,
   .ambient-grid,
@@ -854,4 +990,125 @@ html {
     flex-wrap: wrap;
     width: auto;
   }
+  /* The ticker stays one line and scrolls by hand instead of moving. */
+  .ticker-track {
+    animation: none;
+  }
+  .ticker-lane {
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: none;
+  }
+  .ticker-copy {
+    display: none;
+  }
+}
+
+/* ── XFL 2.0: people profiles ─────────────────────────────────────────────── */
+/* Profile cards: portraits rest slightly muted and come to full colour on hover or focus. */
+.person-photo {
+  filter: saturate(0.82) contrast(1.02);
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1), filter 600ms ease;
+}
+.person-card:hover .person-photo,
+.person-card:focus-within .person-photo {
+  transform: scale(1.045);
+  filter: none;
+}
+.person-sheen {
+  background: linear-gradient(180deg, transparent 55%, rgb(6 17 31 / 0.28));
+}
+.person-name {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.person-card:hover .person-name,
+.person-name:focus-visible {
+  background-size: 100% 1px;
+}
+.person-dialog[open] { animation: dialog-in 380ms cubic-bezier(0.16, 1, 0.3, 1); }
+.person-dialog[open]::backdrop { animation: backdrop-in 380ms ease-out; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } }
+@keyframes backdrop-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .person-photo, .person-name { transition: none; }
+  .person-card:hover .person-photo, .person-card:focus-within .person-photo { transform: none; }
+  .person-dialog[open], .person-dialog[open]::backdrop { animation: none; }
+}
+
+/* ── XFL 2.0: consortium logos — monochrome at rest, full colour on hover ── */
+.member-logo {
+  filter: grayscale(1) brightness(1.7);
+  opacity: 0.8;
+  transition: filter 500ms ease, opacity 500ms ease;
+}
+[data-theme="light"] .member-logo { filter: grayscale(1); opacity: 0.75; }
+.group:hover .member-logo,
+.group:focus-visible .member-logo { filter: none; opacity: 1; }
+
+/* ── XFL 2.0: product showcase ────────────────────────────────────────────── */
+.showcase-progress { width: 0; animation: showcase-progress linear forwards; }
+@keyframes showcase-progress { to { width: 100%; } }
+.showcase-stage { animation: showcase-in 600ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes showcase-in { from { opacity: 0; transform: translateY(10px); } }
+.showcase-shot { animation: showcase-shot 900ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes showcase-shot { from { opacity: 0; transform: scale(0.97) translateY(12px); filter: blur(6px); } }
+.showcase-rise, .showcase-step { animation: showcase-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes showcase-rise { from { opacity: 0; transform: translateY(10px); } }
+.showcase-step .showcase-arrow { display: inline-block; animation: showcase-arrow 2.4s ease-in-out infinite; }
+@keyframes showcase-arrow { 0%, 100% { opacity: 0.35; transform: translateX(0); } 50% { opacity: 1; transform: translateX(2px); } }
+
+/* ── XFL 2.0: tokens for the OMS preview and workflow components ───────────
+   They read --xfl-*; map them to the site tokens so light/dark mode follows. */
+:root {
+  --xfl-surface: var(--color-ink-950);
+  --xfl-surface-2: var(--color-navy-900);
+  --xfl-border: color-mix(in srgb, var(--color-fg) 12%, transparent);
+  --xfl-text: var(--color-text-primary);
+  --xfl-text-muted: var(--color-text-secondary);
+  --xfl-accent: var(--color-gold);
+  --xfl-signal: var(--color-brand-sky);
+  --xfl-up: var(--color-market-up);
+  --xfl-down: var(--color-market-down);
+}
+
+/* ── XFL 2.0: milestone timeline — the rail draws down as it scrolls in ─── */
+.timeline-line { transform: scaleY(0); transition: transform 1600ms cubic-bezier(0.16, 1, 0.3, 1) 200ms; }
+.timeline.is-in .timeline-line { transform: scaleY(1); }
+.js .timeline:not(.is-in) .timeline-item { opacity: 0; transform: translateX(-12px); }
+.timeline-item { transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1), transform 700ms cubic-bezier(0.16, 1, 0.3, 1); transition-delay: calc(300ms + var(--i, 0) * 180ms); }
+@media (prefers-reduced-motion: reduce) {
+  .timeline-line { transform: none; transition: none; }
+  .js .timeline:not(.is-in) .timeline-item { opacity: 1; transform: none; }
+}
+
+/* ── XFL 2.0: live apps — tiles light up in turn, like orders printing ──── */
+.live-app-pulse {
+  background: radial-gradient(120% 80% at 0% 0%, rgb(34 188 235 / 0.16), transparent 60%);
+  opacity: 0;
+  animation: live-app-pulse 6s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.6s);
+}
+@keyframes live-app-pulse { 0%, 70%, 100% { opacity: 0; } 12% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .live-app-pulse { animation: none; } }
+
+/* ── XFL 2.0: gallery viewer ──────────────────────────────────────────────── */
+.lightbox[open] { animation: backdrop-in 260ms ease-out; }
+.lightbox-photo { animation: dialog-in 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+@media (prefers-reduced-motion: reduce) { .lightbox[open], .lightbox-photo { animation: none; } }
+
+/* ── Ecosystem explorer: tour progress, phone flow and bottom sheet ───────── */
+.eco-tour-fill { width: 0; animation: eco-tour-fill linear forwards; }
+@keyframes eco-tour-fill { to { width: 100%; } }
+.eco-mobile-link > span { top: 0; animation: eco-mobile-link 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+@keyframes eco-mobile-link { from { top: -4px; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } to { top: calc(100% - 2px); opacity: 0; } }
+.eco-sheet[open] { animation: eco-sheet-in 360ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes eco-sheet-in { from { transform: translateY(40px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .eco-tour-fill { animation: none; width: 100%; }
+  .eco-mobile-link > span { animation: none; top: 45%; }
+  .eco-sheet[open] { animation: none; }
 }

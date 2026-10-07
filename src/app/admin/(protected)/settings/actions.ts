@@ -35,6 +35,17 @@ const schema = z.object({
   appSupportPhone: phone,
   addressEn: z.string().trim().min(1, "Office address is required.").max(300),
   addressBn: optionalText(300),
+  mapUrl: z
+    .string()
+    .trim()
+    .max(1000)
+    .refine((v) => !v || /^https:\/\/(www\.)?(google\.[a-z.]+\/maps|maps\.google\.[a-z.]+|maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(v), "Paste a Google Maps link or its “Embed a map” address."),
+  hoursEn: optionalText(160),
+  hoursBn: optionalText(160),
+  registrationEn: optionalText(300),
+  registrationBn: optionalText(300),
+  regulatoryEn: optionalText(800),
+  regulatoryBn: optionalText(800),
   socialLinks: z.string().max(2000),
   alertEmails: z.string().max(1000),
 });
@@ -85,6 +96,8 @@ export async function saveSettings(_prev: SettingsState, formData: FormData): Pr
     "contact.appSupportEmail": v.appSupportEmail ?? "",
     "contact.appSupportPhone": v.appSupportPhone ?? "",
     "social.links": social.value,
+    "company.registration": localized(v.registrationEn, v.registrationBn),
+    "company.regulatory": localized(v.regulatoryEn, v.regulatoryBn),
     "leads.alertEmails": alerts.value,
   };
 
@@ -98,19 +111,19 @@ export async function saveSettings(_prev: SettingsState, formData: FormData): Pr
     }
     const office = await tx.office.upsert({
       where: { key: "hq" },
-      update: { email: v.contactEmail, phone: v.contactPhone, updatedById: admin.id },
-      create: { key: "hq", isPrimary: true, status: "PUBLISHED", email: v.contactEmail, phone: v.contactPhone, createdById: admin.id },
+      update: { email: v.contactEmail, phone: v.contactPhone, mapUrl: v.mapUrl || null, updatedById: admin.id },
+      create: { key: "hq", isPrimary: true, status: "PUBLISHED", email: v.contactEmail, phone: v.contactPhone, mapUrl: v.mapUrl || null, createdById: admin.id },
     });
     await tx.officeTranslation.upsert({
       where: { officeId_locale: { officeId: office.id, locale: "en" } },
-      update: { address: v.addressEn },
-      create: { officeId: office.id, locale: "en", name: "Head office", address: v.addressEn },
+      update: { address: v.addressEn, hours: v.hoursEn ?? null },
+      create: { officeId: office.id, locale: "en", name: "Head office", address: v.addressEn, hours: v.hoursEn ?? null },
     });
     if (v.addressBn) {
       await tx.officeTranslation.upsert({
         where: { officeId_locale: { officeId: office.id, locale: "bn" } },
-        update: { address: v.addressBn },
-        create: { officeId: office.id, locale: "bn", name: "প্রধান কার্যালয়", address: v.addressBn },
+        update: { address: v.addressBn, hours: v.hoursBn ?? null },
+        create: { officeId: office.id, locale: "bn", name: "প্রধান কার্যালয়", address: v.addressBn, hours: v.hoursBn ?? null },
       });
     } else {
       await tx.officeTranslation.deleteMany({ where: { officeId: office.id, locale: "bn" } });

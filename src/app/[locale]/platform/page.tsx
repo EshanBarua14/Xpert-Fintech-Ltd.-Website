@@ -5,7 +5,8 @@ import {
   capabilities,
   CapabilityBento,
   CtaBand,
-  ecosystemLabels,
+  Ecosystem,
+  ecosystemModules,
   FlowStory,
   PageHero,
   PrimaryButton,
@@ -13,10 +14,10 @@ import {
   SectionHeader,
   Shell,
 } from "@/components/flagship/Sections";
-import { EcosystemMap } from "@/components/flagship/EcosystemMap";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getFlagshipData } from "@/lib/public/flagship";
+import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { buildMetadata } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -33,7 +34,7 @@ export default async function PlatformPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);
-  const data = await getFlagshipData(locale);
+  const [data, eco, ecoInDb] = await Promise.all([getFlagshipData(locale), getEcosystem(locale), ecosystemInDatabase()]);
 
   return (
     <>
@@ -49,7 +50,7 @@ export default async function PlatformPage({ params }: Props) {
         <div className="grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           <SectionHeader eyebrow={t.ecosystemEyebrow} title={t.ecosystemTitle} body={t.ecosystemBody} />
           <div data-reveal>
-            <EcosystemMap labels={ecosystemLabels(t)} />
+            <Ecosystem t={t} modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)} graph={eco} />
           </div>
         </div>
       </Shell>

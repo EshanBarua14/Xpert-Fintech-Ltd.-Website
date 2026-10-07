@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { submitLead } from "@/app/[locale]/lead-actions";
 import { Select, TextArea, TextInput } from "@/components/ui/Field";
 import type { AppLocale } from "@/lib/i18n/config";
@@ -36,6 +36,20 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
   const formRef = useRef<HTMLFormElement>(null);
   const thanksRef = useRef<HTMLHeadingElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const stepHeadingRef = useRef<HTMLParagraphElement>(null);
+  const [step, setStep] = useState(0);
+  const [clientErrors, setClientErrors] = useState<Record<string, boolean>>({});
+  const firstRender = useRef(true);
+
+  // Move focus to the step heading when the step changes (not on first load).
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    stepHeadingRef.current?.focus();
+  }, [step]);
 
   // Filled in the browser: when the form appeared, which page, and any campaign tags.
   useEffect(() => {
@@ -54,12 +68,18 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
   useEffect(() => {
     if (state.status === "success") thanksRef.current?.focus();
     else if (state.status === "error") {
+      const STEP_OF: Record<string, number> = { organization: 0, designation: 0, businessType: 0, expectedRequirement: 1, interestedOfferingId: 1 };
+      const first = Object.keys(state.errors ?? {})[0];
+      if (mode === "demo" && first) setStep(STEP_OF[first] ?? 2);
       // A Turnstile token works once; get a fresh one for the next attempt.
       (window as unknown as { turnstile?: { reset: () => void } }).turnstile?.reset();
-      const firstInvalid = formRef.current?.querySelector<HTMLElement>("[aria-invalid=true]");
-      (firstInvalid ?? errorRef.current)?.focus();
+      // After the right step is shown, focus the first field to fix.
+      requestAnimationFrame(() => {
+        const firstInvalid = formRef.current?.querySelector<HTMLElement>("[aria-invalid=true]");
+        (firstInvalid ?? errorRef.current)?.focus();
+      });
     }
-  }, [state]);
+  }, [state, mode]);
 
   if (state.status === "success") {
     return (
@@ -96,85 +116,105 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
             ? t.errFix
             : null;
 
-  return (
-    <form ref={formRef} onSubmit={onSubmit} noValidate className="flex flex-col gap-6" aria-busy={pending}>
-      <input type="hidden" name="mode" value={mode} />
-      <input type="hidden" name="locale" value={locale} />
-      <input type="hidden" name="started_at" defaultValue="" />
-      <input type="hidden" name="page_path" defaultValue="" />
-      {UTM_KEYS.map((k) => (
-        <input key={k} type="hidden" name={k} defaultValue="" />
-      ))}
-      {/* Honeypot: invisible to people and screen readers; bots tend to fill it. */}
-      <div aria-hidden="true" className="absolute -left-[10000px] h-px w-px overflow-hidden">
-        <label htmlFor="company_website">Website</label>
-        <input id="company_website" name="company_website" type="text" tabIndex={-1} autoComplete="off" />
-      </div>
+  const isDemo = mode === "demo";
+  const fieldErr = (f: string) => err(f) ?? (clientErrors[f] ? t.errRequired : undefined);
+  const stepTitles = [t.demoStep1, t.demoStep2, t.demoStep3];
 
-      <p className="text-sm text-text-secondary">{t.formRequiredNote}</p>
+  /** Checks the fields of the visible step in the browser before moving on. */
+  const next = () => {
+    const box = stepRefs.current[step];
+    if (!box) return;
+    const bad: Record<string, boolean> = {};
+    for (const el of Array.from(box.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input[name],select[name],textarea[name]"))) {
+      if (!el.checkValidity()) bad[el.name] = true;
+    }
+    setClientErrors(bad);
+    if (Object.keys(bad).length) {
+      box.querySelector<HTMLElement>(`[name="${Object.keys(bad)[0]}"]`)?.focus();
+      return;
+    }
+    setStep((s) => Math.min(s + 1, 2));
+  };
 
-      {formError && (
-        <p ref={errorRef} tabIndex={-1} role="alert" className="rounded-control border border-market-down/40 bg-market-down/10 px-4 py-3 text-sm">
-          {formError}
-        </p>
+  const organisationFields = (
+    <>
+      <TextInput id="organization" label={t.formOrganization} required={isDemo} autoComplete="organization" maxLength={200} error={fieldErr("organization")} />
+      {isDemo && (
+        <>
+          <Select
+            id="businessType"
+            label={t.formBusinessType}
+            defaultValue=""
+            options={[{ value: "", label: t.formChoose }, ...BUSINESS_TYPES.map((b) => ({ value: b, label: t[BUSINESS_TYPE_KEYS[b]] }))]}
+          />
+          <TextInput id="designation" label={t.formDesignation} autoComplete="organization-title" maxLength={120} error={fieldErr("designation")} />
+        </>
       )}
+    </>
+  );
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        <TextInput id="name" label={t.formName} required autoComplete="name" maxLength={120} error={err("name")} />
-        <TextInput id="email" type="email" label={t.formEmail} required autoComplete="email" maxLength={200} error={err("email")} />
-        <TextInput id="phone" type="tel" label={t.formPhone} autoComplete="tel" maxLength={30} error={err("phone")} />
-        <TextInput
-          id="organization"
-          label={t.formOrganization}
-          required={mode === "demo"}
-          autoComplete="organization"
-          maxLength={200}
-          error={err("organization")}
-        />
-        {mode === "demo" && (
-          <>
-            <TextInput id="designation" label={t.formDesignation} autoComplete="organization-title" maxLength={120} error={err("designation")} />
-            <Select
-              id="businessType"
-              label={t.formBusinessType}
-              defaultValue=""
-              options={[{ value: "", label: t.formChoose }, ...BUSINESS_TYPES.map((b) => ({ value: b, label: t[BUSINESS_TYPE_KEYS[b]] }))]}
-            />
-            {offerings.length > 0 && (
-              <Select
-                id="interestedOfferingId"
-                label={t.formProduct}
-                defaultValue={defaultOfferingId ?? ""}
-                options={[{ value: "", label: t.formProductAny }, ...offerings.map((o) => ({ value: o.id, label: o.name }))]}
-              />
-            )}
-          </>
-        )}
+  const interestFields = isDemo && (
+    <>
+      {offerings.length > 0 && (
         <Select
-          id="preferredContact"
-          label={t.formPreferredContact}
-          defaultValue="ANY"
-          options={[
-            { value: "ANY", label: t.cmAny },
-            { value: "EMAIL", label: t.cmEmail },
-            { value: "PHONE", label: t.cmPhone },
-            { value: "WHATSAPP", label: t.cmWhatsapp },
-          ]}
-        />
-      </div>
-
-      {mode === "demo" && (
-        <TextArea
-          id="expectedRequirement"
-          label={t.formRequirement}
-          hint={t.formRequirementHint}
-          rows={4}
-          maxLength={3000}
-          error={err("expectedRequirement")}
+          id="interestedOfferingId"
+          label={t.formProduct}
+          defaultValue={defaultOfferingId ?? ""}
+          options={[{ value: "", label: t.formProductAny }, ...offerings.map((o) => ({ value: o.id, label: o.name }))]}
         />
       )}
-      <TextArea id="message" label={t.formMessage} required={mode === "contact"} rows={mode === "contact" ? 6 : 3} maxLength={5000} error={err("message")} />
+      <Select
+        id="preferredTime"
+        label={t.formPreferredTime}
+        defaultValue=""
+        options={[
+          { value: "", label: t.ptAny },
+          { value: "morning", label: t.ptMorning },
+          { value: "afternoon", label: t.ptAfternoon },
+          { value: "evening", label: t.ptEvening },
+        ]}
+      />
+      {offerings.length > 1 && (
+        <fieldset className="flex flex-col gap-2 sm:col-span-2">
+          <legend className="mb-2 text-sm font-medium">{t.formAlsoInterested}</legend>
+          <div className="flex flex-wrap gap-2">
+            {offerings.map((o) => (
+              <label key={o.id} className="has-[:checked]:border-brand-sky has-[:checked]:bg-brand-sky/10 flex cursor-pointer items-center gap-2 rounded-full border border-fg/15 px-3.5 py-2 text-sm">
+                <input type="checkbox" name="alsoInterested" value={o.id} className="accent-brand-royal" />
+                {o.name}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      <div className="sm:col-span-2">
+        <TextArea id="expectedRequirement" label={t.formRequirement} hint={t.formRequirementHint} rows={4} maxLength={3000} error={fieldErr("expectedRequirement")} />
+      </div>
+    </>
+  );
 
+  const contactFields = (
+    <>
+      <TextInput id="name" label={t.formName} required autoComplete="name" maxLength={120} error={fieldErr("name")} />
+      <TextInput id="email" type="email" label={t.formEmail} required autoComplete="email" maxLength={200} error={fieldErr("email")} />
+      <TextInput id="phone" type="tel" label={t.formPhone} autoComplete="tel" maxLength={30} error={fieldErr("phone")} />
+      <Select
+        id="preferredContact"
+        label={t.formPreferredContact}
+        defaultValue="ANY"
+        options={[
+          { value: "ANY", label: t.cmAny },
+          { value: "EMAIL", label: t.cmEmail },
+          { value: "PHONE", label: t.cmPhone },
+          { value: "WHATSAPP", label: t.cmWhatsapp },
+        ]}
+      />
+    </>
+  );
+
+  const finish = (
+    <>
+      <TextArea id="message" label={t.formMessage} required={mode === "contact"} rows={mode === "contact" ? 6 : 3} maxLength={5000} error={fieldErr("message")} />
       <div className="flex flex-col gap-1.5">
         <div className="flex items-start gap-3">
           <input
@@ -200,19 +240,101 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
           </p>
         )}
       </div>
-
       {turnstileSiteKey && (
         <>
           <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" async defer />
-          <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="dark" data-language={locale} aria-label={t.securityCheck} />
+          <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-theme="auto" data-language={locale} aria-label={t.securityCheck} />
         </>
       )}
+    </>
+  );
 
-      <div>
-        <button type="submit" disabled={pending} className="btn-glow inline-flex h-12 items-center gap-2 rounded-full px-7 text-sm font-semibold text-white disabled:opacity-60">
-          {pending ? t.formSending : mode === "demo" ? t.formSubmitDemo : t.formSubmitContact}
-        </button>
+  const submit = (
+    <button key="submit" type="submit" disabled={pending} className="btn-glow inline-flex h-12 items-center gap-2 rounded-full px-7 text-sm font-semibold text-white disabled:opacity-60">
+      {pending ? t.formSending : isDemo ? t.formSubmitDemo : t.formSubmitContact}
+    </button>
+  );
+
+  return (
+    <form ref={formRef} onSubmit={onSubmit} noValidate className="flex flex-col gap-6" aria-busy={pending}>
+      <input type="hidden" name="mode" value={mode} />
+      <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="started_at" defaultValue="" />
+      <input type="hidden" name="page_path" defaultValue="" />
+      {UTM_KEYS.map((k) => (
+        <input key={k} type="hidden" name={k} defaultValue="" />
+      ))}
+      {/* Honeypot: invisible to people and screen readers; bots tend to fill it. */}
+      <div aria-hidden="true" className="absolute -left-[10000px] h-px w-px overflow-hidden">
+        <label htmlFor="company_website">Website</label>
+        <input id="company_website" name="company_website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
+
+      {formError && (
+        <p ref={errorRef} tabIndex={-1} role="alert" className="rounded-control border border-market-down/40 bg-market-down/10 px-4 py-3 text-sm">
+          {formError}
+        </p>
+      )}
+
+      {isDemo ? (
+        <>
+          {/* Three short steps; every field stays in the form, so nothing is lost when going back. */}
+          <div className="flex flex-col gap-3">
+            <ol className="grid grid-cols-3 gap-2" aria-hidden="true">
+              {stepTitles.map((title, i) => (
+                <li key={title} className="flex flex-col gap-2">
+                  <span className={"h-1 rounded-full transition-colors duration-500 " + (i <= step ? "bg-gradient-to-r from-brand-sky to-cyan-300" : "bg-fg/10")} />
+                  <span className={"hidden text-xs sm:block " + (i === step ? "font-semibold text-text-primary" : "text-text-secondary")}>{title}</span>
+                </li>
+              ))}
+            </ol>
+            <p ref={stepHeadingRef} tabIndex={-1} className="font-display text-xl font-semibold focus:outline-none">
+              <span className="mr-2 font-mono text-xs tracking-widest text-accent">{t.demoStepOf.replace("{i}", String(step + 1)).replace("{n}", "3")}</span>
+              {stepTitles[step]}
+            </p>
+            <p className="text-sm text-text-secondary">{t.formRequiredNote}</p>
+          </div>
+          {[organisationFields, interestFields, <>{contactFields}</>].map((fields, i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                stepRefs.current[i] = el;
+              }}
+              hidden={step !== i}
+              className="flex flex-col gap-6"
+            >
+              <div className="grid gap-5 sm:grid-cols-2">{fields}</div>
+              {i === 2 && finish}
+            </div>
+          ))}
+          <div className="flex flex-wrap items-center gap-3">
+            {step > 0 && (
+              <button type="button" onClick={() => setStep((s) => s - 1)} className="inline-flex h-12 items-center rounded-full border border-fg/15 px-6 text-sm font-semibold hover:border-brand-sky/60">
+                ← {t.formBack}
+              </button>
+            )}
+            {step < 2 ? (
+              // Separate key: React must not turn this very button into the submit button
+              // mid-click, or the browser would submit the form a step early.
+              <button key="continue" type="button" onClick={next} className="btn-glow inline-flex h-12 items-center rounded-full px-7 text-sm font-semibold text-white">
+                {t.formContinue}
+              </button>
+            ) : (
+              submit
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-text-secondary">{t.formRequiredNote}</p>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {contactFields}
+            {organisationFields}
+          </div>
+          {finish}
+          <div>{submit}</div>
+        </>
+      )}
     </form>
   );
 }

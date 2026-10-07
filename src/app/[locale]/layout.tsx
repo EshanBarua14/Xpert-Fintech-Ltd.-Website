@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Anek_Bangla, Hind_Siliguri, JetBrains_Mono } from "next/font/google";
+import { THEME_SCRIPT } from "@/lib/theme-script";
+import { NavProgress } from "@/components/navigation/NavProgress";
+import { marketMode } from "@/lib/market/data";
+import { Noto_Sans_Bengali, Noto_Serif_Bengali, Schibsted_Grotesk, Spectral } from "next/font/google";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { SiteEffects } from "@/components/motion/SiteEffects";
@@ -10,13 +13,16 @@ import { getMessages } from "@/lib/i18n/messages";
 import "../globals.css";
 
 /*
- * Type: Anek Bangla (display) and Hind Siliguri (text) both cover Latin and
- * Bangla, so English and বাংলা pages share one voice. JetBrains Mono is used
- * only for market figures, where columns of digits must line up.
+ * Type. Spectral, a serif drawn for reading on screens, sets headlines with the
+ * steady voice of an annual report; Schibsted Grotesk, a newsroom grotesque,
+ * carries text, interface and figures (with tabular digits for prices).
+ * Bangla falls back letter by letter to Noto Serif Bengali (headlines) and
+ * Noto Sans Bengali (text), so both languages share one hierarchy.
  */
-const display = Anek_Bangla({ subsets: ["latin", "bengali"], axes: ["wdth"], variable: "--font-display-face", display: "swap" });
-const body = Hind_Siliguri({ subsets: ["latin", "bengali"], weight: ["400", "500", "600"], variable: "--font-body", display: "swap" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono", display: "swap" });
+const display = Spectral({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--font-display-face", display: "swap" });
+const body = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+const displayBn = Noto_Serif_Bengali({ subsets: ["bengali"], weight: ["500", "600"], variable: "--font-display-bn", display: "swap" });
+const bodyBn = Noto_Sans_Bengali({ subsets: ["bengali"], weight: ["400", "500", "600"], variable: "--font-body-bn", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
@@ -28,11 +34,6 @@ export const metadata: Metadata = {
 // Publishing from the admin portal will also trigger an immediate refresh (Phase 3).
 export const revalidate = 300;
 
-/* Runs before first paint: marks JS as available (for scroll reveals) and
-   applies the saved theme, or the device's light/dark preference. */
-const THEME_SCRIPT =
-  "(function(){var d=document.documentElement;d.classList.add('js');var t=null;try{t=localStorage.getItem('theme')}catch(e){}" +
-  "if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}d.dataset.theme=t})()";
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -50,7 +51,7 @@ export default async function LocaleLayout({
   const t = getMessages(locale);
 
   return (
-    <html lang={locale} className={`${display.variable} ${body.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`${display.variable} ${body.variable} ${displayBn.variable} ${bodyBn.variable}${marketMode() !== "none" ? " has-ticker" : ""}`} suppressHydrationWarning>
       <head>
         {/* Lets CSS hide scroll-reveal content only when JavaScript can reveal it again. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
@@ -61,11 +62,12 @@ export default async function LocaleLayout({
           {t.skipToContent}
         </a>
         <SiteHeader locale={locale} />
-        <main id="main" className="relative flex-1 pt-20 md:pt-24">
+        <main id="main" className="relative flex-1 pt-[calc(5rem+var(--ticker-h))] md:pt-[calc(6rem+var(--ticker-h))]">
           {children}
         </main>
         <SiteFooter locale={locale} />
         <SiteEffects />
+        <NavProgress />
       </body>
     </html>
   );

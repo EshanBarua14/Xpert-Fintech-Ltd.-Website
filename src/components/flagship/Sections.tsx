@@ -5,7 +5,11 @@ import { Icon } from "@/components/ui/Icon";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils/cn";
-import { EcosystemMap, type EcosystemLabels } from "./EcosystemMap";
+import { EcosystemMap, type EcosystemLabels, type EcosystemModuleInfo } from "./EcosystemMap";
+import { EcosystemExplorer, type TourLabels } from "./EcosystemExplorer";
+import type { EcoGraph } from "@/lib/public/ecosystem";
+import { ECOSYSTEM_MODULES, type EcosystemModuleKey } from "./ecosystem-modules";
+import { pick } from "@/lib/public/text";
 import { CapabilityVisual, type VisualKind } from "./Visuals";
 
 /**
@@ -23,8 +27,12 @@ export function Shell({ children, className, id }: { children: ReactNode; classN
   );
 }
 
+/**
+ * A section's title and lead. On wide screens the lead sits beside the title,
+ * bottom-aligned, like a magazine standfirst; narrow containers stack them.
+ * `eyebrow` is kept for callers but no longer printed: headings stand alone.
+ */
 export function SectionHeader({
-  eyebrow,
   title,
   body,
   align = "left",
@@ -36,28 +44,32 @@ export function SectionHeader({
   align?: "left" | "center";
   as?: "h1" | "h2";
 }) {
+  const centered = align === "center";
   return (
-    <div className={cn("flex max-w-3xl flex-col gap-5", align === "center" && "mx-auto items-center text-center")}>
-      {eyebrow && (
-        <p className="eyebrow" data-reveal>
-          {eyebrow}
-        </p>
-      )}
-      <H
-        data-reveal
-        style={{ ...delay(1), fontStretch: "110%" }}
-        className={cn(
-          "font-display font-semibold tracking-[-0.03em] text-balance text-text-primary",
-          H === "h1" ? "text-5xl leading-[1] md:text-[4.5rem]" : "text-[2.25rem] leading-[1.04] md:text-[3.25rem]",
+    <div className={cn("@container w-full", centered && "mx-auto max-w-3xl")}>
+      <div className={cn("grid gap-5", centered ? "justify-items-center text-center" : "@4xl:grid-cols-12 @4xl:items-end @4xl:gap-x-12")}>
+        <H
+          data-reveal
+          style={delay(0)}
+          className={cn(
+            "font-display text-balance text-text-primary",
+            H === "h1" ? "text-[2.75rem] leading-[1.02] md:text-[4.25rem]" : "text-[2.15rem] leading-[1.06] md:text-[3rem]",
+            !centered && body && "@4xl:col-span-7",
+            !centered && !body && "max-w-4xl @4xl:col-span-9",
+          )}
+        >
+          {title}
+        </H>
+        {body && (
+          <p
+            data-reveal
+            style={delay(1)}
+            className={cn("max-w-xl text-[1.0625rem] leading-relaxed text-pretty text-text-secondary md:text-lg", !centered && "@4xl:col-span-5 @4xl:pb-1.5")}
+          >
+            {body}
+          </p>
         )}
-      >
-        {title}
-      </H>
-      {body && (
-        <p data-reveal style={delay(2)} className="max-w-2xl text-lg leading-relaxed text-pretty text-text-secondary md:text-xl">
-          {body}
-        </p>
-      )}
+      </div>
     </div>
   );
 }
@@ -99,7 +111,75 @@ export function ecosystemLabels(t: Messages): EcosystemLabels {
     hubSub: t.ecoHubSub,
     roles: { bsec: t.roleBsec, dse: t.roleDse, cse: t.roleCse, cdbl: t.roleCdbl, bank: t.roleBank, investors: t.roleInvestors },
     names: { bank: t.nameBank, investors: t.nameInvestors },
+    explore: t.exploreProduct,
   };
+}
+
+/** Labels for the ecosystem tour and the phone layout. */
+export function tourLabels(t: Messages): TourLabels {
+  return {
+    start: t.ecoTourStart,
+    meta: t.ecoTourMeta,
+    step: t.ecoTourStep,
+    prev: t.ecoTourPrev,
+    next: t.ecoTourNext,
+    pause: t.ecoTourPause,
+    play: t.ecoTourPlay,
+    end: t.ecoTourEnd,
+    replay: t.ecoTourReplay,
+    worksWith: t.ecoWorksWith,
+    explore: t.exploreProduct,
+    close: t.close,
+    layers: { MARKET: t.ecoLayerMarket, XFL: t.ecoLayerXfl, PRODUCT: t.ecoLayerProduct, INSTITUTION: t.ecoLayerInstitution, USER: t.ecoLayerUser },
+  };
+}
+
+/** The ecosystem map with its tour and phone layout when the CMS has a graph; the map alone otherwise. */
+export function Ecosystem({ t, modules, graph, focus }: { t: Messages; modules?: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>>; graph?: EcoGraph; focus?: EcosystemModuleKey }) {
+  if (graph && graph.nodes.length && !focus) return <EcosystemExplorer labels={ecosystemLabels(t)} modules={modules} graph={graph} tour={tourLabels(t)} />;
+  return <EcosystemMap labels={ecosystemLabels(t)} modules={modules} focus={focus} className="relative" />;
+}
+
+/** Which product page each ecosystem module opens. */
+const MODULE_SLUG: Record<EcosystemModuleKey, string> = {
+  OMS: "trading-platform",
+  RMS: "rms",
+  BO: "bo-account-opening",
+  "Back office": "back-office",
+  eKYC: "ekyc",
+  DMS: "dms",
+};
+
+type OfferingLike = { translations: { locale: string; slug: string; name: string; tagline: string | null }[] };
+
+/**
+ * Ecosystem modules from the published products: a module whose product is
+ * not published (e.g. eKYC while pending) is hidden from the map, and each
+ * visible module links to its product page with its tagline as the description.
+ */
+export function ecosystemModules(offerings: OfferingLike[], locale: AppLocale): Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>> {
+  const bySlug = new Map<string, OfferingLike>();
+  for (const o of offerings) for (const tr of o.translations) if (tr.locale === "en") bySlug.set(tr.slug, o);
+  const out: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>> = {};
+  for (const key of ECOSYSTEM_MODULES) {
+    const o = bySlug.get(MODULE_SLUG[key]);
+    if (!o) {
+      out[key] = { available: false };
+      continue;
+    }
+    const tr = pick(o.translations, locale);
+    const own = o.translations.find((x) => x.locale === locale);
+    out[key] = {
+      description: tr?.tagline ?? undefined,
+      href: `/${own ? locale : "en"}/products/${(own ?? tr)?.slug ?? MODULE_SLUG[key]}`,
+    };
+  }
+  return out;
+}
+
+/** The ecosystem module that represents a product slug, if any. */
+export function moduleForSlug(slug: string): EcosystemModuleKey | undefined {
+  return ECOSYSTEM_MODULES.find((k) => MODULE_SLUG[k] === slug);
 }
 
 export function FlagshipHero({
@@ -109,15 +189,24 @@ export function FlagshipHero({
   memberCount,
   ticker,
   status,
+  modules,
+  graph,
+  facts,
 }: {
   t: Messages;
   locale: AppLocale;
   body?: string | null;
   memberCount: number;
+  /** Up to three real figures shown under the buttons (members, live apps, institutions…). */
+  facts?: { value: number; label: string }[];
+  /** Which ecosystem modules to show and where they link (from published products). */
+  modules?: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>>;
   /** Live price strip shown along the bottom edge of the hero. */
   ticker?: ReactNode;
   /** Live market status line above the headline (only when market data is on). */
   status?: ReactNode;
+  /** Admin → Ecosystem graph: adds the guided tour and the phone layout. */
+  graph?: EcoGraph;
 }) {
   return (
     <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
@@ -126,8 +215,8 @@ export function FlagshipHero({
           {status && <div data-reveal>{status}</div>}
           <h1
             data-reveal
-            style={{ ...delay(1), fontStretch: "104%" }}
-            className="font-display text-[clamp(2.4rem,4.4vw,4.1rem)] leading-[1] font-semibold tracking-[-0.03em] text-balance text-text-primary"
+            style={{ ...delay(1) }}
+            className="font-display text-[clamp(2.75rem,5vw,4.6rem)] leading-[1.02] text-balance text-text-primary"
           >
             {t.heroTitleA} {t.heroTitleB}
           </h1>
@@ -138,7 +227,18 @@ export function FlagshipHero({
             <PrimaryButton href={`/${locale}/request-demo`}>{t.requestDemo}</PrimaryButton>
             <GhostButton href={`/${locale}/platform`}>{t.explorePlatform}</GhostButton>
           </div>
-          {memberCount > 0 && (
+          {facts && facts.length > 0 ? (
+            <dl data-reveal style={delay(4)} className="mt-2 grid max-w-[34rem] grid-cols-3 border-t border-fg/10 pt-5">
+              {facts.slice(0, 3).map((f, i) => (
+                <div key={f.label} className={cn("flex flex-col gap-1", i > 0 && "border-l border-fg/10 pl-4 sm:pl-6")}>
+                  <dt className="order-2 text-[0.8125rem] leading-snug text-text-secondary">{f.label}</dt>
+                  <dd className="order-1 font-display text-3xl leading-none text-text-primary md:text-[2.5rem]">
+                    <CountUp value={f.value} locale={locale} />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          ) : memberCount > 0 && (
             <Link
               href={`/${locale}/consortium`}
               data-reveal
@@ -150,7 +250,7 @@ export function FlagshipHero({
           )}
         </div>
         <div data-reveal style={delay(2)} className="relative w-full">
-          <EcosystemMap labels={ecosystemLabels(t)} className="relative" />
+          <Ecosystem t={t} modules={modules} graph={graph} />
         </div>
       </div>
       {ticker && <div className="relative">{ticker}</div>}
@@ -198,8 +298,11 @@ const CAPABILITY_KEYS: { key: VisualKind; icon: string; title: keyof Messages; b
 ];
 
 /** The seven capabilities; each links to its product page once published, else to the platform page. */
+/** Capabilities shown only once their product is published (pending products stay off the site). */
+const HIDE_UNTIL_PUBLISHED = new Set(["ekyc"]);
+
 export function capabilities(t: Messages, locale: AppLocale, publishedSlugs: Set<string>): Capability[] {
-  return CAPABILITY_KEYS.map((c) => ({
+  return CAPABILITY_KEYS.filter((c) => !HIDE_UNTIL_PUBLISHED.has(c.slug) || publishedSlugs.has(c.slug)).map((c) => ({
     key: c.key,
     icon: c.icon,
     title: t[c.title],
@@ -219,24 +322,27 @@ const SPAN: Record<VisualKind, string> = {
 };
 
 export function CapabilityBento({ items, anchors = false }: { items: Capability[]; anchors?: boolean }) {
+  // With six cards (eKYC hidden), widen the back-office card so the last row has no gap.
+  const span = (k: VisualKind) => (k === "back" && items.length === 6 ? "lg:col-span-2" : SPAN[k]);
   return (
     <ul className="bento grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((c, i) => (
-        <li key={c.key} id={anchors ? c.key : undefined} data-reveal style={delay(i % 4)} className={cn("scroll-mt-32", SPAN[c.key])}>
+        <li key={c.key} id={anchors ? c.key : undefined} data-reveal style={delay(i % 4)} className={cn("scroll-mt-32", span(c.key))}>
           <Link
             href={c.href}
-            className="spotlight group glass flex h-full flex-col overflow-hidden rounded-3xl p-6 transition-transform duration-500 hover:-translate-y-1"
+            className="spotlight group glass flex h-full flex-col overflow-hidden rounded-3xl p-5 transition-transform duration-500 hover:-translate-y-1 sm:p-6"
           >
             <div className="flex-1">
               <CapabilityVisual kind={c.key} />
             </div>
-            <div className="mt-5 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
+            <div className="mt-4 flex flex-col gap-2.5 sm:mt-5 sm:gap-3">
+              {/* Phones: icon beside the title to keep six cards short; larger screens: icon above. */}
+              <div className="flex items-center gap-3 sm:flex-col sm:items-start">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-fg/10 bg-brand-sky/10 text-brand-sky">
                   <Icon name={c.icon} className="size-5" />
                 </span>
+                <h3 className="font-display text-lg font-semibold tracking-tight">{c.title}</h3>
               </div>
-              <h3 className="font-display text-lg font-semibold tracking-tight">{c.title}</h3>
               <p className="text-sm leading-relaxed text-text-secondary">{c.body}</p>
             </div>
           </Link>
@@ -285,11 +391,19 @@ export function FlowStory({ t }: { t: Messages }) {
 
 // ── Numbers ──────────────────────────────────────────────────────────────────
 
+const LG_COLS: Record<number, string> = { 1: "lg:grid-cols-1", 2: "lg:grid-cols-2", 3: "lg:grid-cols-3", 4: "lg:grid-cols-4", 5: "lg:grid-cols-5" };
+
 export function StatGrid({ items, locale }: { items: { value: number; label: string; suffix?: string }[]; locale: AppLocale }) {
   return (
-    <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-fg/10 bg-fg/10 lg:grid-cols-4">
+    <dl className={cn("grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-fg/10 bg-fg/10", LG_COLS[items.length] ?? "lg:grid-cols-4")}>
       {items.map((s, i) => (
-        <div key={s.label} data-reveal style={delay(i)} className="flex flex-col gap-2 bg-ink-950/90 p-6 md:p-8">
+        <div
+          key={s.label}
+          data-reveal
+          style={delay(i)}
+          // An odd last tile spans both columns on phones, so the grid has no hole.
+          className={cn("flex flex-col gap-2 bg-ink-950/90 p-6 md:p-8", items.length % 2 === 1 && i === items.length - 1 && "col-span-2 lg:col-span-1")}
+        >
           <dt className="order-2 text-sm text-text-secondary">{s.label}</dt>
           <dd className="text-gradient-brand order-1 font-display text-5xl font-semibold tracking-tight md:text-6xl">
             <CountUp value={s.value} suffix={s.suffix} locale={locale} />
@@ -313,7 +427,7 @@ export function Principles({ t }: { t: Messages }) {
     <dl className="grid gap-x-16 gap-y-10 sm:grid-cols-2">
       {items.map((p) => (
         <div key={p.title} className="flex flex-col gap-2 border-l-2 border-gold/60 pl-6">
-          <dt className="font-display text-xl font-semibold" style={{ fontStretch: "108%" }}>
+          <dt className="font-display text-xl font-semibold">
             {p.title}
           </dt>
           <dd className="max-w-md leading-relaxed text-text-secondary">{p.body}</dd>
@@ -328,7 +442,7 @@ export function MemberBoard({ names }: { names: string[] }) {
   return (
     <ul className="grid gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
       {names.map((n) => (
-        <li key={n} className="border-t border-fg/10 py-4 font-display text-lg leading-snug font-medium text-text-primary md:text-xl" style={{ fontStretch: "105%" }}>
+        <li key={n} className="border-t border-fg/10 py-4 font-display text-lg leading-snug font-medium text-text-primary md:text-xl">
           {n}
         </li>
       ))}
@@ -344,7 +458,7 @@ export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
       <div className="relative overflow-hidden rounded-[2rem] bg-brand-royal px-6 py-14 md:px-16 md:py-20">
         <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <div className="flex max-w-2xl flex-col gap-4">
-            <h2 className="font-display text-4xl leading-[1.02] font-semibold tracking-[-0.03em] text-white md:text-6xl" style={{ fontStretch: "110%" }}>
+            <h2 className="font-display text-4xl leading-[1.02] font-semibold tracking-[-0.03em] text-white md:text-6xl">
               {t.ctaTitle}
             </h2>
             <p className="text-lg text-white/80">{t.ctaBody}</p>

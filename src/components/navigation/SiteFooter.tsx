@@ -2,15 +2,15 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { Container } from "@/components/ui/Layout";
 import { Icon } from "@/components/ui/Icon";
-import { LanguageSwitch } from "@/components/navigation/LanguageSwitch";
-import { ThemeToggle } from "@/components/navigation/ThemeToggle";
+import { SocialIcon, socialKind } from "@/components/ui/SocialIcon";
 import { getNavMenu, type NavLink } from "@/lib/content/navigation";
 import { getSiteInfo } from "@/lib/content/settings";
 import { getMessages } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/i18n/config";
 
 function FooterLink({ item }: { item: NavLink }) {
-  const className = "text-sm text-text-secondary transition-colors hover:text-fg";
+  // py-1: a comfortable tap target on phones without changing the column rhythm much.
+  const className = "inline-block py-1 text-sm text-text-secondary transition-colors hover:text-fg";
   if (!item.href) return <span className={className}>{item.label}</span>;
   return item.external ? (
     <a href={item.href} className={className} target="_blank" rel="noopener noreferrer">
@@ -52,9 +52,16 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
               {info.address && (
                 <span className="flex gap-3 text-text-secondary">
                   <Icon name="globe" className="mt-0.5 size-4 shrink-0 text-brand-sky" />
-                  <span>
-                    <span className="sr-only">{t.address}: </span>
-                    {info.address}
+                  <span className="flex flex-col gap-1">
+                    <span>
+                      <span className="sr-only">{t.address}: </span>
+                      {info.address}
+                    </span>
+                    {info.mapLink && (
+                      <a href={info.mapLink} target="_blank" rel="noopener noreferrer" className="self-start font-semibold text-brand-sky hover:text-fg">
+                        {t.getDirections}
+                      </a>
+                    )}
                   </span>
                 </span>
               )}
@@ -78,8 +85,8 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-8 md:justify-items-end">
             {columns.map((column) => (
               <nav key={column.id} aria-label={column.label} className="min-w-40">
-                <h2 className="mb-5 font-mono text-[11px] tracking-[0.2em] text-text-secondary uppercase">{column.label}</h2>
-                <ul className="flex flex-col gap-3">
+                <h2 className="mb-4 text-sm font-semibold text-text-primary">{column.label}</h2>
+                <ul className="flex flex-col gap-1.5">
                   {column.children.map((item) => (
                     <li key={item.id}>
                       <FooterLink item={item} />
@@ -92,6 +99,15 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
         </div>
       </Container>
 
+
+      {(info.registration || info.regulatory) && (
+        <Container className="relative border-t border-fg/[0.06] py-6">
+          <div className="grid gap-3 text-xs leading-relaxed text-text-secondary md:grid-cols-2 md:gap-10">
+            {info.registration && <p>{info.registration}</p>}
+            {info.regulatory && <p>{info.regulatory}</p>}
+          </div>
+        </Container>
+      )}
 
       <div className="relative border-t border-fg/[0.06] bg-ink-950/60 backdrop-blur">
         <Container className="flex flex-col gap-5 py-6 text-xs text-text-secondary md:flex-row md:items-center md:justify-between">
@@ -107,26 +123,36 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
               ))}
             </ul>
           )}
-          <div className="flex flex-wrap items-center gap-4">
-            {info.socialLinks.length > 0 && (
-              <ul className="flex gap-2" aria-label={t.followUs}>
-                {info.socialLinks.map((s) => (
-                  <li key={s.url}>
-                    <a
-                      href={s.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-9 items-center rounded-full border border-fg/10 bg-fg/[0.03] px-4 text-xs font-medium text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-fg"
-                    >
-                      {s.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <ThemeToggle labels={{ toLight: t.themeToLight, toDark: t.themeToDark }} />
-            <LanguageSwitch current={locale} label={t.language} />
-          </div>
+          {(info.socialLinks.length > 0 || info.email) && (
+            <ul className="flex flex-wrap items-center gap-2" aria-label={t.followUs}>
+              {info.email && (
+                <li>
+                  <a
+                    href={`mailto:${info.email}`}
+                    aria-label={`${t.email}: ${info.email}`}
+                    title={info.email}
+                    className="inline-flex size-10 items-center justify-center rounded-full border border-fg/10 bg-fg/[0.03] text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-fg"
+                  >
+                    <SocialIcon kind="email" />
+                  </a>
+                </li>
+              )}
+              {info.socialLinks.map((s) => (
+                <li key={s.url}>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    title={s.label}
+                    className="inline-flex size-10 items-center justify-center rounded-full border border-fg/10 bg-fg/[0.03] text-text-secondary transition-colors hover:border-brand-sky/50 hover:text-fg"
+                  >
+                    <SocialIcon kind={socialKind(s.url)} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </Container>
       </div>
     </footer>

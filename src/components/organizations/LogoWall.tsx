@@ -30,7 +30,7 @@ function Tile({ m, i, size }: { m: Member; i: number; size: "lg" | "sm" }) {
       <span
         className={cn(
           "relative flex items-center justify-center",
-          size === "lg" ? "h-20 w-full" : "h-12 shrink-0",
+          size === "lg" ? "h-24 w-full" : "h-14 min-w-0 shrink",
         )}
       >
         {m.logo ? (
@@ -41,7 +41,7 @@ function Tile({ m, i, size }: { m: Member; i: number; size: "lg" | "sm" }) {
             height={m.logo.height ?? 120}
             className={cn(
               "member-logo w-auto object-contain",
-              size === "lg" ? "max-h-16 max-w-[11rem]" : "max-h-10 max-w-[8rem]",
+              size === "lg" ? "max-h-20 max-w-[14rem]" : "max-h-12 max-w-[14rem]",
             )}
           />
         ) : (
@@ -67,6 +67,7 @@ function Tile({ m, i, size }: { m: Member; i: number; size: "lg" | "sm" }) {
   const cls = cn(
     "spotlight glass group flex h-full rounded-3xl transition-transform duration-500 hover:-translate-y-1",
     size === "lg" ? "min-h-48 flex-col items-center justify-center gap-4 p-6" : "min-h-20 flex-row items-center gap-3 px-4 py-3",
+    size === "sm" && m.logo && "justify-center",
   );
   return (
     <li data-reveal style={{ "--d": i % 4 } as CSSProperties}>
@@ -114,7 +115,7 @@ export function LogoMarquee({ members, label }: { members: Member[]; label: stri
           {loop.map((m, i) => (
             <li key={`${m.id}-${i}`} className={cn("flex items-center gap-3 whitespace-nowrap text-sm text-text-secondary", i >= members.length && "ticker-copy")}>
               {m.logo ? (
-                <Image src={m.logo.url} alt="" width={m.logo.width ?? 200} height={m.logo.height ?? 80} className="member-logo h-9 w-auto max-w-[9rem] object-contain" />
+                <Image src={m.logo.url} alt="" width={m.logo.width ?? 200} height={m.logo.height ?? 80} className="member-logo h-10 w-auto max-w-[12rem] object-contain" />
               ) : (
                 <>
                   <span className="flex size-8 items-center justify-center rounded-lg border border-brand-sky/25 bg-brand-sky/10 font-mono text-[max(10px,0.625rem)] font-semibold text-cyan-300">

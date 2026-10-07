@@ -30,7 +30,7 @@ export function ClientMarquee({ clients, label }: { clients: Member[]; label: st
                 const tile = (
                   <span className="group glass flex h-16 items-center justify-center gap-3 rounded-2xl px-5 whitespace-nowrap transition-colors duration-300 hover:border-brand-sky/40 sm:h-20 sm:px-6">
                     {c.logo ? (
-                      <Image src={c.logo.url} alt="" width={c.logo.width ?? 200} height={c.logo.height ?? 80} className="member-logo h-10 w-auto max-w-[9.5rem] object-contain sm:h-12" />
+                      <Image src={c.logo.url} alt="" width={c.logo.width ?? 200} height={c.logo.height ?? 80} className="member-logo h-11 w-auto max-w-[12rem] object-contain sm:h-14 sm:max-w-[15rem]" />
                     ) : (
                       <>
                         <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-brand-sky/25 bg-brand-sky/10 font-mono text-[max(11px,0.6875rem)] font-semibold text-cyan-300">

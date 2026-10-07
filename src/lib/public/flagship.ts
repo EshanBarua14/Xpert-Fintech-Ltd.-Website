@@ -15,9 +15,12 @@ export const getFlagshipData = cache(async (locale: AppLocale) => {
     getOrganizations("CLIENT"),
     getOfferings(),
   ]);
-  // Clients entered in Admin → Organizations (kind: Client) win; until there are
-  // any, the institutions running a live Xpert app are shown.
-  const clients = clientRows.length ? clientRows : await getOrganizationsWithLiveApps();
+  // Clients: the consortium brokerages (they run Xpert's platform), the
+  // organizations entered as "Client" in Admin → Organizations, and any other
+  // institution running a live Xpert app. Each once, members first.
+  const withApps = await getOrganizationsWithLiveApps();
+  const seen = new Set<string>();
+  const clients = [...members, ...clientRows, ...withApps].filter((o) => (seen.has(o.id) ? false : (seen.add(o.id), true)));
   // A logo is shown only when it is uploaded AND written permission is on file.
   const logos = await mediaMap(
     [...members, ...exchanges, ...clients].map((o) => (o.logoPermission ? o.logoMediaId : null)),

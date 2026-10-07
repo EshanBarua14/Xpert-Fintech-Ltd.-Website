@@ -1065,15 +1065,17 @@ html {
   .person-dialog[open], .person-dialog[open]::backdrop { animation: none; }
 }
 
-/* ── XFL 2.0: consortium logos — monochrome at rest, full colour on hover ── */
+/* ── Client and member logos: full colour on a white plate, so every logo reads
+   the way its owner designed it, on the dark and the light theme alike. ── */
 .member-logo {
-  filter: grayscale(1) brightness(1.7);
-  opacity: 0.8;
-  transition: filter 500ms ease, opacity 500ms ease;
+  background: #fff;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.55rem;
+  box-shadow: 0 0 0 1px rgb(10 20 40 / 0.08);
+  transition: transform 400ms var(--ease-ui), box-shadow 400ms var(--ease-ui);
 }
-[data-theme="light"] .member-logo { filter: grayscale(1); opacity: 0.75; }
 .group:hover .member-logo,
-.group:focus-visible .member-logo { filter: none; opacity: 1; }
+.group:focus-visible .member-logo { transform: translateY(-1px); box-shadow: 0 6px 18px -8px rgb(0 0 0 / 0.45), 0 0 0 1px rgb(10 20 40 / 0.08); }
 
 /* ── XFL 2.0: product showcase ────────────────────────────────────────────── */
 .showcase-progress { width: 0; animation: showcase-progress linear forwards; }

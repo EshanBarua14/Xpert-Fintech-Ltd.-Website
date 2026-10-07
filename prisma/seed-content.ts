@@ -27,6 +27,7 @@ import { ecosystemEdges, ecosystemFlows, ecosystemNodes } from "../src/content/x
 import { BOARD, MANAGEMENT, TEAM, type RosterPerson } from "../src/content/xfl2/people";
 import { LEADER_MESSAGES, MARKET_GOAL } from "../src/content/xfl2/messages";
 import { LEGAL_DRAFTS } from "../src/content/xfl2/legal";
+import { CLIENT_LOGOS, orgNameKey } from "../src/content/xfl2/client-logos";
 import { sniff } from "../src/lib/media/inspect";
 
 const db = new PrismaClient();
@@ -375,7 +376,12 @@ const BN_TITLES: Record<string, string> = {
 
 /** A portrait in prisma/seed-media/people/<key>.(png|jpg) → media library id (same file twice = one item). */
 async function portraitFor(key: string, name: string): Promise<string | null> {
-  const dir = path.join(process.cwd(), "prisma", "seed-media", "people");
+  return seedImage("people", key, name, ["portrait"]);
+}
+
+/** An image in prisma/seed-media/<folder>/<key>.(png|jpg|webp) → media library id; the same file is stored once. */
+async function seedImage(folder: string, key: string, name: string, tags: string[]): Promise<string | null> {
+  const dir = path.join(process.cwd(), "prisma", "seed-media", folder);
   const file = ["png", "jpg", "jpeg", "webp"].map((ext) => path.join(dir, `${key}.${ext}`)).find((f) => existsSync(f));
   if (!file) return null;
   const data = await readFile(file);
@@ -399,7 +405,7 @@ async function portraitFor(key: string, name: string): Promise<string | null> {
       height: type.height ?? null,
       checksum,
       isScanned: true,
-      tags: ["portrait"],
+      tags,
       translations: { create: { locale: EN, altText: name } },
     },
   });
@@ -569,6 +575,38 @@ async function mergePlatformIntoProducts() {
   }
   await db.navItem.update({ where: { id: platform.id }, data: { isHidden: true } });
   console.log("• Header menu: Platform merged into Products (Platform overview is now the first Products link)");
+}
+
+/**
+ * Client logos supplied by XFL: attached to the organization with the same key
+ * or name (consortium members included); clients not in the database yet are
+ * added as published "Client" organizations. Logos set in the admin are kept.
+ * XFL supplied these logos for the website, so permission to show them is set.
+ */
+async function seedClientLogos() {
+  const orgs = await db.organization.findMany({ where: { deletedAt: null }, include: { translations: { where: { locale: EN } } } });
+  let attached = 0;
+  let added = 0;
+  for (const [i, c] of CLIENT_LOGOS.entries()) {
+    let org = orgs.find((o) => o.key === c.key) ?? orgs.find((o) => o.translations.some((t) => orgNameKey(t.name) === orgNameKey(c.name)));
+    if (!org) {
+      const created = await db.organization.create({
+        data: { key: c.key, kind: "CLIENT", status: "PUBLISHED", sortOrder: 100 + i, translations: { create: { locale: EN, name: c.name } } },
+        include: { translations: { where: { locale: EN } } },
+      });
+      orgs.push(created);
+      org = created;
+      added++;
+    }
+    if (org.logoMediaId) continue;
+    const logo = await seedImage("logos", c.key, `${c.name} logo`, ["logo", "client"]);
+    if (!logo) continue;
+    await db.organization.update({ where: { id: org.id }, data: { logoMediaId: logo, logoPermission: true } });
+    await db.mediaUsage.deleteMany({ where: { entityType: "ORGANIZATION", entityId: org.id, field: "logo" } });
+    await db.mediaUsage.create({ data: { mediaId: logo, entityType: "ORGANIZATION", entityId: org.id, field: "logo" } });
+    attached++;
+  }
+  if (attached || added) console.log(`• Client logos: ${attached} attached${added ? `, ${added} new client(s) added` : ""}`);
 }
 
 // ── Consortium and apps ──────────────────────────────────────────────────────
@@ -898,6 +936,7 @@ async function main() {
   await seedMessagesAndGoal();
   await seedLegalDrafts();
   await mergePlatformIntoProducts();
+  await seedClientLogos();
   await seedDeployments();
   await seedTeamLinks();
   await seedMilestones();

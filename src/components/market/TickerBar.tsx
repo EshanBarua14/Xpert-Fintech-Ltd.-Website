@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { crore, fmt, signed } from "@/lib/market/format";
-import type { ExchangeSnapshot, MarketPayload, ShareFigure } from "@/lib/market/types";
+import type { ExchangeSnapshot, MarketPayload } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
 import { useMarket } from "./useMarket";
 
@@ -16,7 +16,6 @@ export type TickerLabels = {
   play: string;
   loading: string;
   unavailable: string;
-  xpertShare: string;
   breadth: string;
   breadthShort: string;
   turnover: string;
@@ -28,7 +27,7 @@ export type TickerLabels = {
 
 type Item = {
   key: string;
-  kind: "exchange" | "share" | "index" | "breadth" | "turnover" | "quote";
+  kind: "exchange" | "index" | "breadth" | "turnover" | "quote";
   label: string;
   value?: string;
   pct?: number;
@@ -39,9 +38,8 @@ type Item = {
 
 const QUOTES_PER_EXCHANGE = 60;
 
-function itemsFor(ex: Ex, snap: ExchangeSnapshot | undefined, share: ShareFigure | undefined, locale: Locale, labels: TickerLabels, moves: Record<string, "up" | "down">, skipLeadIndex: boolean): Item[] {
+function itemsFor(ex: Ex, snap: ExchangeSnapshot | undefined, locale: Locale, labels: TickerLabels, moves: Record<string, "up" | "down">, skipLeadIndex: boolean): Item[] {
   const out: Item[] = [];
-  if (share) out.push({ key: `${ex}-share`, kind: "share", label: labels.xpertShare, value: `${fmt(locale, share.sharePct, 2)}%` });
   if (snap) {
     snap.indices.slice(skipLeadIndex ? 1 : 0).forEach((i) => out.push({ key: `${ex}-i-${i.name}`, kind: "index", label: i.name, value: fmt(locale, i.value), pct: i.changePct }));
     const total = (snap.advancers ?? 0) + (snap.decliners ?? 0) + (snap.unchanged ?? 0);
@@ -74,13 +72,13 @@ function Cell({ it, locale }: { it: Item; locale: Locale }) {
   }
   return (
     <>
-      <span className={cn("font-semibold", it.kind === "quote" ? "text-fg" : it.kind === "share" ? "text-accent" : "text-gold")}>{it.label}</span>
+      <span className={cn("font-semibold", it.kind === "quote" ? "text-fg" : "text-gold")}>{it.label}</span>
       {it.breadth ? (
         <span className="text-text-secondary">
           <span className="text-market-up">▲{fmt(locale, it.breadth[0], 0)}</span> <span className="text-market-down">▼{fmt(locale, it.breadth[1], 0)}</span> •{fmt(locale, it.breadth[2], 0)}
         </span>
       ) : (
-        it.value && <span className={it.kind === "share" ? "font-semibold text-fg" : "text-text-secondary"}>{it.value}</span>
+        it.value && <span className={"text-text-secondary"}>{it.value}</span>
       )}
       {it.pct !== undefined && Number.isFinite(it.pct) && <Pct pct={it.pct} locale={locale} />}
     </>
@@ -147,7 +145,7 @@ function LaneHead({ ex, snap, locale, labels, showIndex }: { ex: Ex; snap?: Exch
 /**
  * The DSE · CSE ticker bar at the very top of every page. Wide screens show
  * the two exchanges side by side, each with its own lane (status, main index,
- * Xpert's market share, the other indices, breadth, turnover, then the day's
+ * the other indices, breadth, turnover, then the day's
  * biggest movers); phones and tablets show one lane with both. Pauses on
  * hover or focus and with its pause button; with reduced motion it does not
  * move and can be scrolled sideways instead. Data: /api/market (refreshed
@@ -159,12 +157,12 @@ export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"
   const [paused, setPaused] = useState(false);
 
   const byEx = (ex: Ex) => data.snapshot?.exchanges.find((e) => e.exchange === ex);
-  const shareOf = (ex: Ex) => data.shares.find((s) => s.exchange === ex);
-  const exchanges: Ex[] = (["DSE", "CSE"] as const).filter((ex) => byEx(ex) || shareOf(ex));
+  // Prices only: Xpert's market share is shown in the market section, not in the ticker.
+  const exchanges: Ex[] = (["DSE", "CSE"] as const).filter((ex) => byEx(ex));
 
   const combined = exchanges.flatMap((ex) => [
     { key: `${ex}-ex`, kind: "exchange" as const, label: ex },
-    ...itemsFor(ex, byEx(ex), shareOf(ex), locale, labels, moves, false),
+    ...itemsFor(ex, byEx(ex), locale, labels, moves, false),
   ]);
 
   return (
@@ -189,7 +187,7 @@ export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"
             {exchanges.map((ex, i) => (
               <div key={ex} className={cn("hidden min-w-0 flex-1 lg:flex", i > 0 && "border-l border-fg/[0.08]")}>
                 <LaneHead ex={ex} snap={byEx(ex)} locale={locale} labels={labels} showIndex />
-                <Lane items={itemsFor(ex, byEx(ex), shareOf(ex), locale, labels, moves, true)} locale={locale} />
+                <Lane items={itemsFor(ex, byEx(ex), locale, labels, moves, true)} locale={locale} />
               </div>
             ))}
           </>

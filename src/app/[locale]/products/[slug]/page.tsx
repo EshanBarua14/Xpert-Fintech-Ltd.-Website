@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils/cn";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -246,7 +247,6 @@ export default async function ProductPage({ params }: Props) {
         <Band title={t.howItWorks}>
           <div data-reveal className="glass rounded-3xl p-4 md:p-8">
           <OrderFlow
-            title={t.howItWorks}
             caption={t.conceptualView}
             steps={steps.map((s, i) => ({ key: s.id, label: s.title, note: s.body, highlight: i === 0 }))}
           />
@@ -269,7 +269,7 @@ export default async function ProductPage({ params }: Props) {
               <li
                 key={l.id}
                 data-reveal
-                style={{ "--d": i, marginInline: `${Math.min(i, 4) * 1.5}%` } as CSSProperties}
+                style={{ "--d": i } as CSSProperties}
                 className="spotlight glass grid items-center gap-2 rounded-2xl p-5 md:grid-cols-[3rem_240px_1fr]"
               >
                 <span className="font-mono text-xs text-cyan-300">L{i + 1}</span>
@@ -295,7 +295,7 @@ export default async function ProductPage({ params }: Props) {
 
       {(useCases.length > 0 || targetUsers.length > 0 || tr.targetCustomers) && (
         <Band alt>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className={cn("grid gap-4", useCases.length > 0 && (targetUsers.length > 0 || tr.targetCustomers) && "md:grid-cols-2")}>
             {useCases.length > 0 && (
               <div data-reveal className="glass flex flex-col gap-6 rounded-3xl p-8">
                 <h2 className="font-display text-2xl font-semibold tracking-tight">{t.useCases}</h2>
@@ -324,7 +324,7 @@ export default async function ProductPage({ params }: Props) {
 
       {offering.children.length > 0 && (
         <Band title={t.modules}>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className={cn("grid gap-4", gridCols(offering.children.length))}>
             {offering.children.map((c, i) => (
               <li key={c.id} data-reveal style={{ "--d": i % 3 } as CSSProperties}>
                 <ProductCard offering={c} locale={found.locale} t={t} />
@@ -375,6 +375,17 @@ export default async function ProductPage({ params }: Props) {
   );
 }
 
+/**
+ * Card grid columns that avoid a lonely last card: 3 or 4 across on desktop,
+ * whichever leaves no gap (or the smallest one); 1–4 items fill one row.
+ */
+function gridCols(n: number) {
+  if (n <= 1) return "max-w-xl";
+  if (n === 2) return "sm:grid-cols-2";
+  if (n === 4 || (n % 4 === 0) || (n % 3 !== 0 && n % 4 > n % 3)) return "sm:grid-cols-2 lg:grid-cols-4";
+  return "sm:grid-cols-2 lg:grid-cols-3";
+}
+
 function Band({ title, body, alt, children }: { title?: string; body?: string; alt?: boolean; children: React.ReactNode }) {
   return (
     <section className={alt ? "border-y border-fg/[0.06] bg-fg/[0.015]" : undefined}>
@@ -388,7 +399,7 @@ function Band({ title, body, alt, children }: { title?: string; body?: string; a
 
 function ItemGrid({ items, icon }: { items: { id: string; title: string; body: string | null; icon: string | null }[]; icon?: string }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <ul className={cn("grid gap-4", gridCols(items.length))}>
       {items.map((i, n) => (
         <li key={i.id} data-reveal style={{ "--d": n % 3 } as CSSProperties} className="spotlight glass flex flex-col gap-4 rounded-3xl p-6 md:p-7">
           <span className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-sky/25 to-brand-royal/20 text-cyan-300">
@@ -422,7 +433,7 @@ function ItemList({ items }: { items: { id: string; title: string; body: string 
 function Deployments({ offering, locale, t }: { offering: Offering; locale: AppLocale; t: Messages }) {
   return (
     <Band title={t.deployments} alt>
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className={cn("grid gap-4", gridCols(offering.deployments.length))}>
         {offering.deployments.map((d) => {
           const org = d.organization && d.organization.status === "PUBLISHED" && !d.organization.deletedAt ? pick(d.organization.translations, locale) : null;
           return (

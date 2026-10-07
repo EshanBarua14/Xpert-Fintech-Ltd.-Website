@@ -23,7 +23,6 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
           play: t.tickerPlay,
           loading: t.tickerLoading,
           unavailable: t.tickerUnavailable,
-          xpertShare: t.tickerXpertShare,
           breadth: t.tickerBreadth,
           breadthShort: t.tickerBreadthShort,
           turnover: t.turnover,

@@ -27,7 +27,8 @@ export function OrderFlow({
   caption,
 }: {
   steps: FlowStep[];
-  title: string;
+  /** Optional: leave it out when the section heading already names the diagram. */
+  title?: string;
   /** Shown as a badge, e.g. "Conceptual view", so it is never read as real topology. */
   caption?: string;
 }) {
@@ -49,10 +50,12 @@ export function OrderFlow({
 
   return (
     <figure className="flex flex-col gap-6">
-      <figcaption className="flex flex-wrap items-center gap-3">
-        <span className="font-display text-xl font-semibold">{title}</span>
-        {caption && <Badge>{caption}</Badge>}
-      </figcaption>
+      {(title || caption) && (
+        <figcaption className="flex flex-wrap items-center gap-3">
+          {title && <span className="font-display text-xl font-semibold">{title}</span>}
+          {caption && <Badge>{caption}</Badge>}
+        </figcaption>
+      )}
 
       {/* Desktop and tablet: horizontal diagram */}
       <MotionPause className="hidden md:block">

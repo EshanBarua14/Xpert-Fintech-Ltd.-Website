@@ -145,117 +145,125 @@ function ShareBlock({ share, t, locale }: { share: ShareFigure; t: Messages; loc
   );
 }
 
-/** One exchange at a glance: status, indices, breadth and totals, Xpert's share, top gainers and losers. */
+/** The three indices each card shows, in this order, so DSE and CSE cards line up. */
+const INDEX_SLOTS = { DSE: ["DSEX", "DSES", "DS30"], CSE: ["CASPI", "CSE30", "CSCX"] } as const;
+const DASH = "—";
+
+/** Xpert's share before a figure is entered: the same block as ShareBlock, with the ring empty. */
+function SharePending({ exchange, t }: { exchange: "DSE" | "CSE"; t: Messages }) {
+  return (
+    <div className="flex flex-col gap-4 rounded-2xl border border-dashed border-fg/15 p-4 sm:flex-row sm:items-center sm:gap-5">
+      <div className="relative size-28 shrink-0 self-center sm:self-auto">
+        <svg viewBox="0 0 140 140" className="size-full" aria-hidden="true">
+          <circle cx="70" cy="70" r="58" fill="none" strokeWidth="12" className="stroke-fg/[0.08]" />
+        </svg>
+        <span className="absolute inset-0 flex items-center justify-center font-display text-2xl text-text-secondary">{DASH}</span>
+      </div>
+      <div className="flex min-w-0 flex-col gap-2">
+        <h4 className="font-display text-base font-semibold">{t.marketShareTitle}</h4>
+        <p className="text-sm leading-relaxed text-text-secondary">{t.marketSharePending.replace("{exchange}", exchange)}</p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * One exchange at a glance. DSE and CSE cards have exactly the same parts in
+ * the same order (status, Xpert's market share, three indices, breadth, day
+ * totals, top gainers and losers); a figure the exchange does not publish
+ * shows as a dash instead of the part disappearing.
+ */
 function ExchangeGlance({ exchange, ex, share, t, locale, className }: { exchange: "DSE" | "CSE"; ex?: ExchangeSnapshot; share?: ShareFigure; t: Messages; locale: Locale; className?: string }) {
   const { gainers, losers } = ex ? movers(ex) : { gainers: [], losers: [] };
+  const hasBreadth = !!ex && (ex.advancers !== undefined || ex.decliners !== undefined);
   const breadthTotal = ex ? (ex.advancers ?? 0) + (ex.decliners ?? 0) + (ex.unchanged ?? 0) : 0;
-  const totals = ex
-    ? ([
-        ex.turnover !== undefined && [t.turnover, crore(locale, ex.turnover)],
-        ex.volume !== undefined && [t.volume, compact(locale, ex.volume)],
-        ex.trades !== undefined && [t.trades, fmt(locale, ex.trades, 0)],
-      ].filter(Boolean) as [string, string][])
-    : [];
+  const count = (v: number | undefined) => (hasBreadth ? fmt(locale, v ?? 0, 0) : DASH);
+  const totals: [string, string][] = [
+    [t.turnover, ex?.turnover !== undefined ? crore(locale, ex.turnover) : DASH],
+    [t.volume, ex?.volume !== undefined ? compact(locale, ex.volume) : DASH],
+    [t.trades, ex?.trades !== undefined ? fmt(locale, ex.trades, 0) : DASH],
+  ];
+  const indices = INDEX_SLOTS[exchange].map((name) => ({ name, i: ex?.indices.find((x) => x.name.toUpperCase() === name) }));
   return (
     <article aria-labelledby={`glance-${exchange}`} className={cn("glass flex-col gap-6 rounded-3xl p-5 sm:p-6", className)}>
       <header className="flex flex-wrap items-center gap-3">
         <h3 id={`glance-${exchange}`} className="font-mono text-xl font-semibold tracking-widest">
           {exchange}
         </h3>
-        {ex?.status && (
-          <span className="inline-flex items-center gap-2 rounded-full border border-fg/10 px-3 py-1 text-xs font-semibold text-text-secondary">
-            <span className={cn("size-1.5 rounded-full", ex.status === "OPEN" ? "animate-pulse bg-market-up" : "bg-text-secondary")} />
-            {t[`marketStatus${ex.status}` as keyof Messages]}
-          </span>
-        )}
-        {ex && (
-          <a href={`/${locale}/markets/${exchange.toLowerCase()}`} className="ml-auto text-sm font-semibold text-brand-sky hover:underline">
-            {t.tickerBoard.replace("{exchange}", exchange)}
-          </a>
-        )}
+        <span className="inline-flex items-center gap-2 rounded-full border border-fg/10 px-3 py-1 text-xs font-semibold text-text-secondary">
+          <span className={cn("size-1.5 rounded-full", ex?.status === "OPEN" ? "animate-pulse bg-market-up" : "bg-text-secondary")} />
+          {ex?.status ? t[`marketStatus${ex.status}` as keyof Messages] : DASH}
+        </span>
+        <a href={`/${locale}/markets/${exchange.toLowerCase()}`} className="ml-auto text-sm font-semibold text-brand-sky hover:underline">
+          {t.tickerBoard.replace("{exchange}", exchange)}
+        </a>
       </header>
 
-      {ex && ex.indices.length > 0 && (
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {ex.indices.map((i) => (
-            <li key={i.name} className="flex flex-col gap-1 rounded-2xl border border-fg/[0.07] bg-fg/[0.02] p-3">
-              <span className="font-mono text-[11px] tracking-widest text-accent">{i.name}</span>
-              <span className="font-display text-xl font-semibold tabular-nums">{fmt(locale, i.value)}</span>
-              <Change pct={i.changePct} abs={i.change} locale={locale} />
-            </li>
-          ))}
-        </ul>
-      )}
+      {share ? <ShareBlock share={share} t={t} locale={locale} /> : <SharePending exchange={exchange} t={t} />}
 
-      {(breadthTotal > 0 || totals.length > 0) && (
-        <div className="flex flex-col gap-3">
+      <ul className="grid grid-cols-3 gap-2 sm:gap-3">
+        {indices.map(({ name, i }) => (
+          <li key={name} className="flex min-w-0 flex-col gap-1 rounded-2xl border border-fg/[0.07] bg-fg/[0.02] p-3">
+            <span className="font-mono text-[11px] tracking-widest text-accent">{name}</span>
+            <span className="truncate font-display text-lg font-semibold tabular-nums sm:text-xl">{i ? fmt(locale, i.value) : DASH}</span>
+            {i ? <Change pct={i.changePct} locale={locale} /> : <span className="text-xs text-text-secondary">{t.notPublished}</span>}
+          </li>
+        ))}
+      </ul>
+
+      <div className="flex flex-col gap-3">
+        <div data-reveal className="bar-grow flex h-2 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden="true">
           {breadthTotal > 0 && (
             <>
-              <div data-reveal className="bar-grow flex h-2 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden="true">
-                <span className="bg-market-up" style={{ width: `${((ex!.advancers ?? 0) / breadthTotal) * 100}%` }} />
-                <span className="bg-text-secondary/50" style={{ width: `${((ex!.unchanged ?? 0) / breadthTotal) * 100}%` }} />
-                <span className="bg-market-down" style={{ width: `${((ex!.decliners ?? 0) / breadthTotal) * 100}%` }} />
-              </div>
-              <dl className="grid grid-cols-3 gap-2 text-center text-xs">
-                <div>
-                  <dt className="text-text-secondary">{t.advanced}</dt>
-                  <dd className="font-mono text-base font-semibold text-market-up">{fmt(locale, ex!.advancers ?? 0, 0)}</dd>
-                </div>
-                <div>
-                  <dt className="text-text-secondary">{t.unchanged}</dt>
-                  <dd className="font-mono text-base font-semibold">{fmt(locale, ex!.unchanged ?? 0, 0)}</dd>
-                </div>
-                <div>
-                  <dt className="text-text-secondary">{t.declined}</dt>
-                  <dd className="font-mono text-base font-semibold text-market-down">{fmt(locale, ex!.decliners ?? 0, 0)}</dd>
-                </div>
-              </dl>
+              <span className="bg-market-up" style={{ width: `${((ex!.advancers ?? 0) / breadthTotal) * 100}%` }} />
+              <span className="bg-text-secondary/50" style={{ width: `${((ex!.unchanged ?? 0) / breadthTotal) * 100}%` }} />
+              <span className="bg-market-down" style={{ width: `${((ex!.decliners ?? 0) / breadthTotal) * 100}%` }} />
             </>
           )}
-          {totals.length > 0 && (
-            <dl className="grid grid-cols-3 gap-2 border-t border-fg/[0.06] pt-3 text-xs">
-              {totals.map(([k, v]) => (
-                <div key={k}>
-                  <dt className="text-text-secondary">{k}</dt>
-                  <dd className="font-mono text-sm font-semibold tabular-nums">{v}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
         </div>
-      )}
+        <dl className="grid grid-cols-3 gap-2 text-center text-xs">
+          <div>
+            <dt className="text-text-secondary">{t.advanced}</dt>
+            <dd className="font-mono text-base font-semibold text-market-up">{count(ex?.advancers)}</dd>
+          </div>
+          <div>
+            <dt className="text-text-secondary">{t.unchanged}</dt>
+            <dd className="font-mono text-base font-semibold">{count(ex?.unchanged)}</dd>
+          </div>
+          <div>
+            <dt className="text-text-secondary">{t.declined}</dt>
+            <dd className="font-mono text-base font-semibold text-market-down">{count(ex?.decliners)}</dd>
+          </div>
+        </dl>
+        <dl className="grid grid-cols-3 gap-2 border-t border-fg/[0.06] pt-3 text-xs">
+          {totals.map(([k, v]) => (
+            <div key={k}>
+              <dt className="text-text-secondary">{k}</dt>
+              <dd className="font-mono text-sm font-semibold tabular-nums">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
 
-      {share ? (
-        <ShareBlock share={share} t={t} locale={locale} />
-      ) : (
-        <p className="rounded-2xl border border-dashed border-fg/15 p-4 text-sm text-text-secondary">
-          <span className="font-semibold text-text-primary">{t.marketShareTitle}: </span>
-          {t.marketSharePending.replace("{exchange}", exchange)}
-        </p>
-      )}
-
-      {ex ? (
-        <div className="grid gap-6 sm:grid-cols-2">
-          <Movers title={t.topGainers} rows={gainers} locale={locale} t={t} tone="up" exchange={exchange} />
-          <Movers title={t.topLosers} rows={losers} locale={locale} t={t} tone="down" exchange={exchange} />
-        </div>
-      ) : (
-        <p className="text-sm text-text-secondary">{t.tickerUnavailable}</p>
-      )}
+      <div className="grid gap-6 sm:grid-cols-2">
+        <Movers title={t.topGainers} rows={gainers} locale={locale} t={t} tone="up" exchange={exchange} />
+        <Movers title={t.topLosers} rows={losers} locale={locale} t={t} tone="down" exchange={exchange} />
+      </div>
     </article>
   );
 }
 
 /**
  * Market at a glance: DSE and CSE side by side on wide screens (a DSE/CSE
- * switch on phones), each with status, indices, breadth and totals, Xpert's
- * market share and the top gainers and losers. Refreshes itself every 20 s.
+ * switch on phones), each with status, Xpert's market share, indices,
+ * breadth and totals and the top gainers and losers, in identical layouts. Refreshes itself every 20 s.
  */
 export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t: Messages; locale: Locale }) {
   const { data, loaded } = useMarket(initial);
   const snapOf = (x: "DSE" | "CSE") => data.snapshot?.exchanges.find((e) => e.exchange === x);
   const shareOf = (x: "DSE" | "CSE") => data.shares.find((f) => f.exchange === x);
-  const list = (["DSE", "CSE"] as const).filter((x) => snapOf(x) || shareOf(x));
+  // Both cards always, side by side, so DSE and CSE read the same way.
+  const list: ("DSE" | "CSE")[] = (["DSE", "CSE"] as const).some((x) => snapOf(x) || shareOf(x)) ? ["DSE", "CSE"] : [];
   const [tab, setTab] = useState<"DSE" | "CSE">(list[0] ?? "DSE");
   if (!list.length) {
     // Prices are on but not here yet (the exchange answered slowly): say so; they appear by themselves.

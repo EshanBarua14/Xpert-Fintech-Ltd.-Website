@@ -548,5 +548,6 @@
   "teamFilterLabel": "Filter by department",
   "teamEveryone": "Everyone",
   "teamShowing": "{n} people",
-  "teamDepartment": "Department"
+  "teamDepartment": "Department",
+  "notPublished": "Not published"
 }

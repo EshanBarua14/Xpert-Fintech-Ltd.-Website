@@ -26,6 +26,7 @@ import path from "node:path";
 import { ecosystemEdges, ecosystemFlows, ecosystemNodes } from "../src/content/xfl2/ecosystem";
 import { BOARD, MANAGEMENT, TEAM, type RosterPerson } from "../src/content/xfl2/people";
 import { LEADER_MESSAGES, MARKET_GOAL } from "../src/content/xfl2/messages";
+import { LEGAL_DRAFTS } from "../src/content/xfl2/legal";
 import { sniff } from "../src/lib/media/inspect";
 
 const db = new PrismaClient();
@@ -510,6 +511,30 @@ async function seedMessagesAndGoal() {
   console.log("• Chairman's and MD's messages saved as drafts (publish in Admin → Messages); market-share goal set");
 }
 
+/**
+ * Privacy policy, Terms of use and Accessibility statement as DRAFT pages
+ * (the footer already links to them). Created once; never published or
+ * overwritten by the seed: XFL's legal adviser reviews them in Admin → Pages.
+ */
+async function seedLegalDrafts() {
+  let added = 0;
+  for (const d of LEGAL_DRAFTS) {
+    const taken = await db.pageTranslation.findFirst({ where: { locale: EN, path: d.path } });
+    if (taken || (await db.page.findUnique({ where: { key: d.key } }))) continue;
+    const page = await db.page.create({
+      data: { key: d.key, template: "legal", status: "DRAFT", translations: { create: { locale: EN, path: d.path, title: d.title, intro: d.intro } } },
+    });
+    const section = await db.pageSection.create({ data: { pageId: page.id, sortOrder: 0 } });
+    for (const [i, part] of d.sections.entries()) {
+      await db.contentBlock.create({
+        data: { sectionId: section.id, type: "RICH_TEXT", status: "PUBLISHED", sortOrder: i, translations: { create: { locale: EN, title: part.title, body: part.body } } },
+      });
+    }
+    added++;
+  }
+  if (added) console.log(`• ${added} legal page draft(s) added (Privacy, Terms, Accessibility): review and publish in Admin → Pages`);
+}
+
 // ── Consortium and apps ──────────────────────────────────────────────────────
 
 async function seedDeployments() {
@@ -835,6 +860,7 @@ async function main() {
   await seedPeople();
   await seedRoster();
   await seedMessagesAndGoal();
+  await seedLegalDrafts();
   await seedDeployments();
   await seedTeamLinks();
   await seedMilestones();

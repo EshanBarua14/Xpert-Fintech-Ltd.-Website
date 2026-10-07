@@ -746,7 +746,7 @@ html.has-ticker {
 @keyframes fill-step {
   0%,
   15% {
-    background: rgb(255 255 255 / 0.08);
+    background: color-mix(in srgb, var(--color-fg) 10%, transparent);
   }
   30%,
   100% {
@@ -985,10 +985,15 @@ html {
   .ambient-stream {
     display: none;
   }
+  /* Logo strips stay one row and scroll sideways by hand (no wall of wrapped rows, no repeats). */
+  .marquee {
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: none;
+  }
   .marquee-track {
     animation: none;
-    flex-wrap: wrap;
-    width: auto;
+    width: max-content;
   }
   /* The ticker stays one line and scrolls by hand instead of moving. */
   .ticker-track {
@@ -1113,21 +1118,24 @@ html {
   .eco-sheet[open] { animation: none; }
 }
 
-/* Brand lockup: the logo turns a full circle once on page load, and again on hover or focus of its link. */
+/* Brand lockup: the logo turns a full 360° in 3D around its vertical axis (like a coin)
+   once on page load, and again on hover or focus of its link. */
 @keyframes logo-spin {
-  from { transform: rotate(-360deg); }
-  to { transform: rotate(0deg); }
-}
-.logo-spin > img {
-  animation: logo-spin 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  from { transform: perspective(400px) rotateY(-360deg); }
+  to { transform: perspective(400px) rotateY(0deg); }
 }
 .logo-spin {
+  transform-style: preserve-3d;
   transition: transform 0s;
+}
+.logo-spin > img {
+  backface-visibility: visible;
+  animation: logo-spin 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
 }
 .group:hover .logo-spin,
 .group:focus-visible .logo-spin {
-  transform: rotate(360deg);
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: perspective(400px) rotateY(360deg);
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (prefers-reduced-motion: reduce) {
   .logo-spin > img { animation: none; }

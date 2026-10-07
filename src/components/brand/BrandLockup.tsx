@@ -6,8 +6,8 @@ export const BRAND_TAGLINE = "Connect The Future";
 
 /**
  * The logo with the company name and the tagline. The logo turns a full
- * circle once when the page loads and again when the lockup is hovered or
- * focused (inside a link with the "group" class); never for reduced motion.
+ * 360° in 3D around its vertical axis once when the page loads and again when
+ * the lockup is hovered or focused (inside a link with the "group" class); never for reduced motion.
  * The name and tagline stay in English in both languages: they are the brand.
  *
  * `text` controls when the words show: "always", or "roomy" for the header,

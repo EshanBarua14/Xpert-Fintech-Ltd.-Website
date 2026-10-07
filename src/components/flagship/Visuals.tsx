@@ -85,7 +85,7 @@ function Bo() {
     <div className="flex h-full min-h-28 sm:min-h-36 items-center justify-center gap-2">
       {[0, 1, 2, 3, 4].map((i) => (
         <span key={i} className="flex items-center gap-2">
-          <span className="block size-3 rounded-full" style={{ animation: `fill-step 5s ease-in-out -${2.5 - i * 0.3}s infinite` }} />
+          <span className="block size-3 rounded-full bg-brand-sky ring-1 ring-brand-sky/40" style={{ animation: `fill-step 5s ease-in-out -${2.5 - i * 0.3}s infinite` }} />
           {i < 4 && <span className="block h-px w-6 bg-fg/15" />}
         </span>
       ))}

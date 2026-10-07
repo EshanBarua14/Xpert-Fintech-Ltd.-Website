@@ -4,8 +4,6 @@ import { notFound } from "next/navigation";
 import { Sections } from "@/components/blocks/BlockRenderer";
 import { EventCards } from "@/components/blocks/DataBlocks";
 import {
-  capabilities,
-  CapabilityBento,
   CtaBand,
   ecosystemModules,
   FlagshipHero,
@@ -33,7 +31,6 @@ import { getFlagshipData } from "@/lib/public/flagship";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
-import { MarketStatusLine } from "@/components/market/MarketStatusLine";
 import { MarketReach } from "@/components/market/MarketReach";
 import { getMarketGoal } from "@/lib/content/leaders";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
@@ -94,7 +91,6 @@ export default async function HomePage({ params }: Props) {
   const clientBase = [...proof.filter((p) => p.label === t.proofClients), ...proof.filter((p) => p.label !== t.proofClients && p.label !== t.proofProducts)];
   const sections = page ? toSections(page, locale) : [];
   const ctx = sections.length ? await blockContext(locale, mediaIdsOf(sections)) : null;
-  const caps = capabilities(t, locale, data.publishedSlugs);
 
   return (
     <>
@@ -105,8 +101,8 @@ export default async function HomePage({ params }: Props) {
         memberCount={data.members.length}
         modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)}
         graph={eco}
-        facts={proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
-        status={market.mode !== "none" ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
+        // The ticker above already shows the market; the figures follow right below in "Our share of the market".
+        facts={showReach ? [] : proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
       />
 
       {data.clients.length > 0 && (
@@ -119,7 +115,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {showReach && (
-        <Shell id="reach" className="py-20 md:py-28">
+        <Shell id="reach" className="py-16 md:py-24">
           <div className="flex flex-col gap-12">
             <SectionHeader title={t.reachTitle} body={t.reachBody} />
             <MarketReach
@@ -145,7 +141,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {showcase.length > 0 && (
-        <Shell id="products" className="py-20 md:py-28">
+        <Shell id="products" className="py-16 md:py-24">
           <div className="flex flex-col gap-14">
             <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
               <SectionHeader eyebrow={t.showcaseEyebrow} title={t.showcaseTitle} body={t.showcaseBody} />
@@ -157,7 +153,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {testimonials.length > 0 && (
-        <Shell id="testimonials" className="py-20 md:py-28">
+        <Shell id="testimonials" className="py-16 md:py-24">
           <div className="flex flex-col gap-14">
             <SectionHeader title={t.testimonialsTitle} body={t.testimonialsBody} />
             <TestimonialSlider
@@ -176,7 +172,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {hasMarket && (
-        <Shell id="market" className="py-20 md:py-28">
+        <Shell id="market" className="py-16 md:py-24">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} body={t.marketBody} />
             <MarketPulse initial={market} t={t} locale={locale} />
@@ -185,7 +181,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {((!showReach && proof.length > 0) || apps.length > 0) && (
-        <Shell id="proof" className="py-20 md:py-28">
+        <Shell id="proof" className="py-16 md:py-24">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.proofEyebrow} title={t.proofTitle} body={t.proofBody} />
             {!showReach && proof.length > 0 && <StatGrid items={proof} locale={locale} />}
@@ -199,12 +195,7 @@ export default async function HomePage({ params }: Props) {
         </Shell>
       )}
 
-      <Shell className="py-20 md:py-28">
-        <div className="flex flex-col gap-14">
-          <SectionHeader eyebrow={t.platformEyebrow} title={t.platformTitle} body={t.platformBody} />
-          <CapabilityBento items={caps} />
-        </div>
-      </Shell>
+      {/* The platform's modules are on /platform; the product showcase above already walks through them. */}
 
       <Shell className="py-16 md:py-24">
         <div className="flex flex-col gap-16">

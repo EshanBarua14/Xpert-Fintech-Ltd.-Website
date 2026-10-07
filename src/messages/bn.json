@@ -548,5 +548,6 @@
   "teamFilterLabel": "বিভাগ অনুযায়ী দেখুন",
   "teamEveryone": "সবাই",
   "teamShowing": "{n} জন",
-  "teamDepartment": "বিভাগ"
+  "teamDepartment": "বিভাগ",
+  "notPublished": "প্রকাশিত হয়নি"
 }

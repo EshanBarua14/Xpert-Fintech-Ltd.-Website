@@ -19,7 +19,7 @@ export type LiveApp = {
 export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android: string; ios: string; web: string } }) {
   if (!apps.length) return null;
   return (
-    <ul className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+    <ul className={cn("grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-4", apps.length % 5 === 0 && apps.length % 4 !== 0 && "xl:grid-cols-5")}>
       {apps.map((a, i) => {
         const href = a.playStoreUrl ?? a.appStoreUrl ?? a.webUrl;
         const linkLabel = a.playStoreUrl ? labels.android : a.appStoreUrl ? labels.ios : labels.web;
@@ -31,8 +31,8 @@ export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android:
                 {monogram(a.appName)}
               </span>
               <span className="flex w-full min-w-0 flex-col">
-                <span className="font-display text-sm leading-snug font-semibold text-text-primary sm:truncate sm:text-base">{a.appName}</span>
-                {a.brokerage && <span className="line-clamp-2 text-xs text-text-secondary sm:line-clamp-none sm:truncate">{a.brokerage}</span>}
+                <span className="font-display text-sm leading-snug font-semibold text-text-primary sm:text-base">{a.appName}</span>
+                {a.brokerage && <span className="line-clamp-2 text-xs leading-snug text-text-secondary">{a.brokerage}</span>}
               </span>
             </span>
             {href && (

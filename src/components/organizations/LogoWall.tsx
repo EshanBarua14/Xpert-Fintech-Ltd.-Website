@@ -29,8 +29,8 @@ function Tile({ m, i, size }: { m: Member; i: number; size: "lg" | "sm" }) {
     <>
       <span
         className={cn(
-          "relative flex w-full items-center justify-center",
-          size === "lg" ? "h-20" : "h-12",
+          "relative flex items-center justify-center",
+          size === "lg" ? "h-20 w-full" : "h-12 shrink-0",
         )}
       >
         {m.logo ? (
@@ -56,25 +56,28 @@ function Tile({ m, i, size }: { m: Member; i: number; size: "lg" | "sm" }) {
           </span>
         )}
       </span>
-      {size === "lg" && (
+      {size === "lg" ? (
         <span className="text-center font-display text-base leading-snug font-semibold text-text-primary">{m.name}</span>
+      ) : (
+        !m.logo && <span className="min-w-0 text-sm leading-snug font-medium text-text-primary">{m.name}</span>
       )}
     </>
   );
+  // Small tiles read as a row: monogram (or logo) and the member's name.
   const cls = cn(
-    "spotlight glass group flex h-full flex-col items-center justify-center gap-4 rounded-3xl transition-transform duration-500 hover:-translate-y-1",
-    size === "lg" ? "min-h-48 p-6" : "min-h-24 p-4",
+    "spotlight glass group flex h-full rounded-3xl transition-transform duration-500 hover:-translate-y-1",
+    size === "lg" ? "min-h-48 flex-col items-center justify-center gap-4 p-6" : "min-h-20 flex-row items-center gap-3 px-4 py-3",
   );
   return (
     <li data-reveal style={{ "--d": i % 4 } as CSSProperties}>
       {m.websiteUrl ? (
-        <a href={m.websiteUrl} target="_blank" rel="noopener noreferrer" className={cls} aria-label={size === "sm" ? m.name : undefined}>
+        <a href={m.websiteUrl} target="_blank" rel="noopener noreferrer" className={cls} aria-label={size === "sm" && m.logo ? m.name : undefined}>
           {inner}
         </a>
       ) : (
         <div className={cls} title={size === "sm" ? m.name : undefined}>
           {inner}
-          {size === "sm" && <span className="sr-only">{m.name}</span>}
+          {size === "sm" && m.logo && <span className="sr-only">{m.name}</span>}
         </div>
       )}
     </li>
@@ -91,7 +94,7 @@ const COLS = {
 export function LogoWall({ members, size = "lg", columns }: { members: Member[]; size?: "lg" | "sm"; columns?: keyof typeof COLS }) {
   if (!members.length) return null;
   return (
-    <ul className={cn("grid gap-4", COLS[columns ?? (size === "lg" ? 4 : 6)])}>
+    <ul className={cn("grid gap-3", COLS[columns ?? 4])}>
       {members.map((m, i) => (
         <Tile key={m.id} m={m} i={i} size={size} />
       ))}
@@ -109,7 +112,7 @@ export function LogoMarquee({ members, label }: { members: Member[]; label: stri
       <div className="marquee overflow-hidden" aria-hidden="true">
         <ul className="marquee-track items-center gap-10 pr-10">
           {loop.map((m, i) => (
-            <li key={`${m.id}-${i}`} className="flex items-center gap-3 whitespace-nowrap text-sm text-text-secondary">
+            <li key={`${m.id}-${i}`} className={cn("flex items-center gap-3 whitespace-nowrap text-sm text-text-secondary", i >= members.length && "ticker-copy")}>
               {m.logo ? (
                 <Image src={m.logo.url} alt="" width={m.logo.width ?? 200} height={m.logo.height ?? 80} className="member-logo h-9 w-auto max-w-[9rem] object-contain" />
               ) : (

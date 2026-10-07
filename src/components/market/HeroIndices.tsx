@@ -29,7 +29,7 @@ export function HeroIndices({ initial, t, locale }: { initial: MarketPayload; t:
                 {ex!.status && <span className="text-text-secondary">{open ? t.marketOpenShort : t.marketClosedShort}</span>}
               </span>
               {indices.length > 0 ? (
-                <dl className="flex flex-col gap-1.5 font-mono text-[13px] tabular-nums">
+                <dl className="flex flex-col gap-1.5 font-mono text-[max(13px,0.8125rem)] tabular-nums">
                   {indices.map((i) => (
                     <div key={i.name} className="flex items-baseline justify-between gap-3">
                       <dt className="text-gold">{i.name}</dt>
@@ -44,7 +44,7 @@ export function HeroIndices({ initial, t, locale }: { initial: MarketPayload; t:
                 </dl>
               ) : (
                 ex!.advancers !== undefined && (
-                  <span className="font-mono text-[13px] tabular-nums">
+                  <span className="font-mono text-[max(13px,0.8125rem)] tabular-nums">
                     <span className="text-market-up">▲ {fmt(locale, ex!.advancers, 0)}</span>{" "}
                     <span className="text-market-down">▼ {fmt(locale, ex!.decliners ?? 0, 0)}</span>{" "}
                     <span className="text-text-secondary">• {fmt(locale, ex!.unchanged ?? 0, 0)}</span>

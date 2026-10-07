@@ -25,7 +25,7 @@ function Cover({ a, large }: { a: ArticleCardData; large?: boolean }) {
         <span aria-hidden="true" className="absolute inset-0 overflow-hidden bg-gradient-to-br from-brand-royal/35 via-navy-800 to-ink-950">
           <span className="grid-fade pointer-events-none absolute inset-0 opacity-60" />
           <span className="absolute -right-16 -bottom-20 size-64 rounded-full bg-brand-sky/15 blur-3xl transition-transform duration-700 group-hover:scale-110" />
-          <span className="absolute bottom-5 left-6 font-mono text-[11px] text-cyan-300/70">XFL · Insights</span>
+          <span className="absolute bottom-5 left-6 font-mono text-[max(11px,0.6875rem)] text-cyan-300/70">XFL · Insights</span>
         </span>
       )}
     </span>

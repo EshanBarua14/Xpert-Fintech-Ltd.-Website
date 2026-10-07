@@ -156,7 +156,7 @@ export function SearchDialog({ locale, labels }: { locale: "en" | "bn"; labels: 
               className="h-16 min-w-0 flex-1 bg-transparent text-lg outline-none placeholder:text-text-secondary/70 focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden"
             />
             {loading && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-brand-sky/30 border-t-brand-sky" />}
-            <button type="button" onClick={() => dialogRef.current?.close()} className="rounded-md border border-fg/15 px-2 py-1 font-mono text-[11px] text-text-secondary hover:text-fg" aria-label={labels.close}>
+            <button type="button" onClick={() => dialogRef.current?.close()} className="rounded-md border border-fg/15 px-2 py-1 font-mono text-[max(11px,0.6875rem)] text-text-secondary hover:text-fg" aria-label={labels.close}>
               Esc
             </button>
           </div>
@@ -171,7 +171,7 @@ export function SearchDialog({ locale, labels }: { locale: "en" | "bn"; labels: 
               <ul id={listId} role="listbox" aria-label={labels.search} className="flex flex-col gap-3">
                 {groups.map((g) => (
                   <li key={g.kind} role="presentation">
-                    <p className="px-3 pt-2 pb-1 text-[11px] font-semibold text-text-secondary">{labels.kinds[g.kind] ?? g.kind}</p>
+                    <p className="px-3 pt-2 pb-1 text-[max(11px,0.6875rem)] font-semibold text-text-secondary">{labels.kinds[g.kind] ?? g.kind}</p>
                     <ul role="presentation">
                       {g.items.map(({ hit }) => {
                         const i = ordered.findIndex((o) => o.hit === hit);

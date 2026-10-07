@@ -52,7 +52,7 @@ function ContactLinks({ p, labels, size = "sm" }: { p: GalleryPerson; labels: Ga
       {p.email && (
         <a href={`mailto:${p.email}`} className={cls} aria-label={labels.email.replace("{name}", p.name)} title={p.email}>
           <SocialIcon kind="email" className={size === "sm" ? "size-[18px]" : "size-4"} />
-          {size === "lg" && <span className="font-mono text-[13px] font-medium">{p.email}</span>}
+          {size === "lg" && <span className="font-mono text-[max(13px,0.8125rem)] font-medium">{p.email}</span>}
         </a>
       )}
       {p.linkedinUrl && (
@@ -112,7 +112,7 @@ function PersonCard({
         />
         <span aria-hidden="true" className="person-sheen pointer-events-none absolute inset-0" />
         {showPlaceholderBadge && p.isPlaceholder && (
-          <span className="absolute top-3 left-3 rounded-md bg-[#06111f]/85 px-2 py-0.5 text-[11px] font-semibold text-[#e0b252]">{labels.placeholder}</span>
+          <span className="absolute top-3 left-3 rounded-md bg-[#06111f]/85 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-[#e0b252]">{labels.placeholder}</span>
         )}
       </button>
 
@@ -247,7 +247,7 @@ export function PeopleGallery({
                   {open.name}
                 </h2>
                 {showPlaceholderBadge && open.isPlaceholder && (
-                  <span className="self-start rounded-md border border-gold/50 px-2 py-0.5 text-[11px] font-semibold text-gold">
+                  <span className="self-start rounded-md border border-gold/50 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-gold">
                     {labels.placeholder}
                   </span>
                 )}

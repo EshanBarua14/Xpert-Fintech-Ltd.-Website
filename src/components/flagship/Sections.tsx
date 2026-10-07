@@ -213,13 +213,13 @@ export function FlagshipHero({
 }) {
   return (
     <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
-      <div className="relative mx-auto grid min-h-[calc(100svh-9rem)] w-full max-w-7xl items-center gap-12 px-4 pt-10 pb-16 md:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:pt-0">
+      <div className="relative mx-auto grid min-h-[calc(100svh-9rem)] w-full max-w-7xl items-center gap-12 px-4 pt-10 pb-16 md:px-8 lg:grid-cols-[1fr_1fr] lg:pt-0">
         <div className="flex flex-col gap-8">
           {status && <div data-reveal>{status}</div>}
           <h1
             data-reveal
             style={{ ...delay(1) }}
-            className="font-display text-[clamp(2.75rem,5vw,4.6rem)] leading-[1.02] text-balance text-text-primary"
+            className="font-display text-[clamp(2.4rem,min(4.4vw,7.5svh),4.6rem)] leading-[1.03] text-balance text-text-primary"
           >
             {t.heroTitleA} {t.heroTitleB}
           </h1>

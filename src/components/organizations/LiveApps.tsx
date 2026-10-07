@@ -27,7 +27,7 @@ export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android:
           <>
             <span aria-hidden="true" className="live-app-pulse absolute inset-0 rounded-3xl" style={{ "--i": i } as CSSProperties} />
             <span className="relative flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-brand-sky/30 bg-gradient-to-br from-brand-sky/20 to-brand-royal/20 font-mono text-[11px] font-semibold tracking-wider text-cyan-300">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-brand-sky/30 bg-gradient-to-br from-brand-sky/20 to-brand-royal/20 font-mono text-[max(11px,0.6875rem)] font-semibold tracking-wider text-cyan-300">
                 {monogram(a.appName)}
               </span>
               <span className="flex w-full min-w-0 flex-col">

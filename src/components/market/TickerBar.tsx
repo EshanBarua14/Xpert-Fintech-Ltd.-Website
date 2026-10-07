@@ -91,7 +91,7 @@ function Lane({ items, locale, className }: { items: Item[]; locale: Locale; cla
     ));
   return (
     <div className={cn("ticker-lane relative min-w-0 flex-1 overflow-hidden", className)}>
-      <ul className="ticker-track h-full items-center font-mono text-[12px] tabular-nums" style={{ animationDuration: `${duration}s` }}>
+      <ul className="ticker-track h-full items-center font-mono text-[max(12px,0.75rem)] tabular-nums" style={{ animationDuration: `${duration}s` }}>
         {row(false)}
         {row(true)}
       </ul>
@@ -108,7 +108,7 @@ function LaneHead({ ex, snap, locale, labels }: { ex: Ex; snap?: ExchangeSnapsho
   return (
     <Link
       href={`/${locale}/markets/${ex.toLowerCase()}`}
-      className="z-10 flex shrink-0 items-center gap-2 border-r border-fg/[0.08] bg-ink-950 px-3 font-mono text-[12px] tabular-nums hover:bg-fg/[0.04] focus-visible:bg-fg/[0.06]"
+      className="z-10 flex shrink-0 items-center gap-2 border-r border-fg/[0.08] bg-ink-950 px-3 font-mono text-[max(12px,0.75rem)] tabular-nums hover:bg-fg/[0.04] focus-visible:bg-fg/[0.06]"
       title={snap?.status ? `${labels.board.replace("{exchange}", ex)} · ${labels.status[snap.status]}` : labels.board.replace("{exchange}", ex)}
     >
       <StatusDot status={snap?.status} />
@@ -145,7 +145,7 @@ export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"
     <div role="region" aria-label={labels.region} className={cn("relative h-(--ticker-h) border-b border-fg/[0.08] bg-ink-950/90 backdrop-blur-xl", paused && "ticker-paused")}>
       <div className="flex h-full items-stretch">
         {exchanges.length === 0 ? (
-          <p className="flex min-w-0 flex-1 items-center gap-2 truncate px-4 font-mono text-[12px] text-text-secondary">
+          <p className="flex min-w-0 flex-1 items-center gap-2 truncate px-4 font-mono text-[max(12px,0.75rem)] text-text-secondary">
             <span className="font-semibold tracking-widest text-fg">DSE · CSE</span>
             <span className="truncate">{loaded ? labels.unavailable : labels.loading}</span>
           </p>
@@ -153,7 +153,7 @@ export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"
           <>
             {/* Phones and tablets: one lane with both exchanges */}
             <div className="flex min-w-0 flex-1 lg:hidden">
-              <Link href={`/${locale}/markets`} className="z-10 flex shrink-0 items-center gap-2 border-r border-fg/[0.08] bg-ink-950 px-3 font-mono text-[12px] font-semibold tracking-widest text-fg">
+              <Link href={`/${locale}/markets`} className="z-10 flex shrink-0 items-center gap-2 border-r border-fg/[0.08] bg-ink-950 px-3 font-mono text-[max(12px,0.75rem)] font-semibold tracking-widest text-fg">
                 <StatusDot status={byEx("DSE")?.status ?? byEx("CSE")?.status} />
                 DSE · CSE
               </Link>
@@ -169,7 +169,7 @@ export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"
           </>
         )}
         <div className="z-10 flex shrink-0 items-center gap-1 border-l border-fg/[0.08] bg-ink-950 px-1.5">
-          {data.mode === "demo" && <span className="demo-text hidden px-2 font-mono text-[11px] font-semibold sm:inline">{labels.demo}</span>}
+          {data.mode === "demo" && <span className="demo-text hidden px-2 font-mono text-[max(11px,0.6875rem)] font-semibold sm:inline">{labels.demo}</span>}
           {exchanges.length > 0 && (
             <button
               type="button"
@@ -190,7 +190,7 @@ export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"
               )}
             </button>
           )}
-          <Link href={`/${locale}/markets`} className="hidden h-7 items-center rounded-full px-2.5 text-[12px] font-semibold text-brand-sky hover:bg-fg/[0.06] sm:flex">
+          <Link href={`/${locale}/markets`} className="hidden h-7 items-center rounded-full px-2.5 text-[max(12px,0.75rem)] font-semibold text-brand-sky hover:bg-fg/[0.06] sm:flex">
             {labels.markets}
           </Link>
         </div>

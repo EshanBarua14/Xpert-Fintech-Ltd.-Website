@@ -117,7 +117,7 @@ export function LogoMarquee({ members, label }: { members: Member[]; label: stri
                 <Image src={m.logo.url} alt="" width={m.logo.width ?? 200} height={m.logo.height ?? 80} className="member-logo h-9 w-auto max-w-[9rem] object-contain" />
               ) : (
                 <>
-                  <span className="flex size-8 items-center justify-center rounded-lg border border-brand-sky/25 bg-brand-sky/10 font-mono text-[10px] font-semibold text-cyan-300">
+                  <span className="flex size-8 items-center justify-center rounded-lg border border-brand-sky/25 bg-brand-sky/10 font-mono text-[max(10px,0.625rem)] font-semibold text-cyan-300">
                     {monogram(m.name, m.shortName)}
                   </span>
                   {m.name}

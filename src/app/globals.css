@@ -172,6 +172,27 @@ html[lang="bn"] {
   font-family: var(--font-bangla);
 }
 
+/*
+ * Fluid scale for desktops. Every size on the site is in rem, so the root size
+ * scales the whole layout: it is designed at 16px on a 1920px-wide window, and
+ * keeps the same proportions on smaller and larger screens instead of looking
+ * oversized on laptops (1280–1600 px windows, often 125–150% Windows scaling)
+ * or lost in the middle of a 4K screen. Breakpoints are unaffected (media
+ * queries use the browser's default size). Phones and tablets keep 16px for
+ * readability, and a visitor's own zoom and font-size settings still apply.
+ */
+@media (min-width: 64rem) {
+  html {
+    font-size: clamp(87.5%, 0.8333vw, 125%);
+  }
+}
+/* Short laptop screens (768–800 px tall): a little smaller again, so the hero and the first section fit. */
+@media (min-width: 64rem) and (max-height: 50rem) {
+  html {
+    font-size: clamp(84.375%, 0.8333vw, 93.75%);
+  }
+}
+
 /* Headlines: Spectral at a medium weight, lining figures, a touch of negative tracking. */
 .font-display {
   font-weight: 500;

@@ -110,7 +110,7 @@ export default async function GalleryPage({ params }: Props) {
                       <span className="absolute right-3 bottom-3 rounded-full bg-[#05080f]/75 px-3 py-1 font-mono text-xs text-white backdrop-blur">
                         {t.photosCount.replace("{n}", nf.format(a.photos.length))}
                       </span>
-                      <span className="absolute top-3 left-3 rounded-full bg-[#05080f]/75 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur">
+                      <span className="absolute top-3 left-3 rounded-full bg-[#05080f]/75 px-3 py-1 text-[max(11px,0.6875rem)] font-semibold text-white backdrop-blur">
                         {a.kind === "event" ? t.eventAlbum : t.photoAlbum}
                       </span>
                     </span>

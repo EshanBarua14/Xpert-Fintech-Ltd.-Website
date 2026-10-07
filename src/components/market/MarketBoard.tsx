@@ -251,7 +251,7 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
                             aria-label={t.sortBy.replace("{column}", c.label)}
                           >
                             {c.label}
-                            <span aria-hidden="true" className="text-[10px]">{on ? (sort.dir === 1 ? "▲" : "▼") : "↕"}</span>
+                            <span aria-hidden="true" className="text-[max(10px,0.625rem)]">{on ? (sort.dir === 1 ? "▲" : "▼") : "↕"}</span>
                           </button>
                         </th>
                       );

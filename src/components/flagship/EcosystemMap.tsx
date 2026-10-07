@@ -464,7 +464,7 @@ export function EcosystemMap({
                     y={y + 4}
                     textAnchor="middle"
                     style={{ fill: on ? "#ffffff" : "var(--eco-pill-text)" }}
-                    className="pointer-events-none font-mono text-[11px] font-semibold"
+                    className="pointer-events-none font-mono text-[max(11px,0.6875rem)] font-semibold"
                   >
                     {text}
                   </text>
@@ -519,7 +519,7 @@ export function EcosystemMap({
           {focusModule ? (
             <>
               <span className="mr-2 inline-flex align-middle">
-                <span className="rounded-full border border-brand-sky/40 bg-brand-sky/10 px-2 py-0.5 font-mono text-[11px] text-accent">
+                <span className="rounded-full border border-brand-sky/40 bg-brand-sky/10 px-2 py-0.5 font-mono text-[max(11px,0.6875rem)] text-accent">
                   {moduleLabel(focusModule)}
                 </span>
               </span>
@@ -541,7 +541,7 @@ export function EcosystemMap({
             <>
               <span className="mr-2 inline-flex flex-wrap gap-1 align-middle">
                 {current.modules.map((m) => (
-                  <span key={m} className="rounded-full border border-brand-sky/40 bg-brand-sky/10 px-2 py-0.5 font-mono text-[11px] text-accent">
+                  <span key={m} className="rounded-full border border-brand-sky/40 bg-brand-sky/10 px-2 py-0.5 font-mono text-[max(11px,0.6875rem)] text-accent">
                     {moduleLabel(m)}
                   </span>
                 ))}

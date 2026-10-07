@@ -47,7 +47,7 @@ function Movers({ title, rows, locale, t, tone, exchange }: { title: string; row
           <tbody>
             {rows.map((q) => (
               <tr key={q.symbol} className="border-t border-fg/[0.06] first:border-t-0">
-                <td className="py-2 pr-2 font-mono text-[13px] font-semibold whitespace-nowrap">
+                <td className="py-2 pr-2 font-mono text-[max(13px,0.8125rem)] font-semibold whitespace-nowrap">
                   <a href={`/${locale}/markets/${exchange.toLowerCase()}/${encodeURIComponent(q.symbol)}`} className="hover:text-brand-sky">
                     {q.symbol}
                   </a>
@@ -202,7 +202,7 @@ function ExchangeGlance({ exchange, ex, share, t, locale, className }: { exchang
       <ul className="grid grid-cols-3 gap-2 sm:gap-3">
         {indices.map(({ name, i }) => (
           <li key={name} className="flex min-w-0 flex-col gap-1 rounded-2xl border border-fg/[0.07] bg-fg/[0.02] p-3">
-            <span className="font-mono text-[11px] tracking-widest text-accent">{name}</span>
+            <span className="font-mono text-[max(11px,0.6875rem)] tracking-widest text-accent">{name}</span>
             <span className="truncate font-display text-lg font-semibold tabular-nums sm:text-xl">{i ? fmt(locale, i.value) : DASH}</span>
             {i ? <Change pct={i.changePct} locale={locale} /> : <span className="text-xs text-text-secondary">{t.notPublished}</span>}
           </li>

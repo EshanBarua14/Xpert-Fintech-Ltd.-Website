@@ -33,7 +33,7 @@ export function ClientMarquee({ clients, label }: { clients: Member[]; label: st
                       <Image src={c.logo.url} alt="" width={c.logo.width ?? 200} height={c.logo.height ?? 80} className="member-logo h-10 w-auto max-w-[9.5rem] object-contain sm:h-12" />
                     ) : (
                       <>
-                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-brand-sky/25 bg-brand-sky/10 font-mono text-[11px] font-semibold text-cyan-300">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-brand-sky/25 bg-brand-sky/10 font-mono text-[max(11px,0.6875rem)] font-semibold text-cyan-300">
                           {monogram(c.name, c.shortName)}
                         </span>
                         <span className="text-sm font-semibold text-text-secondary transition-colors group-hover:text-fg sm:text-base">{c.name}</span>

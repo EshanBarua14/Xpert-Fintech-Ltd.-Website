@@ -14,7 +14,10 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
   const mode = marketMode();
   const ticker =
     mode === "none" ? undefined : (
+      // Keyed: this element is made here (a server component) and placed next to the
+      // navigation bar inside HeaderClient, so React needs a key to tell them apart.
       <TickerBar
+        key="ticker"
         mode={mode}
         locale={locale}
         labels={{
@@ -38,7 +41,7 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
       locale={locale}
       items={items}
       labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language, overview: t.overview, toLight: t.themeToLight, toDark: t.themeToDark, search: searchLabels(t) }}
-      logo={<BrandLockup text="roomy" priority />}
+      logo={<BrandLockup key="logo" text="roomy" priority />}
       ticker={ticker}
     />
   );

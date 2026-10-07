@@ -173,8 +173,8 @@ export function HeaderClient({
 
   return (
     <header className="fixed inset-x-0 top-0 z-(--z-sticky)">
-      {ticker}
-      <div className="px-3 pt-3 md:px-6 md:pt-4">
+      {ticker && <div key="ticker">{ticker}</div>}
+      <div key="bar" className="px-3 pt-3 md:px-6 md:pt-4">
       <div
         className={cn(
           "relative mx-auto flex h-14 max-w-7xl items-center gap-2 rounded-full border px-2 pl-4 transition-[background-color,border-color,box-shadow] duration-500 md:h-16",

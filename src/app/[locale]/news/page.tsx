@@ -67,7 +67,7 @@ export default async function NewsPage({ params, searchParams }: Props) {
                 <p className="font-display text-2xl font-semibold">{t.newsEmptyTitle}</p>
                 <p className="mx-auto mt-3 max-w-xl text-text-secondary">{t.newsEmptyBody}</p>
                 <Link href={`/${loc}/events`} className="mt-6 inline-flex h-11 items-center rounded-full border border-fg/15 px-5 text-sm font-semibold hover:border-brand-sky/60">
-                  {t.allEvents} →
+                  {t.allEvents}
                 </Link>
               </div>
               {events.length > 0 && (

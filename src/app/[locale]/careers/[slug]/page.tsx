@@ -113,7 +113,7 @@ export default async function JobPage({ params }: Props) {
                   <h2 className="font-display text-2xl font-semibold">{t.jobClosedTitle}</h2>
                   <p className="mt-3 text-text-secondary">{t.jobClosedBody}</p>
                   <Link href={`/${loc}/careers`} className="mt-6 inline-flex h-11 items-center rounded-full border border-fg/15 px-5 text-sm font-semibold hover:border-brand-sky/60">
-                    {t.allJobs} →
+                    {t.allJobs}
                   </Link>
                 </>
               )}

@@ -78,7 +78,7 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-8 md:justify-items-end">
             {columns.map((column) => (
               <nav key={column.id} aria-label={column.label} className="min-w-40">
-                <h2 className="mb-5 font-mono text-[11px] tracking-[0.2em] text-text-secondary uppercase">{column.label}</h2>
+                <h2 className="mb-5 font-mono text-[11px] text-text-secondary">{column.label}</h2>
                 <ul className="flex flex-col gap-1.5">
                   {column.children.map((item) => (
                     <li key={item.id}>

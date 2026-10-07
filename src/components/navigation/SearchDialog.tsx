@@ -171,7 +171,7 @@ export function SearchDialog({ locale, labels }: { locale: "en" | "bn"; labels: 
               <ul id={listId} role="listbox" aria-label={labels.search} className="flex flex-col gap-3">
                 {groups.map((g) => (
                   <li key={g.kind} role="presentation">
-                    <p className="px-3 pt-2 pb-1 text-[11px] font-semibold tracking-[0.16em] text-text-secondary uppercase">{labels.kinds[g.kind] ?? g.kind}</p>
+                    <p className="px-3 pt-2 pb-1 text-[11px] font-semibold text-text-secondary">{labels.kinds[g.kind] ?? g.kind}</p>
                     <ul role="presentation">
                       {g.items.map(({ hit }) => {
                         const i = ordered.findIndex((o) => o.hit === hit);
@@ -198,7 +198,7 @@ export function SearchDialog({ locale, labels }: { locale: "en" | "bn"; labels: 
           </div>
           {q.trim().length >= 2 && (
             <a href={seeAll} onClick={(e) => (e.preventDefault(), go(seeAll))} className="border-t border-fg/10 px-5 py-3 text-sm font-semibold text-brand-sky hover:text-fg">
-              {labels.seeAll.replace("{q}", q.trim())} →
+              {labels.seeAll.replace("{q}", q.trim())}
             </a>
           )}
         </div>

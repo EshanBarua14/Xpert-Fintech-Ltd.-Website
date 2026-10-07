@@ -98,6 +98,7 @@ export default async function HomePage({ params }: Props) {
         memberCount={data.members.length}
         modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)}
         graph={eco}
+        facts={proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
         status={market.mode !== "none" ? <MarketStatusLine initial={market} t={t} locale={locale} /> : undefined}
       />
 
@@ -129,7 +130,7 @@ export default async function HomePage({ params }: Props) {
             {proof.length > 0 && <StatGrid items={proof} locale={locale} />}
             {apps.length > 0 && (
               <div className="flex flex-col gap-5">
-                <p className="text-xs font-semibold tracking-[0.16em] text-text-secondary uppercase">{t.liveAppsTitle}</p>
+                <p className="text-xs font-semibold text-text-secondary">{t.liveAppsTitle}</p>
                 <LiveApps apps={apps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp }} />
               </div>
             )}

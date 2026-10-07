@@ -217,7 +217,7 @@ export function TickerBar({ mode, locale, labels }: { mode: MarketPayload["mode"
             </button>
           )}
           <Link href={`/${locale}/markets`} className="hidden h-7 items-center rounded-full px-2.5 text-[12px] font-semibold text-brand-sky hover:bg-fg/[0.06] sm:flex">
-            {labels.markets} →
+            {labels.markets}
           </Link>
         </div>
       </div>

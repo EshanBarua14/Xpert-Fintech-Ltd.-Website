@@ -8,7 +8,16 @@ import type { GalleryPhoto } from "@/lib/public/insights";
  * Photo grid that opens a full-screen viewer. Keyboard: ←/→ to move, Esc to
  * close. Touch: swipe left or right. Focus returns to the photo that opened it.
  */
-export function Lightbox({ photos, labels }: { photos: GalleryPhoto[]; labels: { open: string; close: string; prev: string; next: string; counter: string } }) {
+export function Lightbox({
+  photos,
+  labels,
+  layout = "masonry",
+}: {
+  photos: GalleryPhoto[];
+  labels: { open: string; close: string; prev: string; next: string; counter: string };
+  /** "feature": the first photo full width, the rest in a row of thumbnails (product screens). */
+  layout?: "masonry" | "feature";
+}) {
   const [index, setIndex] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggers = useRef<(HTMLButtonElement | null)[]>([]);
@@ -35,9 +44,9 @@ export function Lightbox({ photos, labels }: { photos: GalleryPhoto[]; labels: {
 
   return (
     <>
-      <ul className="columns-2 gap-3 sm:columns-3 lg:columns-4 [&>li]:mb-3">
+      <ul className={layout === "feature" ? "grid grid-cols-2 gap-3 md:grid-cols-4" : "columns-2 gap-3 sm:columns-3 lg:columns-4 [&>li]:mb-3"}>
         {photos.map((p, i) => (
-          <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className="break-inside-avoid">
+          <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className={layout === "feature" ? (i === 0 ? "col-span-full" : "") : "break-inside-avoid"}>
             <button
               ref={(el) => {
                 triggers.current[i] = el;
@@ -52,8 +61,8 @@ export function Lightbox({ photos, labels }: { photos: GalleryPhoto[]; labels: {
                 alt=""
                 width={p.width ?? 800}
                 height={p.height ?? 600}
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                className="h-auto w-full transition-transform duration-700 group-hover:scale-[1.04]"
+                sizes={layout === "feature" && i === 0 ? "(min-width: 1280px) 1200px, 100vw" : "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"}
+                className={layout === "feature" && i > 0 ? "aspect-[16/10] h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]" : "h-auto w-full transition-transform duration-700 group-hover:scale-[1.04]"}
               />
               <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#05080f]/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             </button>

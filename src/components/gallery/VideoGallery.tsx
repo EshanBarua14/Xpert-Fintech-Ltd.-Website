@@ -62,7 +62,7 @@ function Poster({ v, priority = false }: { v: VideoItem; priority?: boolean }) {
     />
   ) : (
     <span aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(120%_90%_at_20%_10%,rgb(56_189_248/0.35),transparent_60%),radial-gradient(90%_80%_at_90%_100%,rgb(37_99_235/0.45),transparent_60%)] bg-navy-800">
-      <span className="absolute bottom-4 left-4 font-mono text-[11px] tracking-[0.2em] text-white/70 uppercase">XFL · {PROVIDER[v.provider]}</span>
+      <span className="absolute bottom-4 left-4 font-mono text-[11px] text-white/70">XFL · {PROVIDER[v.provider]}</span>
     </span>
   );
 }
@@ -120,7 +120,7 @@ export function FeaturedVideo({ v, labels }: { v: VideoItem; labels: VideoLabels
         )}
       </div>
       <div className="flex flex-col justify-center gap-4 p-6 sm:p-8 lg:p-10">
-        <span className="w-fit rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 font-mono text-[11px] tracking-[0.18em] text-accent uppercase">
+        <span className="w-fit rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1 font-mono text-[11px] text-accent">
           {labels.featured}
         </span>
         <h3 className="font-display text-2xl leading-tight font-semibold tracking-tight text-balance sm:text-3xl">{v.title}</h3>
@@ -128,7 +128,7 @@ export function FeaturedVideo({ v, labels }: { v: VideoItem; labels: VideoLabels
         <Meta v={v} labels={labels} />
         {v.event && (
           <a href={v.event.href} className="w-fit text-sm font-semibold text-brand-sky hover:underline">
-            {v.event.title} →
+            {v.event.title}
           </a>
         )}
       </div>

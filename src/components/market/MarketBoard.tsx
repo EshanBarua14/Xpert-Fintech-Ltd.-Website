@@ -146,7 +146,7 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
           </section>
         )}
         <section className={cn("glass flex flex-col gap-5 rounded-3xl p-6", ex.indices.length ? "lg:col-span-5" : "lg:col-span-12")}>
-          <h2 className="text-xs font-semibold tracking-[0.16em] text-text-secondary uppercase">{t.breadthTitle}</h2>
+          <h2 className="text-xs font-semibold text-text-secondary">{t.breadthTitle}</h2>
           {breadth > 0 && (
             <>
               <div className="flex h-2.5 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden="true">
@@ -214,7 +214,7 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
               onChange={(e) => setQ(e.target.value)}
               placeholder={t.searchSymbols}
               autoCapitalize="characters"
-              className="h-11 w-56 rounded-full border border-fg/15 bg-ink-950/60 px-4 font-mono text-sm uppercase placeholder:normal-case focus:border-brand-sky focus:outline-none"
+              className="h-11 w-56 rounded-full border border-fg/15 bg-ink-950/60 px-4 font-mono text-sm placeholder:normal-case focus:border-brand-sky focus:outline-none"
             />
           </label>
           <button

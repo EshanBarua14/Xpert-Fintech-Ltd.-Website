@@ -73,7 +73,7 @@ export default async function ArticlePage({ params }: Props) {
             ← {t.allNews}
           </Link>
           <p data-reveal className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
-            {card.category && <span className="font-semibold tracking-wider text-gold uppercase">{card.category}</span>}
+            {card.category && <span className="font-semibold text-gold">{card.category}</span>}
             <time dateTime={card.date.toISOString()}>{formatNewsDate(card.date, loc)}</time>
             <span aria-hidden="true">·</span>
             <span>{t.minRead.replace("{n}", String(card.minutes))}</span>
@@ -109,7 +109,7 @@ export default async function ArticlePage({ params }: Props) {
         <aside className="flex flex-col gap-8 lg:sticky lg:top-[calc(8rem+var(--ticker-h))] lg:self-start">
           {tags.length > 0 && (
             <div className="flex flex-col gap-3">
-              <p className="text-xs font-semibold tracking-[0.14em] text-text-secondary uppercase">{t.tagsLabel}</p>
+              <p className="text-xs font-semibold text-text-secondary">{t.tagsLabel}</p>
               <ul className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
                   <li key={tag} className="rounded-full border border-fg/10 px-3 py-1 text-xs text-text-secondary">
@@ -120,7 +120,7 @@ export default async function ArticlePage({ params }: Props) {
             </div>
           )}
           <div className="flex flex-col gap-3">
-            <p className="text-xs font-semibold tracking-[0.14em] text-text-secondary uppercase">{t.shareLabel}</p>
+            <p className="text-xs font-semibold text-text-secondary">{t.shareLabel}</p>
             <ul className="flex flex-wrap gap-2 lg:flex-col">
               {share.map((s) => (
                 <li key={s.label}>

@@ -80,7 +80,7 @@ function MobileFlow({ graph, tour, activeKey }: { graph: EcoGraph; tour: TourLab
               </span>
             )}
             <section className={cn("glass w-full rounded-3xl p-4", l.layer === "XFL" && "border-brand-sky/40 bg-brand-royal/10")}>
-              <h3 className="mb-3 text-[11px] font-semibold tracking-[0.18em] text-text-secondary uppercase">{tour.layers[l.layer]}</h3>
+              <h3 className="mb-3 text-[11px] font-semibold text-text-secondary">{tour.layers[l.layer]}</h3>
               <ul className="flex flex-wrap gap-2">
                 {l.nodes.map((n) => {
                   const on = activeKey === n.key;
@@ -121,7 +121,7 @@ function MobileFlow({ graph, tour, activeKey }: { graph: EcoGraph; tour: TourLab
             <span aria-hidden="true" className="mx-auto -mt-2 h-1 w-10 rounded-full bg-fg/20" />
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold tracking-[0.18em] text-text-secondary uppercase">{tour.layers[open.layer]}</p>
+                <p className="text-[11px] font-semibold text-text-secondary">{tour.layers[open.layer]}</p>
                 <h3 id="eco-sheet-title" className="mt-1 font-display text-2xl font-semibold">
                   {open.label}
                 </h3>
@@ -147,7 +147,7 @@ function MobileFlow({ graph, tour, activeKey }: { graph: EcoGraph; tour: TourLab
             )}
             {open.href && (
               <Link href={open.href} className="btn-glow mt-2 inline-flex h-12 items-center justify-center rounded-full px-6 font-semibold text-white">
-                {open.cta ?? tour.explore} →
+                {open.cta ?? tour.explore}
               </Link>
             )}
           </div>

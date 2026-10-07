@@ -81,13 +81,13 @@ export default async function AboutPage({ params }: Props) {
             <div className="grid gap-6">
               {story.mission && (
                 <div data-reveal style={{ "--d": 1 } as CSSProperties} className="spotlight glass flex flex-col gap-4 rounded-[2rem] border-l-2 border-l-gold/70 p-8">
-                  <p className="text-xs font-semibold tracking-[0.16em] text-gold uppercase">{t.mission}</p>
+                  <p className="text-xs font-semibold text-gold">{t.mission}</p>
                   <p className="text-lg leading-relaxed text-text-primary">{story.mission}</p>
                 </div>
               )}
               {story.vision && (
                 <div data-reveal style={{ "--d": 2 } as CSSProperties} className="spotlight glass flex flex-col gap-4 rounded-[2rem] border-l-2 border-l-brand-sky/70 p-8">
-                  <p className="text-xs font-semibold tracking-[0.16em] text-brand-sky uppercase">{t.vision}</p>
+                  <p className="text-xs font-semibold text-brand-sky">{t.vision}</p>
                   <p className="text-lg leading-relaxed text-text-primary">{story.vision}</p>
                 </div>
               )}
@@ -103,7 +103,7 @@ export default async function AboutPage({ params }: Props) {
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
               <SectionHeader eyebrow={t.consortiumEyebrow} title={t.ownedByTitle.replace("{n}", nf.format(flagship.members.length))} />
               <Link href={`/${loc}/consortium`} className="text-sm font-semibold text-brand-sky hover:text-fg">
-                {t.meetConsortium} →
+                {t.meetConsortium}
               </Link>
             </div>
           </Shell>

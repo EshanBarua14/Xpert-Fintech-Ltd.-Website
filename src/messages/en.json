@@ -514,5 +514,9 @@
   "ptAny": "Any time",
   "ptMorning": "Morning (10:00–13:00)",
   "ptAfternoon": "Afternoon (13:00–17:00)",
-  "ptEvening": "Evening (17:00–20:00)"
+  "ptEvening": "Evening (17:00–20:00)",
+  "demoTitle": "See it working",
+  "demoBody": "A short walkthrough of the product in use.",
+  "screensTitle": "Inside the product",
+  "screensBody": "Screens from the live product. Select one to see it full size."
 }

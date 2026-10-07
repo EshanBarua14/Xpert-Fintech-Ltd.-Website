@@ -37,7 +37,7 @@ function JobRow({ j, t, i }: { j: JobCard; t: Messages; i: number }) {
         </span>
         <span className="inline-flex items-center gap-2 text-sm font-semibold text-brand-sky">
           {j.open ? t.viewAndApply : t.viewJob}
-          <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+         
         </span>
       </Link>
     </li>
@@ -81,7 +81,7 @@ export default async function CareersPage({ params }: Props) {
               <p className="font-display text-2xl font-semibold">{t.noJobsTitle}</p>
               <p className="mt-3 max-w-xl text-text-secondary">{t.noJobsBody}</p>
               <Link href={`/${loc}/contact`} className="mt-6 inline-flex h-11 items-center rounded-full border border-fg/15 px-5 text-sm font-semibold hover:border-brand-sky/60">
-                {t.talkToUs} →
+                {t.talkToUs}
               </Link>
             </div>
           ) : (

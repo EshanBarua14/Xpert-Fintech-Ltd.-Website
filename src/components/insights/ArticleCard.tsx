@@ -25,7 +25,7 @@ function Cover({ a, large }: { a: ArticleCardData; large?: boolean }) {
         <span aria-hidden="true" className="absolute inset-0 overflow-hidden bg-gradient-to-br from-brand-royal/35 via-navy-800 to-ink-950">
           <span className="grid-fade pointer-events-none absolute inset-0 opacity-60" />
           <span className="absolute -right-16 -bottom-20 size-64 rounded-full bg-brand-sky/15 blur-3xl transition-transform duration-700 group-hover:scale-110" />
-          <span className="absolute bottom-5 left-6 font-mono text-[11px] tracking-[0.22em] text-cyan-300/70 uppercase">XFL · Insights</span>
+          <span className="absolute bottom-5 left-6 font-mono text-[11px] text-cyan-300/70">XFL · Insights</span>
         </span>
       )}
     </span>
@@ -35,7 +35,7 @@ function Cover({ a, large }: { a: ArticleCardData; large?: boolean }) {
 function Meta({ a, locale, minLabel }: { a: ArticleCardData; locale: AppLocale; minLabel: string }) {
   return (
     <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary">
-      {a.category && <span className="font-semibold tracking-wider text-gold uppercase">{a.category}</span>}
+      {a.category && <span className="font-semibold text-gold">{a.category}</span>}
       <time dateTime={a.date.toISOString()}>{formatNewsDate(a.date, locale)}</time>
       <span aria-hidden="true">·</span>
       <span>{minLabel.replace("{n}", String(a.minutes))}</span>
@@ -69,7 +69,7 @@ export function FeaturedArticle({ a, locale, minLabel, readLabel }: { a: Article
         {a.excerpt && <span className="line-clamp-4 text-lg leading-relaxed text-text-secondary">{a.excerpt}</span>}
         {a.author && <span className="text-sm text-text-secondary">{a.author}</span>}
         <span className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-brand-sky">
-          {readLabel} <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+          {readLabel}
         </span>
       </span>
     </Link>

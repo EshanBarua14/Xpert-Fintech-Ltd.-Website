@@ -532,7 +532,7 @@ export function EcosystemMap({
                     href={focusInfo.href}
                     onBlur={() => setFocusModule(null)}
                     className="font-semibold text-accent underline-offset-4 hover:underline">
-                    {labels.explore ?? "Explore product"} →
+                    {labels.explore ?? "Explore product"}
                   </Link>
                 </>
               )}

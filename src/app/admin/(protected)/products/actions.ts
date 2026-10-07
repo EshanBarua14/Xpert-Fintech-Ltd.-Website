@@ -9,6 +9,8 @@ import { requireAdmin } from "@/lib/auth/session";
 import { parseLocalDateTime, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { offeringItemSchema, offeringSchema } from "@/lib/validation/offering";
 import { purgeOffering } from "@/lib/admin/purge";
+import { allUsableImages, isUsableImage, isUsableVideoFile, syncMediaUsage } from "@/lib/admin/media";
+import { parseVideoUrl } from "@/lib/public/text";
 
 export type FormState = { errors?: FieldErrors; message?: string; savedAt?: number };
 
@@ -236,4 +238,102 @@ export async function moveOfferingItem(formData: FormData) {
   }
   refreshSite();
   revalidatePath(`/admin/products/${item.offeringId}`);
+}
+
+// ── Product screens and demo video ───────────────────────────────────────────
+
+const mediaSchema = z
+  .object({
+    offeringId: z.string().uuid(),
+    screenshots: z.array(z.string().uuid()).max(24, "Use at most 24 screens."),
+    source: z.enum(["NONE", "LINK", "FILE"]),
+    videoUrl: z.string().trim().max(500),
+    videoFileId: z.string().trim(),
+    posterMediaId: z.string().trim(),
+    captionEn: z.string().trim().max(300),
+    captionBn: z.string().trim().max(300),
+  })
+  .superRefine((v, ctx) => {
+    if (v.source === "LINK" && !parseVideoUrl(v.videoUrl)) ctx.addIssue({ code: "custom", path: ["videoUrl"], message: "Paste a YouTube, Vimeo or Facebook video address." });
+    if (v.source === "FILE" && !uuid.safeParse(v.videoFileId).success) ctx.addIssue({ code: "custom", path: ["videoFileId"], message: "Choose a video file." });
+  });
+
+/**
+ * Saves a product's screens (in the order given) and its demo video. Screens
+ * keep their captions when they stay; one demo video per product.
+ */
+export async function saveOfferingMedia(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin();
+  const parsed = mediaSchema.safeParse({
+    offeringId: formData.get("offeringId") ?? "",
+    screenshots: formData.getAll("screenshots").map(String),
+    source: formData.get("source") ?? "NONE",
+    videoUrl: formData.get("videoUrl") ?? "",
+    videoFileId: formData.get("videoFileId") ?? "",
+    posterMediaId: formData.get("posterMediaId") ?? "",
+    captionEn: formData.get("captionEn") ?? "",
+    captionBn: formData.get("captionBn") ?? "",
+  });
+  if (!parsed.success) return { errors: toFieldErrors(parsed.error), message: "Please fix the highlighted fields." };
+  const v = parsed.data;
+  const screenshots = [...new Set(v.screenshots)];
+  if (!(await allUsableImages(screenshots))) return { errors: { screenshots: "One of the screens is no longer in the media library." } };
+  if (v.posterMediaId && !(await isUsableImage(v.posterMediaId))) return { errors: { posterMediaId: "Choose an image from the media library." } };
+  if (v.source === "FILE" && !(await isUsableVideoFile(v.videoFileId))) return { errors: { videoFileId: "Choose a video file from the media library." } };
+  const link = v.source === "LINK" ? parseVideoUrl(v.videoUrl) : null;
+
+  await db.$transaction(async (tx) => {
+    const existing = await tx.offeringMedia.findMany({ where: { offeringId: v.offeringId } });
+    // Screens: keep rows that stay (their captions too), add new ones, drop the rest.
+    const shots = existing.filter((m) => m.kind !== "VIDEO");
+    const keep = new Set(screenshots);
+    const drop = shots.filter((m) => !m.mediaId || !keep.has(m.mediaId)).map((m) => m.id);
+    if (drop.length) await tx.offeringMedia.deleteMany({ where: { id: { in: drop } } });
+    for (const [i, mediaId] of screenshots.entries()) {
+      const row = shots.find((m) => m.mediaId === mediaId);
+      if (row) await tx.offeringMedia.update({ where: { id: row.id }, data: { sortOrder: i, isHidden: false } });
+      else await tx.offeringMedia.create({ data: { offeringId: v.offeringId, kind: "SCREENSHOT", mediaId, sortOrder: i } });
+    }
+    // Demo video: one row.
+    const videos = existing.filter((m) => m.kind === "VIDEO");
+    if (v.source === "NONE") {
+      if (videos.length) await tx.offeringMedia.deleteMany({ where: { id: { in: videos.map((m) => m.id) } } });
+    } else {
+      const data = {
+        videoProvider: link ? link.provider : ("UPLOAD" as const),
+        videoUrl: link ? v.videoUrl : null,
+        mediaId: v.source === "FILE" ? v.videoFileId : null,
+        posterMediaId: v.posterMediaId || null,
+        isHidden: false,
+        sortOrder: 0,
+      };
+      const [first, ...extra] = videos;
+      if (extra.length) await tx.offeringMedia.deleteMany({ where: { id: { in: extra.map((m) => m.id) } } });
+      const row = first
+        ? await tx.offeringMedia.update({ where: { id: first.id }, data })
+        : await tx.offeringMedia.create({ data: { offeringId: v.offeringId, kind: "VIDEO", ...data } });
+      for (const [locale, caption] of [["en", v.captionEn], ["bn", v.captionBn]] as const) {
+        if (caption) {
+          await tx.offeringMediaTranslation.upsert({
+            where: { itemId_locale: { itemId: row.id, locale } },
+            update: { caption },
+            create: { itemId: row.id, locale, caption },
+          });
+        } else {
+          await tx.offeringMediaTranslation.deleteMany({ where: { itemId: row.id, locale } });
+        }
+      }
+    }
+    // Media library "used in" counts.
+    await tx.mediaUsage.deleteMany({ where: { entityType: "OFFERING", entityId: v.offeringId, field: "screenshots" } });
+    if (screenshots.length) {
+      await tx.mediaUsage.createMany({ data: screenshots.map((mediaId) => ({ mediaId, entityType: "OFFERING" as const, entityId: v.offeringId, field: "screenshots" })) });
+    }
+    await syncMediaUsage(tx, "OFFERING", v.offeringId, "demoVideo", v.source === "FILE" ? v.videoFileId : null);
+    await syncMediaUsage(tx, "OFFERING", v.offeringId, "demoPoster", v.source !== "NONE" && v.posterMediaId ? v.posterMediaId : null);
+  });
+
+  refreshSite();
+  revalidatePath(`/admin/products/${v.offeringId}`);
+  return { message: "Screens and demo video saved.", savedAt: Date.now() };
 }

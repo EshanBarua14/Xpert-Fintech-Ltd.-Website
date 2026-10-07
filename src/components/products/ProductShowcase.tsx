@@ -100,7 +100,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
                 on ? "border-brand-sky/50 bg-brand-sky/[0.08]" : "border-fg/10 bg-fg/[0.02] hover:border-fg/25",
               )}
             >
-              <span className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.14em] text-text-secondary uppercase">
+              <span className="flex items-center gap-2 text-[11px] font-semibold text-text-secondary">
                 <span className={cn("size-1.5 rounded-full transition-colors", on ? "bg-cyan-300 shadow-[0_0_10px_2px_rgb(103_232_249/0.6)]" : "bg-fg/25")} />
                 {labels.typeLabels[item.type] ?? item.type}
               </span>
@@ -136,7 +136,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
               <span className="size-2.5 rounded-full bg-fg/15" />
               <span className="ml-3 truncate font-mono text-[11px] tracking-wider text-text-secondary">{p.name}</span>
               {!p.image && (
-                <span className="ml-auto rounded-full border border-fg/10 px-2 py-0.5 text-[10px] tracking-wider text-text-secondary uppercase">{labels.conceptual}</span>
+                <span className="ml-auto rounded-full border border-fg/10 px-2 py-0.5 text-[10px] text-text-secondary">{labels.conceptual}</span>
               )}
             </div>
             <div className="relative flex min-h-[18rem] flex-1 items-center justify-center p-5 md:min-h-[22rem]">
@@ -158,7 +158,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
             </div>
             {p.steps.length > 1 && (
               <div className="border-t border-fg/[0.06] px-5 py-4">
-                <p className="mb-3 text-[11px] font-semibold tracking-[0.14em] text-text-secondary uppercase">{labels.workflow}</p>
+                <p className="mb-3 text-[11px] font-semibold text-text-secondary">{labels.workflow}</p>
                 <ol className="showcase-lane relative flex flex-wrap items-center gap-x-1.5 gap-y-2">
                   {p.steps.map((s, i) => (
                     <li key={s} className="showcase-step flex items-center gap-1.5" style={{ animationDelay: `${150 + i * 120}ms` }}>
@@ -184,7 +184,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
             </div>
             {p.capabilities.length > 0 && (
               <div className="flex flex-col gap-3">
-                <p className="text-[11px] font-semibold tracking-[0.14em] text-text-secondary uppercase">{labels.capabilities}</p>
+                <p className="text-[11px] font-semibold text-text-secondary">{labels.capabilities}</p>
                 <ul className="grid gap-2">
                   {p.capabilities.map((c, i) => (
                     <li key={c} className="showcase-rise flex items-start gap-3 text-sm text-text-primary" style={{ animationDelay: `${200 + i * 70}ms` }}>
@@ -200,7 +200,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
               className="btn-glow group mt-auto inline-flex h-12 items-center gap-2 self-start rounded-full px-6 text-sm font-semibold text-white transition-transform duration-300 hover:-translate-y-0.5"
             >
               {labels.explore}
-              <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+             
             </Link>
           </div>
         </div>

@@ -62,10 +62,10 @@ export default async function TeamPage({ params }: Props) {
               <p className="text-lg leading-relaxed text-text-secondary">{t.teamEmptyBody}</p>
               <div className="flex flex-wrap gap-3">
                 <Link href={`/${locale}/company/management`} className="inline-flex h-11 items-center rounded-full border border-fg/15 px-5 text-sm font-semibold transition-colors hover:border-brand-sky/60">
-                  {t.management} →
+                  {t.management}
                 </Link>
                 <Link href={`/${locale}/company/board`} className="inline-flex h-11 items-center rounded-full border border-fg/15 px-5 text-sm font-semibold transition-colors hover:border-brand-sky/60">
-                  {t.board} →
+                  {t.board}
                 </Link>
               </div>
             </div>

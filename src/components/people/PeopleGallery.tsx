@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRef, useState, type CSSProperties } from "react";
 import { SocialIcon } from "@/components/ui/SocialIcon";
+import { cn } from "@/lib/utils/cn";
 
 /**
  * Board and management profiles: photo cards that open a full profile in a
@@ -68,11 +69,106 @@ function ContactLinks({ p, labels, size = "sm" }: { p: GalleryPerson; labels: Ga
   );
 }
 
+/** One profile card: portrait, name, role, a few lines of biography, and direct email and LinkedIn links. */
+function PersonCard({
+  p,
+  labels,
+  groupLabel,
+  showPlaceholderBadge,
+  featured,
+  onOpen,
+}: {
+  p: GalleryPerson;
+  labels: GalleryLabels;
+  groupLabel: string;
+  showPlaceholderBadge: boolean;
+  featured: boolean;
+  onOpen: (trigger: HTMLButtonElement) => void;
+}) {
+  const role = p.title ?? groupLabel;
+  return (
+    <article
+      className={cn(
+        "person-card group relative flex h-full flex-col overflow-hidden rounded-2xl border border-fg/[0.08] bg-navy-900 transition-[border-color,box-shadow,transform] duration-500 hover:border-brand-sky/35 hover:shadow-[0_28px_70px_-36px_rgb(6_17_31/0.9)]",
+        featured && "lg:flex-row",
+      )}
+    >
+      {/* The portrait also opens the profile; the name button below is the one in the tab order. */}
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-hidden="true"
+        onClick={(e) => onOpen(e.currentTarget)}
+        className={cn("relative block aspect-[4/5] w-full overflow-hidden bg-navy-800", featured && "lg:aspect-auto lg:w-[46%] lg:shrink-0")}
+      >
+        <Image
+          src={p.photo?.url ?? PLACEHOLDER_PHOTO}
+          alt=""
+          width={p.photo?.width ?? 480}
+          height={p.photo?.height ?? 600}
+          sizes={featured ? "(min-width: 1024px) 30vw, 100vw" : "(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"}
+          className="person-photo h-full w-full object-cover"
+          unoptimized={!p.photo}
+        />
+        <span aria-hidden="true" className="person-sheen pointer-events-none absolute inset-0" />
+        {showPlaceholderBadge && p.isPlaceholder && (
+          <span className="absolute top-3 left-3 rounded-md bg-[#06111f]/85 px-2 py-0.5 text-[11px] font-semibold text-[#e0b252]">{labels.placeholder}</span>
+        )}
+      </button>
+
+      <div className={cn("flex flex-1 flex-col gap-3 p-5 sm:p-6", featured && "lg:justify-center lg:gap-4 lg:p-10")}>
+        <div className="flex flex-col gap-1">
+          <h3 className={cn("font-display leading-tight text-text-primary", featured ? "text-2xl lg:text-[2.25rem]" : "text-[1.375rem]")}>
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              data-person={p.id}
+              onClick={(e) => onOpen(e.currentTarget)}
+              className="person-name text-left focus-visible:outline-offset-4"
+            >
+              {p.name}
+            </button>
+          </h3>
+          <p className="text-sm font-medium text-brand-sky">{role}</p>
+        </div>
+        {p.bio && <p className={cn("text-sm leading-relaxed text-text-secondary", featured ? "line-clamp-5 lg:text-base" : "line-clamp-3")}>{p.bio}</p>}
+        {(p.email || p.linkedinUrl) && (
+          <div className="mt-auto flex items-center gap-3 border-t border-fg/[0.08] pt-4">
+            {p.email && (
+              <a
+                href={`mailto:${p.email}`}
+                aria-label={labels.email.replace("{name}", p.name)}
+                className="flex min-w-0 items-center gap-2 text-sm text-text-secondary transition-colors hover:text-fg"
+              >
+                <SocialIcon kind="email" className="size-4 shrink-0 text-brand-sky" />
+                <span className="truncate">{p.email}</span>
+              </a>
+            )}
+            {p.linkedinUrl && (
+              <a
+                href={p.linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${labels.linkedin}: ${p.name}`}
+                title={labels.linkedin}
+                className="ml-auto flex size-9 shrink-0 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-[#0a66c2] hover:bg-[#0a66c2] hover:text-white"
+              >
+                <SocialIcon kind="linkedin" className="size-4" />
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
+
 export function PeopleGallery({
   people,
   labels,
   showPlaceholderBadge,
   groupLabel,
+  featureFirst = false,
 }: {
   people: GalleryPerson[];
   labels: GalleryLabels;
@@ -80,13 +176,16 @@ export function PeopleGallery({
   showPlaceholderBadge: boolean;
   /** Shown as the role when a person has no title yet, e.g. "Management". */
   groupLabel: string;
+  /** Board: the first person (the chair) gets a wide card. */
+  featureFirst?: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState<GalleryPerson | null>(null);
 
   const show = (p: GalleryPerson, trigger: HTMLButtonElement) => {
-    triggerRef.current = trigger;
+    // Focus goes back to the name button (the portrait button is not in the tab order).
+    triggerRef.current = trigger.closest("article")?.querySelector<HTMLButtonElement>(".person-name") ?? trigger;
     setOpen(p);
     // Open after the content has rendered so the dialog sizes itself correctly.
     requestAnimationFrame(() => dialogRef.current?.showModal());
@@ -98,52 +197,14 @@ export function PeopleGallery({
   return (
     <>
       <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {people.map((p, i) => (
-          <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className="group/card relative">
-            <button
-              type="button"
-              aria-haspopup="dialog"
-              data-person={p.id}
-              onClick={(e) => show(p, e.currentTarget)}
-              className="person-card spotlight glass group flex h-full w-full flex-col overflow-hidden rounded-3xl text-left transition-[transform,border-color,box-shadow] duration-500 group-hover/card:-translate-y-1.5 hover:border-brand-sky/40 hover:shadow-[0_30px_80px_-40px_rgb(34_188_235/0.7)] focus-visible:-translate-y-1.5"
-            >
-              <span className="relative block aspect-[4/5] overflow-hidden bg-navy-800">
-                <Image
-                  src={p.photo?.url ?? PLACEHOLDER_PHOTO}
-                  alt=""
-                  width={p.photo?.width ?? 480}
-                  height={p.photo?.height ?? 600}
-                  sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  className="h-full w-full object-cover grayscale-[30%] transition-[transform,filter] duration-700 group-hover:scale-[1.06] group-hover:grayscale-0 group-focus-visible:scale-[1.06] group-focus-visible:grayscale-0"
-                  unoptimized={!p.photo}
-                />
-                <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#05080f]/95 via-[#05080f]/25 to-transparent" />
-                <span aria-hidden="true" className="person-scan pointer-events-none absolute inset-x-0 -top-1/3 h-1/3 bg-gradient-to-b from-transparent via-brand-sky/25 to-transparent opacity-0" />
-                {showPlaceholderBadge && p.isPlaceholder && (
-                  <span className="absolute top-3 left-3 rounded-md border border-gold/50 bg-[#05080f]/80 px-2 py-0.5 text-[11px] font-semibold tracking-wider text-[#e0b252] uppercase">
-                    {labels.placeholder}
-                  </span>
-                )}
-                <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-6">
-                  <span className="font-display text-xl leading-tight font-semibold tracking-tight text-white">{p.name}</span>
-                  <span className="text-sm text-[#67e8f9]">{p.title ?? groupLabel}</span>
-                  <span className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]">
-                    <span className="overflow-hidden">
-                      <span className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-white/90">
-                        {labels.viewProfile} <span aria-hidden="true">→</span>
-                      </span>
-                    </span>
-                  </span>
-                </span>
-              </span>
-            </button>
-            {(p.email || p.linkedinUrl) && (
-              <div className="absolute top-4 right-4 z-10 flex gap-2 transition-transform duration-500 group-hover/card:-translate-y-1.5">
-                <ContactLinks p={p} labels={labels} />
-              </div>
-            )}
-          </li>
-        ))}
+        {people.map((p, i) => {
+          const featured = featureFirst && i === 0 && people.length > 2;
+          return (
+            <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className={cn(featured && "sm:col-span-2")}>
+              <PersonCard p={p} labels={labels} groupLabel={groupLabel} showPlaceholderBadge={showPlaceholderBadge} featured={featured} onOpen={(t) => show(p, t)} />
+            </li>
+          );
+        })}
       </ul>
 
       <dialog
@@ -186,17 +247,17 @@ export function PeopleGallery({
                   {open.name}
                 </h2>
                 {showPlaceholderBadge && open.isPlaceholder && (
-                  <span className="self-start rounded-md border border-gold/50 px-2 py-0.5 text-[11px] font-semibold tracking-wider text-gold uppercase">
+                  <span className="self-start rounded-md border border-gold/50 px-2 py-0.5 text-[11px] font-semibold text-gold">
                     {labels.placeholder}
                   </span>
                 )}
               </div>
               <dl className="grid gap-1 border-l-2 border-gold/60 pl-5">
-                <dt className="text-xs tracking-[0.14em] text-text-secondary uppercase">{labels.role}</dt>
+                <dt className="text-xs text-text-secondary">{labels.role}</dt>
                 <dd className="text-text-primary">{open.title ?? groupLabel}</dd>
               </dl>
               <section className="flex flex-col gap-3">
-                <h3 className="text-xs tracking-[0.14em] text-text-secondary uppercase">{labels.biography}</h3>
+                <h3 className="text-xs text-text-secondary">{labels.biography}</h3>
                 {open.bio ? (
                   open.bio.split(/\n{2,}/).map((para, i) => (
                     <p key={i} className="leading-relaxed text-text-primary/90">

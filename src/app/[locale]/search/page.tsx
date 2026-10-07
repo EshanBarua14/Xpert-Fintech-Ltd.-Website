@@ -61,7 +61,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
             </p>
             {groups.map((g) => (
               <section key={g.kind} className="flex flex-col gap-3">
-                <h2 className="text-xs font-semibold tracking-[0.16em] text-text-secondary uppercase">{labels.kinds[g.kind as keyof typeof labels.kinds] ?? g.kind}</h2>
+                <h2 className="text-xs font-semibold text-text-secondary">{labels.kinds[g.kind as keyof typeof labels.kinds] ?? g.kind}</h2>
                 <ul className="grid gap-3 md:grid-cols-2">
                   {g.items.map((h) => (
                     <li key={h.href + h.title}>

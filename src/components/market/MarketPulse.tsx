@@ -170,7 +170,7 @@ function ExchangeGlance({ exchange, ex, share, t, locale, className }: { exchang
         )}
         {ex && (
           <a href={`/${locale}/markets/${exchange.toLowerCase()}`} className="ml-auto text-sm font-semibold text-brand-sky hover:underline">
-            {t.tickerBoard.replace("{exchange}", exchange)} →
+            {t.tickerBoard.replace("{exchange}", exchange)}
           </a>
         )}
       </header>
@@ -191,7 +191,7 @@ function ExchangeGlance({ exchange, ex, share, t, locale, className }: { exchang
         <div className="flex flex-col gap-3">
           {breadthTotal > 0 && (
             <>
-              <div className="flex h-2 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden="true">
+              <div data-reveal className="bar-grow flex h-2 overflow-hidden rounded-full bg-fg/[0.06]" aria-hidden="true">
                 <span className="bg-market-up" style={{ width: `${((ex!.advancers ?? 0) / breadthTotal) * 100}%` }} />
                 <span className="bg-text-secondary/50" style={{ width: `${((ex!.unchanged ?? 0) / breadthTotal) * 100}%` }} />
                 <span className="bg-market-down" style={{ width: `${((ex!.decliners ?? 0) / breadthTotal) * 100}%` }} />

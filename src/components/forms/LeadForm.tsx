@@ -317,7 +317,7 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
               // Separate key: React must not turn this very button into the submit button
               // mid-click, or the browser would submit the form a step early.
               <button key="continue" type="button" onClick={next} className="btn-glow inline-flex h-12 items-center rounded-full px-7 text-sm font-semibold text-white">
-                {t.formContinue} →
+                {t.formContinue}
               </button>
             ) : (
               submit

@@ -50,7 +50,7 @@ export default async function CaseStudiesPage({ params }: Props) {
                   <span className="flex flex-1 flex-col gap-3 p-7">
                     <span className="font-display text-2xl leading-snug font-semibold tracking-tight text-balance">{c.title}</span>
                     {c.summary && <span className="line-clamp-3 text-text-secondary">{c.summary}</span>}
-                    <span className="mt-auto pt-2 text-sm font-semibold text-brand-sky">{t.readCaseStudy} →</span>
+                    <span className="mt-auto pt-2 text-sm font-semibold text-brand-sky">{t.readCaseStudy}</span>
                   </span>
                 </Link>
               </li>

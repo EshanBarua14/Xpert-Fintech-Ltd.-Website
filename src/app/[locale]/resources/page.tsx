@@ -54,7 +54,7 @@ export default async function ResourcesPage({ params }: Props) {
                     )}
                   </span>
                   <span className="flex flex-1 flex-col gap-3 p-6">
-                    <span className="text-xs font-semibold tracking-[0.14em] text-gold uppercase">{kindLabel(t, r.kind)}</span>
+                    <span className="text-xs font-semibold text-gold">{kindLabel(t, r.kind)}</span>
                     <span className="font-display text-xl leading-snug font-semibold tracking-tight">{r.title}</span>
                     {r.summary && <span className="line-clamp-3 text-sm text-text-secondary">{r.summary}</span>}
                     <span className="mt-auto inline-flex items-center gap-2 pt-2 text-sm font-semibold text-brand-sky">

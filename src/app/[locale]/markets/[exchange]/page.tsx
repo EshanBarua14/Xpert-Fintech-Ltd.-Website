@@ -38,7 +38,7 @@ export default async function ExchangePage({ params }: Props) {
             ← {t.marketsNav}
           </Link>
           <Link href={`/${locale}/markets/${other.toLowerCase()}`} className="rounded-full border border-fg/15 px-4 py-2 font-semibold hover:border-brand-sky/60">
-            {t.openBoard.replace("{exchange}", other)} →
+            {t.openBoard.replace("{exchange}", other)}
           </Link>
         </nav>
       </PageHero>

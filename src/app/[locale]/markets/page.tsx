@@ -66,7 +66,7 @@ export default async function MarketsPage({ params }: Props) {
                   ) : (
                     <span className="text-sm text-text-secondary">{t.marketsOffTitle}</span>
                   )}
-                  <span className="text-sm font-semibold text-brand-sky group-hover:text-fg">{t.openBoard.replace("{exchange}", code)} →</span>
+                  <span className="text-sm font-semibold text-brand-sky group-hover:text-fg">{t.openBoard.replace("{exchange}", code)}</span>
                 </Link>
               );
             })}

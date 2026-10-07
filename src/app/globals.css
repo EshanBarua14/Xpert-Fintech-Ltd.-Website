@@ -12,14 +12,14 @@
  */
 @theme {
   /* Surfaces */
-  --color-ink-950: #05080f;
-  --color-navy-900: #0a1428;
-  --color-navy-800: #0f1e3a;
-  --color-graphite-700: #1e2633;
+  --color-ink-950: #06111f;
+  --color-navy-900: #0b1c31;
+  --color-navy-800: #112744;
+  --color-graphite-700: #1c2f4a;
 
   /* Text */
-  --color-text-primary: #e8edf5;
-  --color-text-secondary: #9aa7ba;
+  --color-text-primary: #ebf1f8;
+  --color-text-secondary: #a3b4c9;
   --color-text-inverse: #0a1428;
 
   /*
@@ -42,14 +42,15 @@
 
   /* Market semantics — market data only, never decoration */
   --color-market-up: #22c55e;
-  --color-market-down: #ef4444;
+  --color-market-down: #f87171;
   --color-market-neutral: #94a3b8;
 
   /* Type */
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display-face), var(--font-body), ui-sans-serif, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
-  --font-bangla: var(--font-body), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-body), var(--font-body-bn), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-display-bn), Georgia, serif;
+  /* Figures use the text face with tabular digits (see .font-mono below), not a code font. */
+  --font-mono: var(--font-body), var(--font-body-bn), ui-sans-serif, system-ui, sans-serif;
+  --font-bangla: var(--font-body-bn), var(--font-body), ui-sans-serif, sans-serif;
 
   /* Radius */
   --radius-cell: 2px;
@@ -130,7 +131,7 @@
   --color-fg: #0a1428;
   --color-gold: #7a520a;
   --color-market-up: #11692f;
-  --color-market-down: #c81e1e;
+  --color-market-down: #b91c1c;
   --hairline: rgb(10 20 40 / 0.07);
   --grid-line: rgb(10 20 40 / 0.06);
   --glass-a: rgb(255 255 255 / 0.85);
@@ -169,6 +170,23 @@ html {
 
 html[lang="bn"] {
   font-family: var(--font-bangla);
+}
+
+/* Headlines: Spectral at a medium weight, lining figures, a touch of negative tracking. */
+.font-display {
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "kern", "liga";
+}
+html[lang="bn"] .font-display {
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+/* Figures: the text face with tabular digits so columns of prices line up. */
+.font-mono {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0;
 }
 
 /* Tabular numerals for all market figures */
@@ -429,17 +447,16 @@ body::before {
   align-items: center;
   gap: 0.5rem;
   font-family: var(--font-sans);
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--color-gold);
+  color: var(--color-brand-sky);
 }
 
 /* Glass surfaces */
+/* Cards: a solid sheet a step lighter than the page, with a hairline edge (no blur, no gradient). */
 .glass {
-  background: linear-gradient(180deg, var(--glass-a), var(--glass-b));
+  background: color-mix(in srgb, var(--color-navy-900) 94%, transparent);
   border: 1px solid var(--glass-line);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 .glass-strong {
   background: var(--glass-strong);
@@ -522,33 +539,17 @@ body::before {
 
 /* Primary call-to-action: gradient with a light sweep */
 .btn-glow {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  background: linear-gradient(135deg, #24539c, #2a5fae 55%, #1f6fae);
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.08) inset,
-    0 10px 30px -10px rgb(34 188 235 / 0.6);
+  background: var(--color-brand-royal);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.12) inset;
+  transition: background-color 180ms var(--ease-ui), transform 180ms var(--ease-ui);
 }
-.btn-glow::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
-  transform: translateX(-120%);
+.btn-glow:hover {
+  background: var(--color-brand-royal-hover);
 }
-.btn-glow:hover::after {
-  animation: btn-sweep 900ms var(--ease-ui);
+.btn-glow:active {
+  transform: translateY(1px);
 }
-@keyframes btn-sweep {
-  0% {
-    transform: translateX(-120%);
-  }
-  100% {
-    transform: translateX(120%);
-  }
-}
+
 
 /* Scroll reveal: elements with data-reveal fade and rise into view (SiteEffects adds .is-in).
    Only hidden when JavaScript is running, so content never disappears without it. */
@@ -559,10 +560,30 @@ body::before {
 }
 [data-reveal] {
   transition:
-    opacity 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 900ms cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: calc(var(--d, 0) * 90ms);
+    filter 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    clip-path 1000ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--d, 0) * 80ms);
+}
+/* Below the hero: content settles in as it is reached; headlines rise out of a mask. */
+.js main [data-reveal]:not(.is-in) {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.js main .font-display[data-reveal]:not(.is-in),
+.js main [data-reveal]:not(.is-in) > .font-display:only-child {
+  opacity: 1;
+  transform: translateY(0.45em);
+  clip-path: inset(0 0 100% 0);
+}
+/* Bars that measure something grow to their value when they come into view. */
+.bar-grow > span {
+  transform-origin: left center;
+  transition: transform 1100ms cubic-bezier(0.16, 1, 0.3, 1) 150ms;
+}
+.js .bar-grow:not(.is-in) > span {
+  transform: scaleX(0);
 }
 
 /* Endless horizontal strip */
@@ -576,6 +597,16 @@ body::before {
 }
 .marquee:hover .marquee-track {
   animation-play-state: paused;
+}
+/* Product demo: a framed player; without a still, a quiet brand field with a fine grid */
+.demo-frame {
+  box-shadow: 0 40px 100px -50px rgb(6 17 31 / 0.9);
+}
+.demo-placeholder {
+  background:
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
+    radial-gradient(120% 90% at 30% 20%, #1f4f8f 0%, #0b1c31 60%, #06111f 100%);
 }
 /* Page-change bar (NavProgress) */
 .nav-progress {
@@ -777,16 +808,7 @@ html.has-ticker {
   }
 }
 
-/* Gradient text in light mode (plain colour where clipping is unsupported) */
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  [data-theme="light"] .text-gradient-brand {
-    background-image: linear-gradient(90deg, #065f8f, #1f5f9e 40%, #2a5fae 70%, #065f8f 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-  }
-}
+
 [data-theme="light"] .glass,
 [data-theme="light"] .glass-strong {
   box-shadow: 0 1px 2px rgb(10 20 40 / 0.04), 0 12px 32px -16px rgb(10 20 40 / 0.18);
@@ -913,10 +935,16 @@ html {
   .flow-packet-svg {
     display: none;
   }
-  .js .hero-seq [data-reveal]:not(.is-in) {
+  .js .hero-seq [data-reveal]:not(.is-in),
+  .js main [data-reveal]:not(.is-in),
+  .js main .font-display[data-reveal]:not(.is-in) {
     opacity: 1;
     transform: none;
     filter: none;
+    clip-path: none;
+  }
+  .js .bar-grow:not(.is-in) > span {
+    transform: none;
   }
   .ambient-orb,
   .ambient-grid,
@@ -946,21 +974,37 @@ html {
 }
 
 /* ── XFL 2.0: people profiles ─────────────────────────────────────────────── */
-.person-card:hover .person-scan,
-.person-card:focus-visible .person-scan {
-  animation: person-scan 1.3s cubic-bezier(0.16, 1, 0.3, 1) 1;
+/* Profile cards: portraits rest slightly muted and come to full colour on hover or focus. */
+.person-photo {
+  filter: saturate(0.82) contrast(1.02);
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1), filter 600ms ease;
 }
-@keyframes person-scan {
-  0% { top: -33%; opacity: 0; }
-  20% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
+.person-card:hover .person-photo,
+.person-card:focus-within .person-photo {
+  transform: scale(1.045);
+  filter: none;
+}
+.person-sheen {
+  background: linear-gradient(180deg, transparent 55%, rgb(6 17 31 / 0.28));
+}
+.person-name {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.person-card:hover .person-name,
+.person-name:focus-visible {
+  background-size: 100% 1px;
 }
 .person-dialog[open] { animation: dialog-in 380ms cubic-bezier(0.16, 1, 0.3, 1); }
 .person-dialog[open]::backdrop { animation: backdrop-in 380ms ease-out; }
 @keyframes dialog-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } }
 @keyframes backdrop-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .person-card:hover .person-scan, .person-card:focus-visible .person-scan { animation: none; }
+  .person-photo, .person-name { transition: none; }
+  .person-card:hover .person-photo, .person-card:focus-within .person-photo { transform: none; }
   .person-dialog[open], .person-dialog[open]::backdrop { animation: none; }
 }
 

@@ -27,8 +27,12 @@ export function Shell({ children, className, id }: { children: ReactNode; classN
   );
 }
 
+/**
+ * A section's title and lead. On wide screens the lead sits beside the title,
+ * bottom-aligned, like a magazine standfirst; narrow containers stack them.
+ * `eyebrow` is kept for callers but no longer printed: headings stand alone.
+ */
 export function SectionHeader({
-  eyebrow,
   title,
   body,
   align = "left",
@@ -40,28 +44,32 @@ export function SectionHeader({
   align?: "left" | "center";
   as?: "h1" | "h2";
 }) {
+  const centered = align === "center";
   return (
-    <div className={cn("flex max-w-3xl flex-col gap-5", align === "center" && "mx-auto items-center text-center")}>
-      {eyebrow && (
-        <p className="eyebrow" data-reveal>
-          {eyebrow}
-        </p>
-      )}
-      <H
-        data-reveal
-        style={{ ...delay(1), fontStretch: "110%" }}
-        className={cn(
-          "font-display font-semibold tracking-[-0.03em] text-balance text-text-primary",
-          H === "h1" ? "text-5xl leading-[1] md:text-[4.5rem]" : "text-[2.25rem] leading-[1.04] md:text-[3.25rem]",
+    <div className={cn("@container w-full", centered && "mx-auto max-w-3xl")}>
+      <div className={cn("grid gap-5", centered ? "justify-items-center text-center" : "@4xl:grid-cols-12 @4xl:items-end @4xl:gap-x-12")}>
+        <H
+          data-reveal
+          style={delay(0)}
+          className={cn(
+            "font-display text-balance text-text-primary",
+            H === "h1" ? "text-[2.75rem] leading-[1.02] md:text-[4.25rem]" : "text-[2.15rem] leading-[1.06] md:text-[3rem]",
+            !centered && body && "@4xl:col-span-7",
+            !centered && !body && "max-w-4xl @4xl:col-span-9",
+          )}
+        >
+          {title}
+        </H>
+        {body && (
+          <p
+            data-reveal
+            style={delay(1)}
+            className={cn("max-w-xl text-[1.0625rem] leading-relaxed text-pretty text-text-secondary md:text-lg", !centered && "@4xl:col-span-5 @4xl:pb-1.5")}
+          >
+            {body}
+          </p>
         )}
-      >
-        {title}
-      </H>
-      {body && (
-        <p data-reveal style={delay(2)} className="max-w-2xl text-lg leading-relaxed text-pretty text-text-secondary md:text-xl">
-          {body}
-        </p>
-      )}
+      </div>
     </div>
   );
 }
@@ -183,11 +191,14 @@ export function FlagshipHero({
   status,
   modules,
   graph,
+  facts,
 }: {
   t: Messages;
   locale: AppLocale;
   body?: string | null;
   memberCount: number;
+  /** Up to three real figures shown under the buttons (members, live apps, institutions…). */
+  facts?: { value: number; label: string }[];
   /** Which ecosystem modules to show and where they link (from published products). */
   modules?: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>>;
   /** Live price strip shown along the bottom edge of the hero. */
@@ -204,8 +215,8 @@ export function FlagshipHero({
           {status && <div data-reveal>{status}</div>}
           <h1
             data-reveal
-            style={{ ...delay(1), fontStretch: "104%" }}
-            className="font-display text-[clamp(2.4rem,4.4vw,4.1rem)] leading-[1] font-semibold tracking-[-0.03em] text-balance text-text-primary"
+            style={{ ...delay(1) }}
+            className="font-display text-[clamp(2.75rem,5vw,4.6rem)] leading-[1.02] text-balance text-text-primary"
           >
             {t.heroTitleA} {t.heroTitleB}
           </h1>
@@ -216,7 +227,18 @@ export function FlagshipHero({
             <PrimaryButton href={`/${locale}/request-demo`}>{t.requestDemo}</PrimaryButton>
             <GhostButton href={`/${locale}/platform`}>{t.explorePlatform}</GhostButton>
           </div>
-          {memberCount > 0 && (
+          {facts && facts.length > 0 ? (
+            <dl data-reveal style={delay(4)} className="mt-2 grid max-w-[34rem] grid-cols-3 border-t border-fg/10 pt-5">
+              {facts.slice(0, 3).map((f, i) => (
+                <div key={f.label} className={cn("flex flex-col gap-1", i > 0 && "border-l border-fg/10 pl-4 sm:pl-6")}>
+                  <dt className="order-2 text-[0.8125rem] leading-snug text-text-secondary">{f.label}</dt>
+                  <dd className="order-1 font-display text-3xl leading-none text-text-primary md:text-[2.5rem]">
+                    <CountUp value={f.value} locale={locale} />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          ) : memberCount > 0 && (
             <Link
               href={`/${locale}/consortium`}
               data-reveal
@@ -405,7 +427,7 @@ export function Principles({ t }: { t: Messages }) {
     <dl className="grid gap-x-16 gap-y-10 sm:grid-cols-2">
       {items.map((p) => (
         <div key={p.title} className="flex flex-col gap-2 border-l-2 border-gold/60 pl-6">
-          <dt className="font-display text-xl font-semibold" style={{ fontStretch: "108%" }}>
+          <dt className="font-display text-xl font-semibold">
             {p.title}
           </dt>
           <dd className="max-w-md leading-relaxed text-text-secondary">{p.body}</dd>
@@ -420,7 +442,7 @@ export function MemberBoard({ names }: { names: string[] }) {
   return (
     <ul className="grid gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
       {names.map((n) => (
-        <li key={n} className="border-t border-fg/10 py-4 font-display text-lg leading-snug font-medium text-text-primary md:text-xl" style={{ fontStretch: "105%" }}>
+        <li key={n} className="border-t border-fg/10 py-4 font-display text-lg leading-snug font-medium text-text-primary md:text-xl">
           {n}
         </li>
       ))}
@@ -436,7 +458,7 @@ export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
       <div className="relative overflow-hidden rounded-[2rem] bg-brand-royal px-6 py-14 md:px-16 md:py-20">
         <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <div className="flex max-w-2xl flex-col gap-4">
-            <h2 className="font-display text-4xl leading-[1.02] font-semibold tracking-[-0.03em] text-white md:text-6xl" style={{ fontStretch: "110%" }}>
+            <h2 className="font-display text-4xl leading-[1.02] font-semibold tracking-[-0.03em] text-white md:text-6xl">
               {t.ctaTitle}
             </h2>
             <p className="text-lg text-white/80">{t.ctaBody}</p>

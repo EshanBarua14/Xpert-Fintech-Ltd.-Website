@@ -104,6 +104,7 @@ export function PeopleGrid({
       people={rows.filter((r) => r.name)}
       groupLabel={groupLabel}
       showPlaceholderBadge={process.env.APP_ENV !== "production"}
+      featureFirst={group === "BOARD"}
       labels={{
         viewProfile: t.viewProfile,
         close: t.close,

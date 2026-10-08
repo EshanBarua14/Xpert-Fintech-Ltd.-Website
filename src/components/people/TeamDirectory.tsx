@@ -128,12 +128,12 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
               href={`mailto:${p.email}`}
               aria-label={labels.email.replace("{name}", p.name)}
               title={p.email}
-              className="flex size-9 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-[var(--dept)] hover:bg-[var(--dept)] hover:text-white"
+              className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--dept)_45%,transparent)] text-[var(--dept)] transition-colors hover:border-[var(--dept)] hover:bg-[var(--dept)] hover:text-white"
             >
               <SocialIcon kind="email" className="size-4" />
             </a>
           ) : (
-            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-fg/[0.08] text-fg/25">
+            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--dept)_30%,transparent)] text-[color-mix(in_srgb,var(--dept)_65%,transparent)]">
               <SocialIcon kind="email" className="size-4" />
             </span>
           )}
@@ -144,12 +144,12 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
               rel="noopener noreferrer"
               aria-label={`${labels.linkedin}: ${p.name}`}
               title={labels.linkedin}
-              className="flex size-9 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-[#0a66c2] hover:bg-[#0a66c2] hover:text-white"
+              className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--dept)_45%,transparent)] text-[var(--dept)] transition-colors hover:border-[var(--dept)] hover:bg-[var(--dept)] hover:text-white"
             >
               <SocialIcon kind="linkedin" className="size-4" />
             </a>
           ) : (
-            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-fg/[0.08] text-fg/25">
+            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--dept)_30%,transparent)] text-[color-mix(in_srgb,var(--dept)_65%,transparent)]">
               <SocialIcon kind="linkedin" className="size-4" />
             </span>
           )}

@@ -65,7 +65,7 @@ function ContactSlot({ kind, name }: { kind: "email" | "linkedin"; name: string 
 /** Email or LinkedIn not on file yet: the icon, faint and not a link (added in Admin → People → Contacts). */
 function MutedIcon({ kind, size = "size-9" }: { kind: "email" | "linkedin"; size?: string }) {
   return (
-    <span aria-hidden="true" className={cn("flex items-center justify-center rounded-full border border-fg/[0.08] text-fg/25", size)}>
+    <span aria-hidden="true" className={cn("flex items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--tone)_25%,transparent)] text-[color-mix(in_srgb,var(--tone)_50%,transparent)]", size)}>
       <SocialIcon kind={kind} className="size-4" />
     </span>
   );
@@ -179,7 +179,7 @@ function PersonCard({
               href={`mailto:${p.email}`}
               aria-label={labels.email.replace("{name}", p.name)}
               title={p.email}
-              className="flex size-9 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-[var(--tone)] hover:text-fg"
+              className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--tone)_45%,transparent)] text-[var(--tone-ink)] transition-colors hover:border-[var(--tone)] hover:bg-[var(--tone)] hover:text-white"
             >
               <SocialIcon kind="email" className="size-4" />
             </a>
@@ -195,7 +195,7 @@ function PersonCard({
               rel="noopener noreferrer"
               aria-label={`${labels.linkedin}: ${p.name}`}
               title={labels.linkedin}
-              className="flex size-9 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-[#0a66c2] hover:bg-[#0a66c2] hover:text-white"
+              className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--tone)_45%,transparent)] text-[var(--tone-ink)] transition-colors hover:border-[var(--tone)] hover:bg-[var(--tone)] hover:text-white"
             >
               <SocialIcon kind="linkedin" className="size-4" />
             </a>
@@ -293,7 +293,7 @@ export function PeopleGallery({
               type="button"
               onClick={close}
               aria-label={labels.close}
-              className="absolute top-3 right-3 z-10 flex size-10 items-center justify-center rounded-full border border-fg/15 bg-navy-900/80 text-lg text-text-primary backdrop-blur transition-colors hover:border-[var(--tone)]"
+              className="absolute top-3 right-3 z-10 flex size-10 items-center justify-center rounded-full border border-fg/15 bg-navy-900/80 text-lg text-text-primary backdrop-blur transition-colors hover:border-[var(--tone)] hover:text-[var(--tone-ink)]"
             >
               <span aria-hidden="true">×</span>
             </button>
@@ -349,7 +349,7 @@ export function PeopleGallery({
                 {open.email ? (
                   <a
                     href={`mailto:${open.email}`}
-                    className="inline-flex h-10 items-center gap-2 rounded-full border border-fg/15 px-4 text-sm font-semibold text-text-primary transition-colors hover:border-[var(--tone)]"
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--tone)_45%,transparent)] px-4 text-sm font-semibold text-[var(--tone-ink)] transition-colors hover:border-[var(--tone)] hover:bg-[var(--tone)] hover:text-white"
                   >
                     <SocialIcon kind="email" className="size-4" />
                     <span className="hidden max-w-[16rem] truncate sm:inline">{open.email}</span>
@@ -363,7 +363,7 @@ export function PeopleGallery({
                     href={open.linkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 items-center gap-2 rounded-full border border-fg/15 px-4 text-sm font-semibold text-text-primary transition-colors hover:border-[#0a66c2] hover:bg-[#0a66c2] hover:text-white"
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--tone)_45%,transparent)] px-4 text-sm font-semibold text-[var(--tone-ink)] transition-colors hover:border-[var(--tone)] hover:bg-[var(--tone)] hover:text-white"
                   >
                     <SocialIcon kind="linkedin" className="size-4" />
                     {labels.linkedin} <span aria-hidden="true">↗</span>

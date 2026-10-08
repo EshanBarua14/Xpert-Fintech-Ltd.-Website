@@ -71,33 +71,44 @@ export default async function AboutPage({ params }: Props) {
     <>
       <PageHero eyebrow={t.companyEyebrow} title={tr?.title ?? t.aboutTitle} body={story.summary} />
 
-      {/* Story, mission, vision */}
+      {/* Story, mission, vision: the story as reading text on the left, mission and vision as two statements on the right, top-aligned. */}
       {(story.about || story.mission || story.vision) && (
         <Shell className="pb-20 md:pb-28">
-          <div className="grid gap-6 lg:grid-cols-[1.25fr_1fr]">
+          <div className="grid gap-12 border-t border-fg/10 pt-12 md:pt-16 lg:grid-cols-12 lg:gap-16">
             {story.about && (
-              <div data-reveal className="glass relative overflow-hidden rounded-[2rem] p-8 md:p-12">
-                <div className="grid-fade pointer-events-none absolute inset-0 opacity-40" />
-                <p className="eyebrow relative">{t.ourStory}</p>
-                <p className="relative mt-6 font-display text-2xl leading-snug font-medium tracking-[-0.01em] text-balance text-text-primary md:text-[1.75rem]">
-                  {story.about}
-                </p>
+              <div data-reveal className={cn("flex flex-col gap-6", story.mission || story.vision ? "lg:col-span-7" : "lg:col-span-9")}>
+                <h2 className="font-display text-3xl leading-tight tracking-[-0.015em] text-text-primary md:text-4xl">{t.ourStory}</h2>
+                <div className="flex max-w-[62ch] flex-col gap-5">
+                  {story.about
+                    .split(/\n{2,}/)
+                    .map((para) => para.trim())
+                    .filter(Boolean)
+                    .map((para, i) => (
+                      <p key={i} className={cn("leading-relaxed text-pretty", i === 0 ? "text-lg text-text-primary md:text-xl" : "text-base text-text-secondary md:text-lg")}>
+                        {para}
+                      </p>
+                    ))}
+                </div>
               </div>
             )}
-            <div className="grid gap-6">
-              {story.mission && (
-                <div data-reveal style={{ "--d": 1 } as CSSProperties} className="spotlight glass flex flex-col gap-4 rounded-[2rem] border-l-2 border-l-gold/70 p-8">
-                  <p className="text-xs font-semibold text-gold">{t.mission}</p>
-                  <p className="text-lg leading-relaxed text-text-primary">{story.mission}</p>
-                </div>
-              )}
-              {story.vision && (
-                <div data-reveal style={{ "--d": 2 } as CSSProperties} className="spotlight glass flex flex-col gap-4 rounded-[2rem] border-l-2 border-l-brand-sky/70 p-8">
-                  <p className="text-xs font-semibold text-brand-sky">{t.vision}</p>
-                  <p className="text-lg leading-relaxed text-text-primary">{story.vision}</p>
-                </div>
-              )}
-            </div>
+            {(story.mission || story.vision) && (
+              <dl className={cn("flex flex-col divide-y divide-fg/10", story.about ? "lg:col-span-5" : "lg:col-span-12 lg:flex-row lg:divide-x lg:divide-y-0")}>
+                {[
+                  { label: t.mission, text: story.mission, dot: "bg-gold" },
+                  { label: t.vision, text: story.vision, dot: "bg-brand-sky" },
+                ]
+                  .filter((x) => x.text)
+                  .map((x, i) => (
+                    <div key={x.label} data-reveal style={{ "--d": i + 1 } as CSSProperties} className="flex flex-col gap-3 py-8 first:pt-0 last:pb-0 lg:first:pt-1">
+                      <dt className="flex items-center gap-2.5 text-sm font-semibold text-text-secondary">
+                        <span aria-hidden="true" className={cn("size-2 rounded-full", x.dot)} />
+                        {x.label}
+                      </dt>
+                      <dd className="font-display text-xl leading-snug tracking-[-0.01em] text-pretty text-text-primary md:text-2xl">{x.text}</dd>
+                    </div>
+                  ))}
+              </dl>
+            )}
           </div>
         </Shell>
       )}

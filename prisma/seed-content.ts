@@ -621,6 +621,11 @@ async function seedRoster() {
       if (tr && !tr.affiliation) await db.personTranslation.update({ where: { id: tr.id }, data: { affiliation: text } });
       else if (!tr && locale === BN && c.nameBn) await db.personTranslation.create({ data: { personId, locale: BN, name: c.nameBn, affiliation: text } });
     }
+    // The Bangla name follows XFL's spelling (e.g. with "এফসিএ") unless the profile was edited in Admin → People.
+    const edited = (await db.person.findUnique({ where: { id: personId }, select: { updatedById: true } }))?.updatedById;
+    if (c.nameBn && !edited) {
+      await db.personTranslation.updateMany({ where: { personId, locale: BN, NOT: { name: c.nameBn } }, data: { name: c.nameBn } });
+    }
   }
   // The stand-in board cards are no longer needed once the real board is in: move untouched ones to the trash.
   const trashed = await db.person.updateMany({
@@ -809,6 +814,38 @@ async function seedInstitutions() {
     logos++;
   }
   if (added || logos) console.log(`• Market institutions: ${added} added, ${logos} logo(s) attached`);
+}
+
+/** Bangla for the company story (Admin → Settings), added only while the English is still the seeded text. */
+const STORY_BN: Record<string, { en: string; bn: string }> = {
+  "company.summary": {
+    en: "Xpert Fintech Ltd. is a consortium of leading brokerage houses in Bangladesh dedicated to advancing the country's financial technology landscape.",
+    bn: "এক্সপার্ট ফিনটেক লিমিটেড বাংলাদেশের শীর্ষস্থানীয় ব্রোকারেজ হাউসগুলোর একটি কনসোর্টিয়াম, যা দেশের আর্থিক প্রযুক্তি খাতকে এগিয়ে নিতে কাজ করে।",
+  },
+  "company.about": {
+    en: "Headquartered at Saiham Sky View Tower, 45 Bijoynagar, Dhaka, we specialize in delivering enterprise-grade software solutions for the capital market, money market, banking, non-banking financial institutions, and the insurance sector. By combining deep industry expertise with cutting-edge technology, we empower financial institutions to operate with greater efficiency, transparency, and security.",
+    bn: "ঢাকার বিজয়নগরের সাইহাম স্কাই ভিউ টাওয়ারে (৪৫ বিজয়নগর) আমাদের প্রধান কার্যালয়। পুঁজিবাজার, মানি মার্কেট, ব্যাংক, ব্যাংকবহির্ভূত আর্থিক প্রতিষ্ঠান ও বিমা খাতের জন্য আমরা এন্টারপ্রাইজ-মানের সফটওয়্যার সমাধান তৈরি করি। খাতের গভীর অভিজ্ঞতা ও আধুনিক প্রযুক্তির সমন্বয়ে আমরা আর্থিক প্রতিষ্ঠানগুলোকে আরও দক্ষ, স্বচ্ছ ও নিরাপদভাবে পরিচালিত হতে সহায়তা করি।",
+  },
+  "company.mission": {
+    en: "To deliver innovative, reliable, and secure financial technology solutions that enable our partners to optimize performance, enhance investor confidence, and strengthen Bangladesh's economic ecosystem.",
+    bn: "উদ্ভাবনী, নির্ভরযোগ্য ও নিরাপদ আর্থিক প্রযুক্তি সমাধান দেওয়া, যা আমাদের অংশীদারদের কর্মদক্ষতা বাড়ায়, বিনিয়োগকারীর আস্থা দৃঢ় করে এবং বাংলাদেশের অর্থনৈতিক ব্যবস্থাকে শক্তিশালী করে।",
+  },
+  "company.vision": {
+    en: "To be recognized as Bangladesh's leading financial technology innovator, driving digital transformation, global competitiveness, and sustainable growth across the financial sector.",
+    bn: "বাংলাদেশের শীর্ষস্থানীয় আর্থিক প্রযুক্তি উদ্ভাবক হিসেবে স্বীকৃতি পাওয়া, যা আর্থিক খাতজুড়ে ডিজিটাল রূপান্তর, বৈশ্বিক প্রতিযোগিতা-সক্ষমতা ও টেকসই প্রবৃদ্ধি এগিয়ে নেবে।",
+  },
+};
+
+async function seedStoryBangla() {
+  let added = 0;
+  for (const [key, text] of Object.entries(STORY_BN)) {
+    const row = await db.siteSetting.findUnique({ where: { key } });
+    const v = row?.value && typeof row.value === "object" && !Array.isArray(row.value) ? (row.value as Record<string, unknown>) : null;
+    if (!row || !v || v.en !== text.en || (typeof v.bn === "string" && v.bn.trim())) continue;
+    await db.siteSetting.update({ where: { key }, data: { value: { ...v, bn: text.bn } } });
+    added++;
+  }
+  if (added) console.log(`• Bangla added to ${added} company story text(s) (Admin → Settings)`);
 }
 
 /** XFL's memberships and certifications (Admin → Credentials), set once; editors' changes are kept. */
@@ -1215,6 +1252,7 @@ async function main() {
   await seedClientLogos();
   await seedInstitutions();
   await seedCredentials();
+  await seedStoryBangla();
   await seedReviewDrafts();
   await seedDeployments();
   await seedTeamLinks();

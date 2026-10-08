@@ -68,13 +68,12 @@ export default async function AboutPage({ params }: Props) {
   ];
 
   return (
-    // Body text on this page is justified (see .about-justify in globals.css).
-    <div className="about-justify">
+    <div>
       <PageHero eyebrow={t.companyEyebrow} title={tr?.title ?? t.aboutTitle} body={story.summary} />
 
       {/* Story, mission, vision: the story as reading text on the left, mission and vision as two statements on the right, top-aligned. */}
       {(story.about || story.mission || story.vision) && (
-        <Shell className="pb-14 md:pb-16">
+        <Shell className="about-justify pb-14 md:pb-16">
           <div className="grid gap-12 border-t border-fg/10 pt-12 md:pt-16 lg:grid-cols-12 lg:gap-16">
             {story.about && (
               <div data-reveal className={cn("flex flex-col gap-6", story.mission || story.vision ? "lg:col-span-6" : "lg:col-span-9")}>
@@ -116,7 +115,7 @@ export default async function AboutPage({ params }: Props) {
 
       {/* Chairman's and MD's messages (Admin → Messages, once published) */}
       {(chairman || md) && (
-        <Shell className="pb-14 md:pb-16">
+        <Shell className="about-justify pb-14 md:pb-16">
           <div className="flex flex-col gap-20 md:gap-28">
             {chairman && <LeaderMessage message={chairman} heading={t.chairmanMessage} compact />}
             {md && <LeaderMessage message={md} heading={t.mdMessage} compact />}

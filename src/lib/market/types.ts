@@ -35,6 +35,8 @@ export type MarketPayload = {
   delayMinutes: number;
   snapshot: MarketSnapshot | null;
   shares: ShareFigure[];
+  /** Seconds between refreshes (Admin → Market data); browsers poll at this pace. */
+  refreshSeconds?: number;
 };
 
 /** Top movers: from the feed when given, otherwise computed from the quotes. */

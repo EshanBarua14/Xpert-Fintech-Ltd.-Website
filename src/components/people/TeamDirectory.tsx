@@ -122,17 +122,22 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
           </span>
         )}
         <span className="ml-auto flex items-center gap-2">
-          {p.email && (
+          {/* Email and LinkedIn on every card: a link when it is on file, a muted icon until it is added (Admin → People → Contacts). */}
+          {p.email ? (
             <a
               href={`mailto:${p.email}`}
               aria-label={labels.email.replace("{name}", p.name)}
               title={p.email}
-              className="flex size-9 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-fg/40 hover:text-fg"
+              className="flex size-9 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-[var(--dept)] hover:bg-[var(--dept)] hover:text-white"
             >
               <SocialIcon kind="email" className="size-4" />
             </a>
+          ) : (
+            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-fg/[0.08] text-fg/25">
+              <SocialIcon kind="email" className="size-4" />
+            </span>
           )}
-          {p.linkedinUrl && (
+          {p.linkedinUrl ? (
             <a
               href={p.linkedinUrl}
               target="_blank"
@@ -143,6 +148,10 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
             >
               <SocialIcon kind="linkedin" className="size-4" />
             </a>
+          ) : (
+            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-fg/[0.08] text-fg/25">
+              <SocialIcon kind="linkedin" className="size-4" />
+            </span>
           )}
         </span>
       </div>

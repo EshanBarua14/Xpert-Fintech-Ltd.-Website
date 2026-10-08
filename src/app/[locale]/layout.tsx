@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ensureTextOverrides } from "@/lib/i18n/overrides";
 import { notFound } from "next/navigation";
 import { THEME_SCRIPT } from "@/lib/theme-script";
+import { designCss, getDesign } from "@/lib/content/design";
 import { ThemeKeeper } from "@/components/navigation/ThemeKeeper";
 import { NavProgress } from "@/components/navigation/NavProgress";
 import { marketMode } from "@/lib/market/data";
@@ -53,12 +54,15 @@ export default async function LocaleLayout({
   // Admin → Site text edits (loaded at start-up; refreshed here at most once a minute).
   await ensureTextOverrides();
   const t = getMessages(locale);
+  const css = designCss(await getDesign());
 
   return (
     <html lang={locale} className={`${display.variable} ${body.variable} ${displayBn.variable} ${bodyBn.variable}${marketMode() !== "none" ? " has-ticker" : ""}`} suppressHydrationWarning>
       <head>
         {/* Lets CSS hide scroll-reveal content only when JavaScript can reveal it again. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        {/* Colours chosen in Admin → Design */}
+        {css && <style dangerouslySetInnerHTML={{ __html: css }} />}
       </head>
       <body className="flex min-h-dvh flex-col text-text-primary">
         <ThemeKeeper />

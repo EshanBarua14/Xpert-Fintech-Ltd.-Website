@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils/cn";
+import { getDesign } from "@/lib/content/design";
 import { editorHints } from "@/lib/env/hints";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
@@ -13,11 +14,10 @@ import { getFlagshipData, getPartyLogos } from "@/lib/public/flagship";
 import { getCredentials } from "@/lib/content/credentials";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { omsLabels } from "@/lib/public/labels";
-import { CapabilityVisual, type VisualKind } from "@/components/flagship/Visuals";
+import type { VisualKind } from "@/components/flagship/Visuals";
 import { Icon } from "@/components/ui/Icon";
-import { OrderFlow } from "@/components/diagrams/OrderFlow";
 import { ProductCard } from "@/components/products/ProductCard";
-import { MediaImage, Paragraphs } from "@/components/blocks/Shared";
+import { Paragraphs } from "@/components/blocks/Shared";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages, type Messages } from "@/lib/i18n/messages";
 import { getOfferingBySlug, getSeo, mediaMap } from "@/lib/public/content";
@@ -25,6 +25,9 @@ import { breadcrumbLd, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo"
 import { parseVideoUrl, pick, videoEmbedUrl } from "@/lib/public/text";
 import { ProductDemo } from "@/components/products/ProductDemo";
 import { DemoPlaceholder, ScreensPlaceholder } from "@/components/products/MediaPlaceholder";
+import { DeviceShowcase } from "@/components/products/DeviceShowcase";
+import { ProductMark, productVars } from "@/components/products/ProductMark";
+import { AutomationFlow } from "@/components/products/AutomationFlow";
 import { Lightbox } from "@/components/gallery/Lightbox";
 import type { GalleryPhoto } from "@/lib/public/insights";
 
@@ -126,6 +129,7 @@ export default async function ProductPage({ params }: Props) {
     ? await Promise.all([getFlagshipData(found.locale), getEcosystem(found.locale), ecosystemInDatabase()])
     : [null, { nodes: [], edges: [], flows: [] }, false];
   const showOmsPreview = offering.key === "trading-platform";
+  const look = (offering.key && (await getDesign()).products[offering.key]) || null;
 
   return (
     <>
@@ -167,11 +171,9 @@ export default async function ProductPage({ params }: Props) {
                 </>
               )}
             </nav>
-            {productLogo && (
-              <span data-reveal className="flex size-16 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 ring-1 ring-black/5">
-                <Image src={productLogo.url} alt="" width={productLogo.width ?? 128} height={productLogo.height ?? 128} className="h-full w-full object-contain" />
-              </span>
-            )}
+            <span data-reveal>
+              <ProductMark productKey={offering.key} look={look} logo={productLogo ? { url: productLogo.url, width: productLogo.width, height: productLogo.height } : null} name={tr.name} size="lg" />
+            </span>
             <h1
               data-reveal
               style={{ "--d": 1 } as CSSProperties}
@@ -195,18 +197,15 @@ export default async function ProductPage({ params }: Props) {
             )}
           </div>
           <div data-reveal style={{ "--d": 2 } as CSSProperties}>
-            {hero ? (
-              <div className="glass overflow-hidden rounded-3xl p-2 shadow-[0_40px_120px_-40px_rgb(34_188_235/0.5)]">
-                <MediaImage media={hero} priority className="rounded-2xl" />
-              </div>
-            ) : (
-              <div className="glass relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-3xl p-10 shadow-[0_40px_120px_-40px_rgb(34_188_235/0.5)]">
-                <div className="grid-fade pointer-events-none absolute inset-0 opacity-60" />
-                <div className="relative h-full w-full">
-                  <CapabilityVisual kind={visualFor(tr.slug, offering.type)} />
-                </div>
-              </div>
-            )}
+            {/* The product on web, tablet and phone: its screenshots once added, its illustration until then. */}
+            <DeviceShowcase
+              name={tr.name}
+              productKey={offering.key}
+              look={look}
+              logo={productLogo ? { url: productLogo.url, width: productLogo.width, height: productLogo.height } : null}
+              visual={visualFor(tr.slug, offering.type)}
+              shots={[...(hero ? [{ url: hero.url, alt: hero.alt ?? tr.name, width: hero.width, height: hero.height }] : []), ...shots].slice(0, 3)}
+            />
           </div>
         </div>
       </section>
@@ -270,11 +269,22 @@ export default async function ProductPage({ params }: Props) {
       )}
 
       {steps.length > 1 && (
-        <Band title={t.howItWorks}>
-          <div data-reveal className="glass rounded-3xl p-4 md:p-8">
-          <OrderFlow
-            steps={steps.map((s, i) => ({ key: s.id, label: s.title, note: s.body, highlight: i === 0 }))}
-          />
+        <Band title={t.automationTitle} body={t.automationBody}>
+          <div data-reveal>
+            <AutomationFlow
+              steps={steps.map((s) => ({ id: s.id, title: s.title, body: s.body }))}
+              productKey={offering.key}
+              look={look}
+              labels={{ running: t.automationRunning, done: t.automationDone, step: t.ecoTourStep, pause: t.ecoTourPause, play: t.ecoTourPlay }}
+            />
+          </div>
+        </Band>
+      )}
+
+      {ecoModule && flagship && (
+        <Band title={t.whereItFits} body={t.whereItFitsBody} alt>
+          <div data-reveal className="glass rounded-3xl p-4 md:p-8" style={productVars(offering.key, look)}>
+            <EcosystemMap labels={ecosystemLabels(t, found.locale)} logos={flagship.logos} modules={withEcosystem(ecosystemModules(flagship.offerings, found.locale), eco, ecoInDb)} emphasis={ecoModule} />
           </div>
         </Band>
       )}
@@ -340,15 +350,6 @@ export default async function ProductPage({ params }: Props) {
                 <ItemList items={targetUsers} />
               </div>
             )}
-          </div>
-        </Band>
-      )}
-
-      {ecoModule && flagship && (
-        <Band title={t.whereItFits} alt>
-          <p data-reveal className="-mt-6 max-w-2xl text-lg text-text-secondary">{t.whereItFitsBody}</p>
-          <div data-reveal className="glass rounded-3xl p-4 md:p-8">
-            <EcosystemMap labels={{ ...ecosystemLabels(t, found.locale), steps: undefined }} logos={flagship.logos} modules={withEcosystem(ecosystemModules(flagship.offerings, found.locale), eco, ecoInDb)} focus={ecoModule} />
           </div>
         </Band>
       )}

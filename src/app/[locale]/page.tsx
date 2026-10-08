@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getDesign, type HomeSection } from "@/lib/content/design";
 import { editorHints } from "@/lib/env/hints";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -81,7 +82,7 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   const [data, events, market, showcase, credentials] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]);
-  const [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare()]);
+  const [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline, design] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign()]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -94,6 +95,8 @@ export default async function HomePage({ params }: Props) {
   const showReach = market.shares.length > 0 || goal !== null || headline !== null;
   // Client institutions first: the client base is what this panel shows off.
   const clientBase = [...proof.filter((p) => p.label === t.proofClients), ...proof.filter((p) => p.label !== t.proofClients && p.label !== t.proofProducts)];
+  // Sections switched off in Admin → Design → Home page.
+  const show = (key: HomeSection) => !design.hidden.includes(key);
   const sections = page ? toSections(page, locale) : [];
   const ctx = sections.length ? await blockContext(locale, mediaIdsOf(sections)) : null;
 
@@ -113,7 +116,7 @@ export default async function HomePage({ params }: Props) {
         market={market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} /> : undefined}
       />
 
-      {data.clients.length > 0 && (
+      {show("clients") && data.clients.length > 0 && (
         <section id="clients" className="relative scroll-mt-28 overflow-hidden border-y border-fg/[0.06] py-12 md:py-16">
           <div className="mx-auto mb-8 w-full max-w-7xl px-4 md:px-8">
             <SectionHeader eyebrow={t.clientsEyebrow} title={t.clientsTitle.replace("{n}", new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(data.clients.length))} />
@@ -122,7 +125,7 @@ export default async function HomePage({ params }: Props) {
         </section>
       )}
 
-      {showReach && (
+      {show("reach") && showReach && (
         <Shell id="reach" className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
             <SectionHeader title={t.reachTitle} />
@@ -150,7 +153,7 @@ export default async function HomePage({ params }: Props) {
         </Shell>
       )}
 
-      {showcase.length > 0 && (
+      {show("showcase") && showcase.length > 0 && (
         <Shell id="products" className="py-12 md:py-16">
           <div className="flex flex-col gap-14">
             <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
@@ -163,7 +166,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {/* Outside production, an empty reviews section says how to fill it instead of disappearing. */}
-      {testimonials.length === 0 && editorHints() && (
+      {show("testimonials") && testimonials.length === 0 && editorHints() && (
         <Shell id="testimonials" className="py-12 md:py-16">
           <div className="flex flex-col gap-8">
             <SectionHeader title={t.testimonialsTitle} />
@@ -181,7 +184,7 @@ export default async function HomePage({ params }: Props) {
         </Shell>
       )}
 
-      {testimonials.length > 0 && (
+      {show("testimonials") && testimonials.length > 0 && (
         <Shell id="testimonials" className="py-12 md:py-16">
           <div className="flex flex-col gap-14">
             <SectionHeader title={t.testimonialsTitle} />
@@ -203,7 +206,7 @@ export default async function HomePage({ params }: Props) {
         </Shell>
       )}
 
-      {hasMarket && (
+      {show("market") && hasMarket && (
         <Shell id="market" className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} />
@@ -212,7 +215,7 @@ export default async function HomePage({ params }: Props) {
         </Shell>
       )}
 
-      {((!showReach && proof.length > 0) || apps.length > 0) && (
+      {show("apps") && ((!showReach && proof.length > 0) || apps.length > 0) && (
         <Shell id="proof" className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.proofEyebrow} title={t.proofTitle} />
@@ -229,13 +232,16 @@ export default async function HomePage({ params }: Props) {
 
       {/* The platform's modules are on /platform; the product showcase above already walks through them. */}
 
+      {show("flow") && (
       <Shell className="py-12 md:py-16">
         <div className="flex flex-col gap-16">
           <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} align="center" />
           <FlowStory t={t} products={flowProducts} exchanges={exchangeLogos(data.logos.parties)} />
         </div>
       </Shell>
+      )}
 
+      {show("consortium") && (
       <Shell className="py-12 md:py-16">
         <div className="flex flex-col gap-14">
           <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
@@ -245,18 +251,21 @@ export default async function HomePage({ params }: Props) {
           <LogoWall members={data.members} size="sm" />
         </div>
       </Shell>
+      )}
 
+      {show("principles") && (
       <Shell className="py-12 md:py-16">
         <div className="flex flex-col gap-14">
           <SectionHeader title={t.principlesTitle} />
           <Principles t={t} />
         </div>
       </Shell>
+      )}
 
       {/* Sections added in Admin → Pages → Home appear here. */}
       {ctx && <Sections sections={sections} ctx={ctx} />}
 
-      {events.length > 0 && (
+      {show("events") && events.length > 0 && (
         <Shell className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
             <div className="flex flex-wrap items-end justify-between gap-6">

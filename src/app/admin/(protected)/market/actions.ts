@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { clearMarketInfoCache, dhakaToday, testFeed } from "@/lib/market/data";
+import { clearMarketInfoCache, dhakaToday, REFRESH_CHOICES, REFRESH_KEY, testFeed } from "@/lib/market/data";
 import { saveShares, type ShareInput } from "@/lib/market/share";
 import { HEADLINE_SHARE_KEY } from "@/lib/content/leaders";
 import { checkbox, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
@@ -180,4 +180,15 @@ export async function saveHeadlineShare(_prev: MarketState, formData: FormData):
   await db.siteSetting.upsert({ where: { key: HEADLINE_SHARE_KEY }, update: { value, updatedById: admin.id }, create: { key: HEADLINE_SHARE_KEY, value, updatedById: admin.id } });
   refresh();
   return { ok: true, savedAt: Date.now(), message: `Saved: ${value.pct}% overall${value.asOf ? ` (as of ${value.asOf})` : ""}.` };
+}
+
+/** How often DSE/CSE prices refresh on the site: 15, 30 or 60 seconds. */
+export async function saveRefreshInterval(_prev: MarketState, formData: FormData): Promise<MarketState> {
+  const admin = await requireAdmin();
+  const seconds = Number(formData.get("refreshSeconds"));
+  if (!(REFRESH_CHOICES as readonly number[]).includes(seconds)) return { errors: { refreshSeconds: "Choose 15, 30 or 60 seconds." }, message: "Please fix the highlighted field." };
+  const value = { seconds };
+  await db.siteSetting.upsert({ where: { key: REFRESH_KEY }, update: { value, updatedById: admin.id }, create: { key: REFRESH_KEY, value, updatedById: admin.id } });
+  refresh();
+  return { ok: true, savedAt: Date.now(), message: `Saved: prices refresh every ${seconds} seconds.` };
 }

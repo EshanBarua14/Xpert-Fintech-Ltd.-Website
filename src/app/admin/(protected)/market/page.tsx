@@ -1,8 +1,8 @@
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { dhakaToday, liveMarketTurnover, marketMode } from "@/lib/market/data";
+import { DEFAULT_REFRESH, dhakaToday, liveMarketTurnover, marketMode, REFRESH_KEY } from "@/lib/market/data";
 import { ConfirmButton } from "@/components/admin/AdminUi";
-import { HeadlineShareForm, MarketGoalForm, MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
+import { RefreshIntervalForm, HeadlineShareForm, MarketGoalForm, MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
 import { getHeadlineShare, readGoal } from "@/lib/content/leaders";
 import { clearMarketGoal, deleteMarketShare } from "./actions";
 
@@ -17,6 +17,8 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
   await requireAdmin();
   const { edit } = await searchParams;
   const headline = await getHeadlineShare();
+  const refreshRow = await db.siteSetting.findUnique({ where: { key: REFRESH_KEY } });
+  const refreshSeconds = Number((refreshRow?.value as { seconds?: unknown } | null)?.seconds) || DEFAULT_REFRESH;
   const [source, shares, goalRow] = await Promise.all([
     db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }),
     db.marketShare.findMany({ orderBy: [{ tradeDate: "desc" }, { exchange: "asc" }], take: 60 }),
@@ -152,6 +154,15 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section id="refresh" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">
+        <h2 className="font-display text-xl font-semibold">Refresh interval</h2>
+        <p className="text-sm text-text-secondary">
+          How often the ticker, hero indices, market cards and price boards update. The server reads DSE and CSE (or the licensed feed) at most once per
+          interval, however many visitors are on the site; browsers ask for new prices at the same pace while the page is open.
+        </p>
+        <RefreshIntervalForm seconds={refreshSeconds} />
       </section>
 
       <section id="overall-share" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">

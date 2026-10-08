@@ -7,36 +7,13 @@ import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode 
 import type { NavLink } from "@/lib/content/navigation";
 import type { AppLocale } from "@/lib/i18n/config";
 import { Icon } from "@/components/ui/Icon";
+import { iconFor } from "@/lib/content/nav-icons";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { ThemeToggle } from "./ThemeToggle";
 import { SearchDialog, type SearchLabels } from "./SearchDialog";
 import { cn } from "@/lib/utils/cn";
 
 type Labels = { menu: string; closeMenu: string; mainNavigation: string; language: string; overview: string; toLight: string; toDark: string; search?: SearchLabels };
-
-/** Picks an icon for a menu link from where it goes. */
-function iconFor(href: string | null): string {
-  const h = href ?? "";
-  if (/\/markets(\/|$)/.test(h)) return "chart";
-  if (/trading|oms|#trading/.test(h)) return "exchange";
-  if (/rms|risk/.test(h)) return "shield";
-  if (/ekyc/.test(h)) return "id";
-  if (/bo-account|#bo/.test(h)) return "users";
-  if (/dms/.test(h)) return "document";
-  if (/back-office|#back/.test(h)) return "chart";
-  if (/market-data|#data/.test(h)) return "globe";
-  if (/board|management|people|consortium/.test(h)) return "users";
-  if (/contact/.test(h)) return "mail";
-  if (/#videos|videos/.test(h)) return "video";
-  if (/gallery/.test(h)) return "image";
-  if (/news|insights/.test(h)) return "newspaper";
-  if (/events/.test(h)) return "calendar";
-  if (/careers/.test(h)) return "briefcase";
-  if (/resources/.test(h)) return "book";
-  if (/case-studies/.test(h)) return "document";
-  if (/about|company/.test(h)) return "globe";
-  return "network";
-}
 
 function ItemLink({
   item,
@@ -73,7 +50,7 @@ function MegaPanel({ item, id, overview, onNavigate }: { item: NavLink; id: stri
         <div className="relative hidden overflow-hidden rounded-2xl border border-fg/10 bg-gradient-to-br from-brand-royal/40 via-navy-800 to-ink-950 p-6 md:flex md:flex-col md:justify-end">
           <div className="grid-fade pointer-events-none absolute inset-0 opacity-50" />
           <span className="relative mb-auto flex size-11 items-center justify-center rounded-2xl bg-fg/10 text-cyan-300">
-            <Icon name={iconFor(item.href)} className="size-5" />
+            <Icon name={item.icon ?? iconFor(item.href)} className="size-5" />
           </span>
           <p className="relative mt-10 font-display text-xl font-semibold">{item.label}</p>
           {item.description && <p className="relative mt-2 text-sm text-text-secondary">{item.description}</p>}
@@ -90,7 +67,7 @@ function MegaPanel({ item, id, overview, onNavigate }: { item: NavLink; id: stri
                 {/* The same glowing line as the active top menu item, drawn in on hover. */}
                 <span aria-hidden="true" className="nav-glow absolute inset-x-4 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-fg/10 bg-fg/[0.04] text-brand-sky transition-colors group-hover:border-brand-sky/50 group-hover:text-cyan-300">
-                  <Icon name={iconFor(child.href)} className="size-[18px]" />
+                  <Icon name={child.icon ?? iconFor(child.href)} className="size-[18px]" />
                 </span>
                 <span className="flex flex-col gap-0.5">
                   <span className="text-sm font-semibold text-text-primary">{child.label}</span>
@@ -303,7 +280,7 @@ export function HeaderClient({
                       {item.children.map((child) => (
                         <li key={child.id}>
                           <ItemLink item={child} onNavigate={() => setMenuOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-2 text-text-secondary hover:bg-fg/5 hover:text-fg">
-                            <Icon name={iconFor(child.href)} className="size-4 text-brand-sky" />
+                            <Icon name={child.icon ?? iconFor(child.href)} className="size-4 text-brand-sky" />
                             {child.label}
                           </ItemLink>
                         </li>

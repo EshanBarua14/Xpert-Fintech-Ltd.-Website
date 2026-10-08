@@ -166,3 +166,11 @@ Admin → Site text lists every button, label, heading and message on the websit
 Edits are stored in the database (setting `site.text`), loaded into memory when the server starts and refreshed at most once a minute, so with several server processes every one picks an edit up within a minute. The defaults stay in `src/messages/en.json` and `bn.json`.
 
 The company name in the header and footer comes from Admin → Settings; the tagline ("Connect The Future") and department names are in Site text.
+
+## Design (colours, icons, home sections)
+
+Admin → Design sets the site colours (buttons, accents, highlights, separately for dark and light), the people-card group colours, each product's colours and symbol (used for its mark until a logo is uploaded, its device display and its automation flow), the icon of each menu link, and which home-page sections show. Empty fields keep the built-in look; "Reset to the built-in design" clears everything. Words are edited in Admin → Site text, links in Admin → Navigation, page sections in Admin → Pages.
+
+## Price refresh
+
+Admin → Market data → Refresh interval: 15, 30 or 60 seconds. The server reads DSE and CSE (or the licensed feed) at most once per interval for all visitors, and browsers ask for new prices at the same pace while a page is open.

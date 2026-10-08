@@ -1281,3 +1281,40 @@ html {
     text-wrap: wrap;
   }
 }
+
+/* ── Product device display: web, tablet and phone in perspective ── */
+.device-stage { perspective: 1600px; }
+.device-scene { transform-style: preserve-3d; transform: rotateX(8deg) rotateY(-14deg); transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1); }
+.device-stage:hover .device-scene { transform: rotateX(4deg) rotateY(-6deg); }
+.device { transform-style: preserve-3d; animation: device-float 7s ease-in-out infinite; }
+.device-web { transform: translateZ(-40px); }
+.device-tab { transform: translateZ(60px); animation-delay: -2.3s; }
+.device-phone { transform: translateZ(110px); animation-delay: -4.6s; }
+@keyframes device-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .device { animation: none; }
+  .device-scene { transition: none; }
+}
+
+/* ── Automation flow: the active step's packet and node pulse ── */
+.auto-packet { transition: left 900ms cubic-bezier(0.65, 0, 0.35, 1), top 900ms cubic-bezier(0.65, 0, 0.35, 1); }
+.auto-node-on { animation: auto-pulse 1.6s ease-out infinite; }
+@keyframes auto-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--p-to) 55%, transparent); }
+  100% { box-shadow: 0 0 0 14px transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auto-packet { transition: none; }
+  .auto-node-on { animation: none; }
+}
+@media (min-width: 48rem) {
+  .auto-grid { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+}
+.eco-spin-slow { animation: eco-dash 2.4s linear infinite; }
+@keyframes eco-dash { to { stroke-dashoffset: -28; } }
+@media (max-width: 40rem) {
+  .device-scene { transform: rotateX(6deg) rotateY(-8deg) scale(0.94); }
+}

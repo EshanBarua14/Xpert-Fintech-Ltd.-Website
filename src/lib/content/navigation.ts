@@ -14,6 +14,8 @@ export type NavLink = {
   newTab: boolean;
   isCta: boolean;
   children: NavLink[];
+  /** Icon chosen in Admin → Design → Menu icons (else picked from where the link goes). */
+  icon?: string;
 };
 
 type Translation = { locale: string; label: string; description: string | null };

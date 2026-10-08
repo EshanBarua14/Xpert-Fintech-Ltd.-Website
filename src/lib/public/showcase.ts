@@ -5,6 +5,7 @@ import { publishedWhere } from "@/lib/db/publishing";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { VisualKind } from "@/components/flagship/Visuals";
 import { mediaMap } from "./content";
+import { getDesign } from "@/lib/content/design";
 import { pick } from "./text";
 
 /** Illustration used when a product has no hero image or screenshot yet. */
@@ -28,6 +29,12 @@ export type ShowcaseProduct = {
   href: string;
   visual: VisualKind;
   image: { url: string; alt: string; width: number | null; height: number | null } | null;
+  /** Up to three images for the web, tablet and phone screens (hero image first, then screenshots). */
+  shots: { url: string; alt: string; width: number | null; height: number | null }[];
+  /** Product logo (Admin → Products → Product logo). */
+  logo: { url: string; width: number | null; height: number | null } | null;
+  /** Colours and symbol from Admin → Design → Products. */
+  look: { from?: string; to?: string; icon?: string } | null;
   capabilities: string[];
   steps: string[];
 };
@@ -44,13 +51,13 @@ export const getShowcase = cache(async (locale: AppLocale): Promise<ShowcaseProd
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
         include: { translations: true },
       },
-      media: { where: { isHidden: false, kind: "SCREENSHOT" }, orderBy: { sortOrder: "asc" }, take: 1 },
+      media: { where: { isHidden: false, kind: "SCREENSHOT" }, orderBy: { sortOrder: "asc" }, take: 3 },
     },
   });
-  const images = await mediaMap(rows.map((r) => r.heroMediaId ?? r.media[0]?.mediaId), locale);
-  const order = ["PLATFORM", "MODULE", "PRODUCT", "INTEGRATION", "CAPABILITY", "SERVICE"];
+  const design = await getDesign();
+  const images = await mediaMap(rows.flatMap((r) => [r.heroMediaId, r.iconMediaId, ...r.media.map((m) => m.mediaId)]), locale);
+  // In the order set in Admin → Products.
   return rows
-    .sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type) || a.sortOrder - b.sortOrder)
     .map((r): ShowcaseProduct | null => {
       const tr = pick(r.translations, locale);
       if (!tr) return null;
@@ -71,6 +78,12 @@ export const getShowcase = cache(async (locale: AppLocale): Promise<ShowcaseProd
         href: `/${own ? locale : "en"}/products/${(own ?? tr).slug}`,
         visual: visualForSlug(tr.slug),
         image,
+        shots: [r.heroMediaId, ...r.media.map((m) => m.mediaId)]
+          .map((id) => (id ? images.get(id) : undefined))
+          .filter((x): x is NonNullable<typeof x> => Boolean(x))
+          .slice(0, 3),
+        logo: r.iconMediaId ? (images.get(r.iconMediaId) ?? null) : null,
+        look: (r.key && design.products[r.key]) || null,
         capabilities: titles("CAPABILITY").slice(0, 4),
         steps: titles("WORKFLOW_STEP").slice(0, 6),
       };

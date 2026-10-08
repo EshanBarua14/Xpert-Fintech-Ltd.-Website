@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import type { MarketPayload } from "@/lib/market/types";
 
-const POLL_MS = 20_000;
+/** Default poll interval; the server tells the real one (Admin → Market data: 15, 30 or 60 s). */
+let pollMs = 30_000;
 
 /*
  * One shared poller for every market widget on the page (ticker, status line,
- * Market pulse): a single request to /api/market every 20 s while the tab is
+ * Market pulse): a single request to /api/market every 15–60 s (Admin → Market data) while the tab is
  * visible, however many widgets are mounted.
  */
 type Moves = Record<string, "up" | "down">;
@@ -38,6 +39,7 @@ async function load() {
     const res = await fetch("/api/market", { cache: "no-store" });
     if (res.ok) {
       const next = (await res.json()) as MarketPayload;
+      if (next.refreshSeconds && next.refreshSeconds >= 10) pollMs = next.refreshSeconds * 1000;
       const old = new Map<string, number>();
       for (const ex of state.data.snapshot?.exchanges ?? []) for (const q of ex.quotes) old.set(`${ex.exchange}:${q.symbol}`, q.ltp);
       const moves: Moves = {};
@@ -60,7 +62,7 @@ async function load() {
 
 function schedule() {
   clearTimeout(timer);
-  if (listeners.size) timer = setTimeout(load, POLL_MS);
+  if (listeners.size) timer = setTimeout(load, pollMs);
 }
 
 function onVisible() {
@@ -75,6 +77,7 @@ export function useMarket(initial: MarketPayload) {
 
   useEffect(() => {
     if (initial.mode === "none") return;
+    if (initial.refreshSeconds && initial.refreshSeconds >= 10) pollMs = initial.refreshSeconds * 1000;
     if (!state) state = { data: initial, moves: {} };
     else if (richer(state.data, initial) !== state.data) emit({ ...state, data: initial });
     listeners.add(setCurrent);
@@ -82,7 +85,7 @@ export function useMarket(initial: MarketPayload) {
       document.addEventListener("visibilitychange", onVisible);
       // The page may be cached for a few minutes: refresh at once if the snapshot is old.
       const asOf = state.data.snapshot ? Date.parse(state.data.snapshot.asOf) : 0;
-      if (!asOf || Date.now() - asOf > 30_000) void load();
+      if (!asOf || Date.now() - asOf > pollMs) void load();
       else schedule();
     }
     return () => {

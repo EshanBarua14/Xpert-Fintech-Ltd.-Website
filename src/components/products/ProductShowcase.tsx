@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { CapabilityVisual } from "@/components/flagship/Visuals";
+import { DeviceShowcase } from "./DeviceShowcase";
+import { ProductMark, productVars } from "./ProductMark";
 import type { ShowcaseProduct } from "@/lib/public/showcase";
 import { cn } from "@/lib/utils/cn";
 
@@ -96,16 +96,18 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
               onClick={() => choose(i)}
               onKeyDown={(e) => onKey(e, i)}
               className={cn(
-                "group relative flex min-w-[13rem] shrink-0 flex-col gap-1 overflow-hidden rounded-2xl border px-5 py-4 text-left transition-[border-color,background-color] duration-300 lg:min-w-0",
+                "group relative flex min-w-[15rem] shrink-0 flex-col gap-1 overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-[border-color,background-color] duration-300 lg:min-w-0",
                 on ? "border-brand-sky/50 bg-brand-sky/[0.08]" : "border-fg/10 bg-fg/[0.02] hover:border-fg/25",
               )}
             >
-              <span className="flex items-center gap-2 text-[max(11px,0.6875rem)] font-semibold text-text-secondary">
-                <span className={cn("size-1.5 rounded-full transition-colors", on ? "bg-cyan-300 shadow-[0_0_10px_2px_rgb(103_232_249/0.6)]" : "bg-fg/25")} />
-                {labels.typeLabels[item.type] ?? item.type}
-              </span>
-              <span className={cn("font-display text-base leading-snug font-semibold transition-colors", on ? "text-text-primary" : "text-text-secondary group-hover:text-text-primary")}>
-                {item.name}
+              <span className="flex items-center gap-3">
+                <ProductMark productKey={item.key} logo={item.logo} look={item.look} size="sm" className={cn("transition-[filter,opacity]", !on && "opacity-80 saturate-50 group-hover:opacity-100 group-hover:saturate-100")} />
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="text-[max(11px,0.6875rem)] font-semibold text-text-secondary">{labels.typeLabels[item.type] ?? item.type}</span>
+                  <span className={cn("font-display text-base leading-snug font-semibold transition-colors", on ? "text-text-primary" : "text-text-secondary group-hover:text-text-primary")}>
+                    {item.name}
+                  </span>
+                </span>
               </span>
               {on && auto && !reduce && products.length > 1 && (
                 <span
@@ -127,31 +129,12 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
         aria-labelledby={`showcase-tab-${p.id}`}
         className="beam glass relative overflow-hidden rounded-[2rem] p-2"
       >
-        <div key={p.id} className="showcase-stage relative grid gap-0 overflow-hidden rounded-[1.6rem] bg-navy-900/70 xl:grid-cols-[1.15fr_1fr]">
-          {/* Interface window */}
+        <div key={p.id} style={productVars(p.key, p.look)} className="showcase-stage relative grid gap-0 overflow-hidden rounded-[1.6rem] bg-navy-900/70 xl:grid-cols-[1.25fr_1fr]">
+          {/* The product on web, tablet and phone, with its workflow underneath */}
           <div className="relative flex flex-col border-b border-fg/[0.06] xl:border-r xl:border-b-0">
-            <div className="flex items-center gap-2 border-b border-fg/[0.06] px-4 py-3">
-              <span className="size-2.5 rounded-full bg-fg/15" />
-              <span className="size-2.5 rounded-full bg-fg/15" />
-              <span className="size-2.5 rounded-full bg-fg/15" />
-              <span className="ml-3 truncate font-mono text-[max(11px,0.6875rem)] tracking-wider text-text-secondary">{p.name}</span>
-            </div>
-            <div className="relative flex min-h-[18rem] flex-1 items-center justify-center p-5 md:min-h-[22rem]">
+            <div className="relative flex flex-1 items-center justify-center p-6 md:p-8">
               <div className="grid-fade pointer-events-none absolute inset-0 opacity-50" />
-              {p.image ? (
-                <Image
-                  src={p.image.url}
-                  alt={p.image.alt || p.name}
-                  width={p.image.width ?? 1280}
-                  height={p.image.height ?? 800}
-                  sizes="(min-width: 1280px) 40vw, (min-width: 1024px) 60vw, 100vw"
-                  className="showcase-shot relative h-auto max-h-[24rem] w-full rounded-xl object-contain shadow-[0_30px_80px_-30px_rgb(0_0_0/0.8)] ring-1 ring-fg/10"
-                />
-              ) : (
-                <div className="showcase-shot relative h-full min-h-[14rem] w-full">
-                  <CapabilityVisual kind={p.visual} />
-                </div>
-              )}
+              <DeviceShowcase name={p.name} productKey={p.key} logo={p.logo} look={p.look} visual={p.visual} shots={p.shots} size="md" className="showcase-shot relative max-w-[38rem]" />
             </div>
             {p.steps.length > 1 && (
               <div className="border-t border-fg/[0.06] px-5 py-4">
@@ -159,7 +142,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
                 <ol className="showcase-lane relative flex flex-wrap items-center gap-x-1.5 gap-y-2">
                   {p.steps.map((s, i) => (
                     <li key={s} className="showcase-step flex items-center gap-1.5" style={{ animationDelay: `${150 + i * 120}ms` }}>
-                      <span className="rounded-full border border-brand-sky/30 bg-brand-sky/10 px-2.5 py-1 font-mono text-[max(11px,0.6875rem)] text-cyan-300">{s}</span>
+                      <span className="rounded-full border border-[color-mix(in_srgb,var(--p-to)_40%,transparent)] bg-[color-mix(in_srgb,var(--p-to)_12%,transparent)] px-2.5 py-1 font-mono text-[max(11px,0.6875rem)] text-text-primary">{s}</span>
                       {i < p.steps.length - 1 && <span aria-hidden="true" className="showcase-arrow text-text-secondary">→</span>}
                     </li>
                   ))}
@@ -171,6 +154,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
           {/* Story */}
           <div className="flex flex-col gap-6 p-7 md:p-9">
             <div className="flex flex-col gap-3">
+              <ProductMark productKey={p.key} logo={p.logo} look={p.look} name={p.name} size="lg" className="showcase-rise" />
               <h3 className="showcase-rise font-display text-3xl leading-[1.05] font-semibold tracking-[-0.025em] text-balance md:text-4xl">{p.name}</h3>
               {p.tagline && <p className="showcase-rise text-gradient-brand text-lg font-medium" style={{ animationDelay: "80ms" }}>{p.tagline}</p>}
               {p.summary && (

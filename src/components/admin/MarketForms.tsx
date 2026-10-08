@@ -1,9 +1,9 @@
 "use client";
 
-import { saveHeadlineShare, saveMarketGoal, saveMarketShare, saveMarketSource, testMarketFeed, type MarketState } from "@/app/admin/(protected)/market/actions";
+import { saveRefreshInterval, saveHeadlineShare, saveMarketGoal, saveMarketShare, saveMarketSource, testMarketFeed, type MarketState } from "@/app/admin/(protected)/market/actions";
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
-import { TextInput } from "@/components/ui/Field";
+import { Select, TextInput } from "@/components/ui/Field";
 
 export type SourceValues = {
   providerName: string;
@@ -143,6 +143,30 @@ export function HeadlineShareForm({ pct, asOf }: { pct: string; asOf: string }) 
       <div>
         <SubmitButton pending={pending}>Save overall share</SubmitButton>
       </div>
+    </form>
+  );
+}
+
+/** Refresh interval for the ticker, hero indices, market cards and price boards. */
+export function RefreshIntervalForm({ seconds }: { seconds: number }) {
+  const { state, pending, onSubmit } = useActionForm<MarketState>(saveRefreshInterval, {});
+  return (
+    <form onSubmit={onSubmit} className="flex flex-wrap items-end gap-4" noValidate>
+      <div className="min-w-[14rem]">
+        <Select
+          id="refreshSeconds"
+          label="Refresh prices every"
+          defaultValue={String(seconds)}
+          options={[
+            { value: "15", label: "15 seconds" },
+            { value: "30", label: "30 seconds" },
+            { value: "60", label: "60 seconds" },
+          ]}
+          error={state.errors?.refreshSeconds}
+        />
+      </div>
+      <SubmitButton pending={pending}>Save</SubmitButton>
+      <FormMessage message={state.message} isError={!state.ok && Boolean(state.errors)} />
     </form>
   );
 }

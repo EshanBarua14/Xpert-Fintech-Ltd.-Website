@@ -1,6 +1,7 @@
 import { BrandLockup } from "@/components/brand/BrandLockup";
 import { getSiteInfo } from "@/lib/content/settings";
-import { getNavMenu } from "@/lib/content/navigation";
+import { getNavMenu, type NavLink } from "@/lib/content/navigation";
+import { getDesign } from "@/lib/content/design";
 import { getMessages } from "@/lib/i18n/messages";
 import type { AppLocale } from "@/lib/i18n/config";
 import { HeaderClient } from "./HeaderClient";
@@ -11,7 +12,12 @@ import { getPartyLogos } from "@/lib/public/flagship";
 
 /** Header: menu from Admin → Navigation ("header" menu), logo from the brand asset. */
 export async function SiteHeader({ locale }: { locale: AppLocale }) {
-  const [items, info, parties] = await Promise.all([getNavMenu("header", locale), getSiteInfo(locale), getPartyLogos(locale)]);
+  const [rawItems, info, parties, design] = await Promise.all([getNavMenu("header", locale), getSiteInfo(locale), getPartyLogos(locale), getDesign()]);
+  // Menu icons chosen in Admin → Design, matched by the link's path ("products/ost").
+  const pathOf = (href: string | null) => (href ?? "").replace(/^\/(en|bn)(?=\/|$)/, "").replace(/^\/+/, "").replace(/\/+$/, "");
+  const withIcons = (list: NavLink[]): NavLink[] =>
+    list.map((i) => ({ ...i, ...(design.navIcons[pathOf(i.href)] && { icon: design.navIcons[pathOf(i.href)] }), children: withIcons(i.children) }));
+  const items = withIcons(rawItems);
   const t = getMessages(locale);
   const mode = marketMode();
   // The ticker's settings, not an element: HeaderClient renders the ticker itself,

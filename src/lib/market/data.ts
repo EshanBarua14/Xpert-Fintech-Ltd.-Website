@@ -29,9 +29,14 @@ export function marketMode(): Mode {
 }
 
 let cache: { at: number; value: MarketSnapshot | null } | null = null;
-const TTL_MS = 15_000;
 let boardCache: { at: number; value: MarketSnapshot | null } | null = null;
-const BOARD_TTL_MS = 60_000; // be a polite reader: at most one request per exchange per minute
+
+/** How often prices refresh, in seconds (Admin → Market data). Server reads and browser polls both follow it. */
+export const REFRESH_KEY = "market.refreshSeconds";
+export const REFRESH_CHOICES = [15, 30, 60] as const;
+export const DEFAULT_REFRESH = 30;
+let refreshSeconds: number = DEFAULT_REFRESH;
+const TTL = () => refreshSeconds * 1000;
 
 let boardRefresh: Promise<MarketSnapshot | null> | null = null;
 
@@ -63,7 +68,7 @@ function refreshBoard(): Promise<MarketSnapshot | null> {
  * (pages render without prices and the browser fills them in a moment later).
  */
 async function boardSnapshot(waitMs = 1500): Promise<MarketSnapshot | null> {
-  if (boardCache && Date.now() - boardCache.at < BOARD_TTL_MS) return boardCache.value;
+  if (boardCache && Date.now() - boardCache.at < TTL()) return boardCache.value;
   const pending = refreshBoard();
   if (boardCache) return boardCache.value;
   return Promise.race([pending, new Promise<null>((r) => setTimeout(() => r(null), waitMs))]);
@@ -71,7 +76,7 @@ async function boardSnapshot(waitMs = 1500): Promise<MarketSnapshot | null> {
 
 /** Calls the licensed feed adapter. Short cache so many visitors cause one upstream call. */
 async function licensedSnapshot(): Promise<MarketSnapshot | null> {
-  if (cache && Date.now() - cache.at < TTL_MS) return cache.value;
+  if (cache && Date.now() - cache.at < TTL()) return cache.value;
   const url = process.env.MARKET_DATA_API_URL;
   if (!url) return null;
   let value: MarketSnapshot | null = null;
@@ -124,13 +129,21 @@ export async function latestShares(): Promise<ShareFigure[]> {
 }
 
 // Admin settings and share figures change rarely: read them at most every 30 s
-// (browsers poll /api/market every 20 s; saving in the admin clears this at once).
+// (browsers poll /api/market at the refresh interval; saving in the admin clears this at once).
 let infoCache: { at: number; value: Promise<{ source: Awaited<ReturnType<typeof db.marketDataSource.findFirst>>; shares: ShareFigure[] }> } | null = null;
 function settingsAndShares() {
   if (!infoCache || Date.now() - infoCache.at > 30_000) {
     infoCache = {
       at: Date.now(),
-      value: Promise.all([db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }).catch(() => null), latestShares()]).then(([source, shares]) => ({ source, shares })),
+      value: Promise.all([
+        db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }).catch(() => null),
+        latestShares(),
+        db.siteSetting.findUnique({ where: { key: REFRESH_KEY } }).catch(() => null),
+      ]).then(([source, shares, refresh]) => {
+        const v = Number((refresh?.value as { seconds?: unknown } | null)?.seconds);
+        refreshSeconds = (REFRESH_CHOICES as readonly number[]).includes(v) ? v : DEFAULT_REFRESH;
+        return { source, shares };
+      }),
     };
   }
   return infoCache.value;
@@ -174,6 +187,7 @@ export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = 
     delayMinutes: source?.displayDelayMinutes ?? 0,
     snapshot,
     shares,
+    refreshSeconds,
   };
 }
 

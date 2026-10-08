@@ -592,5 +592,9 @@
   "flowStepData": "সরাসরি দাম ও বিশ্লেষণ সিদ্ধান্তে সহায়তা করে",
   "testimonialRatingShort": "{n}/5",
   "flowStepTrade": "বিনিয়োগকারী অনলাইনে বা অ্যাপে লেনদেন করেন",
-  "reachOverall": "ডিএসই ও সিএসই মিলিয়ে"
+  "reachOverall": "ডিএসই ও সিএসই মিলিয়ে",
+  "automationTitle": "যেভাবে কাজ করে, স্বয়ংক্রিয়ভাবে",
+  "automationBody": "প্রতিটি ধাপ নিজে থেকেই চলে এবং পরের ধাপে পৌঁছে দেয়; মাঝে আবার কিছু লিখতে হয় না।",
+  "automationRunning": "চলছে",
+  "automationDone": "সম্পন্ন"
 }

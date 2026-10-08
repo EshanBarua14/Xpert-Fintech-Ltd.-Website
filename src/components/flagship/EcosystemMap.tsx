@@ -235,6 +235,7 @@ export function EcosystemMap({
   focus,
   highlight,
   logos,
+  emphasis,
 }: {
   labels: EcosystemLabels;
   className?: string;
@@ -247,6 +248,8 @@ export function EcosystemMap({
    */
   highlight?: ModuleKey | null;
   logos?: EcosystemLogos;
+  /** A module kept marked (product pages) while the scenes play: "this product". */
+  emphasis?: ModuleKey;
 }) {
   const router = useRouter();
   const stepped = !!labels.steps?.length;
@@ -553,7 +556,7 @@ export function EcosystemMap({
                 <g
                   key={key}
                   className="eco-role cursor-pointer outline-none transition-opacity duration-500 focus-visible:[&>rect:last-of-type]:stroke-[3]"
-                  opacity={on ? 1 : focusModule ? 0.3 : 0.55}
+                  opacity={on || emphasis === key ? 1 : focusModule ? 0.3 : 0.55}
                   tabIndex={0}
                   role={info?.href ? "link" : "button"}
                   aria-label={info?.description ? `${text}: ${info.description}` : text}
@@ -567,6 +570,9 @@ export function EcosystemMap({
                   onClick={() => openModule(key)}
                   onKeyDown={(e) => onPillKey(e, key)}
                 >
+                  {emphasis === key && (
+                    <rect x={x - w / 2 - 6} y={y - 18} width={w + 12} height={36} rx={18} fill="none" stroke="#f0c66e" strokeWidth={1.5} strokeDasharray="3 4" className={reduce ? undefined : "eco-spin-slow"} />
+                  )}
                   {/* Larger invisible hit area for touch */}
                   <rect x={x - w / 2 - 6} y={y - 18} width={w + 12} height={36} fill="transparent" />
                   {pulsing.has(key) && !reduce && (

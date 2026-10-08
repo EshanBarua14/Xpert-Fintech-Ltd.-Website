@@ -29,9 +29,10 @@ export function Shell({ children, className, id }: { children: ReactNode; classN
 }
 
 /**
- * A section's title and lead. On wide screens the lead sits beside the title,
- * bottom-aligned, like a magazine standfirst; narrow containers stack them.
- * `eyebrow` is kept for callers but no longer printed: headings stand alone.
+ * A section's title and its lead line, stacked: the lead sits directly under
+ * the title, on the same left edge, at reading width, so the pair always
+ * reads as one unit at every screen size. `eyebrow` is kept for callers but
+ * not printed: headings stand alone.
  */
 export function SectionHeader({
   title,
@@ -47,30 +48,22 @@ export function SectionHeader({
 }) {
   const centered = align === "center";
   return (
-    <div className={cn("@container w-full", centered && "mx-auto max-w-3xl")}>
-      <div className={cn("grid gap-5", centered ? "justify-items-center text-center" : "@4xl:grid-cols-12 @4xl:items-end @4xl:gap-x-12")}>
-        <H
-          data-reveal
-          style={delay(0)}
-          className={cn(
-            "font-display text-balance text-text-primary",
-            H === "h1" ? "text-[2.75rem] leading-[1.02] md:text-[4.25rem]" : "text-[2.15rem] leading-[1.06] md:text-[3rem]",
-            !centered && body && "@4xl:col-span-7",
-            !centered && !body && "max-w-4xl @4xl:col-span-9",
-          )}
-        >
-          {title}
-        </H>
-        {body && (
-          <p
-            data-reveal
-            style={delay(1)}
-            className={cn("max-w-xl text-[1.0625rem] leading-relaxed text-pretty text-text-secondary md:text-lg", !centered && "@4xl:col-span-5 @4xl:pb-1.5")}
-          >
-            {body}
-          </p>
+    <div className={cn("flex w-full flex-col gap-4", centered ? "mx-auto max-w-3xl items-center text-center" : "items-start text-left")}>
+      <H
+        data-reveal
+        style={delay(0)}
+        className={cn(
+          "max-w-4xl font-display text-balance text-text-primary",
+          H === "h1" ? "text-[2.6rem] leading-[1.04] md:text-[4rem]" : "text-[2.05rem] leading-[1.08] md:text-[2.85rem]",
         )}
-      </div>
+      >
+        {title}
+      </H>
+      {body && (
+        <p data-reveal style={delay(1)} className="max-w-[44rem] text-[1.0625rem] leading-relaxed text-pretty text-text-secondary md:text-lg">
+          {body}
+        </p>
+      )}
     </div>
   );
 }
@@ -205,8 +198,11 @@ export function ecosystemModules(offerings: OfferingLike[], locale: AppLocale): 
 
 /** The ecosystem module that represents a product slug, if any. */
 export function moduleForSlug(slug: string): EcosystemModuleKey | undefined {
-  return ECOSYSTEM_MODULES.find((k) => MODULE_SLUG[k] === slug);
+  return ECOSYSTEM_MODULES.find((k) => MODULE_SLUG[k] === slug) ?? INVESTOR_CHANNELS[slug];
 }
+
+/** Investor-facing products reach the market through the OMS: the map marks it on their pages. */
+const INVESTOR_CHANNELS: Record<string, EcosystemModuleKey> = { ost: "OMS", "smart-stock": "OMS" };
 
 export function FlagshipHero({
   t,

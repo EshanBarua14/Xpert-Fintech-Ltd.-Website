@@ -37,15 +37,14 @@ const BN: Locale = "bn";
 const WITH_DEPLOYMENTS = process.argv.includes("--with-deployments");
 
 /** Offerings published by this seed. Everything else stays as it is. */
-const PUBLISH = new Set([
-  "trading-platform",
-  "rms",
-  "dms",
-  "bo-account-opening",
-  "back-office",
-  "market-data",
-  "exchange-connectivity",
-]);
+const PUBLISH = new Set(["trading-platform", "ost", "smart-stock", "back-office", "bo-account-opening", "dms"]);
+
+/**
+ * XFL's product line-up (8 Oct 2026), in the order shown everywhere. RMS,
+ * Market Data and Exchange Connectivity are no longer listed as products.
+ */
+const LINEUP = ["trading-platform", "ost", "smart-stock", "back-office", "bo-account-opening", "ekyc", "dms"];
+const RETIRED = ["rms", "market-data", "exchange-connectivity"];
 
 type Text = { en: string; bn?: string };
 type Item = { title: Text; body?: Text; icon?: string };
@@ -294,7 +293,7 @@ const CONTENT: OfferingContent[] = [
   },
   // Confirmed, details pending: created as drafts with names only.
   { key: "smart-stock", type: "PRODUCT", slug: "smart-stock", name: t("Smart Stock", "স্মার্ট স্টক") },
-  { key: "ost", type: "PRODUCT", slug: "ost", name: t("OST", "ওএসটি") },
+  { key: "ost", type: "PRODUCT", slug: "ost", name: t("Online Share Trading (OST)", "অনলাইন শেয়ার ট্রেডিং (ওএসটি)") },
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -368,6 +367,69 @@ async function upsertOffering(c: OfferingContent) {
     await db.offering.update({ where: { id: offering.id }, data: { status: "PUBLISHED", publishAt: null } });
   }
   return offering;
+}
+
+/**
+ * Applies the line-up once (a marker in Settings records it), so later edits in
+ * Admin → Products are not undone: the seven products published in order, the
+ * retired ones moved to drafts, and the ecosystem nodes to match.
+ */
+async function applyProductLineup() {
+  const MARK = "seed.product-lineup-2026-10-08";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  for (const [i, key] of LINEUP.entries()) {
+    await db.offering.updateMany({ where: { key, deletedAt: null }, data: { status: "PUBLISHED", publishAt: null, sortOrder: i + 1, parentId: null, hasOwnPage: true } });
+  }
+  await db.offering.updateMany({ where: { key: { in: RETIRED } }, data: { status: "DRAFT" } });
+  // Names XFL uses for them.
+  const rename: [string, string, string][] = [
+    ["trading-platform", "Xpert Trading OMS", "এক্সপার্ট ট্রেডিং ওএমএস"],
+    ["ost", "Online Share Trading (OST)", "অনলাইন শেয়ার ট্রেডিং (ওএসটি)"],
+  ];
+  for (const [key, en, bn] of rename) {
+    const o = await db.offering.findUnique({ where: { key } });
+    if (!o) continue;
+    await db.offeringTranslation.updateMany({ where: { offeringId: o.id, locale: EN }, data: { name: en } });
+    await db.offeringTranslation.updateMany({ where: { offeringId: o.id, locale: BN }, data: { name: bn } });
+  }
+  await db.ecosystemNode.updateMany({ where: { key: { in: ["ost", "ekyc"] } }, data: { status: "PUBLISHED" } });
+  await db.ecosystemNode.updateMany({ where: { key: "rms" }, data: { status: "DRAFT" } });
+  // The Products menu: the seven in order, the retired ones hidden, missing ones added.
+  const MENU: Record<string, { en: string; bn: string; descEn: string; descBn: string }> = {
+    ost: { en: "Online Share Trading (OST)", bn: "অনলাইন শেয়ার ট্রেডিং (ওএসটি)", descEn: "Online share trading.", descBn: "অনলাইনে শেয়ার লেনদেন।" },
+    "smart-stock": { en: "Smart Stock", bn: "স্মার্ট স্টক", descEn: "", descBn: "" },
+  };
+  const parents = await db.navItem.findMany({ where: { href: "products", parentId: null } });
+  for (const parent of parents) {
+    const kids = await db.navItem.findMany({ where: { parentId: parent.id } });
+    await db.navItem.updateMany({ where: { parentId: parent.id, href: { in: RETIRED.map((k) => `products/${k}`) } }, data: { isHidden: true } });
+    for (const [i, key] of LINEUP.entries()) {
+      const href = `products/${key}`;
+      const kid = kids.find((k) => k.href === href);
+      if (kid) {
+        await db.navItem.update({ where: { id: kid.id }, data: { sortOrder: i, isHidden: false } });
+        if (key === "trading-platform") {
+          await db.navItemTranslation.updateMany({ where: { itemId: kid.id, locale: EN }, data: { label: "Xpert Trading OMS" } });
+          await db.navItemTranslation.updateMany({ where: { itemId: kid.id, locale: BN }, data: { label: "এক্সপার্ট ট্রেডিং ওএমএস" } });
+        }
+      }
+      else if (MENU[key]) {
+        const m = MENU[key]!;
+        await db.navItem.create({
+          data: {
+            menuId: parent.menuId,
+            parentId: parent.id,
+            linkType: "INTERNAL",
+            href,
+            sortOrder: i,
+            translations: { create: [{ locale: EN, label: m.en, description: m.descEn || null }, { locale: BN, label: m.bn, description: m.descBn || null }] },
+          },
+        });
+      }
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log(`• Products: ${LINEUP.length} listed in XFL's order; RMS, Market Data and Exchange Connectivity moved to drafts`);
 }
 
 // ── People ───────────────────────────────────────────────────────────────────
@@ -1121,11 +1183,12 @@ async function main() {
   const ids = new Map<string, string>();
   for (const c of CONTENT) ids.set(c.key, (await upsertOffering(c)).id);
   for (const c of CONTENT) {
-    if (c.parent && ids.get(c.parent)) {
+    if (c.parent && ids.get(c.parent) && !LINEUP.includes(c.key)) {
       await db.offering.update({ where: { key: c.key }, data: { parentId: ids.get(c.parent) } });
     }
   }
   console.log(`• Products: ${[...PUBLISH].join(", ")} published${bnItemsAdded ? `; Bangla added to ${bnItemsAdded} product item(s)` : ""}`);
+  await applyProductLineup();
   await markPlaceholders();
   await seedPeople();
   await seedRoster();

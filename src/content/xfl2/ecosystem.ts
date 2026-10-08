@@ -76,7 +76,7 @@ export const ecosystemNodes: EcosystemNode[] = [
   { key: "oms", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "trading-platform", mobileOrder: 20, layoutX: 0.6, layoutY: 0.15,
     label: { en: "OMS", bn: "ওএমএস" },
     description: { en: "Order management for brokerage trading on DSE and CSE.", bn: "ডিএসই ও সিএসইতে ব্রোকারেজ লেনদেনের অর্ডার ব্যবস্থাপনা।" } },
-  { key: "rms", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "rms", mobileOrder: 21, layoutX: 0.6, layoutY: 0.3,
+  { key: "rms", layer: "PRODUCT", status: "DRAFT", offeringKey: "rms", mobileOrder: 21, layoutX: 0.6, layoutY: 0.3,
     label: { en: "RMS", bn: "আরএমএস" },
     description: { en: "Risk controls applied to orders before and after they reach the market.", bn: "বাজারে পৌঁছানোর আগে ও পরে অর্ডারে প্রয়োগ করা ঝুঁকি নিয়ন্ত্রণ।" } },
   { key: "dms", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "dms", mobileOrder: 22, layoutX: 0.6, layoutY: 0.45,
@@ -93,9 +93,9 @@ export const ecosystemNodes: EcosystemNode[] = [
     editorNote: "Description pending from XFL. Node shows label only until then." },
 
   // Products (pending)
-  { key: "ost", layer: "PRODUCT", status: "DRAFT", offeringKey: "ost", mobileOrder: 25, layoutX: 0.6, layoutY: 0.88,
-    label: { en: "OST" }, editorNote: "Confirmed product; details pending from XFL." },
-  { key: "ekyc", layer: "PRODUCT", status: "DRAFT", offeringKey: "ekyc", mobileOrder: 26, layoutX: 0.5, layoutY: 0.68,
+  { key: "ost", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "ost", mobileOrder: 25, layoutX: 0.6, layoutY: 0.88,
+    label: { en: "OST", bn: "ওএসটি" }, editorNote: "Online Share Trading. Description pending from XFL." },
+  { key: "ekyc", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "ekyc", mobileOrder: 26, layoutX: 0.5, layoutY: 0.68,
     label: { en: "eKYC", bn: "ই-কেওয়াইসি" }, editorNote: "Pending XFL confirmation." },
 
   // Institutions
@@ -118,6 +118,9 @@ export const ecosystemEdges: EcosystemEdge[] = [
   { from: "oms", to: "rms", kind: "RISK" },
   { from: "rms", to: "dse", kind: "ORDER" },
   { from: "rms", to: "cse", kind: "ORDER" },
+  // Orders reach the exchanges from the OMS (RMS is no longer shown as a separate product).
+  { from: "oms", to: "dse", kind: "ORDER" },
+  { from: "oms", to: "cse", kind: "ORDER" },
   { from: "oms", to: "brokerages", kind: "ORDER" },
   { from: "brokerages", to: "investors", kind: "ORDER" },
   { from: "investors", to: "bo-account-opening", kind: "ONBOARDING" },

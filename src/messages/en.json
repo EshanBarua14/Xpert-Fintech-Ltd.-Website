@@ -129,7 +129,7 @@
   "flowTitle": "Every order, checked before it reaches the exchange.",
   "flowBody": "Orders move from the investor to the exchange through one connected path, with risk checks built in.",
   "flowStep1": "Investor places an order on web or mobile",
-  "flowStep2": "The order is placed on web or mobile and validated",
+  "flowStep2": "The OMS checks the order against limits and routes it",
   "flowStep3": "RMS checks limits and exposure",
   "flowStep4": "It goes to DSE or CSE over certified FIX links",
   "flowStep5": "Back office settles and reports",
@@ -173,7 +173,7 @@
   "ecoScene3": "Settle",
   "ecoScene4": "Oversee",
   "ecoText1": "An investor applies online and is verified; the brokerage, as a depository participant, registers the BO account with CDBL and keeps the documents on file.",
-  "ecoText2": "Orders from web and mobile pass the broker’s risk checks (RMS), then the OMS routes them to DSE or CSE for matching.",
+  "ecoText2": "Orders from web and mobile pass the broker’s risk checks in the OMS, which then routes them to DSE or CSE for matching.",
   "ecoText3": "After a trade, the exchange clears it: shares move between BO accounts at CDBL, and money moves through the settlement banks.",
   "ecoText4": "BSEC regulates the whole market: the stock exchanges, the central depository and every brokerage house.",
   "ecoHub": "Brokerage house",
@@ -580,7 +580,7 @@
   "ecoStep3b": "Shares move between BO accounts at CDBL",
   "ecoStep3c": "Money settles through the banks",
   "ecoStep4a": "BSEC regulates exchanges and CDBL",
-  "ecoStep4b": "RMS and back office report to the regulator",
+  "ecoStep4b": "The back office reports to the regulator",
   "ecoStepsLabel": "Steps in this scene",
   "credentialsTitle": "Memberships and exchange certifications",
   "credentialsBy": "{org}",
@@ -590,5 +590,6 @@
   "flowStepOpen": "The investor opens a BO account online",
   "flowStepDocs": "KYC documents are filed and kept on record",
   "flowStepData": "Live prices and research inform the decision",
-  "testimonialRatingShort": "{n}/5"
+  "testimonialRatingShort": "{n}/5",
+  "flowStepTrade": "The investor trades online or on the app"
 }

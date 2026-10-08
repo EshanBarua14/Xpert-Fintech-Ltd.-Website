@@ -343,7 +343,7 @@ const CAPABILITY_KEYS: { key: VisualKind; icon: string; title: keyof Messages; b
 
 /** The seven capabilities; each links to its product page once published, else to the platform page. */
 /** Capabilities shown only once their product is published (pending products stay off the site). */
-const HIDE_UNTIL_PUBLISHED = new Set(["ekyc"]);
+const HIDE_UNTIL_PUBLISHED = new Set(["ekyc", "rms", "market-data"]);
 
 export function capabilities(t: Messages, locale: AppLocale, publishedSlugs: Set<string>): Capability[] {
   return CAPABILITY_KEYS.filter((c) => !HIDE_UNTIL_PUBLISHED.has(c.slug) || publishedSlugs.has(c.slug)).map((c) => ({
@@ -405,10 +405,10 @@ type FlowProductInfo = { name: string; href: string; logo: FlowLogo | null };
 const FLOW: { keys: string[]; icon: string; text: keyof Messages; exchanges?: boolean }[] = [
   { keys: ["bo-account-opening", "ekyc"], icon: "users", text: "flowStepOpen" },
   { keys: ["dms"], icon: "document", text: "flowStepDocs" },
-  { keys: ["market-data"], icon: "globe", text: "flowStepData" },
+  { keys: ["ost", "smart-stock"], icon: "globe", text: "flowStepTrade" },
   { keys: ["trading-platform"], icon: "exchange", text: "flowStep2" },
-  { keys: ["rms"], icon: "shield", text: "flowStep3" },
-  { keys: ["exchange-connectivity"], icon: "network", text: "flowStep4", exchanges: true },
+  // The exchanges are not an Xpert product: this step always shows, with the DSE and CSE logos.
+  { keys: [], icon: "network", text: "flowStep4", exchanges: true },
   { keys: ["back-office"], icon: "chart", text: "flowStep5" },
 ];
 
@@ -429,22 +429,22 @@ export function FlowStory({
   exchanges?: { DSE?: FlowLogo; CSE?: FlowLogo };
 }) {
   const steps = products && Object.keys(products).length
-    ? FLOW.map((f) => ({ ...f, items: f.keys.map((k) => products[k]).filter((p): p is FlowProductInfo => Boolean(p)) })).filter((f) => f.items.length)
+    ? FLOW.map((f) => ({ ...f, items: f.keys.map((k) => products[k]).filter((p): p is FlowProductInfo => Boolean(p)) })).filter((f) => f.items.length || f.exchanges)
     : [];
   if (!steps.length) return <FlowStoryShort t={t} />;
-  const cols = steps.length >= 7 ? "xl:grid-cols-7" : steps.length === 6 ? "xl:grid-cols-6" : "xl:grid-cols-5";
+  const cols = steps.length >= 7 ? "lg:grid-cols-4 xl:grid-cols-7" : steps.length === 6 ? "lg:grid-cols-3 xl:grid-cols-6" : "lg:grid-cols-5";
   return (
     <div className="relative">
       {/* Connecting rail with travelling light (wide screens, one row) */}
       <div aria-hidden="true" className="absolute top-10 right-[6%] left-[6%] hidden h-px bg-gradient-to-r from-transparent via-fg/15 to-transparent xl:block">
         <span className="absolute -top-[2px] h-[5px] w-24 rounded-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent" style={{ animation: "lane 6s linear infinite" }} />
       </div>
-      <ol className={cn("relative grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4", cols)}>
+      <ol className={cn("relative grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3", cols)}>
         {steps.map((s, i) => {
           const logos = s.exchanges ? [exchanges?.DSE, exchanges?.CSE].filter((l): l is FlowLogo => Boolean(l)) : [];
           const productLogo = s.items.find((p) => p.logo)?.logo;
           return (
-            <li key={s.keys[0]} data-reveal style={delay(i % 7)} className="flex flex-col items-center gap-3 text-center">
+            <li key={s.keys[0] ?? s.text} data-reveal style={delay(i % 7)} className="flex flex-col items-center gap-3 text-center">
               <span className="glass relative flex size-20 items-center justify-center rounded-3xl text-brand-sky shadow-[0_0_60px_-20px_rgb(34_188_235/0.7)]">
                 {logos.length ? (
                   <span className="flex gap-1.5">
@@ -464,6 +464,7 @@ export function FlowStory({
                 <span className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">{i + 1}</span>
               </span>
               <span className="flex flex-col items-center gap-0.5">
+                {s.exchanges && !s.items.length && <span className="text-sm font-semibold leading-snug text-gold">DSE · CSE</span>}
                 {s.items.map((p) => (
                   <Link key={p.href} href={p.href} className="text-sm font-semibold leading-snug text-gold underline-offset-4 hover:underline">
                     {p.name}

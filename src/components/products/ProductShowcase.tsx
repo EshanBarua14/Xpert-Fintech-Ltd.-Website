@@ -135,9 +135,6 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
               <span className="size-2.5 rounded-full bg-fg/15" />
               <span className="size-2.5 rounded-full bg-fg/15" />
               <span className="ml-3 truncate font-mono text-[max(11px,0.6875rem)] tracking-wider text-text-secondary">{p.name}</span>
-              {!p.image && (
-                <span className="ml-auto rounded-full border border-fg/10 px-2 py-0.5 text-[max(10px,0.625rem)] text-text-secondary">{labels.conceptual}</span>
-              )}
             </div>
             <div className="relative flex min-h-[18rem] flex-1 items-center justify-center p-5 md:min-h-[22rem]">
               <div className="grid-fade pointer-events-none absolute inset-0 opacity-50" />

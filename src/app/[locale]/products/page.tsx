@@ -25,9 +25,8 @@ export default async function ProductsPage({ params }: Props) {
   const t = getMessages(locale);
   const [{ offerings, publishedSlugs }, showcase, flow] = await Promise.all([getFlagshipData(locale), getShowcase(locale), getFlowProducts(locale)]);
 
-  // Platforms first, then products, modules, integrations and services.
-  const order = ["PLATFORM", "PRODUCT", "MODULE", "INTEGRATION", "CAPABILITY", "SERVICE"];
-  const sorted = [...offerings].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type) || a.sortOrder - b.sortOrder);
+  // In the order set in Admin → Products (the "Order" field).
+  const sorted = [...offerings].sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
     <>

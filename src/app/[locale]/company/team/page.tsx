@@ -74,6 +74,8 @@ export default async function TeamPage({ params }: Props) {
                 showing: t.teamShowing,
                 email: t.emailPerson,
                 linkedin: t.linkedinProfile,
+                linkedinSearch: t.linkedinSearch,
+                emailMissing: t.emailMissing,
                 departments: Object.fromEntries(Object.entries(DEPARTMENT_TEXT_KEYS).map(([d, k]) => [d, t[k as keyof typeof t] as string])),
               }}
             />

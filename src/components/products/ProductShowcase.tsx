@@ -134,7 +134,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
           <div className="relative flex flex-col border-b border-fg/[0.06] xl:border-r xl:border-b-0">
             <div className="relative flex flex-1 items-center justify-center p-6 md:p-8">
               <div className="grid-fade pointer-events-none absolute inset-0 opacity-50" />
-              <DeviceShowcase name={p.name} productKey={p.key} logo={p.logo} look={p.look} visual={p.visual} shots={p.shots} size="md" className="showcase-shot relative max-w-[38rem]" />
+              <DeviceShowcase name={p.name} productKey={p.key} logo={p.logo} look={p.look} visual={p.visual} shots={p.shots} size="md" devices="web-phone" className="showcase-shot relative max-w-[38rem]" />
             </div>
             {p.steps.length > 1 && (
               <div className="border-t border-fg/[0.06] px-5 py-4">

@@ -3,6 +3,8 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/admin/AdminUi";
 import { AdminList, formatDhaka, Notice } from "@/components/admin/AdminList";
+import { ReviewSpeedForm } from "@/components/admin/ReviewSpeedForm";
+import { getReviewSeconds, REVIEW_SPEED_CHOICES } from "@/lib/content/reviews";
 
 type Search = { q?: string; view?: string; trashed?: string; deleted?: string };
 
@@ -23,6 +25,7 @@ export default async function TestimonialsPage({ searchParams }: { searchParams:
     }),
     db.testimonial.count({ where: { deletedAt: { not: null } } }),
   ]);
+  const seconds = await getReviewSeconds();
   return (
     <AdminList
       title="Testimonials"
@@ -35,6 +38,13 @@ export default async function TestimonialsPage({ searchParams }: { searchParams:
       columns={["Organization", "Approval", "Status", "Updated"]}
       notices={
         <>
+          {!inTrash && (
+            <section className="rounded-2xl border border-fg/10 p-5">
+              <h2 className="mb-1 font-semibold">Slide speed</h2>
+              <p className="mb-4 text-sm text-text-secondary">How long each review stays on the home page before the slider moves on. A person with several reviews is shown once (the first in this list).</p>
+              <ReviewSpeedForm seconds={seconds} choices={REVIEW_SPEED_CHOICES} />
+            </section>
+          )}
           {params.trashed && <Notice>Moved to trash.</Notice>}
           {params.deleted && <Notice>Deleted permanently.</Notice>}
         </>

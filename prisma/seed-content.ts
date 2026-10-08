@@ -905,11 +905,13 @@ async function seedCredentials() {
  */
 async function seedReviewDrafts() {
   let added = 0;
+  // A review already written for the person under another spelling ("Mohd" / "Mohd.", "Mohammed" / "Mohammad") counts.
+  const key2 = (v: string) => v.toLowerCase().replace(/\b(fca|fcs|fcma|acca|fcca|cfa)\b/g, " ").replace(/[.,]/g, " ").replace(/\s+/g, " ").trim().split(" ").slice(-2).join(" ");
+  const written = new Set((await db.testimonial.findMany({ where: { deletedAt: null }, select: { personName: true } })).map((r) => key2(r.personName)));
   for (const [i, b] of BOARD.entries()) {
     const person = await db.person.findUnique({ where: { key: b.key } });
     if (!person) continue;
-    const exists = await db.testimonial.findFirst({ where: { personName: b.name } });
-    if (exists) continue;
+    if (written.has(key2(b.name))) continue;
     const review = await db.testimonial.create({
       data: {
         personName: b.name,
@@ -1325,6 +1327,47 @@ async function seedRmsInOms() {
   console.log(`• Risk checks now described inside the OMS: ${texts} product text(s), ${flows} ecosystem flow(s) updated`);
 }
 
+/**
+ * Product screenshots supplied by XFL, in prisma/seed-media/products as
+ * <product key>-<web|tablet|phone>.(png|jpg|webp). Each file is added once to
+ * that product's screens (Admin → Products → Screens and demo video), after
+ * any screens already there; removing it in the admin keeps it removed.
+ * Personal details visible in a screenshot are blurred before it is added here.
+ */
+const PRODUCT_SHOTS: Record<string, { en: string; bn: string }> = {
+  "trading-platform-web": {
+    en: "Xpert Trading OMS: order entry, portfolio, market depth, order list and order summary on one dealer desk",
+    bn: "এক্সপার্ট ট্রেডিং ওএমএস: একই ডিলার ডেস্কে অর্ডার প্রদান, পোর্টফোলিও, মার্কেট ডেপথ, অর্ডার তালিকা ও অর্ডার সারাংশ",
+  },
+};
+async function seedProductScreens() {
+  let added = 0;
+  for (const [file, caption] of Object.entries(PRODUCT_SHOTS)) {
+    const mark = `seed.product-shot.${file}`;
+    if (await db.siteSetting.findUnique({ where: { key: mark } })) continue;
+    const key = file.replace(/-(web|tablet|phone)$/, "");
+    const offering = await db.offering.findUnique({ where: { key } });
+    if (!offering) continue;
+    const mediaId = await seedImage("products", file, caption.en, ["product", "screenshot"]);
+    if (!mediaId) continue;
+    if (!(await db.offeringMedia.findFirst({ where: { offeringId: offering.id, mediaId } }))) {
+      const last = await db.offeringMedia.findFirst({ where: { offeringId: offering.id }, orderBy: { sortOrder: "desc" } });
+      await db.offeringMedia.create({
+        data: {
+          offeringId: offering.id,
+          kind: "SCREENSHOT",
+          mediaId,
+          sortOrder: (last?.sortOrder ?? -1) + 1,
+          translations: { create: [{ locale: EN, caption: caption.en }, { locale: BN, caption: caption.bn }] },
+        },
+      });
+      added++;
+    }
+    await db.siteSetting.create({ data: { key: mark, value: { at: new Date().toISOString() } } });
+  }
+  if (added) console.log(`• Product screens: added ${added} screenshot(s) supplied by XFL`);
+}
+
 /** Older databases: mark seeded stand-in profiles as placeholders (until an editor changes that). */
 async function markPlaceholders() {
   const res = await db.person.updateMany({ where: { key: { startsWith: "placeholder-" }, isPlaceholder: false, translations: { some: { name: "Name to be confirmed" } } }, data: { isPlaceholder: true } });
@@ -1361,6 +1404,7 @@ async function main() {
   await seedMarketsLinks();
   await seedEcosystem();
   await seedRmsInOms();
+  await seedProductScreens();
   console.log("Content seed complete.");
 }
 

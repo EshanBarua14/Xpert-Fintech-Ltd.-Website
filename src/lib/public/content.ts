@@ -1,4 +1,5 @@
 import "server-only";
+import { splitAffiliation } from "@/lib/people/affiliation";
 import { editorHints } from "@/lib/env/hints";
 import { cache } from "react";
 import type { OrganizationKind, PersonGroup } from "@prisma/client";
@@ -220,8 +221,14 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           },
         })
       : [];
+    // Exact name first; else the same last two names when only one person has them ("Mohammed/Mohammad Rahmat Pasha").
+    const tail2 = (v: string) => nameKey(v).split(" ").slice(-2).join(" ");
     const personOf = (r: (typeof rows)[number]) =>
-      people.find((p) => p.translations.some((t) => t.locale === "en" && nameKey(t.name) === nameKey(r.personName)));
+      people.find((p) => p.translations.some((t) => t.locale === "en" && nameKey(t.name) === nameKey(r.personName))) ??
+      (() => {
+        const hits = people.filter((p) => p.translations.some((t) => t.locale === "en" && tail2(t.name) === tail2(r.personName) && tail2(r.personName).includes(" ")));
+        return hits.length === 1 ? hits[0] : undefined;
+      })();
     const photoOf = (r: (typeof rows)[number]) => r.photoMediaId ?? personOf(r)?.photoMediaId ?? null;
     // Organizations named in an affiliation ("Managing Director, Apex Investments Ltd.") lend their logo.
     const orgs = await db.organization.findMany({ where: { ...publishedWhere(), logoPermission: true, logoMediaId: { not: null } }, include: { translations: true } });
@@ -243,12 +250,25 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
       }),
       locale,
     );
-    return rows.flatMap((r) => {
+    // One card per person: their published, approved review if there is one, else a written one over a seeded placeholder.
+    const isLive = (r: (typeof rows)[number]) => r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date());
+    const rank = (r: (typeof rows)[number]) => (isLive(r) ? 0 : (pick(r.translations, locale)?.quote ?? "").startsWith("[") ? 2 : 1);
+    const best = new Map<string, (typeof rows)[number]>();
+    for (const r of rows) {
+      const p = personOf(r);
+      const k = p ? `p:${people.indexOf(p)}` : `n:${nameKey(r.personName)}`;
+      const cur = best.get(k);
+      if (!cur || rank(r) < rank(cur)) best.set(k, r);
+    }
+    const chosen = new Set(best.values());
+    return rows.filter((r) => chosen.has(r)).flatMap((r) => {
       const tr = pick(r.translations, locale);
       if (!tr) return [];
       const org = r.organization && !r.organization.deletedAt ? r.organization : null;
       const affiliation = affiliationOf(r);
       const named = org ? null : orgIn(affiliation);
+      // "Managing Director & CEO, UCB Stock Brokerage Ltd." → designation and institution, shown on their own lines.
+      const position = splitAffiliation(tr.personTitle || affiliation);
       const logoId = org?.logoPermission ? org.logoMediaId : (named?.logoMediaId ?? null);
       return [
         {
@@ -257,10 +277,12 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           // The name as kept in Admin → People (in this language), else as written on the review.
           name: personOf(r)?.translations.find((t) => t.locale === locale)?.name ?? personOf(r)?.translations.find((t) => t.locale === "en")?.name ?? r.personName,
           // The reviewer's title: as written on the review, else their position from Admin → People.
-          role: tr.personTitle || affiliation || roleOf(r),
+          role: position.designation || roleOf(r),
           organization: org
             ? (pick(org.translations, locale)?.name ?? null)
-            : !tr.personTitle && !affiliation && roleOf(r)
+            : position.institution
+              ? position.institution
+              : !tr.personTitle && !affiliation && roleOf(r)
               ? // Only their role at Xpert is known (e.g. "Director"): name the company it is at.
                 locale === "bn" ? "এক্সপার্ট ফিনটেক লিমিটেড" : "Xpert Fintech Ltd."
               : null,

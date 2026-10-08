@@ -86,7 +86,7 @@ export function GhostButton({ href, children }: { href: string; children: ReactN
   return (
     <Link
       href={href}
-      className="inline-flex h-12 items-center gap-2 rounded-full border border-fg/15 bg-fg/[0.03] px-6 text-sm font-semibold text-text-primary backdrop-blur transition-colors duration-300 hover:border-brand-sky/60 hover:bg-brand-sky/10"
+      className="inline-flex h-12 shrink-0 whitespace-nowrap items-center gap-2 rounded-full border border-fg/15 bg-fg/[0.03] px-6 text-sm font-semibold text-text-primary backdrop-blur transition-colors duration-300 hover:border-brand-sky/60 hover:bg-brand-sky/10"
     >
       {children}
     </Link>

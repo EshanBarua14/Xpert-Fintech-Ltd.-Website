@@ -28,6 +28,7 @@ import { DemoPlaceholder, ScreensPlaceholder } from "@/components/products/Media
 import { DeviceShowcase } from "@/components/products/DeviceShowcase";
 import { ProductMark, productVars } from "@/components/products/ProductMark";
 import { AutomationFlow } from "@/components/products/AutomationFlow";
+import { EcosystemPosition } from "@/components/products/EcosystemPosition";
 import { Lightbox } from "@/components/gallery/Lightbox";
 import type { GalleryPhoto } from "@/lib/public/insights";
 
@@ -111,6 +112,8 @@ export default async function ProductPage({ params }: Props) {
   const screenshots = offering.media.filter((m) => m.kind !== "VIDEO" && m.mediaId && images.has(m.mediaId));
   // The first playable video is the product demo (a link, or an uploaded file).
   const preview = editorHints();
+  // Where the demo video and screens go, shown outside the live site until they are added.
+  const mediaSlots = preview || process.env.APP_ENV !== "production";
   const demo = offering.media.find((m) => m.kind === "VIDEO" && (videoEmbedUrl(m.videoUrl) || (m.mediaId && images.has(m.mediaId))));
   const demoPoster = demo ? (images.get(demo.posterMediaId ?? "")?.url ?? parseVideoUrl(demo.videoUrl)?.thumbnail ?? null) : null;
   const shots: GalleryPhoto[] = screenshots.map((m) => {
@@ -125,9 +128,9 @@ export default async function ProductPage({ params }: Props) {
   const url = `${SITE_URL}/${found.locale}/products/${tr.slug}`;
   const enSlug = offering.translations.find((x) => x.locale === "en")?.slug ?? tr.slug;
   const ecoModule = moduleForSlug(enSlug);
-  const [flagship, eco, ecoInDb] = ecoModule
-    ? await Promise.all([getFlagshipData(found.locale), getEcosystem(found.locale), ecosystemInDatabase()])
-    : [null, { nodes: [], edges: [], flows: [] }, false];
+  const [flagship, eco, ecoInDb] = await Promise.all([ecoModule ? getFlagshipData(found.locale) : null, getEcosystem(found.locale), ecosystemInDatabase()]);
+  // This product's node in Admin → Ecosystem (what it receives and passes on).
+  const ecoNode = eco.nodes.find((n) => n.product === offering.key)?.key ?? null;
   const showOmsPreview = offering.key === "trading-platform";
   const look = (offering.key && (await getDesign()).products[offering.key]) || null;
 
@@ -151,6 +154,9 @@ export default async function ProductPage({ params }: Props) {
           publisher: { "@type": "Organization", name: "Xpert Fintech Ltd.", url: SITE_URL },
         }}
       />
+
+      {/* Marks the page for the background: this product's icons and colour. */}
+      <span hidden data-product-key={offering.key ?? undefined} />
 
       {/* Hero */}
       <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
@@ -204,7 +210,7 @@ export default async function ProductPage({ params }: Props) {
               look={look}
               logo={productLogo ? { url: productLogo.url, width: productLogo.width, height: productLogo.height } : null}
               visual={visualFor(tr.slug, offering.type)}
-              shots={[...(hero ? [{ url: hero.url, alt: hero.alt ?? tr.name, width: hero.width, height: hero.height }] : []), ...shots].slice(0, 3)}
+              shots={[...(hero ? [{ url: hero.url, alt: hero.alt ?? tr.name, width: hero.width, height: hero.height }] : []), ...shots]}
             />
           </div>
         </div>
@@ -245,46 +251,10 @@ export default async function ProductPage({ params }: Props) {
       )}
 
       {/* Until the demo video and screens are added, outside production show where they go. */}
-      {!demo && preview && (
+      {!demo && mediaSlots && (
         <Band title={t.demoTitle} body={t.demoBody}>
           <div className="mx-auto w-full max-w-5xl">
             <DemoPlaceholder name={tr.name} adminHref={`/admin/products/${offering.id}#media`} />
-          </div>
-        </Band>
-      )}
-
-      {capabilities.length > 0 && (
-        <Band title={t.capabilities} alt>
-          <ItemGrid items={capabilities} />
-        </Band>
-      )}
-
-      {showOmsPreview && (
-        <Band title={t.omsPreviewTitle}>
-          <p data-reveal className="-mt-6 max-w-2xl text-lg text-text-secondary">{t.omsPreviewBody}</p>
-          <div data-reveal>
-            <OmsPreview labels={omsLabels(t)} />
-          </div>
-        </Band>
-      )}
-
-      {steps.length > 1 && (
-        <Band title={t.automationTitle} body={t.automationBody}>
-          <div data-reveal>
-            <AutomationFlow
-              steps={steps.map((s) => ({ id: s.id, title: s.title, body: s.body }))}
-              productKey={offering.key}
-              look={look}
-              labels={{ running: t.automationRunning, done: t.automationDone, step: t.ecoTourStep, pause: t.ecoTourPause, play: t.ecoTourPlay }}
-            />
-          </div>
-        </Band>
-      )}
-
-      {ecoModule && flagship && (
-        <Band title={t.whereItFits} body={t.whereItFitsBody} alt>
-          <div data-reveal className="glass rounded-3xl p-4 md:p-8" style={productVars(offering.key, look)}>
-            <EcosystemMap labels={ecosystemLabels(t, found.locale)} logos={flagship.logos} modules={withEcosystem(ecosystemModules(flagship.offerings, found.locale), eco, ecoInDb)} emphasis={ecoModule} />
           </div>
         </Band>
       )}
@@ -297,11 +267,70 @@ export default async function ProductPage({ params }: Props) {
         </Band>
       )}
 
-      {shots.length === 0 && preview && (
+      {shots.length === 0 && mediaSlots && (
         <Band title={t.screensTitle} body={t.screensBody} alt>
           <ScreensPlaceholder adminHref={`/admin/products/${offering.id}#media`} />
         </Band>
       )}
+
+      {capabilities.length > 0 && (
+        <Band title={t.capabilities}>
+          <ItemGrid items={capabilities} />
+        </Band>
+      )}
+
+      {showOmsPreview && (
+        <Band title={t.omsPreviewTitle} alt>
+          <p data-reveal className="-mt-6 max-w-2xl text-lg text-text-secondary">{t.omsPreviewBody}</p>
+          <div data-reveal>
+            <OmsPreview labels={omsLabels(t)} />
+          </div>
+        </Band>
+      )}
+
+      {(ecoNode || (ecoModule && flagship)) && (
+        <Band title={t.whereItFits} body={t.whereItFitsBody}>
+          <div data-reveal className="glass flex flex-col gap-8 rounded-3xl p-5 md:p-8" style={productVars(offering.key, look)}>
+            {ecoNode && (
+              <EcosystemPosition
+                graph={eco}
+                nodeKey={ecoNode}
+                name={tr.name}
+                productKey={offering.key}
+                look={look}
+                logo={productLogo ? { url: productLogo.url, width: productLogo.width, height: productLogo.height } : null}
+                labels={{
+                  from: t.posFrom,
+                  to: t.posTo,
+                  none: t.posNone,
+                  kinds: { DATA: t.posKindDATA, ORDER: t.posKindORDER, RISK: t.posKindRISK, ONBOARDING: t.posKindONBOARDING, OPERATIONS: t.posKindOPERATIONS },
+                  layers: { MARKET: t.posLayerMARKET, PRODUCT: t.posLayerPRODUCT, INSTITUTION: t.posLayerINSTITUTION, USER: t.posLayerUSER, XFL: t.posLayerXFL },
+                }}
+              />
+            )}
+            {ecoModule && flagship && (
+              <div className="flex flex-col gap-4 border-t border-fg/[0.08] pt-6">
+                <h3 className="font-display text-lg font-semibold">{t.posMapTitle}</h3>
+                <EcosystemMap labels={ecosystemLabels(t, found.locale)} logos={flagship.logos} modules={withEcosystem(ecosystemModules(flagship.offerings, found.locale), eco, ecoInDb)} emphasis={ecoModule} />
+              </div>
+            )}
+          </div>
+        </Band>
+      )}
+
+      {steps.length > 1 && (
+        <Band title={t.automationTitle} body={t.automationBody} alt>
+          <div data-reveal>
+            <AutomationFlow
+              steps={steps.map((s) => ({ id: s.id, title: s.title, body: s.body }))}
+              productKey={offering.key}
+              look={look}
+              labels={{ running: t.automationRunning, done: t.automationDone, step: t.ecoTourStep, pause: t.ecoTourPause, play: t.ecoTourPlay }}
+            />
+          </div>
+        </Band>
+      )}
+
 
       {layers.length > 0 && (
         <Band title={t.architecture}>

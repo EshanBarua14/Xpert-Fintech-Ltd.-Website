@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getReviewSeconds } from "@/lib/content/reviews";
 import { getDesign, type HomeSection } from "@/lib/content/design";
 import { editorHints } from "@/lib/env/hints";
 import Link from "next/link";
@@ -82,7 +83,7 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   const [data, events, market, showcase, credentials] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]);
-  const [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline, design] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign()]);
+  const [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline, design, reviewSeconds] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds()]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -190,6 +191,7 @@ export default async function HomePage({ params }: Props) {
             <SectionHeader title={t.testimonialsTitle} />
             <TestimonialSlider
               items={testimonials}
+              seconds={reviewSeconds}
               labels={{
                 region: t.testimonialsRegion,
                 prev: t.testimonialPrev,

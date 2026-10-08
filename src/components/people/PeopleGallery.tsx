@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useRef, useState, type CSSProperties } from "react";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 import { cn } from "@/lib/utils/cn";
+import { institutionOf, splitAffiliation } from "@/lib/people/affiliation";
+import { ContactIcon } from "./ContactIcon";
 
 /**
  * Board and management profiles: photo cards that open a full profile in a
@@ -38,6 +40,10 @@ export type GalleryLabels = {
   linkedin: string;
   /** "Email {name}" */
   email: string;
+  /** "Find {name} on LinkedIn" (no LinkedIn on file yet) */
+  linkedinSearch: string;
+  /** No email on file yet */
+  emailMissing: string;
   placeholder: string;
   role: string;
 };
@@ -62,12 +68,14 @@ function ContactSlot({ kind, name }: { kind: "email" | "linkedin"; name: string 
   );
 }
 
-/** Email or LinkedIn not on file yet: the icon, faint and not a link (added in Admin → People → Contacts). */
-function MutedIcon({ kind, size = "size-9" }: { kind: "email" | "linkedin"; size?: string }) {
+/** Their position elsewhere, on two lines: the designation, then the institution in its own type. */
+function Affiliation({ text, className }: { text: string; className?: string }) {
+  const { designation, institution } = splitAffiliation(text);
   return (
-    <span aria-hidden="true" className={cn("flex items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--tone)_25%,transparent)] text-[color-mix(in_srgb,var(--tone)_50%,transparent)]", size)}>
-      <SocialIcon kind={kind} className="size-4" />
-    </span>
+    <p className={cn("flex flex-col gap-0.5", className)}>
+      {designation && <span className="text-sm leading-snug font-medium text-text-primary/85">{designation}</span>}
+      {institution && <span className="font-display text-[0.95rem] leading-snug text-[color-mix(in_srgb,var(--tone-ink)_70%,var(--color-text-secondary))]">{institution}</span>}
+    </p>
   );
 }
 
@@ -167,38 +175,14 @@ function PersonCard({
             </button>
           </h3>
           <p className="text-sm font-semibold text-[var(--tone-ink)]">{role}</p>
-          {p.affiliation && <p className="text-sm leading-snug text-text-secondary">{p.affiliation}</p>}
+          {p.affiliation && <Affiliation text={p.affiliation} />}
         </div>
         <div className="mt-auto flex items-center gap-2 border-t border-fg/[0.08] pt-4">
-          {p.email ? (
-            <a
-              href={`mailto:${p.email}`}
-              aria-label={labels.email.replace("{name}", p.name)}
-              title={p.email}
-              className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--tone)_45%,transparent)] text-[var(--tone-ink)] transition-colors hover:border-[var(--tone)] hover:bg-[var(--tone)] hover:text-white"
-            >
-              <SocialIcon kind="email" className="size-4" />
-            </a>
-          ) : showPlaceholderBadge ? (
-            <ContactSlot kind="email" name={p.name} />
-          ) : (
-            <MutedIcon kind="email" />
-          )}
-          {p.linkedinUrl ? (
-            <a
-              href={p.linkedinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${labels.linkedin}: ${p.name}`}
-              title={labels.linkedin}
-              className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--tone)_45%,transparent)] text-[var(--tone-ink)] transition-colors hover:border-[var(--tone)] hover:bg-[var(--tone)] hover:text-white"
-            >
-              <SocialIcon kind="linkedin" className="size-4" />
-            </a>
-          ) : showPlaceholderBadge ? (
+          {!p.email && showPlaceholderBadge ? <ContactSlot kind="email" name={p.name} /> : <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} />}
+          {!p.linkedinUrl && showPlaceholderBadge ? (
             <ContactSlot kind="linkedin" name={p.name} />
           ) : (
-            <MutedIcon kind="linkedin" />
+            <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org={p.org?.name ?? institutionOf(p.affiliation)} labels={labels} />
           )}
           <button
             type="button"
@@ -311,7 +295,7 @@ export function PeopleGallery({
                   <h2 id="person-dialog-name" className="font-display text-[clamp(1.5rem,3.4svh,2.25rem)] leading-tight font-semibold tracking-[-0.02em] text-balance">
                     {open.name}
                   </h2>
-                  {open.affiliation && <p className="text-sm leading-snug text-text-secondary">{open.affiliation}</p>}
+                  {open.affiliation && <Affiliation text={open.affiliation} />}
                 </div>
               </div>
               {showPlaceholderBadge && open.isPlaceholder && (
@@ -352,7 +336,7 @@ export function PeopleGallery({
                     <span className="sr-only sm:hidden">{open.email}</span>
                   </a>
                 ) : (
-                  <MutedIcon kind="email" size="size-10" />
+                  <ContactIcon kind="email" value={null} name={open.name} labels={labels} size="size-10" />
                 )}
                 {open.linkedinUrl ? (
                   <a
@@ -365,7 +349,7 @@ export function PeopleGallery({
                     {labels.linkedin} <span aria-hidden="true">↗</span>
                   </a>
                 ) : (
-                  <MutedIcon kind="linkedin" size="size-10" />
+                  <ContactIcon kind="linkedin" value={null} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
                 )}
                 {open.org && <OrgLogo org={open.org} className="ml-auto h-9 md:hidden" />}
               </div>

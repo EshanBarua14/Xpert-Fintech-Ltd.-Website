@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
+import { REVIEW_SPEED_CHOICES, REVIEW_SPEED_KEY } from "@/lib/content/reviews";
 import { formInput } from "@/lib/admin/forms";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { purgeTestimonial } from "@/lib/admin/purge";
@@ -113,4 +114,18 @@ export async function deleteTestimonialForever(formData: FormData) {
   await purgeTestimonial(id);
   refresh();
   redirect("/admin/testimonials?view=trash&deleted=1");
+}
+
+export type ReviewSpeedState = { ok?: boolean; savedAt?: number; message?: string; errors?: FieldErrors };
+
+/** Admin → Testimonials: how many seconds the home-page review slider waits before moving on. */
+export async function saveReviewSpeed(_prev: ReviewSpeedState, formData: FormData): Promise<ReviewSpeedState> {
+  const admin = await requireAdmin();
+  const seconds = Number(formData.get("slideSeconds"));
+  if (!(REVIEW_SPEED_CHOICES as readonly number[]).includes(seconds)) return { errors: { slideSeconds: "Choose one of the listed speeds." }, message: "Please fix the highlighted field." };
+  const value = { seconds };
+  await db.siteSetting.upsert({ where: { key: REVIEW_SPEED_KEY }, update: { value, updatedById: admin.id }, create: { key: REVIEW_SPEED_KEY, value, updatedById: admin.id } });
+  revalidatePath("/", "layout");
+  revalidatePath("/admin/testimonials");
+  return { ok: true, savedAt: Date.now(), message: `Saved: reviews move on every ${seconds} seconds.` };
 }

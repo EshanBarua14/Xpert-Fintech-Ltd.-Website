@@ -16,6 +16,8 @@ export type EcoNode = {
   /** Product page, when the node is linked to a published product. */
   href: string | null;
   mobileOrder: number;
+  /** Key of the published product this node stands for. */
+  product?: string | null;
 };
 export type EcoEdge = { from: string; to: string; kind: string };
 export type EcoStep = { node: string; title: string; body: string | null };
@@ -57,6 +59,7 @@ export const getEcosystem = cache(async (locale: AppLocale): Promise<EcoGraph> =
       ? await db.offering.findMany({ where: { id: { in: offeringIds }, ...publishedWhere(now), hasOwnPage: true }, include: { translations: true } })
       : [];
     const hrefById = new Map<string, string>();
+    const keyById = new Map<string, string | null>(offerings.map((o) => [o.id, o.key ?? null]));
     for (const o of offerings) {
       const tr = pick(o.translations, locale);
       const own = o.translations.find((x) => x.locale === locale);
@@ -74,6 +77,7 @@ export const getEcosystem = cache(async (locale: AppLocale): Promise<EcoGraph> =
         cta: tr.ctaLabel,
         href: r.offeringId ? (hrefById.get(r.offeringId) ?? null) : null,
         mobileOrder: r.mobileOrder,
+        product: r.offeringId ? (keyById.get(r.offeringId) ?? null) : null,
       });
     }
     const visible = new Set(nodes.map((n) => n.key));

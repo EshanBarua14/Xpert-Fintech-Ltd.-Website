@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils/cn";
 
 type Labels = { region: string; prev: string; next: string; pause: string; play: string; slide: string; /** "Rated {n} out of 5" */ rating: string; /** "{n}/5" */ ratingShort?: string; /** Digits 0–9 (Bangla numerals on the Bangla site). */ digits?: string };
 
-const AUTO_MS = 7000;
+/** Default seconds per position; set in Admin → Testimonials → Slide speed. */
+const DEFAULT_SECONDS = 4;
 
 function initials(name: string) {
   return name
@@ -25,7 +26,8 @@ function initials(name: string) {
  * moves on by itself, pausing on hover, keyboard focus, a hidden tab, the
  * pause button and reduced motion.
  */
-export function TestimonialSlider({ items, labels }: { items: TestimonialCard[]; labels: Labels }) {
+export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: { items: TestimonialCard[]; labels: Labels; seconds?: number }) {
+  const AUTO_MS = Math.max(2, seconds) * 1000;
   const track = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState(0);
   const [stops, setStops] = useState(items.length);
@@ -84,7 +86,7 @@ export function TestimonialSlider({ items, labels }: { items: TestimonialCard[];
       if (!document.hidden) go(active + 1);
     }, AUTO_MS);
     return () => clearTimeout(id);
-  }, [active, moving, go]);
+  }, [active, moving, go, AUTO_MS]);
 
   if (!items.length) return null;
 
@@ -129,10 +131,10 @@ export function TestimonialSlider({ items, labels }: { items: TestimonialCard[];
                     {initials(t.name)}
                   </span>
                 )}
-                <span className="flex min-w-0 flex-col gap-1">
-                  <span className="font-display text-lg leading-tight text-text-primary">{t.name}</span>
-                  {t.role && <span className="text-sm leading-snug text-text-secondary">{t.role}</span>}
-                  {t.organization && <span className="text-sm font-medium leading-snug text-brand-sky">{t.organization}</span>}
+                <span className="flex min-w-0 flex-col">
+                  <span className="font-display text-xl leading-tight font-semibold text-text-primary">{t.name}</span>
+                  {t.role && <span className="mt-1.5 text-[0.8125rem] leading-snug font-semibold text-gold">{t.role}</span>}
+                  {t.organization && <span className="mt-0.5 font-display text-[0.95rem] leading-snug text-brand-sky">{t.organization}</span>}
                 </span>
               </figcaption>
               {t.rating ? (

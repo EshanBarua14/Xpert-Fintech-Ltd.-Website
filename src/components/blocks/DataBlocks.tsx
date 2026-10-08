@@ -119,6 +119,8 @@ export async function PeopleGrid({
         bioPending: t.bioPending,
         linkedin: t.linkedinProfile,
         email: t.emailPerson,
+        linkedinSearch: t.linkedinSearch,
+        emailMissing: t.emailMissing,
         placeholder: t.placeholderBadge,
         role: t.roleLabel,
       }}

@@ -256,7 +256,8 @@ export function EcosystemMap({
 }) {
   const router = useRouter();
   const stepped = !!labels.steps?.length;
-  const [scene, setScene] = useState(0);
+  // On a product page, open on the first scene where that product works.
+  const [scene, setScene] = useState(() => (emphasis ? Math.max(0, SCENES.findIndex((sc) => sc.some((st) => st.modules.includes(emphasis)))) : 0));
   const [step, setStep] = useState(stepped ? 0 : WHOLE);
   const [play, setPlay] = useState<Play>("all");
   const [paused, setPaused] = useState(false);

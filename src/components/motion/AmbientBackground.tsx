@@ -3,13 +3,15 @@
 import { usePathname } from "next/navigation";
 import { BourseCanvas } from "./BourseCanvas";
 import { SceneCanvas, type SceneName } from "./SceneCanvas";
+import { IconDrift } from "./IconDrift";
 
 /**
  * Site-wide backdrop behind all content: soft light from the brand blues and
  * a faint scene that matches the page — a trading board for markets and
  * products, a member network for the consortium, a constellation for people,
  * a news wire for insights, soft light for the gallery and a signal for
- * contact pages.
+ * contact pages — with a few faint icons that belong to the page drifting
+ * over it (a product page uses its own icons and colour).
  */
 export function sceneFor(pathname: string): SceneName | "market" {
   const path = pathname.replace(/^\/(en|bn)(?=\/|$)/, "") || "/";
@@ -28,6 +30,7 @@ export function AmbientBackground() {
       <div className="ambient-orb ambient-orb-1" />
       <div className="ambient-orb ambient-orb-2" />
       {scene === "market" ? <BourseCanvas /> : <SceneCanvas key={scene} scene={scene} />}
+      <IconDrift scene={scene} />
     </div>
   );
 }

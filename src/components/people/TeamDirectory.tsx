@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useMemo, useState, type CSSProperties } from "react";
-import { SocialIcon } from "@/components/ui/SocialIcon";
 import { departmentColor, departmentLabel, departmentRank } from "@/lib/people/departments";
 import { cn } from "@/lib/utils/cn";
+import { ContactIcon } from "./ContactIcon";
 
 export type TeamMember = {
   id: string;
@@ -16,7 +16,7 @@ export type TeamMember = {
   linkedinUrl: string | null;
 };
 
-export type TeamLabels = { filter: string; everyone: string; showing: string; email: string; linkedin: string; /** Department names by lower-case department, from Site text. */ departments: Record<string, string> };
+export type TeamLabels = { filter: string; everyone: string; showing: string; email: string; linkedin: string; linkedinSearch: string; emailMissing: string; /** Department names by lower-case department, from Site text. */ departments: Record<string, string> };
 
 function initials(name: string) {
   return name
@@ -123,36 +123,8 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
         )}
         <span className="ml-auto flex items-center gap-2">
           {/* Email and LinkedIn on every card: a link when it is on file, a muted icon until it is added (Admin → People → Contacts). */}
-          {p.email ? (
-            <a
-              href={`mailto:${p.email}`}
-              aria-label={labels.email.replace("{name}", p.name)}
-              title={p.email}
-              className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--dept)_45%,transparent)] text-[var(--dept)] transition-colors hover:border-[var(--dept)] hover:bg-[var(--dept)] hover:text-white"
-            >
-              <SocialIcon kind="email" className="size-4" />
-            </a>
-          ) : (
-            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--dept)_30%,transparent)] text-[color-mix(in_srgb,var(--dept)_65%,transparent)]">
-              <SocialIcon kind="email" className="size-4" />
-            </span>
-          )}
-          {p.linkedinUrl ? (
-            <a
-              href={p.linkedinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${labels.linkedin}: ${p.name}`}
-              title={labels.linkedin}
-              className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--dept)_45%,transparent)] text-[var(--dept)] transition-colors hover:border-[var(--dept)] hover:bg-[var(--dept)] hover:text-white"
-            >
-              <SocialIcon kind="linkedin" className="size-4" />
-            </a>
-          ) : (
-            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--dept)_30%,transparent)] text-[color-mix(in_srgb,var(--dept)_65%,transparent)]">
-              <SocialIcon kind="linkedin" className="size-4" />
-            </span>
-          )}
+          <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} color="var(--dept)" ink="var(--dept)" />
+          <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org="Xpert Fintech" labels={labels} color="var(--dept)" ink="var(--dept)" />
         </span>
       </div>
     </article>

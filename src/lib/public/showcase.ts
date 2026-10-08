@@ -29,7 +29,7 @@ export type ShowcaseProduct = {
   href: string;
   visual: VisualKind;
   image: { url: string; alt: string; width: number | null; height: number | null } | null;
-  /** Up to three images for the web, tablet and phone screens (hero image first, then screenshots). */
+  /** Images for the device screens (hero image first, then screenshots); wide ones go on web, tall on the phone. */
   shots: { url: string; alt: string; width: number | null; height: number | null }[];
   /** Product logo (Admin → Products → Product logo). */
   logo: { url: string; width: number | null; height: number | null } | null;
@@ -51,7 +51,7 @@ export const getShowcase = cache(async (locale: AppLocale): Promise<ShowcaseProd
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
         include: { translations: true },
       },
-      media: { where: { isHidden: false, kind: "SCREENSHOT" }, orderBy: { sortOrder: "asc" }, take: 3 },
+      media: { where: { isHidden: false, kind: "SCREENSHOT" }, orderBy: { sortOrder: "asc" }, take: 6 },
     },
   });
   const design = await getDesign();
@@ -80,8 +80,7 @@ export const getShowcase = cache(async (locale: AppLocale): Promise<ShowcaseProd
         image,
         shots: [r.heroMediaId, ...r.media.map((m) => m.mediaId)]
           .map((id) => (id ? images.get(id) : undefined))
-          .filter((x): x is NonNullable<typeof x> => Boolean(x))
-          .slice(0, 3),
+          .filter((x): x is NonNullable<typeof x> => Boolean(x)),
         logo: r.iconMediaId ? (images.get(r.iconMediaId) ?? null) : null,
         look: (r.key && design.products[r.key]) || null,
         capabilities: titles("CAPABILITY").slice(0, 4),

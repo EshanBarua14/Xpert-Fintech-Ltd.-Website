@@ -60,6 +60,14 @@ const amount = z
   .refine((v) => v === "" || (/^\d+(\.\d{1,2})?$/.test(v) && Number(v) <= 1e14), "Enter an amount in taka, e.g. 812345678.50")
   .transform((v) => (v === "" ? null : Number(v)));
 
+/** A share typed as a percentage (e.g. 45), used when Xpert's turnover in taka is not to hand. */
+const pct = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/[%\s]/g, ""))
+  .refine((v) => v === "" || (Number(v) >= 0 && Number(v) <= 100), "Enter a percentage from 0 to 100.")
+  .transform((v) => (v === "" ? null : Number(v)));
+
 const dailySchema = z.object({
   tradeDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick the trading day."),
   sourceNote: z.string().trim().max(200).transform((v) => v || null),
@@ -67,6 +75,8 @@ const dailySchema = z.object({
   dseMarket: amount,
   cseXpert: amount,
   cseMarket: amount,
+  dseShare: pct,
+  cseShare: pct,
 });
 
 /**
@@ -81,9 +91,10 @@ export async function saveMarketShare(_prev: MarketState, formData: FormData): P
   const v = parsed.data;
   if (v.tradeDate > dhakaToday()) return { errors: { tradeDate: "That day has not happened yet." }, message: "Please fix the highlighted fields." };
   const inputs: ShareInput[] = [];
-  if (v.dseXpert !== null) inputs.push({ exchange: "DSE", xpertTurnover: v.dseXpert, marketTurnover: v.dseMarket });
-  if (v.cseXpert !== null) inputs.push({ exchange: "CSE", xpertTurnover: v.cseXpert, marketTurnover: v.cseMarket });
-  if (!inputs.length) return { errors: { dseXpert: "Fill in Xpert's turnover for DSE, CSE or both." }, message: "Nothing to save yet." };
+  // Xpert's turnover in taka, or else its share in % (turned into taka from the market total).
+  if (v.dseXpert !== null || v.dseShare !== null) inputs.push({ exchange: "DSE", xpertTurnover: v.dseXpert ?? 0, sharePct: v.dseXpert === null ? v.dseShare : null, marketTurnover: v.dseMarket });
+  if (v.cseXpert !== null || v.cseShare !== null) inputs.push({ exchange: "CSE", xpertTurnover: v.cseXpert ?? 0, sharePct: v.cseXpert === null ? v.cseShare : null, marketTurnover: v.cseMarket });
+  if (!inputs.length) return { errors: { dseXpert: "Fill in Xpert's turnover or share for DSE, CSE or both." }, message: "Nothing to save yet." };
   const results = await saveShares(v.tradeDate, inputs, v.sourceNote, admin.id);
   if (results.some((r) => r.ok)) refresh();
   const errors: FieldErrors = {};

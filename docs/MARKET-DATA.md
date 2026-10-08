@@ -106,7 +106,11 @@ by default), fill in Xpert's turnover for DSE, CSE or both, and the market
 totals. For today, an empty CSE total is taken from CSE's live data (exchange
 mode) or the licensed feed. DSE does not publish its total outside its data
 feed, so enter it from DSE's daily report unless the licensed feed is on. The
-page shows whether today's figure is saved for each exchange.
+page shows whether today's figure is saved for each exchange. When only the
+percentage is known (e.g. 45%), leave Xpert turnover empty and type the share
+in *…or Xpert's share (%)*: the turnover is worked out from the market total.
+DSE's total is also read from dsebd.org's home page in exchange mode, so it can
+fill in by itself for today.
 
 **Automatically** — Xpert's OMS or back office posts the day's figures after
 the close (e.g. a 15:30 Dhaka scheduled job):

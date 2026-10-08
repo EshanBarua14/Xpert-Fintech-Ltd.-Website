@@ -192,6 +192,8 @@ export default async function HomePage({ params }: Props) {
                 play: t.testimonialPlay,
                 slide: t.testimonialSlide,
                 rating: t.testimonialRating,
+                ratingShort: t.testimonialRatingShort,
+                digits: locale === "bn" ? "০১২৩৪৫৬৭৮৯" : undefined,
               }}
             />
           </div>

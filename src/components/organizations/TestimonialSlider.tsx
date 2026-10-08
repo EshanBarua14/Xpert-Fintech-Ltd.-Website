@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties } from "re
 import type { TestimonialCard } from "@/lib/public/content";
 import { cn } from "@/lib/utils/cn";
 
-type Labels = { region: string; prev: string; next: string; pause: string; play: string; slide: string; /** "Rated {n} out of 5" */ rating: string };
+type Labels = { region: string; prev: string; next: string; pause: string; play: string; slide: string; /** "Rated {n} out of 5" */ rating: string; /** "{n}/5" */ ratingShort?: string; /** Digits 0–9 (Bangla numerals on the Bangla site). */ digits?: string };
 
 const AUTO_MS = 7000;
 
@@ -135,14 +135,25 @@ export function TestimonialSlider({ items, labels }: { items: TestimonialCard[];
                   {t.organization && <span className="text-sm font-medium leading-snug text-brand-sky">{t.organization}</span>}
                 </span>
               </figcaption>
-              {t.rating && (
+              {t.rating ? (
                 <p className="flex items-center gap-0.5" role="img" aria-label={labels.rating.replace("{n}", String(t.rating))}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <svg key={n} aria-hidden="true" viewBox="0 0 20 20" className={cn("size-[1.15rem]", n <= t.rating! ? "fill-gold" : "fill-fg/15")}>
                       <path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L10 14.8 4.8 17.6l1-5.8L1.5 7.7l5.9-.8z" />
                     </svg>
                   ))}
+                  <span aria-hidden="true" className="ml-2 font-mono text-sm font-semibold text-text-primary tabular-nums">
+                    {(labels.ratingShort ?? "{n}/5").replace("{n}", String(t.rating)).replace(/\d/g, (d) => labels.digits?.[Number(d)] ?? d)}
+                  </span>
                 </p>
+              ) : (
+                t.draft && (
+                  // Outside production: a review without a rating says so, so it is added before publishing.
+                  <p className="flex items-center gap-2 text-xs font-semibold text-gold">
+                    <span aria-hidden="true" className="tracking-[0.2em] text-fg/25">★★★★★</span>
+                    No rating yet (out of 5)
+                  </p>
+                )
               )}
               <blockquote className="flex-1">
                 <p className="testimonial-quote text-[1.0625rem] leading-relaxed text-text-primary">{t.quote}</p>

@@ -2,7 +2,13 @@ import "server-only";
 import { db } from "@/lib/db/client";
 import { dhakaToday, liveMarketTurnover } from "./data";
 
-export type ShareInput = { exchange: "DSE" | "CSE"; xpertTurnover: number; marketTurnover?: number | null };
+export type ShareInput = {
+  exchange: "DSE" | "CSE";
+  xpertTurnover: number;
+  marketTurnover?: number | null;
+  /** Share in %, when Xpert's turnover in taka is not known: Xpert turnover = market total × share. */
+  sharePct?: number | null;
+};
 export type ShareResult = { exchange: "DSE" | "CSE"; ok: boolean; sharePct?: number; marketTurnover?: number; message: string };
 
 /**
@@ -14,7 +20,7 @@ export type ShareResult = { exchange: "DSE" | "CSE"; ok: boolean; sharePct?: num
 export async function saveShares(tradeDate: string, inputs: ShareInput[], sourceNote: string | null, adminId: string | null): Promise<ShareResult[]> {
   const day = new Date(`${tradeDate}T00:00:00Z`);
   const results: ShareResult[] = [];
-  for (const f of inputs) {
+  for (let f of inputs) {
     let market = f.marketTurnover ?? null;
     let note = sourceNote;
     if (!(market && market > 0) && tradeDate === dhakaToday()) {
@@ -25,6 +31,7 @@ export async function saveShares(tradeDate: string, inputs: ShareInput[], source
       results.push({ exchange: f.exchange, ok: false, message: `${f.exchange}: enter the exchange's total turnover (it is not available from the live data for this day).` });
       continue;
     }
+    if (f.sharePct != null) f = { ...f, xpertTurnover: Math.round(market * f.sharePct) / 100 };
     if (!(f.xpertTurnover >= 0) || f.xpertTurnover > market) {
       results.push({ exchange: f.exchange, ok: false, message: `${f.exchange}: Xpert turnover must be between 0 and the market's total.` });
       continue;

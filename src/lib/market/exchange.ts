@@ -173,6 +173,42 @@ export function parseCseSummary(html: string): CseSummary {
   };
 }
 
+/**
+ * One index from page text, in the layouts DSE has used: "DSEX Index 5,123.45 12.34 0.24%",
+ * "DSEX 5,123.45 ▼ 12.34 (0.24%)", "DSEX: 5123.45 -12.34 -0.24 %". When the page shows the
+ * direction only by colour, the raw HTML right after the name decides the sign.
+ */
+function findIndex(text: string, name: string, html: string): IndexValue | null {
+  const re = new RegExp(
+    String.raw`\b${name}\b(?:\s*Index)?[^\d]{0,30}?([\d,]+\.\d+)[^\d+\-−▲▼]{0,15}?([+\-−▲▼]?\s*[\d,]*\.?\d+)[^\d+\-−▲▼]{0,15}?\(?\s*([+\-−▲▼]?\s*[\d.]+)\s*\)?\s*%`,
+    "g",
+  );
+  for (const m of text.matchAll(re)) {
+    const value = num(m[1]);
+    const signed = (s: string | undefined) => num(s?.replace("▲", "").replace("▼", "-"));
+    let change = signed(m[2]);
+    let pct = signed(m[3]);
+    if (!(value > 100) || !Number.isFinite(change) || !Number.isFinite(pct) || Math.abs(pct) > 20) continue;
+    const down = change < 0 || pct < 0 || /▼/.test(m[2] ?? "") || /▼/.test(m[3] ?? "");
+    let negative = down;
+    if (!down && change !== 0) {
+      // Direction by colour only: look at the classes just after the name in the HTML.
+      const at = html.search(new RegExp(String.raw`\b${name}\b`));
+      // Up to the next index name, so a neighbour's colour is not read as this one's.
+      let near = at >= 0 ? html.slice(at + name.length, at + 700) : "";
+      const next = near.search(/\b(DSEX|DSES|DS30|CASPI|CSE30|CSCX)\b/);
+      if (next >= 0) near = near.slice(0, next);
+      negative = /class="[^"]*\b(down|red|negative|minus|loss|decrease|danger)\b/i.test(near) && !/class="[^"]*\b(up|green|positive|plus|gain|increase|success)\b/i.test(near);
+    }
+    if (negative) {
+      change = -Math.abs(change);
+      pct = -Math.abs(pct);
+    }
+    return { name, value: round(value), change: round(change), changePct: round(pct) };
+  }
+  return null;
+}
+
 export type DseSummary = { status?: ExchangeSnapshot["status"]; indices: IndexValue[]; turnover?: number; volume?: number; trades?: number };
 
 /**
@@ -185,17 +221,8 @@ export function parseDseSummary(html: string): DseSummary {
   const text = decode(html);
   const indices: IndexValue[] = [];
   for (const name of DSE_INDEX_NAMES) {
-    const m = new RegExp(String.raw`\b${name}\b\s*(?:Index)?\s*([\d,]+\.\d+)\s*([+\-−]?\s*[\d,]*\.?\d+)\s*([+\-−]?\s*[\d.]+)\s*%`).exec(text);
-    if (!m) continue;
-    const value = num(m[1]);
-    let change = num(m[2]);
-    let pct = num(m[3]);
-    if (!(value > 0) || !Number.isFinite(change) || !Number.isFinite(pct)) continue;
-    if (change < 0 || pct < 0) {
-      change = -Math.abs(change);
-      pct = -Math.abs(pct);
-    }
-    indices.push({ name, value: round(value), change: round(change), changePct: round(pct) });
+    const found = findIndex(text, name, html);
+    if (found) indices.push(found);
   }
   const trades = num(/Total\s*Trade[s]?\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
   const volume = num(/Total\s*Volume\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
@@ -244,6 +271,9 @@ export type ExchangeReport = { exchange: "DSE" | "CSE"; ok: boolean; count: numb
 
 /** Reads both boards. Returns what worked, plus a per-exchange report for the admin test. */
 export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | null; reports: ExchangeReport[] }> {
+  // The DSE prices page also shows the indices on DSE's newer site: kept to read them
+  // when the home page gives none.
+  let dseMarketsHtml: string | null = null;
   const tasks: [("DSE" | "CSE"), () => Promise<Quote[]>][] = [
     [
       "DSE",
@@ -252,6 +282,7 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
         let first: unknown = null;
         try {
           const html = await getHtml(DSE_URL());
+          dseMarketsHtml = html;
           const strip = parseDseStrip(html);
           const quotes = strip.length ? strip : parsePriceTable(html);
           if (quotes.length >= 5) return quotes;
@@ -265,7 +296,7 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
     ],
     ["CSE", async () => parsePriceTable(await getHtml(CSE_URL()))],
   ];
-  const [results, cse, dse] = await Promise.all([
+  const [results, cse, dseHome] = await Promise.all([
     Promise.allSettled(tasks.map(([, run]) => run())),
     getHtml(CSE_HOME_URL())
       .then(parseCseSummary)
@@ -280,6 +311,21 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
         return null;
       }),
   ]);
+  // DSE indices and totals: the home page first, the prices page for whatever it lacks.
+  let dse = dseHome;
+  if (dseMarketsHtml) {
+    const alt = parseDseSummary(dseMarketsHtml);
+    if (!dse) dse = alt;
+    else {
+      const have = new Set(dse.indices.map((i) => i.name));
+      dse = {
+        ...alt,
+        ...Object.fromEntries(Object.entries(dse).filter(([, v]) => v !== undefined)),
+        indices: [...dse.indices, ...alt.indices.filter((i) => !have.has(i.name))],
+      } as DseSummary;
+    }
+  }
+  if (dse) dse.indices.sort((a, b) => DSE_INDEX_NAMES.indexOf(a.name as (typeof DSE_INDEX_NAMES)[number]) - DSE_INDEX_NAMES.indexOf(b.name as (typeof DSE_INDEX_NAMES)[number]));
   const exchanges: ExchangeSnapshot[] = [];
   const reports: ExchangeReport[] = [];
   results.forEach((r, i) => {

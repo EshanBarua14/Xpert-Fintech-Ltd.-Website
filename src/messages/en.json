@@ -589,5 +589,6 @@
   "consultantsLinkBody": "Advisers who bring outside expertise to Xpert.",
   "flowStepOpen": "The investor opens a BO account online",
   "flowStepDocs": "KYC documents are filed and kept on record",
-  "flowStepData": "Live prices and research inform the decision"
+  "flowStepData": "Live prices and research inform the decision",
+  "testimonialRatingShort": "{n}/5"
 }

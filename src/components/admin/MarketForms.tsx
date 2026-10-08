@@ -85,7 +85,15 @@ export function MarketShareForm({ today, live, initial }: { today: string; live:
           return (
             <fieldset key={ex} className="flex flex-col gap-4 rounded-card border border-fg/10 p-4">
               <legend className="px-2 font-mono text-sm font-semibold">{ex}</legend>
-              <TextInput id={`${k}Xpert`} inputMode="decimal" defaultValue={initial?.[`${k}Xpert` as "dseXpert"]} label="Xpert turnover (BDT)" hint="Total traded through Xpert members. Leave empty to skip this exchange." error={e[`${k}Xpert`]} />
+              <TextInput id={`${k}Xpert`} inputMode="decimal" defaultValue={initial?.[`${k}Xpert` as "dseXpert"]} label="Xpert turnover (BDT)" hint="Total traded through Xpert members. Leave this and the share empty to skip this exchange." error={e[`${k}Xpert`]} />
+              <TextInput
+                id={`${k}Share`}
+                inputMode="decimal"
+                label="…or Xpert's share (%)"
+                placeholder="e.g. 45"
+                hint="Used only when Xpert turnover is empty: the turnover is worked out from the market total."
+                error={e[`${k}Share`]}
+              />
               <TextInput id={`${k}Market`} inputMode="decimal" defaultValue={initial?.[`${k}Market` as "dseMarket"]} label="Market turnover (BDT)" placeholder={live[ex] ? String(live[ex]) : undefined} hint={liveHint(ex)} error={e[`${k}Market`]} />
             </fieldset>
           );

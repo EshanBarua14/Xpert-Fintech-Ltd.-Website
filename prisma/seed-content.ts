@@ -29,6 +29,7 @@ import { LEADER_MESSAGES, MARKET_GOAL } from "../src/content/xfl2/messages";
 import { LEGAL_DRAFTS } from "../src/content/xfl2/legal";
 import { CLIENT_LOGOS, NOT_CLIENTS, orgNameKey } from "../src/content/xfl2/client-logos";
 import { CREDENTIALS } from "../src/content/xfl2/credentials";
+import { DIRECTOR_PROFILES } from "../src/content/xfl2/director-profiles";
 import { sniff } from "../src/lib/media/inspect";
 
 const db = new PrismaClient();
@@ -627,6 +628,33 @@ async function seedRoster() {
       await db.personTranslation.updateMany({ where: { personId, locale: BN, NOT: { name: c.nameBn } }, data: { name: c.nameBn } });
     }
   }
+  // Directors' biographies and positions at their own organizations (XFL, 8 Oct 2026): filled where still empty.
+  let profiles = 0;
+  for (const d of DIRECTOR_PROFILES) {
+    const personId = ids.get(d.key) ?? (await db.person.findUnique({ where: { key: d.key }, select: { id: true } }))?.id;
+    if (!personId) continue;
+    for (const locale of [EN, BN] as const) {
+      const lang = locale === EN ? "en" : "bn";
+      const tr = await db.personTranslation.findUnique({ where: { personId_locale: { personId, locale } } });
+      if (!tr) {
+        // No Bangla version yet: create it with the Bangla name, biography and position.
+        if (locale === BN) {
+          await db.personTranslation.create({ data: { personId, locale: BN, name: d.nameBn, bio: d.bio.bn, affiliation: d.affiliation.bn } });
+          profiles++;
+        }
+        continue;
+      }
+      const data = {
+        ...(!tr.bio?.trim() && { bio: d.bio[lang] }),
+        ...(!tr.affiliation?.trim() && { affiliation: d.affiliation[lang] }),
+      };
+      if (Object.keys(data).length) {
+        await db.personTranslation.update({ where: { id: tr.id }, data });
+        profiles++;
+      }
+    }
+  }
+  if (profiles) console.log(`• Directors' profiles: biography and position added to ${profiles} profile text(s)`);
   // The stand-in board cards are no longer needed once the real board is in: move untouched ones to the trash.
   const trashed = await db.person.updateMany({
     where: { key: { startsWith: "placeholder-" }, isPlaceholder: true, deletedAt: null, updatedById: null },

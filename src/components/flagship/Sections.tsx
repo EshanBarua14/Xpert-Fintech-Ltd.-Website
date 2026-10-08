@@ -569,7 +569,7 @@ export function MemberBoard({ names }: { names: string[] }) {
 
 export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
   return (
-    <Shell className="py-20 md:py-28">
+    <Shell className="py-14 md:py-20">
       <div className="relative overflow-hidden rounded-[2rem] bg-brand-royal px-6 py-14 md:px-16 md:py-20">
         <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <div className="flex max-w-2xl flex-col gap-4">
@@ -603,7 +603,7 @@ export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
 export function PageHero({ eyebrow, title, body, children }: { eyebrow?: string; title: string; body?: string | null; children?: ReactNode }) {
   return (
     <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 pt-16 pb-12 md:px-8 md:pt-24 md:pb-16">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 pt-10 pb-8 md:px-8 md:pt-14 md:pb-10">
         <SectionHeader as="h1" eyebrow={eyebrow} title={title} body={body} />
         {children}
       </div>

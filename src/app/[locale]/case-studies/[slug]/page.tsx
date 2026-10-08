@@ -45,7 +45,7 @@ export default async function CaseStudyPage({ params }: Props) {
     <article>
       <JsonLd data={breadcrumbLd([{ name: t.home, url: `${SITE_URL}/${loc}` }, { name: t.caseStudiesTitle, url: `${SITE_URL}/${loc}/case-studies` }, { name: tr.title, url }])} />
       <header className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
-        <div className="relative mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-16 pb-10 md:px-8 md:pt-24">
+        <div className="relative mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-10 pb-8 md:px-8 md:pt-14">
           <Link href={`/${loc}/case-studies`} data-reveal className="text-sm text-text-secondary hover:text-fg">
             ← {t.caseStudiesTitle}
           </Link>
@@ -60,7 +60,7 @@ export default async function CaseStudyPage({ params }: Props) {
           </div>
         </div>
       )}
-      <Shell className="py-16 md:py-24">
+      <Shell className="py-12 md:py-16">
         <ol className="mx-auto flex max-w-4xl flex-col gap-6">
           {parts.map((p, i) => (
             <li key={p.n} data-reveal style={{ "--d": i } as CSSProperties} className="glass grid gap-4 rounded-3xl p-7 md:grid-cols-[8rem_1fr] md:p-10">

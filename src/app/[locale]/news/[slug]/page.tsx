@@ -68,7 +68,7 @@ export default async function ArticlePage({ params }: Props) {
       />
 
       <header className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
-        <div className="relative mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pt-16 pb-10 md:px-8 md:pt-24">
+        <div className="relative mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pt-10 pb-8 md:px-8 md:pt-14">
           <Link href={`/${loc}/news`} data-reveal className="text-sm text-text-secondary hover:text-fg">
             ← {t.allNews}
           </Link>
@@ -135,7 +135,7 @@ export default async function ArticlePage({ params }: Props) {
       </div>
 
       {related.length > 0 && (
-        <Shell className="border-t border-fg/[0.06] py-16 md:py-24">
+        <Shell className="border-t border-fg/[0.06] py-12 md:py-16">
           <div className="flex flex-col gap-10">
             <SectionHeader title={t.relatedNews} />
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

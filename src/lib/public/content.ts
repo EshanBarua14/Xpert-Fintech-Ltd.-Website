@@ -1,4 +1,5 @@
 import "server-only";
+import { editorHints } from "@/lib/env/hints";
 import { cache } from "react";
 import type { OrganizationKind, PersonGroup } from "@prisma/client";
 import { db } from "@/lib/db/client";
@@ -264,7 +265,7 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           logo: logoId ? (media.get(logoId) ?? null) : null,
           logoAlt: org ? (pick(org.translations, locale)?.name ?? null) : named ? (pick(named.translations, locale)?.name ?? null) : null,
           rating: r.rating && r.rating >= 1 && r.rating <= 5 ? r.rating : null,
-          draft: preview && !(r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date())),
+          draft: preview && editorHints() && !(r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date())),
         },
       ];
     });

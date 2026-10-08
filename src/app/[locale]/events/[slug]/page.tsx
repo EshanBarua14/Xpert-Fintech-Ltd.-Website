@@ -82,7 +82,7 @@ export default async function EventPage({ params }: Props) {
       <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
         <div className="aurora opacity-70" />
         <div className="grid-fade pointer-events-none absolute inset-0" />
-        <header className="relative mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-16 pb-12 md:px-8 md:pt-24">
+        <header className="relative mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-10 pb-10 md:px-8 md:pt-14">
           <Link href={`/${found.locale}/events`} data-reveal className="text-sm text-text-secondary hover:text-fg">
             ← {t.allEvents}
           </Link>

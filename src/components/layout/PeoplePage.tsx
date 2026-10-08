@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { editorHints } from "@/lib/env/hints";
 import { notFound } from "next/navigation";
 import type { PersonGroup } from "@prisma/client";
 import { PeopleGrid } from "@/components/blocks/DataBlocks";
@@ -28,7 +29,7 @@ export function peoplePage(group: PersonGroup, path: string, titleKey: "board" |
         <Shell className="pb-16">
           {people.length ? (
             <PeopleGrid people={people} photos={photos} locale={locale as AppLocale} group={group} />
-          ) : process.env.APP_ENV !== "production" ? (
+          ) : editorHints() ? (
             // Outside production: say where the profile is added.
             <a href="/admin/people/new" className="flex max-w-md flex-col gap-2 rounded-2xl border border-dashed border-gold/60 p-6 text-sm text-text-secondary hover:border-gold">
               <span className="font-semibold text-gold">No profile yet</span>

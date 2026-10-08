@@ -65,7 +65,7 @@ export default async function JobPage({ params }: Props) {
         />
       )}
       <header className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
-        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pt-16 pb-10 md:px-8 md:pt-24">
+        <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pt-10 pb-8 md:px-8 md:pt-14">
           <Link href={`/${loc}/careers`} data-reveal className="text-sm text-text-secondary hover:text-fg">
             ← {t.allJobs}
           </Link>

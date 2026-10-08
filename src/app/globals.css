@@ -1116,6 +1116,19 @@ html {
 .person-name:focus-visible {
   background-size: 100% 1px;
 }
+/* Group accents for profile cards: board gold, management blue, consultant teal, team violet.
+   --tone draws lines, dots and glows; --tone-ink is the readable text colour on each theme. */
+.people-tone-board { --tone: #d4a24c; --tone-ink: #f0c66e; }
+.people-tone-management { --tone: #22bceb; --tone-ink: #67e8f9; }
+.people-tone-consultant { --tone: #14b8a6; --tone-ink: #5eead4; }
+.people-tone-team { --tone: #8b5cf6; --tone-ink: #c4b5fd; }
+[data-theme="light"] .people-tone-board { --tone: #c08a2c; --tone-ink: #8a5d0b; }
+[data-theme="light"] .people-tone-management { --tone: #1d8fc4; --tone-ink: #0b6480; }
+[data-theme="light"] .people-tone-consultant { --tone: #0d9488; --tone-ink: #0f6b62; }
+[data-theme="light"] .people-tone-team { --tone: #7c3aed; --tone-ink: #5b21b6; }
+.person-sheen {
+  background: linear-gradient(180deg, transparent 50%, rgb(6 17 31 / 0.55));
+}
 .person-dialog[open] { animation: dialog-in 380ms cubic-bezier(0.16, 1, 0.3, 1); }
 .person-dialog[open]::backdrop { animation: backdrop-in 380ms ease-out; }
 @keyframes dialog-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } }

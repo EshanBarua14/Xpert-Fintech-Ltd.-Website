@@ -104,3 +104,33 @@ export const getFlowProducts = cache(async (locale: AppLocale): Promise<Record<s
   }
   return out;
 });
+
+export type OrgLogoEntry = { names: string[]; name: string; logo: MemberLogo };
+
+const normOrg = (v: string) =>
+  v.toLowerCase().replace(/&/g, " and ").replace(/[.,()'’]/g, " ").replace(/\b(limited|ltd|plc)\b/g, " ").replace(/\s+/g, " ").trim();
+
+/** Published organizations whose logo may be shown, with every name they go by (EN, BN, short names). */
+export const getOrgLogos = cache(async (locale: AppLocale): Promise<OrgLogoEntry[]> => {
+  const rows = await db.organization
+    .findMany({ where: { ...publishedWhere(), logoPermission: true, logoMediaId: { not: null } }, include: { translations: true } })
+    .catch(() => []);
+  const media = await mediaMap(rows.map((r) => r.logoMediaId), locale);
+  return rows.flatMap((r) => {
+    const m = r.logoMediaId ? media.get(r.logoMediaId) : undefined;
+    const tr = pick(r.translations, locale);
+    if (!m || !tr) return [];
+    const names = r.translations.flatMap((t) => [t.name, t.shortName]).filter((n): n is string => Boolean(n && n.trim().length > 3)).map(normOrg);
+    return [{ names, name: tr.name, logo: { url: m.url, width: m.width, height: m.height } }];
+  });
+});
+
+/** The organization named in a text such as "CEO, UCB Stock Brokerage Limited" (longest name wins). */
+export function orgForText(orgs: OrgLogoEntry[], text: string | null | undefined) {
+  if (!text) return null;
+  const t = normOrg(text);
+  let best: OrgLogoEntry | null = null;
+  let len = 0;
+  for (const o of orgs) for (const n of o.names) if (n && t.includes(n) && n.length > len) { best = o; len = n.length; }
+  return best ? { name: best.name, logo: best.logo } : null;
+}

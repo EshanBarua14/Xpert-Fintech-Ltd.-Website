@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { editorHints } from "@/lib/env/hints";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Sections } from "@/components/blocks/BlockRenderer";
@@ -122,7 +123,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {showReach && (
-        <Shell id="reach" className="py-16 md:py-24">
+        <Shell id="reach" className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
             <SectionHeader title={t.reachTitle} />
             <MarketReach
@@ -150,7 +151,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {showcase.length > 0 && (
-        <Shell id="products" className="py-16 md:py-24">
+        <Shell id="products" className="py-12 md:py-16">
           <div className="flex flex-col gap-14">
             <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
               <SectionHeader eyebrow={t.showcaseEyebrow} title={t.showcaseTitle} />
@@ -162,8 +163,8 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {/* Outside production, an empty reviews section says how to fill it instead of disappearing. */}
-      {testimonials.length === 0 && process.env.APP_ENV !== "production" && (
-        <Shell id="testimonials" className="py-16 md:py-24">
+      {testimonials.length === 0 && editorHints() && (
+        <Shell id="testimonials" className="py-12 md:py-16">
           <div className="flex flex-col gap-8">
             <SectionHeader title={t.testimonialsTitle} />
             <div className="flex flex-col items-start gap-3 rounded-3xl border border-dashed border-gold/50 bg-gold/[0.04] p-6 md:p-8">
@@ -181,7 +182,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {testimonials.length > 0 && (
-        <Shell id="testimonials" className="py-16 md:py-24">
+        <Shell id="testimonials" className="py-12 md:py-16">
           <div className="flex flex-col gap-14">
             <SectionHeader title={t.testimonialsTitle} />
             <TestimonialSlider
@@ -203,7 +204,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {hasMarket && (
-        <Shell id="market" className="py-16 md:py-24">
+        <Shell id="market" className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} />
             <MarketPulse initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} />
@@ -212,7 +213,7 @@ export default async function HomePage({ params }: Props) {
       )}
 
       {((!showReach && proof.length > 0) || apps.length > 0) && (
-        <Shell id="proof" className="py-16 md:py-24">
+        <Shell id="proof" className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.proofEyebrow} title={t.proofTitle} />
             {!showReach && proof.length > 0 && <StatGrid items={proof} locale={locale} />}
@@ -228,14 +229,14 @@ export default async function HomePage({ params }: Props) {
 
       {/* The platform's modules are on /platform; the product showcase above already walks through them. */}
 
-      <Shell className="py-16 md:py-24">
+      <Shell className="py-12 md:py-16">
         <div className="flex flex-col gap-16">
           <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} align="center" />
           <FlowStory t={t} products={flowProducts} exchanges={exchangeLogos(data.logos.parties)} />
         </div>
       </Shell>
 
-      <Shell className="py-16 md:py-24">
+      <Shell className="py-12 md:py-16">
         <div className="flex flex-col gap-14">
           <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
             <SectionHeader eyebrow={t.consortiumEyebrow} title={t.consortiumTitle} />
@@ -245,7 +246,7 @@ export default async function HomePage({ params }: Props) {
         </div>
       </Shell>
 
-      <Shell className="py-16 md:py-24">
+      <Shell className="py-12 md:py-16">
         <div className="flex flex-col gap-14">
           <SectionHeader title={t.principlesTitle} />
           <Principles t={t} />
@@ -256,7 +257,7 @@ export default async function HomePage({ params }: Props) {
       {ctx && <Sections sections={sections} ctx={ctx} />}
 
       {events.length > 0 && (
-        <Shell className="py-16 md:py-24">
+        <Shell className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <SectionHeader eyebrow={t.latestEyebrow} title={t.events} />

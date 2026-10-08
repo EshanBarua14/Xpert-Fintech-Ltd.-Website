@@ -15,7 +15,7 @@ export default function NotFound() {
     <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
       <div className="aurora opacity-70" />
       <div className="grid-fade pointer-events-none absolute inset-0" />
-      <Container className="relative flex min-h-[70svh] flex-col items-start justify-center gap-6 py-24 md:py-32">
+      <Container className="relative flex min-h-[70svh] flex-col items-start justify-center gap-6 py-16 md:py-20">
       <p className="text-gradient-brand font-display text-8xl font-semibold tracking-tighter md:text-9xl">404</p>
       <h1 className="text-gradient font-display text-4xl font-semibold tracking-[-0.035em] md:text-6xl">{t.notFoundTitle}</h1>
       <p className="max-w-xl text-lg text-text-secondary">{t.notFoundBody}</p>

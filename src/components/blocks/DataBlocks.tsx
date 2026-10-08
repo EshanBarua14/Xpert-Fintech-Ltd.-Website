@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { getOrgLogos, orgForText } from "@/lib/public/flagship";
+import { editorHints } from "@/lib/env/hints";
 import Link from "next/link";
 import type { OrganizationKind, PersonGroup } from "@prisma/client";
 import { ProductCard } from "@/components/products/ProductCard";
@@ -71,7 +73,7 @@ export async function PeopleListBlock({ block, ctx }: { block: BlockData; ctx: B
 type PersonRow = Awaited<ReturnType<typeof getPeople>>[number];
 
 /** Board / management profiles as photo cards with a pop-up profile. */
-export function PeopleGrid({
+export async function PeopleGrid({
   people,
   photos,
   locale,
@@ -85,6 +87,8 @@ export function PeopleGrid({
   const t = getMessages(locale);
   const groupLabel =
     group === "BOARD" ? t.boardMember : group === "MANAGEMENT" ? t.managementMember : group === "CONSULTANT" ? t.consultantMember : group === "LEADERSHIP" ? t.leadershipMember : t.teamMember;
+  // Logos of the organizations named in people's affiliations (e.g. "CEO, Apex Investments Limited").
+  const orgs = await getOrgLogos(locale);
   const rows: GalleryPerson[] = people.map((p) => {
     const tr = pick(p.translations, locale);
     const photo = photos.get(p.photoMediaId ?? "");
@@ -93,6 +97,7 @@ export function PeopleGrid({
       name: tr?.name ?? "",
       title: pick(p.roles[0]?.translations ?? [], locale)?.title ?? null,
       affiliation: tr?.affiliation ?? null,
+      org: orgForText(orgs, tr?.affiliation ?? pick(p.translations, "en")?.affiliation),
       bio: tr?.bio ?? null,
       photo: photo ? { url: photo.url, width: photo.width, height: photo.height } : null,
       linkedinUrl: p.linkedinUrl,
@@ -104,8 +109,9 @@ export function PeopleGrid({
     <PeopleGallery
       people={rows.filter((r) => r.name)}
       groupLabel={groupLabel}
-      showPlaceholderBadge={process.env.APP_ENV !== "production"}
+      showPlaceholderBadge={editorHints()}
       featureFirst={group === "BOARD" || group === "MANAGEMENT" || group === "CONSULTANT"}
+      tone={group === "BOARD" ? "board" : group === "MANAGEMENT" ? "management" : group === "CONSULTANT" ? "consultant" : "team"}
       labels={{
         viewProfile: t.viewProfile,
         close: t.close,

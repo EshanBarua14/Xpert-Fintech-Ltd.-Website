@@ -74,7 +74,7 @@ export default async function AboutPage({ params }: Props) {
 
       {/* Story, mission, vision: the story as reading text on the left, mission and vision as two statements on the right, top-aligned. */}
       {(story.about || story.mission || story.vision) && (
-        <Shell className="pb-20 md:pb-28">
+        <Shell className="pb-14 md:pb-16">
           <div className="grid gap-12 border-t border-fg/10 pt-12 md:pt-16 lg:grid-cols-12 lg:gap-16">
             {story.about && (
               <div data-reveal className={cn("flex flex-col gap-6", story.mission || story.vision ? "lg:col-span-6" : "lg:col-span-9")}>
@@ -116,7 +116,7 @@ export default async function AboutPage({ params }: Props) {
 
       {/* Chairman's and MD's messages (Admin → Messages, once published) */}
       {(chairman || md) && (
-        <Shell className="pb-20 md:pb-28">
+        <Shell className="pb-14 md:pb-16">
           <div className="flex flex-col gap-20 md:gap-28">
             {chairman && <LeaderMessage message={chairman} heading={t.chairmanMessage} compact />}
             {md && <LeaderMessage message={md} heading={t.mdMessage} compact />}
@@ -126,7 +126,7 @@ export default async function AboutPage({ params }: Props) {
 
       {/* The consortium, as a moving strip */}
       {flagship.members.length > 0 && (
-        <div className="pb-20 md:pb-28">
+        <div className="pb-14 md:pb-16">
           <Shell className="pb-8">
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
               <SectionHeader eyebrow={t.consortiumEyebrow} title={t.ownedByTitle.replace("{n}", nf.format(flagship.members.length))} />
@@ -141,7 +141,7 @@ export default async function AboutPage({ params }: Props) {
 
       {/* Milestones */}
       {milestones.length > 0 && (
-        <Shell className="pb-20 md:pb-28">
+        <Shell className="pb-14 md:pb-16">
           <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
             <div className="lg:sticky lg:top-[calc(8rem+var(--ticker-h))] lg:self-start">
               <SectionHeader eyebrow={t.milestonesEyebrow} title={t.milestonesTitle} />
@@ -168,7 +168,7 @@ export default async function AboutPage({ params }: Props) {
       )}
 
       {/* People */}
-      <Shell className="pb-20 md:pb-28">
+      <Shell className="pb-14 md:pb-16">
         <div className="flex flex-col gap-12">
           <SectionHeader eyebrow={t.peopleEyebrow} title={t.peopleTitle} />
           <ul className={cn("grid gap-4 md:grid-cols-3", people.length === 4 && "md:grid-cols-2 xl:grid-cols-4")}>

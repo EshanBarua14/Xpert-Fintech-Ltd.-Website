@@ -44,10 +44,10 @@ export default async function PlatformPage({ params }: Props) {
           <PrimaryButton href={`/${locale}/request-demo`}>{t.requestDemo}</PrimaryButton>
         </div>
       </PageHero>
-      <Shell className="pb-24 md:pb-32">
+      <Shell className="pb-16 md:pb-20">
         <CapabilityBento items={capabilities(t, locale, data.publishedSlugs)} anchors />
       </Shell>
-      <Shell className="py-16 md:py-24">
+      <Shell className="py-12 md:py-16">
         <div className="grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           <SectionHeader eyebrow={t.ecosystemEyebrow} title={t.ecosystemTitle} body={t.ecosystemBody} />
           <div data-reveal>
@@ -55,13 +55,13 @@ export default async function PlatformPage({ params }: Props) {
           </div>
         </div>
       </Shell>
-      <Shell className="py-16 md:py-24">
+      <Shell className="py-12 md:py-16">
         <div className="flex flex-col gap-16">
           <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} align="center" />
           <FlowStory t={t} products={flowProducts} exchanges={exchangeLogos(data.logos.parties)} />
         </div>
       </Shell>
-      <Shell className="py-16 md:py-24">
+      <Shell className="py-12 md:py-16">
         <div className="flex flex-col gap-14">
           <SectionHeader eyebrow={t.principlesEyebrow} title={t.principlesTitle} />
           <Principles t={t} />

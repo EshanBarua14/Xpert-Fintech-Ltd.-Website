@@ -1,4 +1,5 @@
 import "server-only";
+import { editorHints } from "@/lib/env/hints";
 import { cache } from "react";
 import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
@@ -79,7 +80,7 @@ export const getLeaderMessage = cache(async (key: LeaderKey, locale: AppLocale):
     name: tr?.name ?? null,
     title,
     photo: photo ? { url: photo.url, width: photo.width, height: photo.height } : null,
-    draft: !m.published,
+    draft: !m.published && editorHints(),
   };
 });
 

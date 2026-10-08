@@ -151,6 +151,8 @@ enum PersonGroup {
   MANAGEMENT
   LEADERSHIP
   TEAM
+  /// Company → Consultants
+  CONSULTANT
 }
 
 enum EmploymentType {

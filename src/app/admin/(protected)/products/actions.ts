@@ -45,6 +45,7 @@ export async function saveOffering(_prev: FormState, formData: FormData): Promis
     status: formData.get("status"),
     publishAt: formData.get("publishAt") || undefined,
     sortOrder: formData.get("sortOrder") || 0,
+    iconMediaId: formData.get("iconMediaId") ?? "",
     en: readTranslation(formData, "en"),
     bn: readTranslation(formData, "bn"),
   });
@@ -54,6 +55,8 @@ export async function saveOffering(_prev: FormState, formData: FormData): Promis
   if (input.parentId && input.parentId === input.id) {
     return { errors: { parentId: "A product cannot be its own parent." } };
   }
+
+  if (!(await isUsableImage(input.iconMediaId))) return { errors: { iconMediaId: "That image is no longer in the media library." } };
 
   const enSlug = input.en.slug || slugify(input.en.name);
   if (!enSlug) return { errors: { "en.slug": "Enter a URL slug using English letters." } };
@@ -72,6 +75,7 @@ export async function saveOffering(_prev: FormState, formData: FormData): Promis
     status: input.status,
     publishAt: parseLocalDateTime(input.publishAt),
     sortOrder: input.sortOrder,
+    iconMediaId: input.iconMediaId,
     updatedById: admin.id,
   };
 
@@ -85,6 +89,7 @@ export async function saveOffering(_prev: FormState, formData: FormData): Promis
         id = created.id;
       }
       const offeringId = id!;
+      await syncMediaUsage(tx, "OFFERING", offeringId, "icon", input.iconMediaId);
 
       await tx.offeringTranslation.upsert({
         where: { offeringId_locale: { offeringId, locale: "en" } },

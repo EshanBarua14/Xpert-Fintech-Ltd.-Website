@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils/cn";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -61,6 +62,8 @@ export default async function AboutPage({ params }: Props) {
   const people = [
     { href: "company/board", title: t.board, body: t.boardLinkBody, count: counts.BOARD, icon: "shield" },
     { href: "company/management", title: t.management, body: t.managementLinkBody, count: counts.MANAGEMENT, icon: "users" },
+    // Shown once a consultant is published in Admin → People.
+    ...(counts.CONSULTANT > 0 ? [{ href: "company/consultants", title: t.consultants, body: t.consultantsLinkBody, count: counts.CONSULTANT, icon: "users" }] : []),
     { href: "company/team", title: t.teamTitle, body: t.teamLinkBody, count: counts.LEADERSHIP + counts.TEAM, icon: "network" },
   ];
 
@@ -156,7 +159,7 @@ export default async function AboutPage({ params }: Props) {
       <Shell className="pb-20 md:pb-28">
         <div className="flex flex-col gap-12">
           <SectionHeader eyebrow={t.peopleEyebrow} title={t.peopleTitle} />
-          <ul className="grid gap-4 md:grid-cols-3">
+          <ul className={cn("grid gap-4 md:grid-cols-3", people.length === 4 && "md:grid-cols-2 xl:grid-cols-4")}>
             {people.map((p, i) => (
               <li key={p.href} data-reveal style={{ "--d": i } as CSSProperties}>
                 <Link href={`/${loc}/${p.href}`} className="spotlight glass group flex h-full flex-col gap-5 rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-1">

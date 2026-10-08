@@ -182,6 +182,8 @@ export type TestimonialCard = {
   organization: string | null;
   photo: MediaInfo | null;
   logo: MediaInfo | null;
+  /** The organization the logo belongs to (its alt text). */
+  logoAlt?: string | null;
   /** 1–5 stars, when the client gave a rating. */
   rating: number | null;
   /** Not published or no written approval yet: only shown outside production, marked as a draft. */
@@ -201,33 +203,66 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       include: { translations: true, organization: { include: { translations: true } } },
     });
-    // A review without its own photo uses the photo of the person with the same name in Admin → People (e.g. a director).
-    const names = rows.filter((r) => !r.photoMediaId).map((r) => r.personName);
+    // A review is matched by name to the person in Admin → People (e.g. a director): their photo,
+    // their position at their own organization (affiliation) and that organization's logo fill
+    // in whatever the review itself leaves empty.
+    const names = [...new Set(rows.map((r) => r.personName))];
     const people = names.length
       ? await db.person.findMany({
-          where: { deletedAt: null, photoMediaId: { not: null }, translations: { some: { locale: "en", name: { in: names } } } },
-          select: { photoMediaId: true, translations: { where: { locale: "en" }, select: { name: true } } },
+          where: { deletedAt: null, translations: { some: { locale: "en", name: { in: names } } } },
+          select: {
+            photoMediaId: true,
+            translations: { select: { locale: true, name: true, affiliation: true } },
+            roles: { orderBy: { sortOrder: "asc" }, select: { group: true, translations: { select: { locale: true, title: true } } } },
+          },
         })
       : [];
-    const photoOf = (r: (typeof rows)[number]) =>
-      r.photoMediaId ?? people.find((p) => p.translations.some((t) => t.name.toLowerCase() === r.personName.toLowerCase()))?.photoMediaId ?? null;
+    const personOf = (r: (typeof rows)[number]) =>
+      people.find((p) => p.translations.some((t) => t.locale === "en" && t.name.toLowerCase() === r.personName.toLowerCase()));
+    const photoOf = (r: (typeof rows)[number]) => r.photoMediaId ?? personOf(r)?.photoMediaId ?? null;
+    // Organizations named in an affiliation ("Managing Director, Apex Investments Ltd.") lend their logo.
+    const orgs = await db.organization.findMany({ where: { ...publishedWhere(), logoPermission: true, logoMediaId: { not: null } }, include: { translations: true } });
+    const norm = (v: string) => v.toLowerCase().replace(/&/g, " and ").replace(/[.,()'’]/g, " ").replace(/\b(limited|ltd|plc)\b/g, " ").replace(/\s+/g, " ").trim();
+    const orgIn = (text: string | null | undefined) =>
+      text ? orgs.find((o) => o.translations.some((t) => t.name && norm(text).includes(norm(t.name)))) ?? null : null;
+    const affiliationOf = (r: (typeof rows)[number]) => {
+      const p = personOf(r);
+      return (p?.translations.find((t) => t.locale === locale)?.affiliation || p?.translations.find((t) => t.locale === "en")?.affiliation) ?? null;
+    };
+    const roleOf = (r: (typeof rows)[number]) => {
+      const tr = personOf(r)?.roles[0]?.translations;
+      return tr?.find((t) => t.locale === locale)?.title ?? tr?.find((t) => t.locale === "en")?.title ?? null;
+    };
     const media = await mediaMap(
-      rows.flatMap((r) => [photoOf(r), r.organization?.logoPermission ? r.organization.logoMediaId : null]),
+      rows.flatMap((r) => {
+        const own = r.organization && r.organization.logoPermission ? r.organization.logoMediaId : null;
+        return [photoOf(r), own ?? orgIn(affiliationOf(r))?.logoMediaId ?? null];
+      }),
       locale,
     );
     return rows.flatMap((r) => {
       const tr = pick(r.translations, locale);
       if (!tr) return [];
       const org = r.organization && !r.organization.deletedAt ? r.organization : null;
+      const affiliation = affiliationOf(r);
+      const named = org ? null : orgIn(affiliation);
+      const logoId = org?.logoPermission ? org.logoMediaId : (named?.logoMediaId ?? null);
       return [
         {
           id: r.id,
           quote: tr.quote,
           name: r.personName,
-          role: tr.personTitle,
-          organization: org ? (pick(org.translations, locale)?.name ?? null) : null,
+          // The reviewer's title: as written on the review, else their position from Admin → People.
+          role: tr.personTitle || affiliation || roleOf(r),
+          organization: org
+            ? (pick(org.translations, locale)?.name ?? null)
+            : !tr.personTitle && !affiliation && roleOf(r)
+              ? // Only their role at Xpert is known (e.g. "Director"): name the company it is at.
+                locale === "bn" ? "এক্সপার্ট ফিনটেক লিমিটেড" : "Xpert Fintech Ltd."
+              : null,
           photo: media.get(photoOf(r) ?? "") ?? null,
-          logo: org?.logoPermission ? (media.get(org.logoMediaId ?? "") ?? null) : null,
+          logo: logoId ? (media.get(logoId) ?? null) : null,
+          logoAlt: org ? (pick(org.translations, locale)?.name ?? null) : named ? (pick(named.translations, locale)?.name ?? null) : null,
           rating: r.rating && r.rating >= 1 && r.rating <= 5 ? r.rating : null,
           draft: preview && !(r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date())),
         },

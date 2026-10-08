@@ -111,7 +111,7 @@ export default async function EditProductPage({
         </section>
       ) : (
         <>
-          <ProductForm values={toProductFormValues(offering)} parentOptions={await parentOptions(offering.id)} />
+          <ProductForm values={toProductFormValues(offering)} parentOptions={await parentOptions(offering.id)} images={await imageOptions()} />
 
           <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
             <div>

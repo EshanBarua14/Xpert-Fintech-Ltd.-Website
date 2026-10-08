@@ -16,7 +16,8 @@ import {
 } from "@/components/flagship/Sections";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
-import { getFlagshipData } from "@/lib/public/flagship";
+import { getFlagshipData, getFlowProducts } from "@/lib/public/flagship";
+import { exchangeLogos } from "@/components/market/ExchangeMark";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { buildMetadata } from "@/lib/public/seo";
 
@@ -34,7 +35,7 @@ export default async function PlatformPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);
-  const [data, eco, ecoInDb] = await Promise.all([getFlagshipData(locale), getEcosystem(locale), ecosystemInDatabase()]);
+  const [data, eco, ecoInDb, flowProducts] = await Promise.all([getFlagshipData(locale), getEcosystem(locale), ecosystemInDatabase(), getFlowProducts(locale)]);
 
   return (
     <>
@@ -56,8 +57,8 @@ export default async function PlatformPage({ params }: Props) {
       </Shell>
       <Shell className="py-16 md:py-24">
         <div className="flex flex-col gap-16">
-          <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} body={t.flowBody} align="center" />
-          <FlowStory t={t} />
+          <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} align="center" />
+          <FlowStory t={t} products={flowProducts} exchanges={exchangeLogos(data.logos.parties)} />
         </div>
       </Shell>
       <Shell className="py-16 md:py-24">

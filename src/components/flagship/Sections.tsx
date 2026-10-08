@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import { CountUp } from "@/components/motion/CountUp";
@@ -397,7 +398,88 @@ export function CapabilityBento({ items, anchors = false }: { items: Capability[
 
 // ── Order flow story ─────────────────────────────────────────────────────────
 
-export function FlowStory({ t }: { t: Messages }) {
+type FlowLogo = { url: string; width: number | null; height: number | null };
+type FlowProductInfo = { name: string; href: string; logo: FlowLogo | null };
+
+/** The journey, in order, and which products do each step (by product key). */
+const FLOW: { keys: string[]; icon: string; text: keyof Messages; exchanges?: boolean }[] = [
+  { keys: ["bo-account-opening", "ekyc"], icon: "users", text: "flowStepOpen" },
+  { keys: ["dms"], icon: "document", text: "flowStepDocs" },
+  { keys: ["market-data"], icon: "globe", text: "flowStepData" },
+  { keys: ["trading-platform"], icon: "exchange", text: "flowStep2" },
+  { keys: ["rms"], icon: "shield", text: "flowStep3" },
+  { keys: ["exchange-connectivity"], icon: "network", text: "flowStep4", exchanges: true },
+  { keys: ["back-office"], icon: "chart", text: "flowStep5" },
+];
+
+/**
+ * An order's journey through every published Xpert product, from account
+ * opening to settlement. Each step names (and links to) the products doing
+ * it, with the product's logo when one is set; the exchange step shows the
+ * DSE and CSE logos. Without product data it falls back to the short
+ * five-step version.
+ */
+export function FlowStory({
+  t,
+  products,
+  exchanges,
+}: {
+  t: Messages;
+  products?: Record<string, FlowProductInfo>;
+  exchanges?: { DSE?: FlowLogo; CSE?: FlowLogo };
+}) {
+  const steps = products && Object.keys(products).length
+    ? FLOW.map((f) => ({ ...f, items: f.keys.map((k) => products[k]).filter((p): p is FlowProductInfo => Boolean(p)) })).filter((f) => f.items.length)
+    : [];
+  if (!steps.length) return <FlowStoryShort t={t} />;
+  const cols = steps.length >= 7 ? "xl:grid-cols-7" : steps.length === 6 ? "xl:grid-cols-6" : "xl:grid-cols-5";
+  return (
+    <div className="relative">
+      {/* Connecting rail with travelling light (wide screens, one row) */}
+      <div aria-hidden="true" className="absolute top-10 right-[6%] left-[6%] hidden h-px bg-gradient-to-r from-transparent via-fg/15 to-transparent xl:block">
+        <span className="absolute -top-[2px] h-[5px] w-24 rounded-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent" style={{ animation: "lane 6s linear infinite" }} />
+      </div>
+      <ol className={cn("relative grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4", cols)}>
+        {steps.map((s, i) => {
+          const logos = s.exchanges ? [exchanges?.DSE, exchanges?.CSE].filter((l): l is FlowLogo => Boolean(l)) : [];
+          const productLogo = s.items.find((p) => p.logo)?.logo;
+          return (
+            <li key={s.keys[0]} data-reveal style={delay(i % 7)} className="flex flex-col items-center gap-3 text-center">
+              <span className="glass relative flex size-20 items-center justify-center rounded-3xl text-brand-sky shadow-[0_0_60px_-20px_rgb(34_188_235/0.7)]">
+                {logos.length ? (
+                  <span className="flex gap-1.5">
+                    {logos.map((l) => (
+                      <span key={l.url} className="flex size-8 items-center justify-center overflow-hidden rounded-lg bg-white p-0.5 ring-1 ring-black/5">
+                        <Image src={l.url} alt="" width={l.width ?? 64} height={l.height ?? 64} className="h-full w-full object-contain" />
+                      </span>
+                    ))}
+                  </span>
+                ) : productLogo ? (
+                  <span className="flex size-12 items-center justify-center overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">
+                    <Image src={productLogo.url} alt="" width={productLogo.width ?? 96} height={productLogo.height ?? 96} className="h-full w-full object-contain" />
+                  </span>
+                ) : (
+                  <Icon name={s.icon} className="size-7" />
+                )}
+                <span className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">{i + 1}</span>
+              </span>
+              <span className="flex flex-col items-center gap-0.5">
+                {s.items.map((p) => (
+                  <Link key={p.href} href={p.href} className="text-sm font-semibold leading-snug text-gold underline-offset-4 hover:underline">
+                    {p.name}
+                  </Link>
+                ))}
+              </span>
+              <p className="max-w-[13rem] text-sm leading-relaxed text-text-primary">{t[s.text]}</p>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+function FlowStoryShort({ t }: { t: Messages }) {
   const steps = [
     { icon: "users", label: t.flowStep1, tag: t.p4Title },
     { icon: "exchange", label: t.flowStep2, tag: "OMS" },
@@ -406,29 +488,18 @@ export function FlowStory({ t }: { t: Messages }) {
     { icon: "chart", label: t.flowStep5, tag: t.capBackTitle },
   ];
   return (
-    <div className="relative">
-      {/* Connecting rail with travelling light */}
-      <div aria-hidden="true" className="absolute top-12 right-[10%] left-[10%] hidden h-px bg-gradient-to-r from-transparent via-fg/15 to-transparent lg:block">
-        <span
-          className="absolute -top-[2px] h-[5px] w-24 rounded-full bg-gradient-to-r from-transparent via-cyan-300 to-transparent"
-          style={{ animation: "lane 4.5s linear infinite" }}
-        />
-      </div>
-      <ol className="relative grid gap-4 lg:grid-cols-5">
-        {steps.map((s, i) => (
-          <li key={s.tag} data-reveal style={delay(i)} className="flex flex-col items-center gap-4 text-center">
-            <span className="glass relative flex size-24 items-center justify-center rounded-3xl text-brand-sky shadow-[0_0_60px_-20px_rgb(34_188_235/0.7)]">
-              <Icon name={s.icon} className="size-8" />
-              <span className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">
-                {i + 1}
-              </span>
-            </span>
-            <span className="text-sm font-semibold text-gold">{s.tag}</span>
-            <p className="max-w-[16rem] text-sm leading-relaxed text-text-primary">{s.label}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
+    <ol className="relative grid gap-4 lg:grid-cols-5">
+      {steps.map((s, i) => (
+        <li key={s.tag} data-reveal style={delay(i)} className="flex flex-col items-center gap-4 text-center">
+          <span className="glass relative flex size-24 items-center justify-center rounded-3xl text-brand-sky">
+            <Icon name={s.icon} className="size-8" />
+            <span className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">{i + 1}</span>
+          </span>
+          <span className="text-sm font-semibold text-gold">{s.tag}</span>
+          <p className="max-w-[16rem] text-sm leading-relaxed text-text-primary">{s.label}</p>
+        </li>
+      ))}
+    </ol>
   );
 }
 

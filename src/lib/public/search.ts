@@ -93,7 +93,7 @@ export async function searchSite(locale: AppLocale, raw: string): Promise<Search
     const tr = prefer(p.translations);
     const role = p.roles[0];
     if (!tr || !role) continue;
-    const page = role.group === "BOARD" ? "company/board" : role.group === "MANAGEMENT" ? "company/management" : "company/team";
+    const page = role.group === "BOARD" ? "company/board" : role.group === "MANAGEMENT" ? "company/management" : role.group === "CONSULTANT" ? "company/consultants" : "company/team";
     hits.push({ kind: "person", title: tr.name, subtitle: prefer(role.translations)?.title ?? null, href: `/${locale}/${page}` });
   }
   for (const o of orgs) {

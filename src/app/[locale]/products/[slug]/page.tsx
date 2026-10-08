@@ -90,6 +90,7 @@ export default async function ProductPage({ params }: Props) {
     found.locale,
   );
   const hero = images.get(offering.heroMediaId ?? "");
+  const productLogo = offering.iconMediaId ? (await mediaMap([offering.iconMediaId], found.locale)).get(offering.iconMediaId) : undefined;
   const [partyLogos, credentials] = await Promise.all([getPartyLogos(found.locale), getCredentials(found.locale)]);
   const deploymentLogos = await mediaMap(
     offering.deployments.map((d) => (d.organization?.logoPermission ? d.organization.logoMediaId : null)),
@@ -165,6 +166,11 @@ export default async function ProductPage({ params }: Props) {
                 </>
               )}
             </nav>
+            {productLogo && (
+              <span data-reveal className="flex size-16 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 ring-1 ring-black/5">
+                <Image src={productLogo.url} alt="" width={productLogo.width ?? 128} height={productLogo.height ?? 128} className="h-full w-full object-contain" />
+              </span>
+            )}
             <h1
               data-reveal
               style={{ "--d": 1 } as CSSProperties}

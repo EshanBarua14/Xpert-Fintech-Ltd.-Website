@@ -27,7 +27,7 @@ import { getMessages } from "@/lib/i18n/messages";
 import { mediaIdsOf, toSections } from "@/lib/public/blocks";
 import { getEvents, getPageByKey, getSeo, getTestimonials } from "@/lib/public/content";
 import { TestimonialSlider } from "@/components/organizations/TestimonialSlider";
-import { getFlagshipData } from "@/lib/public/flagship";
+import { getFlagshipData, getFlowProducts } from "@/lib/public/flagship";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
@@ -80,7 +80,7 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   const [data, events, market, showcase, credentials] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]);
-  const [apps, eco, ecoInDb, testimonials, goal] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal()]);
+  const [apps, eco, ecoInDb, testimonials, goal, flowProducts] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale)]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -115,7 +115,7 @@ export default async function HomePage({ params }: Props) {
       {data.clients.length > 0 && (
         <section id="clients" className="relative scroll-mt-28 overflow-hidden border-y border-fg/[0.06] py-12 md:py-16">
           <div className="mx-auto mb-8 w-full max-w-7xl px-4 md:px-8">
-            <SectionHeader eyebrow={t.clientsEyebrow} title={t.clientsTitle.replace("{n}", new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(data.clients.length))} body={t.clientsBody} />
+            <SectionHeader eyebrow={t.clientsEyebrow} title={t.clientsTitle.replace("{n}", new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(data.clients.length))} />
           </div>
           <ClientMarquee clients={data.clients} label={t.clientsEyebrow} />
         </section>
@@ -124,7 +124,7 @@ export default async function HomePage({ params }: Props) {
       {showReach && (
         <Shell id="reach" className="py-16 md:py-24">
           <div className="flex flex-col gap-12">
-            <SectionHeader title={t.reachTitle} body={t.reachBody} />
+            <SectionHeader title={t.reachTitle} />
             <MarketReach
               shares={market.shares}
               goal={goal ? { targetPct: goal.targetPct, year: goal.year, note: (locale === "bn" ? goal.bn : goal.en) || goal.en || null } : null}
@@ -151,7 +151,7 @@ export default async function HomePage({ params }: Props) {
         <Shell id="products" className="py-16 md:py-24">
           <div className="flex flex-col gap-14">
             <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
-              <SectionHeader eyebrow={t.showcaseEyebrow} title={t.showcaseTitle} body={t.showcaseBody} />
+              <SectionHeader eyebrow={t.showcaseEyebrow} title={t.showcaseTitle} />
               <GhostButton href={`/${locale}/products`}>{t.exploreProducts}</GhostButton>
             </div>
             <ProductShowcase products={showcase} labels={showcaseLabels(t)} />
@@ -163,7 +163,7 @@ export default async function HomePage({ params }: Props) {
       {testimonials.length === 0 && process.env.APP_ENV !== "production" && (
         <Shell id="testimonials" className="py-16 md:py-24">
           <div className="flex flex-col gap-8">
-            <SectionHeader title={t.testimonialsTitle} body={t.testimonialsBody} />
+            <SectionHeader title={t.testimonialsTitle} />
             <div className="flex flex-col items-start gap-3 rounded-3xl border border-dashed border-gold/50 bg-gold/[0.04] p-6 md:p-8">
               <p className="font-semibold text-gold">Only visible outside the live site: no client reviews yet.</p>
               <p className="max-w-2xl text-sm leading-relaxed text-text-secondary">
@@ -181,7 +181,7 @@ export default async function HomePage({ params }: Props) {
       {testimonials.length > 0 && (
         <Shell id="testimonials" className="py-16 md:py-24">
           <div className="flex flex-col gap-14">
-            <SectionHeader title={t.testimonialsTitle} body={t.testimonialsBody} />
+            <SectionHeader title={t.testimonialsTitle} />
             <TestimonialSlider
               items={testimonials}
               labels={{
@@ -201,7 +201,7 @@ export default async function HomePage({ params }: Props) {
       {hasMarket && (
         <Shell id="market" className="py-16 md:py-24">
           <div className="flex flex-col gap-12">
-            <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} body={t.marketBody} />
+            <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} />
             <MarketPulse initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} />
           </div>
         </Shell>
@@ -210,7 +210,7 @@ export default async function HomePage({ params }: Props) {
       {((!showReach && proof.length > 0) || apps.length > 0) && (
         <Shell id="proof" className="py-16 md:py-24">
           <div className="flex flex-col gap-12">
-            <SectionHeader eyebrow={t.proofEyebrow} title={t.proofTitle} body={t.proofBody} />
+            <SectionHeader eyebrow={t.proofEyebrow} title={t.proofTitle} />
             {!showReach && proof.length > 0 && <StatGrid items={proof} locale={locale} />}
             {apps.length > 0 && (
               <div className="flex flex-col gap-5">
@@ -226,15 +226,15 @@ export default async function HomePage({ params }: Props) {
 
       <Shell className="py-16 md:py-24">
         <div className="flex flex-col gap-16">
-          <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} body={t.flowBody} align="center" />
-          <FlowStory t={t} />
+          <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} align="center" />
+          <FlowStory t={t} products={flowProducts} exchanges={exchangeLogos(data.logos.parties)} />
         </div>
       </Shell>
 
       <Shell className="py-16 md:py-24">
         <div className="flex flex-col gap-14">
           <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
-            <SectionHeader eyebrow={t.consortiumEyebrow} title={t.consortiumTitle} body={t.consortiumBody} />
+            <SectionHeader eyebrow={t.consortiumEyebrow} title={t.consortiumTitle} />
             <GhostButton href={`/${locale}/consortium`}>{t.meetConsortium}</GhostButton>
           </div>
           <LogoWall members={data.members} size="sm" />

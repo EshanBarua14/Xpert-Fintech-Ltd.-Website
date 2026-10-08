@@ -52,7 +52,7 @@ export const getMilestones = cache(async (locale: AppLocale) => {
 
 /** How many published people are in each group (for the people links). */
 export const getPeopleCounts = cache(async () => {
-  const groups = ["BOARD", "MANAGEMENT", "LEADERSHIP", "TEAM"] as const;
+  const groups = ["BOARD", "MANAGEMENT", "CONSULTANT", "LEADERSHIP", "TEAM"] as const;
   const counts = await Promise.all(
     groups.map((group) => db.person.count({ where: { ...publishedWhere(), roles: { some: { group } } } })),
   );

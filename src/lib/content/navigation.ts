@@ -56,7 +56,7 @@ const FIXED_ROUTES = [
  */
 const livePaths = cache(async (locale: AppLocale): Promise<Set<string>> => {
   const now = new Date();
-  const [pages, offerings, events, articles, careers, cases, resourceCount, albums] = await Promise.all([
+  const [pages, offerings, events, articles, careers, cases, resourceCount, albums, consultants] = await Promise.all([
     db.pageTranslation.findMany({ where: { locale, page: publishedWhere(now) }, select: { path: true } }),
     db.offeringTranslation.findMany({ where: { locale, offering: { ...publishedWhere(now), hasOwnPage: true } }, select: { slug: true } }),
     db.eventTranslation.findMany({ where: { locale, event: publishedWhere(now) }, select: { slug: true } }),
@@ -65,11 +65,14 @@ const livePaths = cache(async (locale: AppLocale): Promise<Set<string>> => {
     db.caseStudyTranslation.findMany({ where: { locale, caseStudy: publishedWhere(now) }, select: { slug: true } }),
     db.resource.count({ where: publishedWhere(now) }),
     db.albumTranslation.findMany({ where: { locale, album: publishedWhere(now) }, select: { slug: true } }),
+    db.person.count({ where: { ...publishedWhere(now), roles: { some: { group: "CONSULTANT" } } } }),
   ]);
   // Listing pages appear in menus only once they have something to show.
   const listings = [
     cases.length > 0 && "case-studies",
     resourceCount > 0 && "resources",
+    // Company → Consultants: once a consultant is published (always outside production, to preview it).
+    (consultants > 0 || process.env.APP_ENV !== "production") && "company/consultants",
   ].filter((x): x is string => Boolean(x));
   return new Set([
     ...FIXED_ROUTES,

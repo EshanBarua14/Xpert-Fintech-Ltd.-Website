@@ -665,6 +665,15 @@ body::before {
   line-height: 1;
   color: var(--color-brand-sky);
 }
+/* The closing mark, so every quote is visibly closed */
+.testimonial-quote::after {
+  content: "”";
+  margin-left: 0.08em;
+  font-size: 1.9em;
+  line-height: 0;
+  vertical-align: -0.38em;
+  color: var(--color-brand-sky);
+}
 .testimonial-progress {
   width: 0;
   animation: testimonial-progress linear forwards;

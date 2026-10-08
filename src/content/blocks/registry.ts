@@ -181,6 +181,7 @@ export const BLOCKS = {
         options: [
           { value: "BOARD", label: "Board of directors" },
           { value: "MANAGEMENT", label: "Management committee" },
+          { value: "CONSULTANT", label: "Consultants" },
           { value: "LEADERSHIP", label: "Leadership" },
           { value: "TEAM", label: "Team" },
         ],

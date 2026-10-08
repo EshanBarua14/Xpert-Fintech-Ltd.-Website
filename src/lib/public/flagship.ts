@@ -80,3 +80,27 @@ export const getFlagshipData = cache(async (locale: AppLocale) => {
     publishedSlugs,
   };
 });
+
+export type FlowProduct = { name: string; href: string; logo: MemberLogo | null };
+
+/**
+ * Published products by key (e.g. "rms"), with their name, page and logo
+ * (Admin → Products → Product logo), for the order-flow story.
+ */
+export const getFlowProducts = cache(async (locale: AppLocale): Promise<Record<string, FlowProduct>> => {
+  const offerings = await getOfferings();
+  const icons = await mediaMap(offerings.map((o) => o.iconMediaId), locale);
+  const out: Record<string, FlowProduct> = {};
+  for (const o of offerings) {
+    const tr = pick(o.translations, locale);
+    if (!o.key || !tr) continue;
+    const own = o.translations.find((x) => x.locale === locale);
+    const icon = o.iconMediaId ? icons.get(o.iconMediaId) : undefined;
+    out[o.key] = {
+      name: tr.name,
+      href: `/${own ? locale : "en"}/products/${(own ?? tr).slug}`,
+      logo: icon ? { url: icon.url, width: icon.width, height: icon.height } : null,
+    };
+  }
+  return out;
+});

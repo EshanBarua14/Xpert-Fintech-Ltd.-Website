@@ -71,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         events.map((e) => ({ updatedAt: e.updatedAt, translations: e.translations.map((t) => ({ locale: t.locale, path: `events/${t.slug}` })) })),
         0.4,
       ),
-      ...entries([fixed("company/about", now), fixed("company/board", now), fixed("company/management", now), fixed("company/team", now)], 0.5),
+      ...entries([fixed("company/about", now), fixed("company/board", now), fixed("company/management", now), fixed("company/consultants", now), fixed("company/team", now)], 0.5),
       ...entries([fixed("careers", now)], 0.5),
       ...entries(under("careers", careers), 0.5),
       ...entries([fixed("news", now), fixed("gallery", now)], 0.6),

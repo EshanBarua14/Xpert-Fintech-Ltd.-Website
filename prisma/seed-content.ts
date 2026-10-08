@@ -672,6 +672,12 @@ async function seedClientLogos() {
     hidden += r.count;
   }
   if (hidden) console.log(`• ${hidden} organization(s) not on XFL's client list moved to drafts`);
+  // SkyTrade (com.xfltrade.sky) is Skyline's branded app; it was seeded without its brokerage.
+  const skyline = await db.organization.findUnique({ where: { key: "skyline" } });
+  if (skyline) {
+    const linked = await db.deployment.updateMany({ where: { key: "skytrade", organizationId: null }, data: { organizationId: skyline.id } });
+    if (linked.count) console.log("• SkyTrade linked to Skyline");
+  }
 }
 
 /** The market's institutions, drawn on the ecosystem map and the market cards. */
@@ -929,6 +935,35 @@ async function seedTeamLinks() {
   if (added) console.log(`• Added the Team link to ${added} menu(s)`);
 }
 
+// ── Navigation: Consultants link under Company (header and footer) ───────────
+
+/** Adds a "Consultants" link right after "Management" in every menu that has one, once. */
+async function seedConsultantLinks() {
+  const managementLinks = await db.navItem.findMany({ where: { href: "company/management", parentId: { not: null } } });
+  let added = 0;
+  for (const m of managementLinks) {
+    if (await db.navItem.findFirst({ where: { menuId: m.menuId, parentId: m.parentId, href: "company/consultants" } })) continue;
+    await db.navItem.updateMany({ where: { menuId: m.menuId, parentId: m.parentId, sortOrder: { gt: m.sortOrder } }, data: { sortOrder: { increment: 1 } } });
+    await db.navItem.create({
+      data: {
+        menuId: m.menuId,
+        parentId: m.parentId,
+        linkType: "INTERNAL",
+        href: "company/consultants",
+        sortOrder: m.sortOrder + 1,
+        translations: {
+          create: [
+            { locale: EN, label: "Consultants", description: "Advisers who bring outside expertise." },
+            { locale: BN, label: "পরামর্শক", description: "বাইরের অভিজ্ঞতা নিয়ে পরামর্শ দেন যাঁরা।" },
+          ],
+        },
+      },
+    });
+    added++;
+  }
+  if (added) console.log(`• Added the Consultants link to ${added} menu(s)`);
+}
+
 // ── Navigation: Markets link in the header and footer ───────────────────────
 
 /** Adds "Markets" to the header (after Products) and to the footer's first column, once. */
@@ -1103,6 +1138,7 @@ async function main() {
   await seedReviewDrafts();
   await seedDeployments();
   await seedTeamLinks();
+  await seedConsultantLinks();
   await seedMilestones();
   await syncPendingProductLinks();
   await seedInsightsLinks();

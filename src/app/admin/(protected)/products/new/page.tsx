@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { newProductValues, parentOptions } from "@/lib/admin/products";
+import { imageOptions } from "@/lib/admin/media";
 
 export default async function NewProductPage() {
   await requireAdmin();
@@ -16,7 +17,7 @@ export default async function NewProductPage() {
           Save as a draft first; add capabilities, workflow steps and FAQs after saving.
         </p>
       </div>
-      <ProductForm values={newProductValues} parentOptions={await parentOptions()} />
+      <ProductForm values={newProductValues} parentOptions={await parentOptions()} images={await imageOptions()} />
     </div>
   );
 }

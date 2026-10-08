@@ -84,7 +84,7 @@ export function PeopleGrid({
 }) {
   const t = getMessages(locale);
   const groupLabel =
-    group === "BOARD" ? t.boardMember : group === "MANAGEMENT" ? t.managementMember : group === "LEADERSHIP" ? t.leadershipMember : t.teamMember;
+    group === "BOARD" ? t.boardMember : group === "MANAGEMENT" ? t.managementMember : group === "CONSULTANT" ? t.consultantMember : group === "LEADERSHIP" ? t.leadershipMember : t.teamMember;
   const rows: GalleryPerson[] = people.map((p) => {
     const tr = pick(p.translations, locale);
     const photo = photos.get(p.photoMediaId ?? "");
@@ -105,7 +105,7 @@ export function PeopleGrid({
       people={rows.filter((r) => r.name)}
       groupLabel={groupLabel}
       showPlaceholderBadge={process.env.APP_ENV !== "production"}
-      featureFirst={group === "BOARD" || group === "MANAGEMENT"}
+      featureFirst={group === "BOARD" || group === "MANAGEMENT" || group === "CONSULTANT"}
       labels={{
         viewProfile: t.viewProfile,
         close: t.close,

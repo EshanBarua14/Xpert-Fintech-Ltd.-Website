@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { pick } from "@/lib/public/text";
@@ -20,7 +21,18 @@ type Offering = {
 };
 
 /** Product card: name, type, one-line value proposition, link to the product page. */
-export function ProductCard({ offering, locale, t }: { offering: Offering; locale: AppLocale; t: Messages }) {
+export function ProductCard({
+  offering,
+  locale,
+  t,
+  logo,
+}: {
+  offering: Offering;
+  locale: AppLocale;
+  t: Messages;
+  /** Product logo (Admin → Products → Product logo). */
+  logo?: { url: string; width: number | null; height: number | null } | null;
+}) {
   const tr = pick(offering.translations, locale);
   const own = offering.translations.find((x) => x.locale === locale);
   if (!tr) return null;
@@ -31,9 +43,16 @@ export function ProductCard({ offering, locale, t }: { offering: Offering; local
       href={href}
       className="spotlight glass group flex h-full min-h-60 flex-col gap-4 rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-1"
     >
-      <Badge tone="brand" className="self-start">
-        {TYPE_LABEL[offering.type] ?? offering.type}
-      </Badge>
+      <span className="flex items-center justify-between gap-3">
+        <Badge tone="brand" className="self-start">
+          {TYPE_LABEL[offering.type] ?? offering.type}
+        </Badge>
+        {logo && (
+          <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">
+            <Image src={logo.url} alt="" width={logo.width ?? 96} height={logo.height ?? 96} className="h-full w-full object-contain" />
+          </span>
+        )}
+      </span>
       <h3 className="font-display text-2xl font-semibold tracking-tight">{tr.name}</h3>
       {(tr.tagline || tr.summary) && <p className="text-sm text-text-secondary">{tr.tagline ?? tr.summary}</p>}
       <span className="mt-auto text-sm font-semibold text-brand-sky">

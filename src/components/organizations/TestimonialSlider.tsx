@@ -151,7 +151,7 @@ export function TestimonialSlider({ items, labels }: { items: TestimonialCard[];
                 <div className="flex items-center border-t border-fg/[0.08] pt-5">
                   <Image
                     src={t.logo.url}
-                    alt={t.organization ?? ""}
+                    alt={t.logoAlt ?? t.organization ?? ""}
                     width={t.logo.width ?? 160}
                     height={t.logo.height ?? 48}
                     className="member-logo h-8 w-auto max-w-[10rem] object-contain object-left"

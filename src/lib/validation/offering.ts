@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { checkbox, optionalText, slugField } from "./common";
+import { checkbox, optionalId, optionalText, slugField } from "./common";
 
 export const OFFERING_TYPES = ["PRODUCT", "PLATFORM", "MODULE", "CAPABILITY", "SERVICE", "INTEGRATION"] as const;
 
@@ -49,6 +49,7 @@ export const offeringSchema = z.object({
   status: z.enum(["DRAFT", "PUBLISHED"]),
   publishAt: z.string().optional(),
   sortOrder: z.coerce.number().int().min(0).max(9999),
+  iconMediaId: optionalId,
   en: z.object({ name: z.string().trim().min(1, "English name is required.").max(120), ...translation }),
   // Bangla is optional: leave the name empty to have no Bangla version yet.
   bn: z.object({ name: z.string().trim().max(120), ...translation }),

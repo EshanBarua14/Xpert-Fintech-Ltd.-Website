@@ -23,6 +23,7 @@ export const newProductValues: ProductFormValues = {
   status: "DRAFT",
   publishAt: "",
   sortOrder: 0,
+  iconMediaId: "",
   en: { ...emptyTranslation },
   bn: { ...emptyTranslation },
 };
@@ -63,6 +64,7 @@ export function toProductFormValues(o: {
   status: ProductFormValues["status"];
   publishAt: Date | null;
   sortOrder: number;
+  iconMediaId?: string | null;
   translations: TranslationRow[];
 }): ProductFormValues {
   return {
@@ -75,6 +77,7 @@ export function toProductFormValues(o: {
     status: o.status,
     publishAt: toLocalInput(o.publishAt),
     sortOrder: o.sortOrder,
+    iconMediaId: o.iconMediaId ?? "",
     en: toFormTranslation(o.translations.find((t) => t.locale === "en")),
     bn: toFormTranslation(o.translations.find((t) => t.locale === "bn")),
   };

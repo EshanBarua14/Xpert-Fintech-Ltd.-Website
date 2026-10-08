@@ -129,9 +129,9 @@
   "flowTitle": "Every order, checked before it reaches the exchange.",
   "flowBody": "Orders move from the investor to the exchange through one connected path, with risk checks built in.",
   "flowStep1": "Investor places an order on web or mobile",
-  "flowStep2": "The OMS validates and routes it",
+  "flowStep2": "The order is placed on web or mobile and validated",
   "flowStep3": "RMS checks limits and exposure",
-  "flowStep4": "The order goes to DSE or CSE",
+  "flowStep4": "It goes to DSE or CSE over certified FIX links",
   "flowStep5": "Back office settles and reports",
   "consortiumEyebrow": "The consortium",
   "consortiumTitle": "Built together by Bangladesh’s brokerage houses.",
@@ -583,5 +583,11 @@
   "ecoStep4b": "RMS and back office report to the regulator",
   "ecoStepsLabel": "Steps in this scene",
   "credentialsTitle": "Memberships and exchange certifications",
-  "credentialsBy": "{org}"
+  "credentialsBy": "{org}",
+  "consultants": "Consultants",
+  "consultantMember": "Consultant",
+  "consultantsLinkBody": "Advisers who bring outside expertise to Xpert.",
+  "flowStepOpen": "The investor opens a BO account online",
+  "flowStepDocs": "KYC documents are filed and kept on record",
+  "flowStepData": "Live prices and research inform the decision"
 }

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { saveOffering, type FormState } from "@/app/admin/(protected)/products/actions";
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { Select, TextArea, TextInput } from "@/components/ui/Field";
+import { ImagePicker } from "@/components/admin/ImagePicker";
+import type { ImageOption } from "@/lib/admin/media";
 import { OFFERING_TYPES } from "@/lib/validation/offering";
 import { slugify } from "@/lib/validation/common";
 
@@ -28,6 +30,8 @@ export type ProductFormValues = {
   status: "DRAFT" | "PUBLISHED";
   publishAt: string;
   sortOrder: number;
+  /** Product logo (Admin → Media), shown on the order-flow story and wherever the product is listed with a mark. */
+  iconMediaId: string;
   en: Translation;
   bn: Translation;
 };
@@ -128,9 +132,11 @@ function Checkbox({ name, label, defaultChecked, hint }: { name: string; label: 
 export function ProductForm({
   values,
   parentOptions,
+  images,
 }: {
   values: ProductFormValues;
   parentOptions: { value: string; label: string }[];
+  images: ImageOption[];
 }) {
   const { state, pending, onSubmit } = useActionForm<FormState>(saveOffering, {});
   const errors = state.errors ?? {};
@@ -197,6 +203,7 @@ export function ProductForm({
             defaultValue={String(values.sortOrder)}
             error={errors.sortOrder}
           />
+          <ImagePicker name="iconMediaId" label="Product logo" options={images} defaultValue={values.iconMediaId} error={errors.iconMediaId} />
           <Checkbox name="isFeatured" label="Featured" hint="Highlighted on the homepage." defaultChecked={values.isFeatured} />
           <Checkbox name="hasOwnPage" label="Has its own page" defaultChecked={values.hasOwnPage} />
           <Checkbox name="showDemoCta" label='Show "Request a demo"' defaultChecked={values.showDemoCta} />

@@ -153,10 +153,6 @@ function PersonCard({
           unoptimized={!p.photo}
         />
         <span aria-hidden="true" className="person-sheen pointer-events-none absolute inset-0" />
-        <span className="absolute top-4 left-4 inline-flex max-w-[calc(100%-2rem)] items-center gap-2 rounded-full border border-white/15 bg-[#05080f]/65 px-3 py-1 text-[max(11px,0.6875rem)] font-semibold text-white backdrop-blur-md">
-          <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-[var(--tone)]" />
-          <span className="truncate">{groupLabel}</span>
-        </span>
         {showPlaceholderBadge && p.isPlaceholder && (
           <span className="absolute top-4 right-4 rounded-md bg-[#06111f]/85 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-[#e0b252]">{labels.placeholder}</span>
         )}

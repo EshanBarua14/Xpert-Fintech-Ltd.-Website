@@ -76,8 +76,8 @@ const NODE_H = 62;
 const NODES: Record<NodeKey, { x: number; y: number; name?: string }> = {
   bsec: { x: 400, y: 52, name: "BSEC" },
   investors: { x: 86, y: 300 },
-  dse: { x: 712, y: 200, name: "DSE" },
-  cse: { x: 712, y: 396, name: "CSE" },
+  dse: { x: 690, y: 200, name: "DSE" },
+  cse: { x: 690, y: 396, name: "CSE" },
   cdbl: { x: 570, y: 522, name: "CDBL" },
   bank: { x: 196, y: 522 },
 };
@@ -160,7 +160,8 @@ const SCENES: Step[][] = [
   // Trade
   [
     { modules: [], flows: [{ id: "inv-hub", d: INV_HUB, from: "investors", to: "investors" }] },
-    { modules: ["RMS"], flows: [] },
+    // Limit and exposure checks run inside the OMS (RMS is no longer a separate product).
+    { modules: ["OMS"], flows: [] },
     {
       modules: ["OMS"],
       flows: [
@@ -174,8 +175,9 @@ const SCENES: Step[][] = [
     {
       modules: [],
       flows: [
-        { id: "dse-cdbl", d: "M770 231 C 800 330, 740 480, 645 515", from: "dse", to: "cdbl" },
-        { id: "cse-cdbl", d: "M690 427 C 680 460, 660 485, 645 492", from: "cse", to: "cdbl" },
+        // Passes to the left of CSE, so no link runs behind its box.
+        { id: "dse-cdbl", d: "M680 231 C 600 280, 560 380, 575 491", from: "dse", to: "cdbl" },
+        { id: "cse-cdbl", d: "M670 427 C 665 460, 657 488, 645 505", from: "cse", to: "cdbl" },
       ],
     },
     { modules: ["BO"], flows: [{ id: "bo-cdbl-2", d: linkPath("BO", "cdbl"), to: "cdbl", both: true, requires: "BO" }] },
@@ -186,8 +188,8 @@ const SCENES: Step[][] = [
     {
       modules: [],
       flows: [
-        { id: "bsec-dse", d: "M475 52 C 580 54, 690 96, 712 169", from: "bsec", to: "dse", dotted: true },
-        { id: "bsec-cse", d: "M475 60 C 700 84, 830 250, 787 384", from: "bsec", to: "cse", dotted: true },
+        { id: "bsec-dse", d: "M475 52 C 570 54, 670 96, 690 169", from: "bsec", to: "dse", dotted: true },
+        { id: "bsec-cse", d: "M475 52 C 690 50, 805 120, 802 230 S 790 370, 765 396", from: "bsec", to: "cse", dotted: true },
         { id: "bsec-cdbl", d: "M462 76 C 560 170, 600 330, 585 491", from: "bsec", to: "cdbl", dotted: true },
       ],
     },
@@ -195,7 +197,8 @@ const SCENES: Step[][] = [
       modules: ["RMS", "Back office"],
       flows: [
         { id: "rms-bsec", d: linkPath("RMS", "bsec"), to: "bsec", dotted: true, requires: "RMS" },
-        { id: "back-bsec", d: linkPath("Back office", "bsec"), to: "bsec", dotted: true, requires: "Back office" },
+        // Around the left of the brokerage, so the line never crosses the hub.
+        { id: "back-bsec", d: "M333 384 C 240 415, 190 335, 200 260 S 260 95, 325 62", to: "bsec", dotted: true, requires: "Back office" },
       ],
     },
   ],
@@ -502,11 +505,15 @@ export function EcosystemMap({
             live.flows.flatMap((f) => {
               const dirs = f.both ? [false, true] : [false];
               return dirs.flatMap((rev) =>
-                [0, 1].map((k) => (
-                  <circle key={`${scene}-${cur}-${f.id}-${rev}-${k}`} r={f.dotted ? 4 : 6} fill="url(#eco-packet)">
+                [0, 1].map((k) => {
+                  const begin = `${k * (f.dotted ? 1.3 : 0.95) + (rev ? 0.45 : 0) + 0.35}s`;
+                  return (
+                  // Hidden until its motion starts, so it never waits at the map's corner.
+                  <circle key={`${scene}-${cur}-${f.id}-${rev}-${k}`} r={f.dotted ? 4 : 6} fill="url(#eco-packet)" opacity={0}>
+                    <set attributeName="opacity" to="1" begin={begin} fill="freeze" />
                     <animateMotion
                       dur={f.dotted ? "2.6s" : "1.9s"}
-                      begin={`${k * (f.dotted ? 1.3 : 0.95) + (rev ? 0.45 : 0) + 0.35}s`}
+                      begin={begin}
                       repeatCount="indefinite"
                       keyPoints={rev ? "1;0" : "0;1"}
                       keyTimes="0;1"
@@ -515,7 +522,8 @@ export function EcosystemMap({
                       <mpath href={`#${uid}-${scene}-${f.id}`} />
                     </animateMotion>
                   </circle>
-                )),
+                  );
+                }),
               );
             })}
 

@@ -480,12 +480,11 @@ function FlowStoryShort({ t }: { t: Messages }) {
   const steps = [
     { icon: "users", label: t.flowStep1, tag: t.p4Title },
     { icon: "exchange", label: t.flowStep2, tag: "OMS" },
-    { icon: "shield", label: t.flowStep3, tag: "RMS" },
     { icon: "globe", label: t.flowStep4, tag: "DSE · CSE" },
     { icon: "chart", label: t.flowStep5, tag: t.capBackTitle },
   ];
   return (
-    <ol className="relative grid gap-4 lg:grid-cols-5">
+    <ol className="relative grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {steps.map((s, i) => (
         <li key={s.tag} data-reveal style={delay(i)} className="flex flex-col items-center gap-4 text-center">
           <span className="glass relative flex size-24 items-center justify-center rounded-3xl text-brand-sky">

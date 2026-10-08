@@ -91,7 +91,7 @@ const CONTENT: OfferingContent[] = [
     items: {
       WORKFLOW_STEP: [
         { title: t("Order entry", "অর্ডার প্রদান"), body: t("A dealer or investor enters an order on web, desktop or mobile.", "ডিলার বা বিনিয়োগকারী ওয়েব, ডেস্কটপ বা মোবাইল থেকে অর্ডার দেন।") },
-        { title: t("Pre-trade risk check", "প্রি-ট্রেড ঝুঁকি যাচাই"), body: t("RMS checks the order against configured limits before it leaves the brokerage.", "অর্ডার ব্রোকারেজ থেকে বের হওয়ার আগে আরএমএস নির্ধারিত সীমার সঙ্গে তা যাচাই করে।") },
+        { title: t("Pre-trade risk check", "প্রি-ট্রেড ঝুঁকি যাচাই"), body: t("The OMS checks the order against the brokerage's limits and exposure before it leaves.", "অর্ডার বের হওয়ার আগে ওএমএস ব্রোকারেজের নির্ধারিত সীমা ও এক্সপোজারের সঙ্গে তা যাচাই করে।") },
         { title: t("Exchange", "এক্সচেঞ্জ"), body: t("The order is routed to DSE or CSE.", "অর্ডারটি ডিএসই বা সিএসই-তে পাঠানো হয়।") },
         { title: t("Execution", "সম্পাদন"), body: t("Executions are reported back to the platform.", "সম্পাদিত লেনদেনের তথ্য প্ল্যাটফর্মে ফিরে আসে।") },
         { title: t("Portfolio update", "পোর্টফোলিও হালনাগাদ"), body: t("Holdings and balances update for the investor.", "বিনিয়োগকারীর হোল্ডিং ও ব্যালান্স হালনাগাদ হয়।") },
@@ -100,7 +100,7 @@ const CONTENT: OfferingContent[] = [
       ARCHITECTURE_LAYER: [
         { title: t("Channels", "চ্যানেল"), body: t("Web, desktop and branded mobile apps for investors and dealers.", "বিনিয়োগকারী ও ডিলারদের জন্য ওয়েব, ডেস্কটপ ও নিজস্ব ব্র্যান্ডের মোবাইল অ্যাপ।") },
         { title: t("Order management", "অর্ডার ব্যবস্থাপনা"), body: t("Order entry, amendment, cancellation and order book.", "অর্ডার দেওয়া, সংশোধন, বাতিল এবং অর্ডার বুক।") },
-        { title: t("Risk controls", "ঝুঁকি নিয়ন্ত্রণ"), body: t("Pre-trade limit checks through RMS.", "আরএমএস-এর মাধ্যমে লেনদেনের আগে সীমা যাচাই।") },
+        { title: t("Risk controls", "ঝুঁকি নিয়ন্ত্রণ"), body: t("Pre-trade limit and exposure checks built into the OMS.", "ওএমএস-এর ভেতরেই লেনদেনের আগে সীমা ও এক্সপোজার যাচাই।") },
         { title: t("Market connectivity", "বাজার সংযোগ"), body: t("Connections to Dhaka Stock Exchange and Chittagong Stock Exchange.", "ঢাকা স্টক এক্সচেঞ্জ ও চট্টগ্রাম স্টক এক্সচেঞ্জের সঙ্গে সংযোগ।") },
         { title: t("Back office", "ব্যাক অফিস"), body: t("Settlement, accounts and reporting downstream.", "পরবর্তী ধাপে সেটেলমেন্ট, হিসাব ও রিপোর্টিং।") },
       ],
@@ -112,7 +112,7 @@ const CONTENT: OfferingContent[] = [
       ],
       SECURITY: [
         { title: t("Role-based access", "ভূমিকাভিত্তিক প্রবেশাধিকার"), body: t("Dealers, supervisors and investors see only what their role allows.", "ডিলার, সুপারভাইজার ও বিনিয়োগকারীরা শুধু নিজ নিজ ভূমিকায় অনুমোদিত তথ্যই দেখেন।") },
-        { title: t("Risk checks on every order", "প্রতিটি অর্ডারে ঝুঁকি যাচাই"), body: t("Orders pass RMS checks before reaching the exchange.", "এক্সচেঞ্জে পৌঁছানোর আগে প্রতিটি অর্ডার আরএমএস যাচাই পার হয়।") },
+        { title: t("Risk checks on every order", "প্রতিটি অর্ডারে ঝুঁকি যাচাই"), body: t("Every order passes limit and exposure checks before reaching the exchange.", "এক্সচেঞ্জে পৌঁছানোর আগে প্রতিটি অর্ডার সীমা ও এক্সপোজার যাচাই পার হয়।") },
         { title: t("Activity records", "কার্যক্রমের রেকর্ড"), body: t("Order actions are recorded for review.", "পর্যালোচনার জন্য অর্ডার-সংক্রান্ত প্রতিটি কাজ রেকর্ড করা হয়।") },
       ],
       TARGET_USER: [
@@ -1267,6 +1267,64 @@ async function seedEcosystem() {
   if (nodesAdded || edgesAdded || flowsAdded) console.log(`• Ecosystem: added ${nodesAdded} node(s), ${edgesAdded} link(s), ${flowsAdded} flow(s)`);
 }
 
+/**
+ * Once: RMS is no longer a separate product, so limit and exposure checks are
+ * described as part of the OMS. Updates the OMS texts, the phone order of the
+ * ecosystem products and the two ecosystem flows that stepped through RMS —
+ * each only where it still has the seeded wording (admin edits are kept).
+ */
+async function seedRmsInOms() {
+  const MARK = "seed.rms-in-oms-2026-10-08";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const WORDING: [string, string][] = [
+    ["RMS checks the order against configured limits before it leaves the brokerage.", "The OMS checks the order against the brokerage's limits and exposure before it leaves."],
+    ["অর্ডার ব্রোকারেজ থেকে বের হওয়ার আগে আরএমএস নির্ধারিত সীমার সঙ্গে তা যাচাই করে।", "অর্ডার বের হওয়ার আগে ওএমএস ব্রোকারেজের নির্ধারিত সীমা ও এক্সপোজারের সঙ্গে তা যাচাই করে।"],
+    ["Pre-trade limit checks through RMS.", "Pre-trade limit and exposure checks built into the OMS."],
+    ["আরএমএস-এর মাধ্যমে লেনদেনের আগে সীমা যাচাই।", "ওএমএস-এর ভেতরেই লেনদেনের আগে সীমা ও এক্সপোজার যাচাই।"],
+    ["Orders pass RMS checks before reaching the exchange.", "Every order passes limit and exposure checks before reaching the exchange."],
+    ["এক্সচেঞ্জে পৌঁছানোর আগে প্রতিটি অর্ডার আরএমএস যাচাই পার হয়।", "এক্সচেঞ্জে পৌঁছানোর আগে প্রতিটি অর্ডার সীমা ও এক্সপোজার যাচাই পার হয়।"],
+  ];
+  let texts = 0;
+  for (const [from, to] of WORDING) {
+    texts += (await db.offeringItemTranslation.updateMany({ where: { body: from }, data: { body: to } })).count;
+  }
+  for (const n of ecosystemNodes) {
+    if (n.layer !== "PRODUCT") continue;
+    await db.ecosystemNode.updateMany({ where: { key: n.key, updatedById: null }, data: { mobileOrder: n.mobileOrder } });
+  }
+  const nodes = new Map((await db.ecosystemNode.findMany({ select: { id: true, key: true } })).map((n) => [n.key, n.id]));
+  const edges = await db.ecosystemEdge.findMany({ select: { id: true, fromNodeId: true, toNodeId: true } });
+  const edgeId = (key?: string) => {
+    if (!key) return null;
+    const [a, b] = key.split(">");
+    return edges.find((e) => e.fromNodeId === nodes.get(a!) && e.toNodeId === nodes.get(b!))?.id ?? null;
+  };
+  let flows = 0;
+  for (const f of ecosystemFlows.filter((x) => x.key === "order-lifecycle" || x.key === "explore")) {
+    const flow = await db.ecosystemFlow.findUnique({ where: { key: f.key } });
+    if (!flow || flow.updatedById) continue;
+    await db.ecosystemFlowStep.deleteMany({ where: { flowId: flow.id } });
+    for (const [k, st] of f.steps.entries()) {
+      const nodeId = nodes.get(st.node);
+      if (!nodeId) continue;
+      await db.ecosystemFlowStep.create({
+        data: {
+          flowId: flow.id,
+          nodeId,
+          edgeId: edgeId(st.edge),
+          sortOrder: k,
+          translations: {
+            create: (["en", "bn"] as const).filter((l) => st.title[l]).map((l) => ({ locale: l === "en" ? EN : BN, title: st.title[l]!, body: st.body?.[l] ?? null })),
+          },
+        },
+      });
+    }
+    flows++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log(`• Risk checks now described inside the OMS: ${texts} product text(s), ${flows} ecosystem flow(s) updated`);
+}
+
 /** Older databases: mark seeded stand-in profiles as placeholders (until an editor changes that). */
 async function markPlaceholders() {
   const res = await db.person.updateMany({ where: { key: { startsWith: "placeholder-" }, isPlaceholder: false, translations: { some: { name: "Name to be confirmed" } } }, data: { isPlaceholder: true } });
@@ -1302,6 +1360,7 @@ async function main() {
   await seedInsightsLinks();
   await seedMarketsLinks();
   await seedEcosystem();
+  await seedRmsInOms();
   console.log("Content seed complete.");
 }
 

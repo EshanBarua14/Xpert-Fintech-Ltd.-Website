@@ -43,7 +43,9 @@ export function MarketNetwork({ caption }: { caption: string }) {
 
           {/* Order packets travel each link; SMIL keeps them on the curve. */}
           {links.map((l, i) => (
-            <circle key={`p-${l.id}`} r="3.5" className="flow-packet-svg fill-cyan-300">
+            <circle key={`p-${l.id}`} r="3.5" className="flow-packet-svg fill-cyan-300" opacity={0}>
+              {/* Hidden until its motion starts, so it never waits at the corner. */}
+              <set attributeName="opacity" to="1" begin={`${i * 0.45}s`} fill="freeze" />
               <animateMotion dur={`${3.2 + (i % 3) * 0.6}s`} begin={`${i * 0.45}s`} repeatCount="indefinite" path={l.d} />
             </circle>
           ))}

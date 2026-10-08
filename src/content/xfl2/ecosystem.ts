@@ -76,26 +76,26 @@ export const ecosystemNodes: EcosystemNode[] = [
   { key: "oms", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "trading-platform", mobileOrder: 20, layoutX: 0.6, layoutY: 0.15,
     label: { en: "OMS", bn: "ওএমএস" },
     description: { en: "Order management for brokerage trading on DSE and CSE.", bn: "ডিএসই ও সিএসইতে ব্রোকারেজ লেনদেনের অর্ডার ব্যবস্থাপনা।" } },
-  { key: "rms", layer: "PRODUCT", status: "DRAFT", offeringKey: "rms", mobileOrder: 21, layoutX: 0.6, layoutY: 0.3,
+  { key: "rms", layer: "PRODUCT", status: "DRAFT", offeringKey: "rms", mobileOrder: 29, layoutX: 0.6, layoutY: 0.3,
     label: { en: "RMS", bn: "আরএমএস" },
     description: { en: "Risk controls applied to orders before and after they reach the market.", bn: "বাজারে পৌঁছানোর আগে ও পরে অর্ডারে প্রয়োগ করা ঝুঁকি নিয়ন্ত্রণ।" } },
-  { key: "dms", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "dms", mobileOrder: 22, layoutX: 0.6, layoutY: 0.45,
+  { key: "dms", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "dms", mobileOrder: 26, layoutX: 0.6, layoutY: 0.45,
     label: { en: "DMS", bn: "ডিএমএস" },
     description: { en: "Controlled storage, access and approval of brokerage documents.", bn: "ব্রোকারেজ নথির নিয়ন্ত্রিত সংরক্ষণ, প্রবেশাধিকার ও অনুমোদন।" } },
-  { key: "bo-account-opening", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "bo-account-opening", mobileOrder: 23, layoutX: 0.6, layoutY: 0.6,
+  { key: "bo-account-opening", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "bo-account-opening", mobileOrder: 24, layoutX: 0.6, layoutY: 0.6,
     label: { en: "BO Account Opening", bn: "বিও অ্যাকাউন্ট খোলা" },
     description: { en: "Digital application and approval of investor BO accounts.", bn: "বিনিয়োগকারীর বিও অ্যাকাউন্টের ডিজিটাল আবেদন ও অনুমোদন।" } },
-  { key: "back-office", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "back-office", mobileOrder: 24, layoutX: 0.6, layoutY: 0.68,
+  { key: "back-office", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "back-office", mobileOrder: 23, layoutX: 0.6, layoutY: 0.68,
     label: { en: "Back office", bn: "ব্যাক অফিস" },
     description: { en: "Accounts, settlement and reporting for the brokerage back office.", bn: "ব্রোকারেজ ব্যাক অফিসের হিসাব, সেটেলমেন্ট ও রিপোর্টিং।" } },
-  { key: "smart-stock", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "smart-stock", mobileOrder: 25, layoutX: 0.6, layoutY: 0.75,
+  { key: "smart-stock", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "smart-stock", mobileOrder: 22, layoutX: 0.6, layoutY: 0.75,
     label: { en: "Smart Stock", bn: "স্মার্ট স্টক" },
     editorNote: "Description pending from XFL. Node shows label only until then." },
 
-  // Products (pending)
-  { key: "ost", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "ost", mobileOrder: 25, layoutX: 0.6, layoutY: 0.88,
+  // Products (descriptions pending from XFL)
+  { key: "ost", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "ost", mobileOrder: 21, layoutX: 0.6, layoutY: 0.88,
     label: { en: "OST", bn: "ওএসটি" }, editorNote: "Online Share Trading. Description pending from XFL." },
-  { key: "ekyc", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "ekyc", mobileOrder: 26, layoutX: 0.5, layoutY: 0.68,
+  { key: "ekyc", layer: "PRODUCT", status: "PUBLISHED", offeringKey: "ekyc", mobileOrder: 25, layoutX: 0.5, layoutY: 0.68,
     label: { en: "eKYC", bn: "ই-কেওয়াইসি" }, editorNote: "Pending XFL confirmation." },
 
   // Institutions
@@ -116,9 +116,8 @@ export const ecosystemEdges: EcosystemEdge[] = [
   { from: "cse", to: "xfl", kind: "DATA" },
   { from: "xfl", to: "oms", kind: "ORDER" },
   { from: "oms", to: "rms", kind: "RISK" },
-  { from: "rms", to: "dse", kind: "ORDER" },
-  { from: "rms", to: "cse", kind: "ORDER" },
-  // Orders reach the exchanges from the OMS (RMS is no longer shown as a separate product).
+  // Orders reach the exchanges from the OMS, which runs the limit checks itself
+  // (RMS is no longer shown as a separate product).
   { from: "oms", to: "dse", kind: "ORDER" },
   { from: "oms", to: "cse", kind: "ORDER" },
   { from: "oms", to: "brokerages", kind: "ORDER" },
@@ -134,6 +133,9 @@ export const ecosystemEdges: EcosystemEdge[] = [
   { from: "xfl", to: "smart-stock", kind: "DATA" },
   { from: "smart-stock", to: "investors", kind: "DATA" },
   { from: "xfl", to: "ost", kind: "DATA" },
+  // Investors trade through OST; their orders go on to the OMS.
+  { from: "investors", to: "ost", kind: "ORDER" },
+  { from: "ost", to: "oms", kind: "ORDER" },
 ];
 
 // ---------------------------------------------------------------- flows
@@ -144,9 +146,9 @@ export const ecosystemFlows: EcosystemFlow[] = [
     name: { en: "Order lifecycle", bn: "অর্ডারের ধাপসমূহ" },
     steps: [
       { node: "investors", title: { en: "Investor places an order", bn: "বিনিয়োগকারী অর্ডার দেন" } },
-      { node: "oms", edge: "oms>brokerages", title: { en: "OMS receives the order", bn: "ওএমএস অর্ডার গ্রহণ করে" } },
-      { node: "rms", edge: "oms>rms", title: { en: "RMS runs pre-trade checks", bn: "আরএমএস ট্রেডের আগে ঝুঁকি যাচাই করে" } },
-      { node: "dse", edge: "rms>dse", title: { en: "Order reaches the exchange", bn: "অর্ডার এক্সচেঞ্জে পৌঁছায়" } },
+      { node: "ost", edge: "investors>ost", title: { en: "Order placed through OST", bn: "ওএসটি-তে অর্ডার দেওয়া হয়" } },
+      { node: "oms", edge: "ost>oms", title: { en: "OMS checks limits and exposure", bn: "ওএমএস লিমিট ও এক্সপোজার যাচাই করে" } },
+      { node: "dse", edge: "oms>dse", title: { en: "Order reaches the exchange", bn: "অর্ডার এক্সচেঞ্জে পৌঁছায়" } },
     ],
   },
   {
@@ -155,7 +157,7 @@ export const ecosystemFlows: EcosystemFlow[] = [
     steps: [
       { node: "investors", title: { en: "Investor starts an application", bn: "বিনিয়োগকারী আবেদন শুরু করেন" } },
       { node: "bo-account-opening", edge: "investors>bo-account-opening", title: { en: "BO account application", bn: "বিও অ্যাকাউন্টের আবেদন" } },
-      { node: "ekyc", edge: "bo-account-opening>ekyc", title: { en: "Identity verification", bn: "পরিচয় যাচাই" } }, // hidden while eKYC is DRAFT
+      { node: "ekyc", edge: "bo-account-opening>ekyc", title: { en: "Identity verification", bn: "পরিচয় যাচাই" } },
       { node: "dms", edge: "bo-account-opening>dms", title: { en: "Documents stored and approved", bn: "নথি সংরক্ষণ ও অনুমোদন" } },
       { node: "brokerages", title: { en: "Account ready to trade", bn: "অ্যাকাউন্ট লেনদেনের জন্য প্রস্তুত" } },
     ],
@@ -167,9 +169,8 @@ export const ecosystemFlows: EcosystemFlow[] = [
       { node: "brokerages", title: { en: "Connect", bn: "সংযোগ" }, body: { en: "Consortium brokerages run on XFL technology.", bn: "কনসোর্টিয়াম ব্রোকারেজগুলো এক্সপার্ট ফিনটেকের প্রযুক্তিতে চলে।" } },
       { node: "bo-account-opening", title: { en: "Onboard", bn: "অনবোর্ড" }, body: { en: "Investors open BO accounts digitally.", bn: "বিনিয়োগকারীরা ডিজিটালি বিও অ্যাকাউন্ট খোলেন।" } },
       { node: "ekyc", title: { en: "Verify", bn: "যাচাই" }, body: { en: "Identity is verified electronically.", bn: "ইলেকট্রনিকভাবে পরিচয় যাচাই করা হয়।" } },
-      { node: "oms", title: { en: "Trade", bn: "লেনদেন" }, body: { en: "Orders flow through the OMS.", bn: "অর্ডার ওএমএসের মাধ্যমে প্রবাহিত হয়।" } },
-      { node: "rms", edge: "oms>rms", title: { en: "Manage risk", bn: "ঝুঁকি ব্যবস্থাপনা" }, body: { en: "Risk checks run before orders leave.", bn: "অর্ডার পাঠানোর আগে ঝুঁকি যাচাই হয়।" } },
-      { node: "dse", edge: "rms>dse", title: { en: "Connect to market", bn: "বাজারে সংযোগ" }, body: { en: "Orders reach DSE and CSE.", bn: "অর্ডার ডিএসই ও সিএসইতে পৌঁছায়।" } },
+      { node: "oms", title: { en: "Trade", bn: "লেনদেন" }, body: { en: "Orders pass limit and exposure checks in the OMS.", bn: "ওএমএস-এ অর্ডার লিমিট ও এক্সপোজার যাচাই পার হয়।" } },
+      { node: "dse", edge: "oms>dse", title: { en: "Connect to market", bn: "বাজারে সংযোগ" }, body: { en: "Orders reach DSE and CSE.", bn: "অর্ডার ডিএসই ও সিএসইতে পৌঁছায়।" } },
       { node: "dms", title: { en: "Operate", bn: "পরিচালনা" }, body: { en: "Documents and approvals are controlled.", bn: "নথি ও অনুমোদন নিয়ন্ত্রিতভাবে পরিচালিত হয়।" } },
       { node: "xfl", title: { en: "Analyse", bn: "বিশ্লেষণ" }, body: { en: "Activity becomes operational insight.", bn: "কার্যক্রম থেকে পরিচালনাগত অন্তর্দৃষ্টি তৈরি হয়।" } },
     ],

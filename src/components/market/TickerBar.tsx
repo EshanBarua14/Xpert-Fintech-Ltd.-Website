@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { fmt, signed } from "@/lib/market/format";
 import { uniqueQuotes, type ExchangeSnapshot, type MarketPayload } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
@@ -36,6 +36,21 @@ type Item = {
 };
 
 const QUOTES_PER_EXCHANGE = 60;
+/** Both lanes move at this speed (pixels per second), however many stocks each has. */
+const SPEED = 42;
+
+type Logo = { url: string; width: number | null; height: number | null };
+type Logos = Partial<Record<Ex, Logo>>;
+
+function Mark({ logo }: { logo?: Logo }) {
+  if (!logo) return null;
+  return (
+    <span aria-hidden="true" className="inline-flex size-[1.15rem] shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-white p-px">
+      {/* eslint-disable-next-line @next/next/no-img-element -- tiny fixed-size mark */}
+      <img src={logo.url} alt="" width={18} height={18} className="size-full object-contain" />
+    </span>
+  );
+}
 
 /** A price ticker: each listed stock's symbol, last price and change, biggest movers first. Indices live in the hero and the market cards. */
 function itemsFor(ex: Ex, snap: ExchangeSnapshot | undefined, locale: Locale, moves: Record<string, "up" | "down">): Item[] {
@@ -43,7 +58,7 @@ function itemsFor(ex: Ex, snap: ExchangeSnapshot | undefined, locale: Locale, mo
   return uniqueQuotes(snap.quotes)
     .sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct))
     .slice(0, QUOTES_PER_EXCHANGE)
-    .map((q) => ({ key: `${ex}-${q.symbol}`, kind: "quote" as const, label: q.symbol, value: fmt(locale, q.ltp, q.ltp >= 1000 ? 0 : 1), pct: q.changePct, move: moves[`${ex}:${q.symbol}`] }));
+    .map((q) => ({ key: `${ex}-${q.symbol}`, kind: "quote" as const, label: q.symbol, value: fmt(locale, q.ltp), pct: q.changePct, move: moves[`${ex}:${q.symbol}`] }));
 }
 
 function Pct({ pct, locale }: { pct: number; locale: Locale }) {
@@ -56,9 +71,14 @@ function Pct({ pct, locale }: { pct: number; locale: Locale }) {
   );
 }
 
-function Cell({ it, locale }: { it: Item; locale: Locale }) {
+function Cell({ it, locale, logos }: { it: Item; locale: Locale; logos?: Logos }) {
   if (it.kind === "exchange") {
-    return <span className="rounded-md bg-fg/[0.07] px-2 py-0.5 font-semibold tracking-widest text-fg">{it.label}</span>;
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-fg/[0.07] px-2 py-0.5 font-semibold tracking-widest text-fg">
+        <Mark logo={logos?.[it.label as Ex]} />
+        {it.label}
+      </span>
+    );
   }
   return (
     <>
@@ -69,29 +89,60 @@ function Cell({ it, locale }: { it: Item; locale: Locale }) {
   );
 }
 
-/** One moving row of items; a second, hidden copy makes the loop seamless. */
-function Lane({ items, locale, className }: { items: Item[]; locale: Locale; className?: string }) {
-  const duration = Math.max(30, items.length * 2.6);
+/**
+ * One moving row of items. The row is repeated until it is at least as wide
+ * as the lane (so a short list never leaves a gap), then doubled for a
+ * seamless loop; its duration is set from its width so every lane moves at
+ * the same speed.
+ */
+function Lane({ items, locale, logos, className }: { items: Item[]; locale: Locale; logos?: Logos; className?: string }) {
+  const lane = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLUListElement>(null);
+  const [reps, setReps] = useState(1);
+  const [duration, setDuration] = useState(Math.max(30, items.length * 2.6));
+  useLayoutEffect(() => {
+    const el = lane.current;
+    const tr = track.current;
+    if (!el || !tr) return;
+    // Reduced motion: the lane does not move and the repeats are hidden.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const measure = () => {
+      // Width of one pass through the items: from the first item to its first repeat.
+      const a = tr.children[0] as HTMLElement | undefined;
+      const b = tr.children[items.length] as HTMLElement | undefined;
+      const one = a && b ? b.offsetLeft - a.offsetLeft : 0;
+      if (one <= 0) return;
+      const need = Math.max(1, Math.ceil(el.clientWidth / one));
+      if (need !== reps) setReps(need);
+      setDuration((one * need) / SPEED);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [items, reps]);
   const row = (copy: boolean) =>
-    items.map((it) => (
-      <li
-        key={`${it.key}${copy ? "-c" : ""}`}
-        className={cn(
-          "flex items-center gap-1.5 px-3.5 whitespace-nowrap",
-          copy && "ticker-copy",
-          it.kind === "exchange" && "pl-5",
-          it.move === "up" && "tick-flash-up",
-          it.move === "down" && "tick-flash-down",
-        )}
-        aria-hidden={copy ? true : undefined}
-        title={it.title}
-      >
-        <Cell it={it} locale={locale} />
-      </li>
-    ));
+    Array.from({ length: reps }, (_, r) =>
+      items.map((it) => (
+        <li
+          key={`${it.key}-${r}${copy ? "-c" : ""}`}
+          className={cn(
+            "flex items-center gap-1.5 px-3.5 whitespace-nowrap",
+            (copy || r > 0) && "ticker-copy",
+            it.kind === "exchange" && "pl-5",
+            it.move === "up" && "tick-flash-up",
+            it.move === "down" && "tick-flash-down",
+          )}
+          aria-hidden={copy || r > 0 ? true : undefined}
+          title={it.title}
+        >
+          <Cell it={it} locale={locale} logos={logos} />
+        </li>
+      )),
+    );
   return (
-    <div className={cn("ticker-lane relative min-w-0 flex-1 overflow-hidden", className)}>
-      <ul className="ticker-track h-full items-center font-mono text-[max(12px,0.75rem)] tabular-nums" style={{ animationDuration: `${duration}s` }}>
+    <div ref={lane} className={cn("ticker-lane relative min-w-0 flex-1 overflow-hidden", className)}>
+      <ul ref={track} className="ticker-track h-full items-center font-mono text-[max(12px,0.75rem)] tabular-nums" style={{ animationDuration: `${duration}s` }}>
         {row(false)}
         {row(true)}
       </ul>
@@ -104,15 +155,16 @@ function StatusDot({ status }: { status?: ExchangeSnapshot["status"] }) {
 }
 
 /** Fixed head of a lane: exchange name (links to its price board) and its status. */
-function LaneHead({ ex, snap, locale, labels }: { ex: Ex; snap?: ExchangeSnapshot; locale: Locale; labels: TickerLabels }) {
+function LaneHead({ ex, snap, locale, labels, logo }: { ex: Ex; snap?: ExchangeSnapshot; locale: Locale; labels: TickerLabels; logo?: Logo }) {
   return (
     <Link
       href={`/${locale}/markets/${ex.toLowerCase()}`}
       className="z-10 flex shrink-0 items-center gap-2 border-r border-fg/[0.08] bg-ink-950 px-3 font-mono text-[max(12px,0.75rem)] tabular-nums hover:bg-fg/[0.04] focus-visible:bg-fg/[0.06]"
       title={snap?.status ? `${labels.board.replace("{exchange}", ex)} · ${labels.status[snap.status]}` : labels.board.replace("{exchange}", ex)}
     >
-      <StatusDot status={snap?.status} />
+      <Mark logo={logo} />
       <span className="font-semibold tracking-widest text-fg">{ex}</span>
+      <StatusDot status={snap?.status} />
       {snap?.status && <span className="sr-only">{labels.status[snap.status]}</span>}
     </Link>
   );
@@ -127,9 +179,15 @@ function LaneHead({ ex, snap, locale, labels }: { ex: Ex; snap?: ExchangeSnapsho
  * motion it does not move and can be scrolled sideways instead. Data:
  * /api/market (refreshed every 20 s, shared with the other market widgets).
  */
-export type TickerProps = { mode: MarketPayload["mode"]; locale: Locale; labels: TickerLabels };
+export type TickerProps = {
+  mode: MarketPayload["mode"];
+  locale: Locale;
+  labels: TickerLabels;
+  /** DSE and CSE logos (Admin → Organizations, keys dse and cse, with logo permission). */
+  logos?: Logos;
+};
 
-export function TickerBar({ mode, locale, labels }: TickerProps) {
+export function TickerBar({ mode, locale, labels, logos }: TickerProps) {
   const [initial] = useState<MarketPayload>(() => ({ mode, providerName: null, delayMinutes: 0, snapshot: null, shares: [] }));
   const { data, moves, loaded } = useMarket(initial);
   const [paused, setPaused] = useState(false);
@@ -144,7 +202,7 @@ export function TickerBar({ mode, locale, labels }: TickerProps) {
   ]);
 
   return (
-    <div role="region" aria-label={labels.region} className={cn("relative h-(--ticker-h) border-b border-fg/[0.08] bg-ink-950/90 backdrop-blur-xl", paused && "ticker-paused")}>
+    <div role="region" aria-label={labels.region} className={cn("ticker-bar relative h-(--ticker-h) border-b border-fg/[0.08] bg-ink-950/90 backdrop-blur-xl", paused && "ticker-paused")}>
       <div className="flex h-full items-stretch">
         {exchanges.length === 0 ? (
           <p className="flex min-w-0 flex-1 items-center gap-2 truncate px-4 font-mono text-[max(12px,0.75rem)] text-text-secondary">
@@ -159,13 +217,13 @@ export function TickerBar({ mode, locale, labels }: TickerProps) {
                 <StatusDot status={byEx("DSE")?.status ?? byEx("CSE")?.status} />
                 DSE · CSE
               </Link>
-              <Lane items={combined} locale={locale} />
+              <Lane items={combined} locale={locale} logos={logos} />
             </div>
             {/* Wide screens: DSE and CSE side by side */}
             {exchanges.map((ex, i) => (
               <div key={ex} className={cn("hidden min-w-0 flex-1 lg:flex", i > 0 && "border-l border-fg/[0.08]")}>
-                <LaneHead ex={ex} snap={byEx(ex)} locale={locale} labels={labels} />
-                <Lane items={itemsFor(ex, byEx(ex), locale, moves)} locale={locale} />
+                <LaneHead ex={ex} snap={byEx(ex)} locale={locale} labels={labels} logo={logos?.[ex]} />
+                <Lane items={itemsFor(ex, byEx(ex), locale, moves)} locale={locale} logos={logos} />
               </div>
             ))}
           </>

@@ -53,7 +53,7 @@ function Movers({ title, rows, locale, t, tone, exchange }: { title: string; row
                     {q.symbol}
                   </a>
                 </td>
-                <td className="py-2 pr-2 text-right font-mono tabular-nums text-text-secondary">{fmt(locale, q.ltp, q.ltp >= 1000 ? 0 : 1)}</td>
+                <td className="py-2 pr-2 text-right font-mono tabular-nums text-text-secondary">{fmt(locale, q.ltp)}</td>
                 <td className="relative w-24 py-2 text-right">
                   <span
                     aria-hidden="true"

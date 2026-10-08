@@ -732,8 +732,9 @@ html.has-ticker {
   width: max-content;
   animation: marquee 80s linear infinite;
 }
-.ticker-lane:hover .ticker-track,
-.ticker-lane:focus-within .ticker-track,
+/* Hovering or focusing anywhere on the bar holds both lanes together. */
+.ticker-bar:hover .ticker-track,
+.ticker-bar:focus-within .ticker-track,
 .ticker-paused .ticker-track {
   animation-play-state: paused;
 }

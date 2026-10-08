@@ -7,10 +7,11 @@ import { HeaderClient } from "./HeaderClient";
 import { searchLabels } from "@/lib/public/labels";
 import { marketMode } from "@/lib/market/data";
 import type { TickerProps } from "@/components/market/TickerBar";
+import { getPartyLogos } from "@/lib/public/flagship";
 
 /** Header: menu from Admin → Navigation ("header" menu), logo from the brand asset. */
 export async function SiteHeader({ locale }: { locale: AppLocale }) {
-  const [items, info] = await Promise.all([getNavMenu("header", locale), getSiteInfo(locale)]);
+  const [items, info, parties] = await Promise.all([getNavMenu("header", locale), getSiteInfo(locale), getPartyLogos(locale)]);
   const t = getMessages(locale);
   const mode = marketMode();
   // The ticker's settings, not an element: HeaderClient renders the ticker itself,
@@ -21,6 +22,7 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
       : {
           mode,
           locale,
+          logos: { DSE: parties.dse, CSE: parties.cse },
           labels: {
             region: t.tickerLabel,
             pause: t.tickerPause,

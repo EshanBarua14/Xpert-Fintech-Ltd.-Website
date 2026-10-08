@@ -1242,3 +1242,16 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .nav-glow { transition: none; }
 }
+
+/* About page: running text is justified, with hyphenation so lines stay even.
+   :where() keeps this weaker than utilities, so centred or right-aligned text
+   stays as it is; headings are never justified. */
+/* From tablet width up: on a phone's narrow column justified lines open wide gaps between words. */
+@media (min-width: 40rem) {
+  :where(.about-justify) :is(p, dd, blockquote, li) {
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    text-wrap: wrap;
+  }
+}

@@ -68,7 +68,8 @@ export default async function AboutPage({ params }: Props) {
   ];
 
   return (
-    <>
+    // Body text on this page is justified (see .about-justify in globals.css).
+    <div className="about-justify">
       <PageHero eyebrow={t.companyEyebrow} title={tr?.title ?? t.aboutTitle} body={story.summary} />
 
       {/* Story, mission, vision: the story as reading text on the left, mission and vision as two statements on the right, top-aligned. */}
@@ -76,7 +77,7 @@ export default async function AboutPage({ params }: Props) {
         <Shell className="pb-20 md:pb-28">
           <div className="grid gap-12 border-t border-fg/10 pt-12 md:pt-16 lg:grid-cols-12 lg:gap-16">
             {story.about && (
-              <div data-reveal className={cn("flex flex-col gap-6", story.mission || story.vision ? "lg:col-span-7" : "lg:col-span-9")}>
+              <div data-reveal className={cn("flex flex-col gap-6", story.mission || story.vision ? "lg:col-span-6" : "lg:col-span-9")}>
                 <h2 className="font-display text-3xl leading-tight tracking-[-0.015em] text-text-primary md:text-4xl">{t.ourStory}</h2>
                 <div className="flex max-w-[62ch] flex-col gap-5">
                   {story.about
@@ -84,7 +85,7 @@ export default async function AboutPage({ params }: Props) {
                     .map((para) => para.trim())
                     .filter(Boolean)
                     .map((para, i) => (
-                      <p key={i} className={cn("leading-relaxed text-pretty", i === 0 ? "text-lg text-text-primary md:text-xl" : "text-base text-text-secondary md:text-lg")}>
+                      <p key={i} className={cn("leading-relaxed", i === 0 ? "text-lg text-text-primary md:text-xl" : "text-base text-text-secondary md:text-lg")}>
                         {para}
                       </p>
                     ))}
@@ -92,7 +93,7 @@ export default async function AboutPage({ params }: Props) {
               </div>
             )}
             {(story.mission || story.vision) && (
-              <dl className={cn("flex flex-col divide-y divide-fg/10", story.about ? "lg:col-span-5" : "lg:col-span-12 lg:flex-row lg:divide-x lg:divide-y-0")}>
+              <dl className={cn("flex flex-col divide-y divide-fg/10", story.about ? "lg:col-span-6" : "lg:col-span-12 lg:flex-row lg:divide-x lg:divide-y-0")}>
                 {[
                   { label: t.mission, text: story.mission, dot: "bg-gold" },
                   { label: t.vision, text: story.vision, dot: "bg-brand-sky" },
@@ -104,7 +105,7 @@ export default async function AboutPage({ params }: Props) {
                         <span aria-hidden="true" className={cn("size-2 rounded-full", x.dot)} />
                         {x.label}
                       </dt>
-                      <dd className="font-display text-xl leading-snug tracking-[-0.01em] text-pretty text-text-primary md:text-2xl">{x.text}</dd>
+                      <dd className="font-display text-lg leading-snug text-text-primary md:text-xl">{x.text}</dd>
                     </div>
                   ))}
               </dl>
@@ -194,6 +195,6 @@ export default async function AboutPage({ params }: Props) {
       {ctx && <Sections sections={sections} ctx={ctx} />}
 
       <CtaBand t={t} locale={loc} />
-    </>
+    </div>
   );
 }

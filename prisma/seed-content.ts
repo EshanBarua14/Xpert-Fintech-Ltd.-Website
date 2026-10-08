@@ -24,7 +24,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { ecosystemEdges, ecosystemFlows, ecosystemNodes } from "../src/content/xfl2/ecosystem";
-import { BOARD, MANAGEMENT, TEAM, type RosterPerson } from "../src/content/xfl2/people";
+import { BOARD, CONSULTANTS, MANAGEMENT, TEAM, type RosterPerson } from "../src/content/xfl2/people";
 import { LEADER_MESSAGES, MARKET_GOAL } from "../src/content/xfl2/messages";
 import { LEGAL_DRAFTS } from "../src/content/xfl2/legal";
 import { CLIENT_LOGOS, NOT_CLIENTS, orgNameKey } from "../src/content/xfl2/client-logos";
@@ -446,6 +446,7 @@ async function seedPeople() {
 // ── Roster (Board, ManCom and the whole team, from XFL) ──────────────────────
 
 const BN_TITLES: Record<string, string> = {
+  Consultant: "পরামর্শক",
   Chairman: "চেয়ারম্যান",
   Director: "পরিচালক",
   "Managing Director": "ব্যবস্থাপনা পরিচালক",
@@ -535,6 +536,7 @@ async function seedRoster() {
   const groups: [PersonGroup, RosterPerson[]][] = [
     ["BOARD", BOARD],
     ["MANAGEMENT", MANAGEMENT],
+    ["CONSULTANT", CONSULTANTS],
     ["TEAM", TEAM],
   ];
   const byKey = new Map<string, RosterPerson>();
@@ -608,6 +610,16 @@ async function seedRoster() {
         if (!existing) await db.personRoleTranslation.create({ data: { roleId: role.id, locale, title } });
         else if (!existing.title.trim()) await db.personRoleTranslation.update({ where: { id: existing.id }, data: { title } });
       }
+    }
+  }
+  // Consultants: their organization under the title ("Consultant" / "Xpert Fintech Ltd."), unless already filled in.
+  for (const c of CONSULTANTS) {
+    const personId = ids.get(c.key);
+    if (!personId || !c.affiliation) continue;
+    for (const [locale, text] of [[EN, c.affiliation.en], [BN, c.affiliation.bn]] as const) {
+      const tr = await db.personTranslation.findUnique({ where: { personId_locale: { personId, locale } } });
+      if (tr && !tr.affiliation) await db.personTranslation.update({ where: { id: tr.id }, data: { affiliation: text } });
+      else if (!tr && locale === BN && c.nameBn) await db.personTranslation.create({ data: { personId, locale: BN, name: c.nameBn, affiliation: text } });
     }
   }
   // The stand-in board cards are no longer needed once the real board is in: move untouched ones to the trash.

@@ -44,6 +44,11 @@ export const MANAGEMENT: RosterPerson[] = [
 ];
 
 /** Everyone at Xpert, by position (XFL's staff list, with titles confirmed by XFL). */
+/** Consultants (Company → Consultants), as given by XFL (8 Oct 2026). No photo yet: the card shows the placeholder portrait. */
+export const CONSULTANTS: (RosterPerson & { nameBn?: string; affiliation?: { en: string; bn: string } })[] = [
+  { key: "mohammad-ali", name: "Mohammad Ali", nameBn: "মোহাম্মদ আলী", title: "Consultant", rank: 1, affiliation: { en: "Xpert Fintech Ltd.", bn: "এক্সপার্ট ফিনটেক লিমিটেড" } },
+];
+
 export const TEAM: RosterPerson[] = [
   { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman", title: "Managing Director", department: "Leadership", rank: 1 },
   { key: "sowkot-osman", name: "Sowkot Osman", title: "Executive Director", department: "Leadership", rank: 2 },

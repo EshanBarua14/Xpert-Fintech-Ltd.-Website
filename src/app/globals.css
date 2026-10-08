@@ -1129,6 +1129,19 @@ html {
 .person-sheen {
   background: linear-gradient(180deg, transparent 50%, rgb(6 17 31 / 0.55));
 }
+/* Profile cards glow softly in their group colour, and brighter on hover or keyboard focus. */
+.person-card {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--tone) 16%, transparent),
+    0 18px 50px -36px color-mix(in srgb, var(--tone) 75%, transparent);
+}
+.person-card:hover,
+.person-card:focus-within {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--tone) 55%, transparent),
+    0 0 34px -6px color-mix(in srgb, var(--tone) 45%, transparent),
+    0 34px 80px -40px color-mix(in srgb, var(--tone) 85%, transparent);
+}
 .person-dialog[open] { animation: dialog-in 380ms cubic-bezier(0.16, 1, 0.3, 1); }
 .person-dialog[open]::backdrop { animation: backdrop-in 380ms ease-out; }
 @keyframes dialog-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } }

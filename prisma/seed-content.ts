@@ -628,25 +628,33 @@ async function seedRoster() {
       await db.personTranslation.updateMany({ where: { personId, locale: BN, NOT: { name: c.nameBn } }, data: { name: c.nameBn } });
     }
   }
-  // Directors' biographies and positions at their own organizations (XFL, 8 Oct 2026): filled where still empty.
+  // Board and management biographies and positions (XFL, 8 Oct 2026): filled where still empty, or where an
+  // earlier seeded position is still in place; anything written in Admin → People is kept.
   let profiles = 0;
   for (const d of DIRECTOR_PROFILES) {
-    const personId = ids.get(d.key) ?? (await db.person.findUnique({ where: { key: d.key }, select: { id: true } }))?.id;
-    if (!personId) continue;
+    const person = ids.get(d.key)
+      ? await db.person.findUnique({ where: { id: ids.get(d.key)! } })
+      : await db.person.findUnique({ where: { key: d.key } });
+    if (!person) continue;
+    const personId = person.id;
+    if (d.linkedinUrl && !person.linkedinUrl) await db.person.update({ where: { id: personId }, data: { linkedinUrl: d.linkedinUrl } });
     for (const locale of [EN, BN] as const) {
       const lang = locale === EN ? "en" : "bn";
       const tr = await db.personTranslation.findUnique({ where: { personId_locale: { personId, locale } } });
       if (!tr) {
         // No Bangla version yet: create it with the Bangla name, biography and position.
         if (locale === BN) {
-          await db.personTranslation.create({ data: { personId, locale: BN, name: d.nameBn, bio: d.bio.bn, affiliation: d.affiliation.bn } });
+          await db.personTranslation.create({ data: { personId, locale: BN, name: d.nameBn, bio: d.bio?.bn ?? null, affiliation: d.affiliation?.bn ?? null } });
           profiles++;
         }
         continue;
       }
+      const current = tr.affiliation?.trim() ?? "";
       const data = {
-        ...(!tr.bio?.trim() && { bio: d.bio[lang] }),
-        ...(!tr.affiliation?.trim() && { affiliation: d.affiliation[lang] }),
+        ...(d.bio && !tr.bio?.trim() && { bio: d.bio[lang] }),
+        ...(d.affiliation && (!current || (d.replaces ?? []).includes(current)) && current !== d.affiliation[lang] && { affiliation: d.affiliation[lang] }),
+        // The Bangla name follows XFL's spelling unless the profile was edited in the admin.
+        ...(locale === BN && !person.updatedById && tr.name !== d.nameBn && { name: d.nameBn }),
       };
       if (Object.keys(data).length) {
         await db.personTranslation.update({ where: { id: tr.id }, data });
@@ -654,7 +662,11 @@ async function seedRoster() {
       }
     }
   }
-  if (profiles) console.log(`• Directors' profiles: biography and position added to ${profiles} profile text(s)`);
+  if (profiles) console.log(`• Board and management profiles: biography, position or Bangla name updated in ${profiles} profile text(s)`);
+  // Company websites XFL gave for directors' organizations (kept if already set).
+  for (const [key, url] of [["ucb-stock-brokerage", "https://ucbstock.com.bd"], ["nli-securities", "https://nlisecurities.com"]] as const) {
+    await db.organization.updateMany({ where: { key, websiteUrl: null }, data: { websiteUrl: url } });
+  }
   // The stand-in board cards are no longer needed once the real board is in: move untouched ones to the trash.
   const trashed = await db.person.updateMany({
     where: { key: { startsWith: "placeholder-" }, isPlaceholder: true, deletedAt: null, updatedById: null },

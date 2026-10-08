@@ -123,7 +123,15 @@ function PersonCard({
   const role = p.title ?? groupLabel;
   const hasContact = Boolean(p.email || p.linkedinUrl);
   return (
-    <article className="person-card group relative flex h-full flex-col overflow-hidden rounded-[1.6rem] border border-fg/[0.08] bg-navy-900 transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--tone)_55%,transparent)] hover:shadow-[0_30px_70px_-34px_color-mix(in_srgb,var(--tone)_55%,transparent)]">
+    <article
+      // The whole card opens the profile (links inside it keep their own action); the name button is the keyboard route.
+      onClick={(e) => {
+        if ((e.target as Element).closest("a, button")) return;
+        const name = e.currentTarget.querySelector<HTMLButtonElement>(".person-name");
+        if (name) onOpen(name);
+      }}
+      className="person-card group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.6rem] border border-fg/[0.08] bg-navy-900 transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--tone)_60%,transparent)]"
+    >
       <span aria-hidden="true" className="absolute inset-x-0 top-0 z-10 h-[3px] bg-gradient-to-r from-[var(--tone)] via-[color-mix(in_srgb,var(--tone)_50%,transparent)] to-transparent" />
       {/* The portrait also opens the profile; the name button below is the one in the tab order. */}
       <button type="button" tabIndex={-1} aria-hidden="true" onClick={(e) => onOpen(e.currentTarget)} className="relative block aspect-[4/5] w-full overflow-hidden bg-navy-800">

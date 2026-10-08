@@ -28,7 +28,7 @@ export const BOARD: RosterPerson[] = [
   { key: "mohammed-rahmat-pasha", name: "Mohammed Rahmat Pasha", title: "Director", rank: 2 },
   { key: "dilip-kajuri", name: "Dilip Kajuri", title: "Director", rank: 3 },
   { key: "aminul-islam", name: "Aminul Islam", title: "Director", rank: 4 },
-  { key: "mohd-shaahed-imran", name: "Mohd Shaahed Imran", title: "Director", rank: 5 },
+  { key: "mohd-shaahed-imran", name: "Mohd. Shaahed Imran", formerName: "Mohd Shaahed Imran", title: "Director", rank: 5 },
   { key: "md-refat-hossen", name: "Md. Refat Hossen", title: "Director", rank: 6 },
   { key: "fakruddin-ali-ahmed-rajib", name: "Fakruddin Ali Ahmed Rajib", title: "Director", rank: 7 },
   { key: "m-shahryar-faiz", name: "M Shahryar Faiz", title: "Director", rank: 8 },
@@ -38,7 +38,7 @@ export const BOARD: RosterPerson[] = [
 /** Management Committee (ManCom). */
 export const MANAGEMENT: RosterPerson[] = [
   { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman", title: "Managing Director", department: "Leadership", rank: 1 },
-  { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 2 },
+  { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony, FCS", formerName: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 2 },
   { key: "md-abul-moshad-chowdhury", name: "Md. Abul Moshad Chowdhury", title: "Head of Application Support and Development", department: "Engineering", rank: 3 },
   { key: "muhammad-shamsul-maruf", name: "Mohammad Shamsul Maruf", formerName: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 4 },
 ];
@@ -52,7 +52,7 @@ export const CONSULTANTS: (RosterPerson & { nameBn?: string; affiliation?: { en:
 export const TEAM: RosterPerson[] = [
   { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman", title: "Managing Director", department: "Leadership", rank: 1 },
   { key: "sowkot-osman", name: "Sowkot Osman", title: "Executive Director", department: "Leadership", rank: 2 },
-  { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 3 },
+  { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony, FCS", formerName: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 3 },
   { key: "md-abul-moshad-chowdhury", name: "Md. Abul Moshad Chowdhury", title: "Head of Application Support and Development", department: "Engineering", rank: 4 },
   { key: "saikat-biswas", name: "Saikat Biswas", title: "Senior Principal Software Engineer", department: "Engineering", rank: 5 },
   { key: "muhammad-shamsul-maruf", name: "Mohammad Shamsul Maruf", formerName: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 6 },

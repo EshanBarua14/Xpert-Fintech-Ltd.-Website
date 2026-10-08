@@ -207,10 +207,12 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
     // A review is matched by name to the person in Admin → People (e.g. a director): their photo,
     // their position at their own organization (affiliation) and that organization's logo fill
     // in whatever the review itself leaves empty.
-    const names = [...new Set(rows.map((r) => r.personName))];
-    const people = names.length
+    // Names are compared without dots, commas or post-nominals ("Mohd Shaahed Imran" = "Mohd. Shaahed Imran", "… Rony" = "… Rony, FCS").
+    const nameKey = (v: string) =>
+      v.toLowerCase().replace(/,?\s*\b(fca|fcs|fcma|acca|fcca|cfa)\b\.?/g, "").replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
+    const people = rows.length
       ? await db.person.findMany({
-          where: { deletedAt: null, translations: { some: { locale: "en", name: { in: names } } } },
+          where: { deletedAt: null },
           select: {
             photoMediaId: true,
             translations: { select: { locale: true, name: true, affiliation: true } },
@@ -219,7 +221,7 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
         })
       : [];
     const personOf = (r: (typeof rows)[number]) =>
-      people.find((p) => p.translations.some((t) => t.locale === "en" && t.name.toLowerCase() === r.personName.toLowerCase()));
+      people.find((p) => p.translations.some((t) => t.locale === "en" && nameKey(t.name) === nameKey(r.personName)));
     const photoOf = (r: (typeof rows)[number]) => r.photoMediaId ?? personOf(r)?.photoMediaId ?? null;
     // Organizations named in an affiliation ("Managing Director, Apex Investments Ltd.") lend their logo.
     const orgs = await db.organization.findMany({ where: { ...publishedWhere(), logoPermission: true, logoMediaId: { not: null } }, include: { translations: true } });
@@ -252,7 +254,8 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
         {
           id: r.id,
           quote: tr.quote,
-          name: r.personName,
+          // The name as kept in Admin → People (in this language), else as written on the review.
+          name: personOf(r)?.translations.find((t) => t.locale === locale)?.name ?? personOf(r)?.translations.find((t) => t.locale === "en")?.name ?? r.personName,
           // The reviewer's title: as written on the review, else their position from Admin → People.
           role: tr.personTitle || affiliation || roleOf(r),
           organization: org

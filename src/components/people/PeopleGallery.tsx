@@ -74,6 +74,21 @@ function ContactLinks({ p, labels, size = "sm" }: { p: GalleryPerson; labels: Ga
   );
 }
 
+/** Outside production: a missing email or LinkedIn, as a dashed icon that opens the place to add it. */
+function ContactSlot({ kind, name }: { kind: "email" | "linkedin"; name: string }) {
+  const what = kind === "email" ? "email" : "LinkedIn";
+  return (
+    <a
+      href="/admin/people/contacts"
+      aria-label={`Add ${what} for ${name} (Admin)`}
+      title={`No ${what} yet: add it in Admin → People → Contacts`}
+      className="flex size-10 items-center justify-center rounded-full border border-dashed border-gold/60 text-gold transition-colors hover:border-gold hover:bg-gold/10"
+    >
+      <SocialIcon kind={kind} className="size-[18px]" />
+    </a>
+  );
+}
+
 /** One profile card: portrait, name, role, a few lines of biography, and direct email and LinkedIn links. */
 function PersonCard({
   p,
@@ -138,43 +153,35 @@ function PersonCard({
           {p.affiliation && <p className="text-sm leading-snug text-text-secondary">{p.affiliation}</p>}
         </div>
         {p.bio && <p className={cn("text-sm leading-relaxed text-text-secondary", featured ? "line-clamp-5 lg:text-base" : "line-clamp-3")}>{p.bio}</p>}
-        {/* Outside production, a card without contact details shows where they go. */}
-        {!p.email && !p.linkedinUrl && showPlaceholderBadge && (
-          <div className="mt-auto flex items-center gap-3 border-t border-fg/[0.08] pt-4">
-            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-dashed border-gold/50 text-gold/70">
-              <SocialIcon kind="email" className="size-4" />
-            </span>
-            <span aria-hidden="true" className="flex size-9 items-center justify-center rounded-full border border-dashed border-gold/50 text-gold/70">
-              <SocialIcon kind="linkedin" className="size-4" />
-            </span>
-            <a href="/admin/people/contacts" className="ml-auto text-xs font-semibold text-gold hover:underline">
-              Add email &amp; LinkedIn
-            </a>
-          </div>
-        )}
-        {(p.email || p.linkedinUrl) && (
-          <div className="mt-auto flex items-center gap-3 border-t border-fg/[0.08] pt-4">
-            {p.email && (
+        {/* Email and LinkedIn as icon buttons. Outside production, a missing one shows as a
+            dashed icon that opens Admin → People → Contacts, where it is filled in. */}
+        {(p.email || p.linkedinUrl || showPlaceholderBadge) && (
+          <div className="mt-auto flex items-center gap-2.5 border-t border-fg/[0.08] pt-4">
+            {p.email ? (
               <a
                 href={`mailto:${p.email}`}
                 aria-label={labels.email.replace("{name}", p.name)}
-                className="flex min-w-0 items-center gap-2 text-sm text-text-secondary transition-colors hover:text-fg"
+                title={p.email}
+                className="flex size-10 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-brand-sky hover:bg-brand-sky/10 hover:text-fg"
               >
-                <SocialIcon kind="email" className="size-4 shrink-0 text-brand-sky" />
-                <span className="truncate">{p.email}</span>
+                <SocialIcon kind="email" className="size-[18px]" />
               </a>
+            ) : (
+              showPlaceholderBadge && <ContactSlot kind="email" name={p.name} />
             )}
-            {p.linkedinUrl && (
+            {p.linkedinUrl ? (
               <a
                 href={p.linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${labels.linkedin}: ${p.name}`}
                 title={labels.linkedin}
-                className="ml-auto flex size-9 shrink-0 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-[#0a66c2] hover:bg-[#0a66c2] hover:text-white"
+                className="flex size-10 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-[#0a66c2] hover:bg-[#0a66c2] hover:text-white"
               >
-                <SocialIcon kind="linkedin" className="size-4" />
+                <SocialIcon kind="linkedin" className="size-[18px]" />
               </a>
+            ) : (
+              showPlaceholderBadge && <ContactSlot kind="linkedin" name={p.name} />
             )}
           </div>
         )}

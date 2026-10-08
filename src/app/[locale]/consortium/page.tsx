@@ -38,7 +38,6 @@ export default async function ConsortiumPage({ params }: Props) {
               <SectionHeader title={t.members} />
               <div data-reveal className="relative mx-auto aspect-square w-full max-w-md">
                 <MarketGlobe routes={data.members.length} />
-                <span className="glass absolute right-2 bottom-2 rounded-full px-3 py-1 text-xs text-text-secondary">{t.conceptualView}</span>
               </div>
             </div>
             <LogoWall members={data.members} columns={2} />
@@ -51,18 +50,46 @@ export default async function ConsortiumPage({ params }: Props) {
           <div className="flex flex-col gap-10">
             <SectionHeader title={t.exchanges} />
             <ul className="grid gap-4 md:grid-cols-2">
-              {data.exchanges.map((e, i) => (
-                <li key={e.id} data-reveal style={{ "--d": i } as CSSProperties} className="group flex items-center gap-5 rounded-2xl border border-fg/10 p-8">
-                  {e.logo ? (
-                    <Image src={e.logo.url} alt="" width={e.logo.width ?? 160} height={e.logo.height ?? 64} className="member-logo h-14 w-auto max-w-[8rem] object-contain" />
-                  ) : (
-                    <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-sky/10 font-mono text-sm font-semibold text-cyan-300">
-                      {monogram(e.name, e.shortName)}
+              {data.exchanges.map((e, i) => {
+                const inner = (
+                  <>
+                    {e.logo ? (
+                      <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white p-1.5 ring-1 ring-black/5">
+                        <Image src={e.logo.url} alt="" width={e.logo.width ?? 160} height={e.logo.height ?? 64} className="size-full object-contain" />
+                      </span>
+                    ) : (
+                      <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-brand-sky/10 font-mono text-sm font-semibold text-accent">
+                        {monogram(e.name, e.shortName)}
+                      </span>
+                    )}
+                    <span className="flex min-w-0 flex-col gap-1">
+                      <span className="font-display text-xl font-semibold">{e.name}</span>
+                      {e.websiteUrl && (
+                        <span className="inline-flex items-center gap-1 text-sm font-medium text-brand-sky group-hover:underline">
+                          {e.websiteUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
+                          <span aria-hidden="true">↗</span>
+                        </span>
+                      )}
                     </span>
-                  )}
-                  <span className="font-display text-xl font-semibold">{e.name}</span>
-                </li>
-              ))}
+                  </>
+                );
+                return (
+                  <li key={e.id} data-reveal style={{ "--d": i } as CSSProperties} className="flex">
+                    {e.websiteUrl ? (
+                      <a
+                        href={e.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex w-full items-center gap-5 rounded-2xl border border-fg/10 p-6 transition-colors hover:border-brand-sky/50 hover:bg-brand-sky/[0.04] sm:p-8"
+                      >
+                        {inner}
+                      </a>
+                    ) : (
+                      <div className="flex w-full items-center gap-5 rounded-2xl border border-fg/10 p-6 sm:p-8">{inner}</div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </Shell>

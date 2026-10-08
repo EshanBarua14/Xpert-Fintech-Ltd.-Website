@@ -27,7 +27,7 @@ import { ecosystemEdges, ecosystemFlows, ecosystemNodes } from "../src/content/x
 import { BOARD, MANAGEMENT, TEAM, type RosterPerson } from "../src/content/xfl2/people";
 import { LEADER_MESSAGES, MARKET_GOAL } from "../src/content/xfl2/messages";
 import { LEGAL_DRAFTS } from "../src/content/xfl2/legal";
-import { CLIENT_LOGOS, orgNameKey } from "../src/content/xfl2/client-logos";
+import { CLIENT_LOGOS, NOT_CLIENTS, orgNameKey } from "../src/content/xfl2/client-logos";
 import { sniff } from "../src/lib/media/inspect";
 
 const db = new PrismaClient();
@@ -663,14 +663,22 @@ async function seedClientLogos() {
     attached++;
   }
   if (attached || added) console.log(`• Client logos: ${attached} attached${added ? `, ${added} new client(s) added` : ""}`);
+  // Organizations XFL has confirmed are not on its client list: taken off the
+  // site (left as drafts, logo kept) unless an editor has already changed them.
+  let hidden = 0;
+  for (const key of NOT_CLIENTS) {
+    const r = await db.organization.updateMany({ where: { key, kind: "CLIENT", status: "PUBLISHED", updatedById: null, deletedAt: null }, data: { status: "DRAFT" } });
+    hidden += r.count;
+  }
+  if (hidden) console.log(`• ${hidden} organization(s) not on XFL's client list moved to drafts`);
 }
 
 /** The market's institutions, drawn on the ecosystem map and the market cards. */
 const INSTITUTIONS = [
-  { key: "dse", kind: "EXCHANGE", en: "Dhaka Stock Exchange", enShort: "DSE", bn: "ঢাকা স্টক এক্সচেঞ্জ", bnShort: "ডিএসই" },
-  { key: "cse", kind: "EXCHANGE", en: "Chittagong Stock Exchange", enShort: "CSE", bn: "চট্টগ্রাম স্টক এক্সচেঞ্জ", bnShort: "সিএসই" },
-  { key: "bsec", kind: "REGULATOR", en: "Bangladesh Securities and Exchange Commission", enShort: "BSEC", bn: "বাংলাদেশ সিকিউরিটিজ অ্যান্ড এক্সচেঞ্জ কমিশন", bnShort: "বিএসইসি" },
-  { key: "cdbl", kind: "OTHER", en: "Central Depository Bangladesh Limited", enShort: "CDBL", bn: "সেন্ট্রাল ডিপোজিটরি বাংলাদেশ লিমিটেড", bnShort: "সিডিবিএল" },
+  { key: "dse", kind: "EXCHANGE", url: "https://www.dsebd.org", en: "Dhaka Stock Exchange", enShort: "DSE", bn: "ঢাকা স্টক এক্সচেঞ্জ", bnShort: "ডিএসই" },
+  { key: "cse", kind: "EXCHANGE", url: "https://www.cse.com.bd", en: "Chittagong Stock Exchange", enShort: "CSE", bn: "চট্টগ্রাম স্টক এক্সচেঞ্জ", bnShort: "সিএসই" },
+  { key: "bsec", kind: "REGULATOR", url: "https://sec.gov.bd", en: "Bangladesh Securities and Exchange Commission", enShort: "BSEC", bn: "বাংলাদেশ সিকিউরিটিজ অ্যান্ড এক্সচেঞ্জ কমিশন", bnShort: "বিএসইসি" },
+  { key: "cdbl", kind: "OTHER", url: "https://www.cdbl.com.bd", en: "Central Depository Bangladesh Limited", enShort: "CDBL", bn: "সেন্ট্রাল ডিপোজিটরি বাংলাদেশ লিমিটেড", bnShort: "সিডিবিএল" },
 ] as const;
 
 /**
@@ -690,6 +698,7 @@ async function seedInstitutions() {
         data: {
           key: o.key,
           kind: o.kind,
+          websiteUrl: o.url,
           status: "PUBLISHED",
           sortOrder: 200 + i,
           translations: { create: [{ locale: EN, name: o.en, shortName: o.enShort }, { locale: BN, name: o.bn, shortName: o.bnShort }] },
@@ -697,8 +706,12 @@ async function seedInstitutions() {
         include: { translations: true },
       });
       added++;
-    } else if (!org.translations.some((t) => t.locale === BN)) {
-      await db.organizationTranslation.create({ data: { organizationId: org.id, locale: BN, name: o.bn, shortName: o.bnShort } });
+    } else {
+      if (!org.translations.some((t) => t.locale === BN)) {
+        await db.organizationTranslation.create({ data: { organizationId: org.id, locale: BN, name: o.bn, shortName: o.bnShort } });
+      }
+      // The official website, unless an editor has already set one.
+      if (!org.websiteUrl) await db.organization.update({ where: { id: org.id }, data: { websiteUrl: o.url } });
     }
     if (org.logoMediaId) continue;
     const logo = await seedImage("logos", o.key, `${o.en} logo`, ["logo", "institution"]);

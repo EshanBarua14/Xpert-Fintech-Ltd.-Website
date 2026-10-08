@@ -645,6 +645,11 @@ async function seedMessagesAndGoal() {
     });
   }
   await db.siteSetting.upsert({ where: { key: "market.goal" }, update: {}, create: { key: "market.goal", value: MARKET_GOAL } });
+  // Overall share of DSE and CSE turnover as given by XFL (8 Oct 2026); editable in Admin → Market data.
+  if (!(await db.siteSetting.findUnique({ where: { key: "market.headlineShare" } }))) {
+    await db.siteSetting.create({ data: { key: "market.headlineShare", value: { pct: 45, asOf: "2026-10-08" } } });
+    console.log("• Overall market share set to 45% (Admin → Market data → Overall market share)");
+  }
   console.log("• Chairman's and MD's messages saved as drafts (publish in Admin → Messages); market-share goal set");
 }
 

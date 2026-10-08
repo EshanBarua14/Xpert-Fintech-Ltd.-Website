@@ -1,6 +1,6 @@
 "use client";
 
-import { saveMarketGoal, saveMarketShare, saveMarketSource, testMarketFeed, type MarketState } from "@/app/admin/(protected)/market/actions";
+import { saveHeadlineShare, saveMarketGoal, saveMarketShare, saveMarketSource, testMarketFeed, type MarketState } from "@/app/admin/(protected)/market/actions";
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
 import { TextInput } from "@/components/ui/Field";
@@ -124,6 +124,24 @@ export function MarketGoalForm({ values }: { values: GoalValues }) {
       </div>
       <div>
         <SubmitButton pending={pending}>Save goal</SubmitButton>
+      </div>
+    </form>
+  );
+}
+
+/** Xpert's overall share as XFL states it (e.g. 45%), with the date it applies to. Empty removes it. */
+export function HeadlineShareForm({ pct, asOf }: { pct: string; asOf: string }) {
+  const { state, pending, onSubmit } = useActionForm<MarketState>(saveHeadlineShare, {});
+  const e = state.errors ?? {};
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+      <FormMessage message={state.message} isError={!state.ok && Boolean(state.errors)} />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <TextInput id="headlinePct" inputMode="decimal" label="Overall market share (%)" placeholder="45" defaultValue={pct} hint="Leave empty to show the share worked out from the daily figures." error={e.headlinePct || undefined} />
+        <TextInput id="headlineAsOf" type="date" label="As of" defaultValue={asOf} hint="Shown next to the figure. Optional." error={e.headlineAsOf || undefined} />
+      </div>
+      <div>
+        <SubmitButton pending={pending}>Save overall share</SubmitButton>
       </div>
     </form>
   );

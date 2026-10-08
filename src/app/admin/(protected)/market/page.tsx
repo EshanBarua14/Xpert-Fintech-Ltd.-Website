@@ -2,8 +2,8 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { dhakaToday, liveMarketTurnover, marketMode } from "@/lib/market/data";
 import { ConfirmButton } from "@/components/admin/AdminUi";
-import { MarketGoalForm, MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
-import { readGoal } from "@/lib/content/leaders";
+import { HeadlineShareForm, MarketGoalForm, MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
+import { getHeadlineShare, readGoal } from "@/lib/content/leaders";
 import { clearMarketGoal, deleteMarketShare } from "./actions";
 
 const MODE_TEXT = {
@@ -16,6 +16,7 @@ const MODE_TEXT = {
 export default async function MarketAdminPage({ searchParams }: { searchParams: Promise<{ edit?: string }> }) {
   await requireAdmin();
   const { edit } = await searchParams;
+  const headline = await getHeadlineShare();
   const [source, shares, goalRow] = await Promise.all([
     db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }),
     db.marketShare.findMany({ orderBy: [{ tradeDate: "desc" }, { exchange: "asc" }], take: 60 }),
@@ -151,6 +152,15 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section id="overall-share" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">
+        <h2 className="font-display text-xl font-semibold">Overall market share</h2>
+        <p className="text-sm text-text-secondary">
+          Xpert&rsquo;s share of DSE and CSE turnover combined, as XFL states it. When set, the home page leads with this figure (and its goal bar
+          uses it) instead of the one worked out from the daily entries above. {headline ? `Now: ${headline.pct}%${headline.asOf ? ` as of ${headline.asOf}` : ""}.` : "Not set."}
+        </p>
+        <HeadlineShareForm key={headline ? `${headline.pct}-${headline.asOf}` : "none"} pct={headline ? String(headline.pct) : ""} asOf={headline?.asOf ?? ""} />
       </section>
 
       <section id="goal" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">

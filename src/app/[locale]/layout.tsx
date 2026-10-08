@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ensureTextOverrides } from "@/lib/i18n/overrides";
 import { notFound } from "next/navigation";
 import { THEME_SCRIPT } from "@/lib/theme-script";
+import { ThemeKeeper } from "@/components/navigation/ThemeKeeper";
 import { NavProgress } from "@/components/navigation/NavProgress";
 import { marketMode } from "@/lib/market/data";
 import { Noto_Sans_Bengali, Noto_Serif_Bengali, Schibsted_Grotesk, Spectral } from "next/font/google";
@@ -60,6 +61,7 @@ export default async function LocaleLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="flex min-h-dvh flex-col text-text-primary">
+        <ThemeKeeper />
         <AmbientBackground />
         <a href="#main" className="skip-link">
           {t.skipToContent}

@@ -591,5 +591,6 @@
   "flowStepDocs": "KYC documents are filed and kept on record",
   "flowStepData": "Live prices and research inform the decision",
   "testimonialRatingShort": "{n}/5",
-  "flowStepTrade": "The investor trades online or on the app"
+  "flowStepTrade": "The investor trades online or on the app",
+  "reachOverall": "DSE and CSE combined"
 }

@@ -16,10 +16,14 @@ export type ReachLabels = {
   now: string;
   clients: string;
   progress: string;
+  /** "DSE and CSE combined" (+ " · {date}" when dated) for the stated overall share. */
+  overall?: string;
 };
 
 type Props = {
   shares: ShareFigure[];
+  /** Overall share stated by XFL (Admin → Market data); shown instead of the computed one. */
+  headline?: { pct: number; asOf: string | null } | null;
   goal: { targetPct: number; year: number; note: string | null } | null;
   clientBase: { value: number; label: string }[];
   locale: "en" | "bn";
@@ -63,10 +67,10 @@ function useCountUp(target: number) {
  * figures combined), the progress towards the goal set in Admin → Market
  * data, and the client base. With no figure yet, the goal stands on its own.
  */
-export function MarketReach({ shares, goal, clientBase, locale, labels }: Props) {
+export function MarketReach({ shares, headline, goal, clientBase, locale, labels }: Props) {
   const xpert = shares.reduce((s, f) => s + f.xpertTurnover, 0);
   const market = shares.reduce((s, f) => s + f.marketTurnover, 0);
-  const pct = market > 0 ? (xpert / market) * 100 : null;
+  const pct = headline ? headline.pct : market > 0 ? (xpert / market) * 100 : null;
   const { ref, shown } = useCountUp(pct ?? 0);
   const date = (d: string) =>
     new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${d}T00:00:00Z`));
@@ -83,11 +87,14 @@ export function MarketReach({ shares, goal, clientBase, locale, labels }: Props)
             <div className="flex flex-col gap-3">
               <p className="text-sm font-medium text-text-secondary">{labels.share}</p>
               <p className="font-display text-6xl leading-none tracking-[-0.03em] text-text-primary tabular-nums sm:text-7xl md:text-8xl">
-                {fmt(locale, shown, 2)}
+                {fmt(locale, shown, headline && Number.isInteger(headline.pct) ? 0 : 2)}
                 <span className="ml-1 text-[0.5em] text-text-secondary">%</span>
               </p>
-              <p className="text-sm text-text-secondary">{labels.combined}</p>
+              <p className="text-sm text-text-secondary">
+                {headline ? `${labels.overall ?? labels.combined}${headline.asOf ? ` · ${date(headline.asOf)}` : ""}` : labels.combined}
+              </p>
             </div>
+            {!headline && (
             <ul className="flex flex-wrap gap-x-8 gap-y-3">
               {shares.map((s) => (
                 <li key={s.exchange} className="flex items-baseline gap-2">
@@ -97,6 +104,7 @@ export function MarketReach({ shares, goal, clientBase, locale, labels }: Props)
                 </li>
               ))}
             </ul>
+            )}
           </>
         ) : (
           goal && (

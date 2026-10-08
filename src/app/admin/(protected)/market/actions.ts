@@ -6,6 +6,7 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { clearMarketInfoCache, dhakaToday, testFeed } from "@/lib/market/data";
 import { saveShares, type ShareInput } from "@/lib/market/share";
+import { HEADLINE_SHARE_KEY } from "@/lib/content/leaders";
 import { checkbox, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 
 export type MarketState = { errors?: FieldErrors; message?: string; savedAt?: number; ok?: boolean };
@@ -146,4 +147,37 @@ export async function clearMarketGoal() {
   await requireAdmin();
   await db.siteSetting.deleteMany({ where: { key: "market.goal" } });
   refresh();
+}
+
+const headlineSchema = z.object({
+  pct: z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/[%\s]/g, ""))
+    .refine((v) => v === "" || (Number(v) > 0 && Number(v) <= 100), "Enter a percentage above 0 and up to 100, or leave empty."),
+  asOf: z.string().trim().refine((v) => v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v), "Pick a date."),
+});
+
+/**
+ * Xpert's overall share of DSE and CSE turnover as XFL states it. Shown as the
+ * home page's headline figure instead of the one worked out from the daily
+ * entries; empty removes it.
+ */
+export async function saveHeadlineShare(_prev: MarketState, formData: FormData): Promise<MarketState> {
+  const admin = await requireAdmin();
+  const parsed = headlineSchema.safeParse({ pct: formData.get("headlinePct") ?? "", asOf: formData.get("headlineAsOf") ?? "" });
+  if (!parsed.success) {
+    const e = toFieldErrors(parsed.error);
+    return { errors: { headlinePct: e.pct ?? "", headlineAsOf: e.asOf ?? "" }, message: "Please fix the highlighted fields." };
+  }
+  const { pct, asOf } = parsed.data;
+  if (pct === "") {
+    await db.siteSetting.deleteMany({ where: { key: HEADLINE_SHARE_KEY } });
+    refresh();
+    return { ok: true, savedAt: Date.now(), message: "Removed. The home page shows the share worked out from the daily figures." };
+  }
+  const value = { pct: Number(pct), asOf: asOf || null };
+  await db.siteSetting.upsert({ where: { key: HEADLINE_SHARE_KEY }, update: { value, updatedById: admin.id }, create: { key: HEADLINE_SHARE_KEY, value, updatedById: admin.id } });
+  refresh();
+  return { ok: true, savedAt: Date.now(), message: `Saved: ${value.pct}% overall${value.asOf ? ` (as of ${value.asOf})` : ""}.` };
 }

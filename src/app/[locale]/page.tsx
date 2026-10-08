@@ -36,7 +36,7 @@ import { HeroIndices } from "@/components/market/HeroIndices";
 import { exchangeLogos } from "@/components/market/ExchangeMark";
 import { CredentialsInline } from "@/components/blocks/CredentialsBand";
 import { getCredentials } from "@/lib/content/credentials";
-import { getMarketGoal } from "@/lib/content/leaders";
+import { getHeadlineShare, getMarketGoal } from "@/lib/content/leaders";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -80,7 +80,7 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   const [data, events, market, showcase, credentials] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]);
-  const [apps, eco, ecoInDb, testimonials, goal, flowProducts] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale)]);
+  const [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare()]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -90,7 +90,7 @@ export default async function HomePage({ params }: Props) {
   ].filter((p) => p.value > 0);
   const hasMarket = market.mode !== "none" || market.shares.length > 0;
   // Market share and client base, with the goal (Admin → Market data). Replaces the plain figures grid.
-  const showReach = market.shares.length > 0 || goal !== null;
+  const showReach = market.shares.length > 0 || goal !== null || headline !== null;
   // Client institutions first: the client base is what this panel shows off.
   const clientBase = [...proof.filter((p) => p.label === t.proofClients), ...proof.filter((p) => p.label !== t.proofClients && p.label !== t.proofProducts)];
   const sections = page ? toSections(page, locale) : [];
@@ -127,6 +127,7 @@ export default async function HomePage({ params }: Props) {
             <SectionHeader title={t.reachTitle} />
             <MarketReach
               shares={market.shares}
+              headline={headline}
               goal={goal ? { targetPct: goal.targetPct, year: goal.year, note: (locale === "bn" ? goal.bn : goal.en) || goal.en || null } : null}
               clientBase={clientBase}
               locale={locale}
@@ -141,6 +142,7 @@ export default async function HomePage({ params }: Props) {
                 now: t.reachNow,
                 clients: t.reachClients,
                 progress: t.reachProgressLabel,
+                overall: t.reachOverall,
               }}
             />
           </div>

@@ -30,10 +30,29 @@ export type EcosystemLabels = {
   hub: string;
   hubSub: string;
   roles: { bsec: string; dse: string; cse: string; cdbl: string; bank: string; investors: string };
-  names: { bank: string; investors: string };
+  names: { bank: string; investors: string; bsec?: string; dse?: string; cse?: string; cdbl?: string };
+  /** Translated module names where they are words, not acronyms (e.g. "Back office"). */
+  moduleNames?: Partial<Record<EcosystemModuleKey, string>>;
   modules?: string;
   /** Link text in the module detail, e.g. "Explore product". */
   explore?: string;
+  /** Step captions per scene, in order (ecoStep1a…). Without them the scenes play as a whole. */
+  steps?: string[][];
+  /** Name of the step list, e.g. "Steps in this scene". */
+  stepsLabel?: string;
+  /** Digits 0–9 for step numbers (Bangla numerals on the Bangla site). */
+  digits?: string;
+};
+
+export type EcoLogo = { url: string; width: number | null; height: number | null };
+/**
+ * Logos drawn on the map, only those uploaded with permission on file
+ * (Admin → Organizations): the market's institutions by key, and the
+ * brokerages running Xpert, shown in turn inside the hub.
+ */
+export type EcosystemLogos = {
+  parties?: Partial<Record<"bsec" | "dse" | "cse" | "cdbl", EcoLogo>>;
+  members?: (EcoLogo & { name: string })[];
 };
 
 type NodeKey = "bsec" | "dse" | "cse" | "cdbl" | "bank" | "investors";
@@ -115,48 +134,71 @@ type Flow = {
   onlyWithout?: ModuleKey;
 };
 
-/** What happens in each scene: which modules work, and which flows run. */
-const SCENES: { modules: ModuleKey[]; flows: Flow[] }[] = [
-  {
-    // Onboard: eKYC verifies the investor, BO registers the account at CDBL, DMS files the documents.
-    // Without eKYC, the investor's application goes straight to the brokerage.
-    modules: ["eKYC", "BO", "DMS"],
-    flows: [
-      { id: "ekyc-inv", d: linkPath("eKYC", "investors"), to: "investors", both: true, requires: "eKYC" },
-      { id: "inv-apply", d: "M161 300 C 220 300, 262 298, 304 297", from: "investors", to: "investors", onlyWithout: "eKYC" },
-      { id: "bo-cdbl", d: linkPath("BO", "cdbl"), to: "cdbl", both: true, requires: "BO" },
-    ],
-  },
-  {
-    // Trade: orders come in, RMS checks them, the OMS routes them to the exchanges.
-    modules: ["RMS", "OMS"],
-    flows: [
-      { id: "inv-hub", d: "M161 300 C 220 300, 262 298, 304 297", from: "investors", to: "investors" },
-      { id: "oms-dse", d: linkPath("OMS", "dse"), to: "dse", both: true, requires: "OMS" },
-      { id: "oms-cse", d: linkPath("OMS", "cse"), to: "cse", both: true, requires: "OMS" },
-    ],
-  },
-  {
-    // Settle: exchanges settle shares at CDBL; the back office settles money with the banks.
-    modules: ["Back office", "BO"],
-    flows: [
-      { id: "back-bank", d: linkPath("Back office", "bank"), to: "bank", both: true, requires: "Back office" },
-      { id: "bo-cdbl-2", d: linkPath("BO", "cdbl"), to: "cdbl", requires: "BO" },
-      { id: "dse-cdbl", d: "M770 231 C 800 330, 740 480, 645 515", from: "dse", to: "cdbl" },
-      { id: "cse-cdbl", d: "M690 427 C 680 460, 660 485, 645 492", from: "cse", to: "cdbl" },
-    ],
-  },
-  {
-    // Oversee: BSEC regulates everyone; the back office and RMS produce the reports.
-    modules: ["Back office", "RMS"],
-    flows: [
-      { id: "rms-bsec", d: linkPath("RMS", "bsec"), to: "bsec", dotted: true, requires: "RMS" },
-      { id: "bsec-dse", d: "M475 52 C 580 54, 690 96, 712 169", from: "bsec", to: "dse", dotted: true },
-      { id: "bsec-cse", d: "M475 60 C 700 84, 830 250, 787 384", from: "bsec", to: "cse", dotted: true },
-      { id: "bsec-cdbl", d: "M462 76 C 560 170, 600 330, 585 491", from: "bsec", to: "cdbl", dotted: true },
-      { id: "back-bsec", d: linkPath("Back office", "bsec"), to: "bsec", dotted: true, requires: "Back office" },
-    ],
-  },
+type Step = { modules: ModuleKey[]; flows: Flow[] };
+
+/**
+ * What happens in each scene, step by step, in the order it happens. Each
+ * step lights its modules and parties and sends packets along its flows;
+ * earlier steps stay lit (without packets) so the scene builds up.
+ * Captions come from `labels.steps[scene][step]` (Admin → Site text, ecoStep*).
+ */
+const INV_HUB = "M161 300 C 220 300, 262 298, 304 297";
+const SCENES: Step[][] = [
+  // Onboard
+  [
+    {
+      modules: ["eKYC"],
+      flows: [
+        { id: "ekyc-inv", d: linkPath("eKYC", "investors"), to: "investors", both: true, requires: "eKYC" },
+        // Without eKYC, the investor's application goes straight to the brokerage.
+        { id: "inv-apply", d: INV_HUB, from: "investors", to: "investors", onlyWithout: "eKYC" },
+      ],
+    },
+    { modules: ["BO"], flows: [{ id: "bo-cdbl", d: linkPath("BO", "cdbl"), to: "cdbl", both: true, requires: "BO" }] },
+    { modules: ["DMS"], flows: [] },
+  ],
+  // Trade
+  [
+    { modules: [], flows: [{ id: "inv-hub", d: INV_HUB, from: "investors", to: "investors" }] },
+    { modules: ["RMS"], flows: [] },
+    {
+      modules: ["OMS"],
+      flows: [
+        { id: "oms-dse", d: linkPath("OMS", "dse"), to: "dse", both: true, requires: "OMS" },
+        { id: "oms-cse", d: linkPath("OMS", "cse"), to: "cse", both: true, requires: "OMS" },
+      ],
+    },
+  ],
+  // Settle
+  [
+    {
+      modules: [],
+      flows: [
+        { id: "dse-cdbl", d: "M770 231 C 800 330, 740 480, 645 515", from: "dse", to: "cdbl" },
+        { id: "cse-cdbl", d: "M690 427 C 680 460, 660 485, 645 492", from: "cse", to: "cdbl" },
+      ],
+    },
+    { modules: ["BO"], flows: [{ id: "bo-cdbl-2", d: linkPath("BO", "cdbl"), to: "cdbl", both: true, requires: "BO" }] },
+    { modules: ["Back office"], flows: [{ id: "back-bank", d: linkPath("Back office", "bank"), to: "bank", both: true, requires: "Back office" }] },
+  ],
+  // Oversee
+  [
+    {
+      modules: [],
+      flows: [
+        { id: "bsec-dse", d: "M475 52 C 580 54, 690 96, 712 169", from: "bsec", to: "dse", dotted: true },
+        { id: "bsec-cse", d: "M475 60 C 700 84, 830 250, 787 384", from: "bsec", to: "cse", dotted: true },
+        { id: "bsec-cdbl", d: "M462 76 C 560 170, 600 330, 585 491", from: "bsec", to: "cdbl", dotted: true },
+      ],
+    },
+    {
+      modules: ["RMS", "Back office"],
+      flows: [
+        { id: "rms-bsec", d: linkPath("RMS", "bsec"), to: "bsec", dotted: true, requires: "RMS" },
+        { id: "back-bsec", d: linkPath("Back office", "bsec"), to: "bsec", dotted: true, requires: "Back office" },
+      ],
+    },
+  ],
 ];
 
 /* Always-visible, faint base network, tagged by module so hidden modules drop out. */
@@ -178,7 +220,13 @@ const MODULE_PARTIES: Record<ModuleKey, NodeKey[]> = {
   DMS: [],
 };
 
-const SCENE_MS = 5600;
+/** How long each step plays; the last step of a scene holds a little longer. */
+const STEP_MS = 2600;
+const HOLD_MS = 1600;
+
+type Play = "all" | "scene" | "off";
+/** A step picked to show the whole scene at once (reduced motion, or labels without steps). */
+const WHOLE = 99;
 
 export function EcosystemMap({
   labels,
@@ -186,6 +234,7 @@ export function EcosystemMap({
   modules,
   focus,
   highlight,
+  logos,
 }: {
   labels: EcosystemLabels;
   className?: string;
@@ -197,10 +246,13 @@ export function EcosystemMap({
    * module, null clears it. Leave undefined for the map's own behaviour.
    */
   highlight?: ModuleKey | null;
+  logos?: EcosystemLogos;
 }) {
   const router = useRouter();
+  const stepped = !!labels.steps?.length;
   const [scene, setScene] = useState(0);
-  const [auto, setAuto] = useState(true);
+  const [step, setStep] = useState(stepped ? 0 : WHOLE);
+  const [play, setPlay] = useState<Play>("all");
   const [paused, setPaused] = useState(false);
   const [reduce, setReduce] = useState(false);
   const pinned = focus && modules?.[focus]?.available !== false ? focus : null;
@@ -218,27 +270,35 @@ export function EcosystemMap({
   const titleId = `${uid}-t`;
 
   const isAvailable = (m: ModuleKey) => modules?.[m]?.available !== false;
-  const moduleLabel = (m: ModuleKey) => modules?.[m]?.label ?? m;
+  const moduleLabel = (m: ModuleKey) => modules?.[m]?.label ?? labels.moduleNames?.[m] ?? m;
+  const num = (n: number) => (labels.digits ? String(n).replace(/\d/g, (d) => labels.digits![Number(d)] ?? d) : String(n));
 
-  /* Scenes with unavailable modules and their flows removed. */
+  /* Each scene's steps, with unavailable modules and their flows removed; a step left with nothing to show is skipped. */
   const scenes = useMemo(
     () =>
-      SCENES.map((s) => ({
-        modules: s.modules.filter((m) => modules?.[m]?.available !== false),
-        flows: s.flows.filter(
-          (f) =>
-            (!f.requires || modules?.[f.requires]?.available !== false) &&
-            (!f.onlyWithout || modules?.[f.onlyWithout]?.available === false),
-        ),
-      })),
-    [modules],
+      SCENES.map((steps, si) => {
+        const kept = steps
+          .map((st, i) => ({
+            caption: labels.steps?.[si]?.[i] ?? "",
+            modules: st.modules.filter((m) => modules?.[m]?.available !== false),
+            flows: st.flows.filter(
+              (f) => (!f.requires || modules?.[f.requires]?.available !== false) && (!f.onlyWithout || modules?.[f.onlyWithout]?.available === false),
+            ),
+          }))
+          .filter((st) => st.modules.length || st.flows.length);
+        return kept.length ? kept : [{ caption: "", modules: [] as ModuleKey[], flows: [] as Flow[] }];
+      }),
+    [modules, labels.steps],
   );
   const visibleModules = MODULES.filter(({ key }) => isAvailable(key));
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReduce(mq.matches);
-    if (mq.matches) setAuto(false);
+    if (mq.matches) {
+      setPlay("off");
+      setStep(WHOLE);
+    }
   }, []);
 
   useEffect(() => {
@@ -266,18 +326,44 @@ export function EcosystemMap({
     };
   }, []);
 
-  const [hover, setHover] = useState(false);
-  useEffect(() => {
-    if (!auto || paused || hover || reduce || focusModule) return;
-    const id = setTimeout(() => setScene((s) => (s + 1) % 4), SCENE_MS);
-    return () => clearTimeout(id);
-  }, [scene, auto, paused, hover, reduce, focusModule]);
+  const steps = scenes[scene]!;
+  const cur = Math.min(step, steps.length - 1);
+  const atLast = cur === steps.length - 1;
+  const sceneMs = steps.length * STEP_MS + HOLD_MS;
+  const stepMs = !stepped ? sceneMs : atLast ? STEP_MS + HOLD_MS : STEP_MS;
 
-  const current = scenes[scene]!;
-  const activeModules = new Set<ModuleKey>(focusModule ? [focusModule] : current.modules);
-  const activeNodes = new Set<string>(
-    focusModule ? MODULE_PARTIES[focusModule] : current.flows.flatMap((f) => [f.to, f.from ?? ""]),
-  );
+  const [hover, setHover] = useState(false);
+  const holding = paused || hover || !!focusModule;
+  const running = play !== "off" && !reduce && !(atLast && play === "scene");
+  useEffect(() => {
+    if (!running || holding) return;
+    const id = setTimeout(() => {
+      if (!atLast) setStep(cur + 1);
+      else {
+        setScene((s) => (s + 1) % SCENES.length);
+        setStep(stepped ? 0 : WHOLE);
+      }
+    }, stepMs);
+    return () => clearTimeout(id);
+  }, [scene, cur, atLast, running, holding, stepMs, stepped]);
+
+  /* The brokerages running Xpert, shown in turn inside the hub. */
+  const members = logos?.members ?? [];
+  const [mi, setMi] = useState(0);
+  useEffect(() => {
+    if (members.length < 2 || reduce || paused) return;
+    const id = setInterval(() => setMi((i) => (i + 1) % members.length), 2400);
+    return () => clearInterval(id);
+  }, [members.length, reduce, paused]);
+  const member = members.length ? members[mi % members.length] : undefined;
+
+  const shown = steps.slice(0, cur + 1);
+  const live = steps[cur]!;
+  const flows = shown.flatMap((s) => s.flows);
+  const liveFlows = new Set(live.flows.map((f) => f.id));
+  const activeModules = new Set<ModuleKey>(focusModule ? [focusModule] : shown.flatMap((s) => s.modules));
+  const pulsing = new Set<ModuleKey>(focusModule ? [focusModule] : live.modules);
+  const activeNodes = new Set<string>(focusModule ? MODULE_PARTIES[focusModule] : flows.flatMap((f) => [f.to, f.from ?? ""]));
   const focusInfo = focusModule ? modules?.[focusModule] : undefined;
 
   const openModule = (m: ModuleKey) => {
@@ -297,6 +383,11 @@ export function EcosystemMap({
   const node = (key: NodeKey, title: string) => {
     const n = NODES[key];
     const on = activeNodes.has(key);
+    const logo = key in (logos?.parties ?? {}) ? logos!.parties![key as keyof NonNullable<EcosystemLogos["parties"]>] : undefined;
+    // With a logo, it sits on a small white plate left of the name; the pair stays centred.
+    const P = 28;
+    const nameW = title.length * 13;
+    const left = n.x - (P + 7 + nameW) / 2;
     return (
       <g key={key} className="transition-opacity duration-500" opacity={on ? 1 : 0.5}>
         {on && <rect x={n.x - NODE_W / 2 - 8} y={n.y - NODE_H / 2 - 8} width={NODE_W + 16} height={NODE_H + 16} rx={22} fill="url(#eco-glow)" />}
@@ -310,14 +401,31 @@ export function EcosystemMap({
           strokeWidth={on ? 1.6 : 1}
           className="transition-[stroke] duration-500"
         />
-        <text x={n.x} y={n.y - 3} textAnchor="middle" style={{ fill: "var(--eco-text)" }} className="eco-name font-display text-[21px] font-semibold">
-          {title}
-        </text>
+        {logo ? (
+          <>
+            <rect x={left} y={n.y - 24} width={P} height={P} rx={7} fill="#ffffff" stroke="rgb(0 0 0 / 0.08)" />
+            <image href={logo.url} x={left + 3} y={n.y - 21} width={P - 6} height={P - 6} preserveAspectRatio="xMidYMid meet" />
+            <text x={left + P + 7} y={n.y - 3} style={{ fill: "var(--eco-text)" }} className="eco-name font-display text-[21px] font-semibold">
+              {title}
+            </text>
+          </>
+        ) : (
+          <text x={n.x} y={n.y - 3} textAnchor="middle" style={{ fill: "var(--eco-text)" }} className="eco-name font-display text-[21px] font-semibold">
+            {title}
+          </text>
+        )}
         <text x={n.x} y={n.y + 19} textAnchor="middle" style={{ fill: "var(--eco-muted)" }} className="eco-role text-[12.5px]">
           {labels.roles[key]}
         </text>
       </g>
     );
+  };
+
+  const pickScene = (i: number) => {
+    setScene(i);
+    setStep(reduce || !stepped ? WHOLE : 0);
+    setPlay(reduce ? "off" : stepped ? "scene" : "off");
+    setFocusModuleRaw(null);
   };
 
   return (
@@ -347,7 +455,7 @@ export function EcosystemMap({
               <stop offset="0.4" stopColor="#67e8f9" />
               <stop offset="1" stopColor="rgb(34 188 235)" stopOpacity="0" />
             </radialGradient>
-            {current.flows.map((f) => (
+            {live.flows.map((f) => (
               <path key={f.id} id={`${uid}-${scene}-${f.id}`} d={f.d} />
             ))}
           </defs>
@@ -364,31 +472,36 @@ export function EcosystemMap({
             />
           ))}
 
-          {/* Active flows (hidden while a module is focused, so its links stand out) */}
+          {/* Flows of the steps so far: the current step's draw in, earlier ones stay lit (hidden while a module is focused) */}
           {!focusModule &&
-            current.flows.map((f) => (
-              <use
-                key={`${scene}-${f.id}`}
-                href={`#${uid}-${scene}-${f.id}`}
-                fill="none"
-                strokeWidth={2}
-                strokeDasharray={f.dotted ? "4 6" : undefined}
-                strokeLinecap="round"
-                className="eco-flow-in"
-                style={{ stroke: f.dotted ? "var(--eco-oversight)" : "var(--eco-flow)" }}
-              />
-            ))}
+            flows.map((f) => {
+              const now = liveFlows.has(f.id);
+              return (
+                <path
+                  key={`${scene}-${f.id}`}
+                  d={f.d}
+                  pathLength={f.dotted ? undefined : 1}
+                  fill="none"
+                  strokeWidth={now ? 2.4 : 1.8}
+                  strokeDasharray={f.dotted ? "4 6" : undefined}
+                  strokeLinecap="round"
+                  opacity={now || !stepped ? 1 : 0.55}
+                  className={cn("transition-[opacity,stroke-width] duration-500", f.dotted || reduce ? "eco-flow-in" : "eco-flow-draw")}
+                  style={{ stroke: f.dotted ? "var(--eco-oversight)" : "var(--eco-flow)" }}
+                />
+              );
+            })}
 
           {!reduce &&
             !focusModule &&
-            current.flows.flatMap((f) => {
+            live.flows.flatMap((f) => {
               const dirs = f.both ? [false, true] : [false];
               return dirs.flatMap((rev) =>
                 [0, 1].map((k) => (
-                  <circle key={`${scene}-${f.id}-${rev}-${k}`} r={f.dotted ? 4 : 6} fill="url(#eco-packet)">
+                  <circle key={`${scene}-${cur}-${f.id}-${rev}-${k}`} r={f.dotted ? 4 : 6} fill="url(#eco-packet)">
                     <animateMotion
-                      dur={f.dotted ? "3.2s" : "2.3s"}
-                      begin={`${k * (f.dotted ? 1.6 : 1.15) + (rev ? 0.55 : 0)}s`}
+                      dur={f.dotted ? "2.6s" : "1.9s"}
+                      begin={`${k * (f.dotted ? 1.3 : 0.95) + (rev ? 0.45 : 0) + 0.35}s`}
                       repeatCount="indefinite"
                       keyPoints={rev ? "1;0" : "0;1"}
                       keyTimes="0;1"
@@ -414,12 +527,19 @@ export function EcosystemMap({
               className={reduce ? undefined : "eco-spin"}
             />
             <circle cx={HUB.x} cy={HUB.y} r={HUB.r} fill="url(#eco-hub)" stroke="#22bceb" strokeWidth={1.5} />
-            <text x={HUB.x} y={HUB.y - 8} textAnchor="middle" className="eco-hub-text fill-white font-display text-[16px] font-semibold">
+            <text x={HUB.x} y={HUB.y - (member ? 26 : 8)} textAnchor="middle" className="eco-hub-text fill-white font-display text-[16px] font-semibold">
               {labels.hub}
             </text>
-            <text x={HUB.x} y={HUB.y + 16} textAnchor="middle" className="eco-hub-sub fill-[#9ff0ff] text-[12.5px] font-semibold">
+            <text x={HUB.x} y={HUB.y + (member ? -4 : 16)} textAnchor="middle" className="eco-hub-sub fill-[#9ff0ff] text-[12.5px] font-semibold">
               {labels.hubSub}
             </text>
+            {member && (
+              <g key={member.url} className={reduce ? undefined : "eco-logo-in"}>
+                <title>{member.name}</title>
+                <rect x={HUB.x - 54} y={HUB.y + 12} width={108} height={40} rx={10} fill="#ffffff" />
+                <image href={member.url} x={HUB.x - 48} y={HUB.y + 16} width={96} height={32} preserveAspectRatio="xMidYMid meet" />
+              </g>
+            )}
 
             {visibleModules.map(({ key }) => {
               const { x, y } = pillPos(key);
@@ -447,8 +567,8 @@ export function EcosystemMap({
                 >
                   {/* Larger invisible hit area for touch */}
                   <rect x={x - w / 2 - 6} y={y - 18} width={w + 12} height={36} fill="transparent" />
-                  {on && !reduce && (
-                    <rect x={x - w / 2} y={y - 12} width={w} height={24} rx={12} fill="none" stroke="#67e8f9" className="eco-pill-pulse" />
+                  {pulsing.has(key) && !reduce && (
+                    <rect key={`${scene}-${cur}`} x={x - w / 2} y={y - 12} width={w} height={24} rx={12} fill="none" stroke="#67e8f9" className="eco-pill-pulse" />
                   )}
                   <rect
                     x={x - w / 2}
@@ -457,7 +577,7 @@ export function EcosystemMap({
                     height={24}
                     rx={12}
                     style={{ fill: on ? "var(--eco-pill-on)" : "var(--eco-pill)", stroke: on ? "#67e8f9" : "var(--eco-line)" }}
-                    strokeWidth={on ? 1.5 : 1}
+                    strokeWidth={pulsing.has(key) ? 2 : on ? 1.5 : 1}
                   />
                   <text
                     x={x}
@@ -473,11 +593,11 @@ export function EcosystemMap({
             })}
           </g>
 
-          {node("bsec", NODES.bsec.name!)}
+          {node("bsec", labels.names.bsec || NODES.bsec.name!)}
           {node("investors", labels.names.investors)}
-          {node("dse", NODES.dse.name!)}
-          {node("cse", NODES.cse.name!)}
-          {node("cdbl", NODES.cdbl.name!)}
+          {node("dse", labels.names.dse || NODES.dse.name!)}
+          {node("cse", labels.names.cse || NODES.cse.name!)}
+          {node("cdbl", labels.names.cdbl || NODES.cdbl.name!)}
           {node("bank", labels.names.bank)}
         </svg>
         <span className="glass absolute top-0 right-0 rounded-full px-3 py-1 text-xs text-text-secondary">{labels.caption}</span>
@@ -490,32 +610,76 @@ export function EcosystemMap({
               key={s}
               type="button"
               aria-pressed={scene === i}
-              onClick={() => {
-                setScene(i);
-                setAuto(false);
-                setFocusModuleRaw(null);
-              }}
+              onClick={() => pickScene(i)}
               className={cn(
                 "relative overflow-hidden rounded-full border px-2 py-2 text-xs font-semibold transition-colors sm:text-sm",
                 scene === i ? "border-brand-sky/60 bg-brand-sky/10 text-fg" : "border-fg/10 text-text-secondary hover:text-fg",
               )}
             >
               <span className="relative z-10">
-                <span className="mr-1.5 font-mono text-accent">{i + 1}</span>
+                <span className="mr-1.5 font-mono text-accent">{num(i + 1)}</span>
                 {s}
               </span>
-              {scene === i && auto && !reduce && (
+              {scene === i && play === "all" && !reduce && (
                 <span
                   key={`p-${scene}`}
                   aria-hidden="true"
                   className="eco-progress absolute inset-y-0 left-0 bg-brand-sky/15"
-                  style={{ animationDuration: `${SCENE_MS}ms`, animationPlayState: paused || hover || focusModule ? "paused" : "running" }}
+                  style={{ animationDuration: `${sceneMs}ms`, animationPlayState: holding ? "paused" : "running" }}
                 />
               )}
             </button>
           ))}
         </div>
-        <p className="min-h-[3.5rem] text-sm leading-relaxed text-text-secondary md:text-base" aria-live="polite">
+
+        {stepped && (
+          <ol aria-label={labels.stepsLabel} className="grid gap-2" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
+            {steps.map((st, i) => {
+              const state = i < cur ? "done" : i === cur ? "now" : "next";
+              return (
+                <li key={`${scene}-${i}`} className="flex">
+                  <button
+                    type="button"
+                    aria-current={state === "now" ? "step" : undefined}
+                    onClick={() => {
+                      setStep(i);
+                      setPlay("off");
+                    }}
+                    className={cn(
+                      "relative flex w-full items-start gap-2 overflow-hidden rounded-xl border px-2.5 py-2 text-left text-[max(12px,0.75rem)] leading-snug transition-colors md:text-[0.8125rem]",
+                      state === "now" ? "border-brand-sky/60 bg-brand-sky/10 text-fg" : state === "done" ? "border-fg/10 text-text-primary hover:border-fg/30" : "border-fg/10 text-text-secondary hover:border-fg/30 hover:text-fg",
+                    )}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "mt-px flex size-5 shrink-0 items-center justify-center rounded-full font-mono text-[11px] font-semibold",
+                        state === "next" ? "border border-fg/25 text-text-secondary" : "bg-brand-royal text-white",
+                      )}
+                    >
+                      {state === "done" ? (
+                        <svg viewBox="0 0 12 12" className="size-3 fill-none stroke-current stroke-[1.8]"><path d="m2.5 6.2 2.3 2.3 4.7-5" /></svg>
+                      ) : (
+                        num(i + 1)
+                      )}
+                    </span>
+                    <span>{st.caption}</span>
+                    {state === "now" && running && (
+                      <span
+                        key={`sp-${scene}-${cur}`}
+                        aria-hidden="true"
+                        className="eco-progress absolute bottom-0 left-0 h-0.5 bg-brand-sky"
+                        style={{ animationDuration: `${stepMs}ms`, animationPlayState: holding ? "paused" : "running" }}
+                      />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+
+        <p className={cn("leading-relaxed text-text-secondary", stepped ? "min-h-[2.75rem] text-sm" : "min-h-[3.5rem] text-sm md:text-base")} aria-live="polite">
           {focusModule ? (
             <>
               <span className="mr-2 inline-flex align-middle">
@@ -539,13 +703,15 @@ export function EcosystemMap({
             </>
           ) : (
             <>
-              <span className="mr-2 inline-flex flex-wrap gap-1 align-middle">
-                {current.modules.map((m) => (
-                  <span key={m} className="rounded-full border border-brand-sky/40 bg-brand-sky/10 px-2 py-0.5 font-mono text-[max(11px,0.6875rem)] text-accent">
-                    {moduleLabel(m)}
-                  </span>
-                ))}
-              </span>
+              {!stepped && (
+                <span className="mr-2 inline-flex flex-wrap gap-1 align-middle">
+                  {[...new Set(steps.flatMap((s) => s.modules))].map((m) => (
+                    <span key={m} className="rounded-full border border-brand-sky/40 bg-brand-sky/10 px-2 py-0.5 font-mono text-[max(11px,0.6875rem)] text-accent">
+                      {moduleLabel(m)}
+                    </span>
+                  ))}
+                </span>
+              )}
               {labels.sceneText[scene]}
             </>
           )}

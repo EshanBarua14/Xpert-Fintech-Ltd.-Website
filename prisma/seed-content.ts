@@ -665,6 +665,52 @@ async function seedClientLogos() {
   if (attached || added) console.log(`• Client logos: ${attached} attached${added ? `, ${added} new client(s) added` : ""}`);
 }
 
+/** The market's institutions, drawn on the ecosystem map and the market cards. */
+const INSTITUTIONS = [
+  { key: "dse", kind: "EXCHANGE", en: "Dhaka Stock Exchange", enShort: "DSE", bn: "ঢাকা স্টক এক্সচেঞ্জ", bnShort: "ডিএসই" },
+  { key: "cse", kind: "EXCHANGE", en: "Chittagong Stock Exchange", enShort: "CSE", bn: "চট্টগ্রাম স্টক এক্সচেঞ্জ", bnShort: "সিএসই" },
+  { key: "bsec", kind: "REGULATOR", en: "Bangladesh Securities and Exchange Commission", enShort: "BSEC", bn: "বাংলাদেশ সিকিউরিটিজ অ্যান্ড এক্সচেঞ্জ কমিশন", bnShort: "বিএসইসি" },
+  { key: "cdbl", kind: "OTHER", en: "Central Depository Bangladesh Limited", enShort: "CDBL", bn: "সেন্ট্রাল ডিপোজিটরি বাংলাদেশ লিমিটেড", bnShort: "সিডিবিএল" },
+] as const;
+
+/**
+ * DSE, CSE, BSEC and CDBL as organizations (keys dse, cse, bsec, cdbl), so
+ * their official logos can be uploaded in Admin → Organizations and appear on
+ * the ecosystem map and market cards. Adds missing Bangla names; never
+ * changes what an editor set. A logo file placed in prisma/seed-media/logos
+ * as <key>.png is attached when the organization has none.
+ */
+async function seedInstitutions() {
+  let added = 0;
+  let logos = 0;
+  for (const [i, o] of INSTITUTIONS.entries()) {
+    let org = await db.organization.findUnique({ where: { key: o.key }, include: { translations: true } });
+    if (!org) {
+      org = await db.organization.create({
+        data: {
+          key: o.key,
+          kind: o.kind,
+          status: "PUBLISHED",
+          sortOrder: 200 + i,
+          translations: { create: [{ locale: EN, name: o.en, shortName: o.enShort }, { locale: BN, name: o.bn, shortName: o.bnShort }] },
+        },
+        include: { translations: true },
+      });
+      added++;
+    } else if (!org.translations.some((t) => t.locale === BN)) {
+      await db.organizationTranslation.create({ data: { organizationId: org.id, locale: BN, name: o.bn, shortName: o.bnShort } });
+    }
+    if (org.logoMediaId) continue;
+    const logo = await seedImage("logos", o.key, `${o.en} logo`, ["logo", "institution"]);
+    if (!logo) continue;
+    await db.organization.update({ where: { id: org.id }, data: { logoMediaId: logo, logoPermission: true } });
+    await db.mediaUsage.deleteMany({ where: { entityType: "ORGANIZATION", entityId: org.id, field: "logo" } });
+    await db.mediaUsage.create({ data: { mediaId: logo, entityType: "ORGANIZATION", entityId: org.id, field: "logo" } });
+    logos++;
+  }
+  if (added || logos) console.log(`• Market institutions: ${added} added, ${logos} logo(s) attached`);
+}
+
 /**
  * One review card per board director, ready to complete in Admin → Testimonials:
  * photo and name from Admin → People, everything else left for XFL to fill in
@@ -1029,6 +1075,7 @@ async function main() {
   await seedLegalDrafts();
   await mergePlatformIntoProducts();
   await seedClientLogos();
+  await seedInstitutions();
   await seedReviewDrafts();
   await seedDeployments();
   await seedTeamLinks();

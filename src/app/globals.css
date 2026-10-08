@@ -906,6 +906,29 @@ html.has-ticker {
     opacity: 0;
   }
 }
+/* A step's flow draws itself from start to end (paths use pathLength="1") */
+.eco-flow-draw {
+  stroke-dasharray: 1;
+  animation: eco-flow-draw 900ms var(--ease-ui) both;
+}
+@keyframes eco-flow-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* The next brokerage logo in the hub */
+.eco-logo-in {
+  animation: eco-logo-in 600ms var(--ease-ui) both;
+}
+@keyframes eco-logo-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
 .eco-pill-pulse {
   animation: eco-pill-pulse 1.8s ease-out infinite;
   transform-box: fill-box;

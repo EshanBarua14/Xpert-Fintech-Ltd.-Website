@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ExchangeMark, type ExchangeLogo, type ExchangeLogos } from "./ExchangeMark";
 import type { Messages } from "@/lib/i18n/messages";
 import { compact, crore, dhakaTime, fmt, signed } from "@/lib/market/format";
 import { INDEX_SLOTS, movers, type ExchangeSnapshot, type MarketPayload, type Quote, type ShareFigure } from "@/lib/market/types";
@@ -171,7 +172,7 @@ function SharePending({ exchange, t }: { exchange: "DSE" | "CSE"; t: Messages })
  * totals, top gainers and losers); a figure the exchange does not publish
  * shows as a dash instead of the part disappearing.
  */
-function ExchangeGlance({ exchange, ex, share, t, locale, className }: { exchange: "DSE" | "CSE"; ex?: ExchangeSnapshot; share?: ShareFigure; t: Messages; locale: Locale; className?: string }) {
+function ExchangeGlance({ exchange, ex, share, t, locale, className, logo }: { exchange: "DSE" | "CSE"; ex?: ExchangeSnapshot; share?: ShareFigure; t: Messages; locale: Locale; className?: string; logo?: ExchangeLogo }) {
   const { gainers, losers } = ex ? movers(ex) : { gainers: [], losers: [] };
   const hasBreadth = !!ex && (ex.advancers !== undefined || ex.decliners !== undefined);
   const breadthTotal = ex ? (ex.advancers ?? 0) + (ex.decliners ?? 0) + (ex.unchanged ?? 0) : 0;
@@ -185,6 +186,7 @@ function ExchangeGlance({ exchange, ex, share, t, locale, className }: { exchang
   return (
     <article aria-labelledby={`glance-${exchange}`} className={cn("glass flex-col gap-6 rounded-3xl p-5 sm:p-6", className)}>
       <header className="flex flex-wrap items-center gap-3">
+        <ExchangeMark logo={logo} className="size-9 rounded-lg" />
         <h3 id={`glance-${exchange}`} className="font-mono text-xl font-semibold tracking-widest">
           {exchange}
         </h3>
@@ -256,7 +258,7 @@ function ExchangeGlance({ exchange, ex, share, t, locale, className }: { exchang
  * switch on phones), each with status, Xpert's market share, indices,
  * breadth and totals and the top gainers and losers, in identical layouts. Refreshes itself every 20 s.
  */
-export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t: Messages; locale: Locale }) {
+export function MarketPulse({ initial, t, locale, logos }: { initial: MarketPayload; t: Messages; locale: Locale; logos?: ExchangeLogos }) {
   const { data, loaded } = useMarket(initial);
   const snapOf = (x: "DSE" | "CSE") => data.snapshot?.exchanges.find((e) => e.exchange === x);
   const shareOf = (x: "DSE" | "CSE") => data.shares.find((f) => f.exchange === x);
@@ -309,7 +311,7 @@ export function MarketPulse({ initial, t, locale }: { initial: MarketPayload; t:
       <div className={cn("grid gap-6", list.length > 1 && "lg:grid-cols-2")}>
         {list.map((x) => (
           <div key={x} id={`glance-panel-${x}`} className={cn(x === active ? "flex" : "hidden lg:flex", "min-w-0 flex-col")}>
-            <ExchangeGlance exchange={x} ex={snapOf(x)} share={shareOf(x)} t={t} locale={locale} className="flex h-full" />
+            <ExchangeGlance exchange={x} ex={snapOf(x)} share={shareOf(x)} t={t} locale={locale} logo={logos?.[x]} className="flex h-full" />
           </div>
         ))}
       </div>

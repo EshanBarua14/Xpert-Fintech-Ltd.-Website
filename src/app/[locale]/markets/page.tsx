@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CtaBand, PageHero, Shell } from "@/components/flagship/Sections";
 import { MarketPulse } from "@/components/market/MarketPulse";
+import { ExchangeMark, exchangeLogos } from "@/components/market/ExchangeMark";
+import { getPartyLogos } from "@/lib/public/flagship";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getMarketPayload } from "@/lib/market/data";
@@ -26,7 +28,8 @@ export default async function MarketsPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);
-  const market = await getMarketPayload();
+  const [market, parties] = await Promise.all([getMarketPayload(), getPartyLogos(locale)]);
+  const logos = exchangeLogos(parties);
   const exchanges = market.snapshot?.exchanges ?? [];
 
   return (
@@ -44,8 +47,11 @@ export default async function MarketsPage({ params }: Props) {
                   href={`/${locale}/markets/${code.toLowerCase()}`}
                   className="spotlight glass group flex flex-col gap-5 rounded-[2rem] p-6 transition-transform duration-500 hover:-translate-y-1 sm:p-8"
                 >
-                  <span className="flex items-center justify-between">
-                    <span className="font-mono text-sm font-semibold tracking-widest text-accent">{code}</span>
+                  <span className="flex items-center justify-between gap-3">
+                    <span className="flex items-center gap-3">
+                      <ExchangeMark logo={logos[code]} className="size-10 rounded-lg" />
+                      <span className="font-mono text-sm font-semibold tracking-widest text-accent">{code}</span>
+                    </span>
                     <span className="text-xs text-text-secondary">{code === "DSE" ? t.dseName : t.cseName}</span>
                   </span>
                   {idx ? (
@@ -71,7 +77,7 @@ export default async function MarketsPage({ params }: Props) {
               );
             })}
           </div>
-          <MarketPulse initial={market} t={t} locale={locale} />
+          <MarketPulse initial={market} t={t} locale={locale} logos={logos} />
         </div>
       </Shell>
       <CtaBand t={t} locale={locale} />

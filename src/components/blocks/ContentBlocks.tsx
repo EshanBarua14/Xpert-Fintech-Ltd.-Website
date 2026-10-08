@@ -25,7 +25,7 @@ export function HeroBlock({ block, ctx, isFirst }: { block: BlockData; ctx: Bloc
       </div>
       {visual === "network" && (
         <div data-reveal style={revealDelay(2, 9)}>
-          <EcosystemMap labels={ecosystemLabels(ctx.t)} />
+          <EcosystemMap labels={ecosystemLabels(ctx.t, ctx.locale)} />
         </div>
       )}
       {image && (

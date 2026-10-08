@@ -20,7 +20,7 @@ export type TextGroup = (typeof TEXT_GROUPS)[number];
 const RULES: [RegExp, TextGroup][] = [
   [/^(allRightsReserved|home|alsoOn|builtInBangladesh)$/, "Header, footer and menus"],
   [/^(addWatch|removeWatch|indicesTitle|dataNotice|up|down|flat|rankOfMovers|previousSession|rankLabel|live|source)$/, "Markets and ticker"],
-  [/^(orderFlowTitle|participants|partOf|selectNode|allProducts)$/, "Products and platform"],
+  [/^(orderFlowTitle|participants|partOf|selectNode|allProducts|name(Bank|Investors|Bsec|Dse|Cse|Cdbl))$/, "Products and platform"],
   [/^(meetConsortium)$/, "Company and people"],
   [/^(allNews|minRead|byAuthor|relatedNews|downloadPdf|openLink|fromEvent|featuredVideo|moreAlbums)$/, "News, events and gallery"],
   [/^(openRoles|viewAndApply|viewJob|allJobs|coverLetter|submitApplication)$/, "Careers"],

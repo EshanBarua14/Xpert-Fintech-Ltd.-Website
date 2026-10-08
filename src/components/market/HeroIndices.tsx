@@ -4,6 +4,7 @@ import type { Messages } from "@/lib/i18n/messages";
 import { fmt } from "@/lib/market/format";
 import { INDEX_SLOTS, type MarketPayload } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
+import { ExchangeMark, type ExchangeLogos } from "./ExchangeMark";
 import { useMarket } from "./useMarket";
 
 /**
@@ -11,7 +12,7 @@ import { useMarket } from "./useMarket";
  * main indices (value and change), live. Indices an exchange does not publish
  * are left out; with none at all, its advancers and decliners show instead.
  */
-export function HeroIndices({ initial, t, locale }: { initial: MarketPayload; t: Messages; locale: "en" | "bn" }) {
+export function HeroIndices({ initial, t, locale, logos }: { initial: MarketPayload; t: Messages; locale: "en" | "bn"; logos?: ExchangeLogos }) {
   const { data } = useMarket(initial);
   const exchanges = (["DSE", "CSE"] as const).map((x) => ({ x, ex: data.snapshot?.exchanges.find((e) => e.exchange === x) })).filter((e) => e.ex);
   if (!exchanges.length) return null;
@@ -24,8 +25,9 @@ export function HeroIndices({ initial, t, locale }: { initial: MarketPayload; t:
           return (
             <a key={x} href={`/${locale}/markets/${x.toLowerCase()}`} className="group flex flex-col gap-2.5 bg-ink-950/85 p-4 transition-colors hover:bg-navy-900">
               <span className="flex items-center gap-2 text-sm">
-                <span className={cn("size-2 rounded-full", open ? "live-dot bg-market-up" : "bg-text-secondary/60")} aria-hidden="true" />
+                <ExchangeMark logo={logos?.[x]} className="size-6" />
                 <span className="font-semibold tracking-wide text-text-primary">{x}</span>
+                <span className={cn("size-2 rounded-full", open ? "live-dot bg-market-up" : "bg-text-secondary/60")} aria-hidden="true" />
                 {ex!.status && <span className="text-text-secondary">{open ? t.marketOpenShort : t.marketClosedShort}</span>}
               </span>
               {indices.length > 0 ? (

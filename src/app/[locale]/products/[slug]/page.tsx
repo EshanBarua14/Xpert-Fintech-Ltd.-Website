@@ -334,7 +334,7 @@ export default async function ProductPage({ params }: Props) {
         <Band title={t.whereItFits} alt>
           <p data-reveal className="-mt-6 max-w-2xl text-lg text-text-secondary">{t.whereItFitsBody}</p>
           <div data-reveal className="glass rounded-3xl p-4 md:p-8">
-            <EcosystemMap labels={ecosystemLabels(t)} modules={withEcosystem(ecosystemModules(flagship.offerings, found.locale), eco, ecoInDb)} focus={ecoModule} />
+            <EcosystemMap labels={{ ...ecosystemLabels(t, found.locale), steps: undefined }} logos={flagship.logos} modules={withEcosystem(ecosystemModules(flagship.offerings, found.locale), eco, ecoInDb)} focus={ecoModule} />
           </div>
         </Band>
       )}

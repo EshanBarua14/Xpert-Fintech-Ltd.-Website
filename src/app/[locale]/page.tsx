@@ -33,6 +33,7 @@ import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
 import { MarketReach } from "@/components/market/MarketReach";
 import { HeroIndices } from "@/components/market/HeroIndices";
+import { exchangeLogos } from "@/components/market/ExchangeMark";
 import { getMarketGoal } from "@/lib/content/leaders";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
@@ -102,9 +103,10 @@ export default async function HomePage({ params }: Props) {
         memberCount={data.members.length}
         modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)}
         graph={eco}
+        logos={data.logos}
         // The figures follow right below in "Our share of the market".
         facts={showReach ? [] : proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
-        market={market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} /> : undefined}
+        market={market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} /> : undefined}
       />
 
       {data.clients.length > 0 && (
@@ -197,7 +199,7 @@ export default async function HomePage({ params }: Props) {
         <Shell id="market" className="py-16 md:py-24">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} body={t.marketBody} />
-            <MarketPulse initial={market} t={t} locale={locale} />
+            <MarketPulse initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} />
           </div>
         </Shell>
       )}

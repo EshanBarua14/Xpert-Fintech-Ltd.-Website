@@ -50,7 +50,7 @@ export default async function PlatformPage({ params }: Props) {
         <div className="grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           <SectionHeader eyebrow={t.ecosystemEyebrow} title={t.ecosystemTitle} body={t.ecosystemBody} />
           <div data-reveal>
-            <Ecosystem t={t} modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)} graph={eco} />
+            <Ecosystem t={t} locale={locale} logos={data.logos} modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)} graph={eco} />
           </div>
         </div>
       </Shell>

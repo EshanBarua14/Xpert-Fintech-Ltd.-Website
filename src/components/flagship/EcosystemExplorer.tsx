@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
-import { EcosystemMap, type EcosystemLabels, type EcosystemModuleInfo, type EcosystemModuleKey } from "./EcosystemMap";
+import { EcosystemMap, type EcosystemLabels, type EcosystemLogos, type EcosystemModuleInfo, type EcosystemModuleKey } from "./EcosystemMap";
 
 /* Shapes match src/lib/public/ecosystem.ts (kept here so this client file has no server imports). */
 type EcoNode = { key: string; layer: "MARKET" | "XFL" | "PRODUCT" | "INSTITUTION" | "USER"; label: string; description: string | null; cta: string | null; href: string | null; mobileOrder: number };
@@ -38,17 +38,19 @@ export function EcosystemExplorer({
   graph,
   tour,
   className,
+  logos,
 }: {
   labels: EcosystemLabels;
   modules?: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>>;
   graph: EcoGraph;
   tour: TourLabels;
   className?: string;
+  logos?: EcosystemLogos;
 }) {
   return (
     <div className={cn("flex flex-col gap-4", className)}>
       <div className="hidden md:block">
-        <EcosystemMap labels={labels} modules={modules} />
+        <EcosystemMap labels={labels} modules={modules} logos={logos} />
       </div>
       <MobileFlow graph={graph} tour={tour} activeKey={null} />
     </div>

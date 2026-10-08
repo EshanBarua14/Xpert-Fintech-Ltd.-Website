@@ -5,7 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils/cn";
-import { EcosystemMap, type EcosystemLabels, type EcosystemModuleInfo } from "./EcosystemMap";
+import { EcosystemMap, type EcosystemLabels, type EcosystemLogos, type EcosystemModuleInfo } from "./EcosystemMap";
 import { EcosystemExplorer, type TourLabels } from "./EcosystemExplorer";
 import type { EcoGraph } from "@/lib/public/ecosystem";
 import { ECOSYSTEM_MODULES, type EcosystemModuleKey } from "./ecosystem-modules";
@@ -101,7 +101,7 @@ export function GhostButton({ href, children }: { href: string; children: ReactN
 
 // ── Hero ─────────────────────────────────────────────────────────────────────
 
-export function ecosystemLabels(t: Messages): EcosystemLabels {
+export function ecosystemLabels(t: Messages, locale?: AppLocale): EcosystemLabels {
   return {
     caption: t.ecoCaption,
     aria: t.ecoAria,
@@ -110,8 +110,17 @@ export function ecosystemLabels(t: Messages): EcosystemLabels {
     hub: t.ecoHub,
     hubSub: t.ecoHubSub,
     roles: { bsec: t.roleBsec, dse: t.roleDse, cse: t.roleCse, cdbl: t.roleCdbl, bank: t.roleBank, investors: t.roleInvestors },
-    names: { bank: t.nameBank, investors: t.nameInvestors },
+    names: { bank: t.nameBank, investors: t.nameInvestors, bsec: t.nameBsec, dse: t.nameDse, cse: t.nameCse, cdbl: t.nameCdbl },
+    moduleNames: { "Back office": t.ecoModBackOffice },
     explore: t.exploreProduct,
+    steps: [
+      [t.ecoStep1a, t.ecoStep1b, t.ecoStep1c],
+      [t.ecoStep2a, t.ecoStep2b, t.ecoStep2c],
+      [t.ecoStep3a, t.ecoStep3b, t.ecoStep3c],
+      [t.ecoStep4a, t.ecoStep4b],
+    ],
+    stepsLabel: t.ecoStepsLabel,
+    digits: locale === "bn" ? "০১২৩৪৫৬৭৮৯" : undefined,
   };
 }
 
@@ -135,9 +144,25 @@ export function tourLabels(t: Messages): TourLabels {
 }
 
 /** The ecosystem map with its tour and phone layout when the CMS has a graph; the map alone otherwise. */
-export function Ecosystem({ t, modules, graph, focus }: { t: Messages; modules?: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>>; graph?: EcoGraph; focus?: EcosystemModuleKey }) {
-  if (graph && graph.nodes.length && !focus) return <EcosystemExplorer labels={ecosystemLabels(t)} modules={modules} graph={graph} tour={tourLabels(t)} />;
-  return <EcosystemMap labels={ecosystemLabels(t)} modules={modules} focus={focus} className="relative" />;
+export function Ecosystem({
+  t,
+  locale,
+  modules,
+  graph,
+  focus,
+  logos,
+}: {
+  t: Messages;
+  locale?: AppLocale;
+  modules?: Partial<Record<EcosystemModuleKey, EcosystemModuleInfo>>;
+  graph?: EcoGraph;
+  focus?: EcosystemModuleKey;
+  /** Institution and brokerage logos (uploaded with permission in Admin → Organizations). */
+  logos?: EcosystemLogos;
+}) {
+  const labels = ecosystemLabels(t, locale);
+  if (graph && graph.nodes.length && !focus) return <EcosystemExplorer labels={labels} modules={modules} graph={graph} tour={tourLabels(t)} logos={logos} />;
+  return <EcosystemMap labels={labels} modules={modules} focus={focus} logos={logos} className="relative" />;
 }
 
 /** Which product page each ecosystem module opens. */
@@ -193,6 +218,7 @@ export function FlagshipHero({
   modules,
   graph,
   facts,
+  logos,
 }: {
   t: Messages;
   locale: AppLocale;
@@ -210,6 +236,8 @@ export function FlagshipHero({
   market?: ReactNode;
   /** Admin → Ecosystem graph: adds the guided tour and the phone layout. */
   graph?: EcoGraph;
+  /** Institution and brokerage logos for the ecosystem map. */
+  logos?: EcosystemLogos;
 }) {
   return (
     <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
@@ -258,7 +286,7 @@ export function FlagshipHero({
           )}
         </div>
         <div data-reveal style={delay(2)} className="relative w-full">
-          <Ecosystem t={t} modules={modules} graph={graph} />
+          <Ecosystem t={t} locale={locale} modules={modules} graph={graph} logos={logos} />
         </div>
       </div>
       {ticker && <div className="relative">{ticker}</div>}

@@ -46,7 +46,7 @@ export const MANAGEMENT: RosterPerson[] = [
 /** Everyone at Xpert, by position (XFL's staff list, with titles confirmed by XFL). */
 /** Consultants (Company → Consultants), as given by XFL (8 Oct 2026); portrait in prisma/seed-media/people/<key>.jpg. */
 export const CONSULTANTS: (RosterPerson & { nameBn?: string; affiliation?: { en: string; bn: string } })[] = [
-  { key: "mohammad-ali", name: "Mohammad Ali, FCA", formerName: "Mohammad Ali", nameBn: "মোহাম্মদ আলী, এফসিএ", title: "Consultant", rank: 1, affiliation: { en: "Xpert Fintech Ltd.", bn: "এক্সপার্ট ফিনটেক লিমিটেড" } },
+  { key: "mohammad-ali", name: "Md. Mohammad Ali, FCA", formerName: "Mohammad Ali, FCA", nameBn: "মো. মোহাম্মদ আলী, এফসিএ", title: "Consultant", rank: 1, affiliation: { en: "Managing Partner, Ali Zahir Ashraf & Co., Chartered Accountants", bn: "ম্যানেজিং পার্টনার, আলী জহির আশরাফ অ্যান্ড কোং, চার্টার্ড অ্যাকাউন্ট্যান্টস" } },
 ];
 
 export const TEAM: RosterPerson[] = [

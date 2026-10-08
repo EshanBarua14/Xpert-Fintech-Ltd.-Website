@@ -126,4 +126,17 @@ export const DIRECTOR_PROFILES: DirectorProfile[] = [
       bn: "মোহাম্মদ শামসুল মারুফ ফলাফলমুখী একজন সফটওয়্যার ডেভেলপার; Java, C#, Spring Boot, .NET Core, Python, Angular, React, Node.js ও TypeScript-এ তাঁর গভীর দক্ষতা রয়েছে। MongoDB, Elasticsearch, Redis, Kafka এবং রিলেশনাল ও NoSQL ডেটাবেস ব্যবহার করে তিনি স্কেলযোগ্য সিস্টেম তৈরি করেন।",
     },
   },
+  // Consultant. Checked on 8 Oct 2026 against ICAB's list of firms (partner, FCA no. 906, Motijheel and
+  // Banglamotor offices), BSEC's Panel of Auditors (10 Dec 2025, serial 6) and The Daily New Nation
+  // (Oct 2025: Managing Partner; the firm's CA articleship students).
+  {
+    key: "mohammad-ali",
+    nameBn: "মো. মোহাম্মদ আলী, এফসিএ",
+    affiliation: { en: "Managing Partner, Ali Zahir Ashraf & Co., Chartered Accountants", bn: "ম্যানেজিং পার্টনার, আলী জহির আশরাফ অ্যান্ড কোং, চার্টার্ড অ্যাকাউন্ট্যান্টস" },
+    replaces: ["Xpert Fintech Ltd.", "এক্সপার্ট ফিনটেক লিমিটেড"],
+    bio: {
+      en: "Md. Mohammad Ali, FCA is a Fellow Chartered Accountant (ICAB enrollment no. 906) and the Managing Partner of Ali Zahir Ashraf & Co., Chartered Accountants, a Dhaka firm with offices in Motijheel and Banglamotor.\n\nThe firm is on the Bangladesh Securities and Exchange Commission's Panel of Auditors and trains students on the CA articleship course.\n\nHe advises Xpert Fintech Ltd. as a consultant.",
+      bn: "মো. মোহাম্মদ আলী, এফসিএ একজন ফেলো চার্টার্ড অ্যাকাউন্ট্যান্ট (আইসিএবি এনরোলমেন্ট নং ৯০৬) এবং ঢাকার চার্টার্ড অ্যাকাউন্ট্যান্টস প্রতিষ্ঠান আলী জহির আশরাফ অ্যান্ড কোং-এর ম্যানেজিং পার্টনার; প্রতিষ্ঠানটির কার্যালয় মতিঝিল ও বাংলামোটরে।\n\nপ্রতিষ্ঠানটি বাংলাদেশ সিকিউরিটিজ অ্যান্ড এক্সচেঞ্জ কমিশনের প্যানেল অব অডিটরসের অন্তর্ভুক্ত এবং সিএ আর্টিকেলশিপ কোর্সের শিক্ষার্থীদের প্রশিক্ষণ দেয়।\n\nতিনি পরামর্শক হিসেবে এক্সপার্ট ফিনটেক লিমিটেডকে পরামর্শ দেন।",
+    },
+  },
 ];

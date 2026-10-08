@@ -47,35 +47,6 @@ const PLACEHOLDER_PHOTO = "/placeholders/person.svg";
 /** One card's width: 1, 2, 3 or 4 across with 1.25rem gaps. */
 const COLUMN = "w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-3.75rem)/4)]";
 
-/** Email and LinkedIn as round icon links. */
-function ContactLinks({ p, labels, size = "sm" }: { p: GalleryPerson; labels: GalleryLabels; size?: "sm" | "lg" }) {
-  if (!p.email && !p.linkedinUrl) return null;
-  const cls =
-    size === "sm"
-      ? "flex size-10 items-center justify-center rounded-full border border-white/20 bg-[#05080f]/70 text-white backdrop-blur-md transition-[background-color,border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-brand-sky/70 hover:bg-brand-royal/80 focus-visible:border-brand-sky"
-      : "inline-flex h-11 items-center gap-2 rounded-full border border-fg/15 px-5 text-sm font-semibold text-brand-sky transition-colors hover:border-brand-sky/60";
-  return (
-    <>
-      {p.email && (
-        <a href={`mailto:${p.email}`} className={cls} aria-label={labels.email.replace("{name}", p.name)} title={p.email}>
-          <SocialIcon kind="email" className={size === "sm" ? "size-[18px]" : "size-4"} />
-          {size === "lg" && <span className="font-mono text-[max(13px,0.8125rem)] font-medium">{p.email}</span>}
-        </a>
-      )}
-      {p.linkedinUrl && (
-        <a href={p.linkedinUrl} target="_blank" rel="noopener noreferrer" className={cls} aria-label={`${labels.linkedin}: ${p.name}`} title={labels.linkedin}>
-          <SocialIcon kind="linkedin" className={size === "sm" ? "size-[17px]" : "size-4"} />
-          {size === "lg" && (
-            <span>
-              {labels.linkedin} <span aria-hidden="true">↗</span>
-            </span>
-          )}
-        </a>
-      )}
-    </>
-  );
-}
-
 /** With editor hints on: a missing email or LinkedIn, as a dashed icon that opens the place to add it. */
 function ContactSlot({ kind, name }: { kind: "email" | "linkedin"; name: string }) {
   const what = kind === "email" ? "email" : "LinkedIn";
@@ -89,6 +60,44 @@ function ContactSlot({ kind, name }: { kind: "email" | "linkedin"; name: string 
       <SocialIcon kind={kind} className="size-4" />
     </a>
   );
+}
+
+/** Email or LinkedIn not on file yet: the icon, faint and not a link (added in Admin → People → Contacts). */
+function MutedIcon({ kind, size = "size-9" }: { kind: "email" | "linkedin"; size?: string }) {
+  return (
+    <span aria-hidden="true" className={cn("flex items-center justify-center rounded-full border border-fg/[0.08] text-fg/25", size)}>
+      <SocialIcon kind={kind} className="size-4" />
+    </span>
+  );
+}
+
+/**
+ * A biography cut to fit the profile window: whole paragraphs and sentences
+ * up to `max` characters, ending with "…" when something was left out.
+ */
+function fitBio(bio: string, max: number): string[] {
+  const paras = bio.split(/\n{2,}/).map((x) => x.trim()).filter(Boolean);
+  const out: string[] = [];
+  let used = 0;
+  for (const para of paras) {
+    if (used + para.length <= max) {
+      out.push(para);
+      used += para.length;
+      continue;
+    }
+    // Fit as many whole sentences of this paragraph as there is room for.
+    const sentences = para.match(/[^.!?।]+[.!?।]+["'”’)]*\s*|[^.!?।]+$/g) ?? [para];
+    let part = "";
+    for (const sen of sentences) {
+      if (used + part.length + sen.length > max) break;
+      part += sen;
+    }
+    if (part.trim()) out.push(`${part.trim()} …`);
+    else if (!out.length) out.push(`${para.slice(0, max).replace(/\s+\S*$/, "")} …`);
+    else out[out.length - 1] = `${out[out.length - 1]} …`;
+    break;
+  }
+  return out;
 }
 
 /** The organization a person comes from, as a logo on a white plate. */
@@ -121,7 +130,6 @@ function PersonCard({
   onOpen: (trigger: HTMLButtonElement) => void;
 }) {
   const role = p.title ?? groupLabel;
-  const hasContact = Boolean(p.email || p.linkedinUrl);
   return (
     <article
       // The whole card opens the profile (links inside it keep their own action); the name button is the keyboard route.
@@ -165,7 +173,6 @@ function PersonCard({
           <p className="text-sm font-semibold text-[var(--tone-ink)]">{role}</p>
           {p.affiliation && <p className="text-sm leading-snug text-text-secondary">{p.affiliation}</p>}
         </div>
-        {p.bio && <p className="line-clamp-3 text-sm leading-relaxed text-text-secondary/90">{p.bio}</p>}
         <div className="mt-auto flex items-center gap-2 border-t border-fg/[0.08] pt-4">
           {p.email ? (
             <a
@@ -176,8 +183,10 @@ function PersonCard({
             >
               <SocialIcon kind="email" className="size-4" />
             </a>
+          ) : showPlaceholderBadge ? (
+            <ContactSlot kind="email" name={p.name} />
           ) : (
-            showPlaceholderBadge && <ContactSlot kind="email" name={p.name} />
+            <MutedIcon kind="email" />
           )}
           {p.linkedinUrl ? (
             <a
@@ -190,15 +199,17 @@ function PersonCard({
             >
               <SocialIcon kind="linkedin" className="size-4" />
             </a>
+          ) : showPlaceholderBadge ? (
+            <ContactSlot kind="linkedin" name={p.name} />
           ) : (
-            showPlaceholderBadge && <ContactSlot kind="linkedin" name={p.name} />
+            <MutedIcon kind="linkedin" />
           )}
           <button
             type="button"
             tabIndex={-1}
             aria-hidden="true"
             onClick={(e) => onOpen(e.currentTarget)}
-            className={cn("ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--tone-ink)] transition-[gap] hover:gap-2.5", !hasContact && !showPlaceholderBadge && "ml-0")}
+            className="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--tone-ink)] transition-[gap] hover:gap-2.5"
           >
             {labels.viewProfile}
             <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 fill-none stroke-current stroke-[1.8]"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
@@ -272,67 +283,96 @@ export function PeopleGallery({
         onClick={(e) => {
           if (e.target === dialogRef.current) close();
         }}
-        className="person-dialog m-auto border-t-[3px] border-t-[var(--tone)] max-h-[calc(100dvh-2rem)] w-[min(60rem,calc(100vw-2rem))] overflow-auto rounded-[1.75rem] border border-fg/10 bg-navy-900 p-0 text-text-primary shadow-[0_60px_160px_-40px_rgb(0_0_0/0.8)] backdrop:bg-ink-950/75 backdrop:backdrop-blur-sm"
+        className="person-dialog m-auto h-fit max-h-[calc(100dvh-1.5rem)] w-[min(72rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.75rem] border border-t-[3px] border-fg/10 border-t-[var(--tone)] bg-navy-900 p-0 text-text-primary shadow-[0_60px_160px_-40px_rgb(0_0_0/0.8)] backdrop:bg-ink-950/75 backdrop:backdrop-blur-sm"
       >
         {open && (
-          <div className="relative grid md:grid-cols-[20rem_1fr]">
+          // One screen, no scrolling: the photo fills the left column on wide screens and becomes a portrait beside the name on phones;
+          // the biography is cut to fit (see fitBio) and its type scales with the window height.
+          <div className="relative grid max-h-[calc(100dvh-1.5rem)] md:grid-cols-[minmax(15rem,21rem)_1fr]">
             <button
               type="button"
               onClick={close}
               aria-label={labels.close}
-              className="absolute top-4 right-4 z-10 flex size-10 items-center justify-center rounded-full border border-fg/15 bg-navy-900/80 text-lg text-text-primary backdrop-blur transition-colors hover:border-brand-sky/60"
+              className="absolute top-3 right-3 z-10 flex size-10 items-center justify-center rounded-full border border-fg/15 bg-navy-900/80 text-lg text-text-primary backdrop-blur transition-colors hover:border-[var(--tone)]"
             >
               <span aria-hidden="true">×</span>
             </button>
-            <div className="relative aspect-[4/5] max-h-[24rem] overflow-hidden bg-navy-800 md:aspect-auto md:max-h-none md:min-h-[28rem]">
-              <Image
-                src={open.photo?.url ?? PLACEHOLDER_PHOTO}
-                alt={open.name}
-                fill
-                sizes="(min-width: 768px) 20rem, 100vw"
-                className="object-cover"
-                unoptimized={!open.photo}
-              />
-              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-900/70 to-transparent md:bg-none" />
+            <div className="relative hidden overflow-hidden bg-navy-800 md:block">
+              <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt={open.name} fill sizes="21rem" className="object-cover object-top" unoptimized={!open.photo} />
+              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#06111f]/60 via-transparent to-transparent" />
+              {open.org && <OrgLogo org={open.org} className="absolute bottom-4 left-4 h-10" />}
             </div>
-            <div className="flex flex-col gap-6 p-7 md:p-10">
-              <div className="flex flex-col gap-2 pr-10">
-                <p className="flex items-center gap-2 text-sm font-semibold text-[var(--tone-ink)]">
-                  <span aria-hidden="true" className="size-2 rounded-full bg-[var(--tone)]" />
-                  {open.title ?? groupLabel}
-                </p>
-                <h2 id="person-dialog-name" className="font-display text-3xl leading-tight font-semibold tracking-[-0.02em] md:text-4xl">
-                  {open.name}
-                </h2>
-                {showPlaceholderBadge && open.isPlaceholder && (
-                  <span className="self-start rounded-md border border-gold/50 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-gold">
-                    {labels.placeholder}
-                  </span>
-                )}
+            <div className="person-dialog-body flex min-h-0 flex-col gap-[clamp(0.75rem,2svh,1.5rem)] p-5 sm:p-7 md:p-9">
+              <div className="flex items-center gap-4 pr-10">
+                <span className="relative size-20 shrink-0 overflow-hidden rounded-2xl bg-navy-800 md:hidden">
+                  <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt="" fill sizes="5rem" className="object-cover object-top" unoptimized={!open.photo} />
+                </span>
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-[var(--tone-ink)]">
+                    <span aria-hidden="true" className="size-2 rounded-full bg-[var(--tone)]" />
+                    {open.title ?? groupLabel}
+                  </p>
+                  <h2 id="person-dialog-name" className="font-display text-[clamp(1.5rem,3.4svh,2.25rem)] leading-tight font-semibold tracking-[-0.02em] text-balance">
+                    {open.name}
+                  </h2>
+                  {open.affiliation && <p className="text-sm leading-snug text-text-secondary">{open.affiliation}</p>}
+                </div>
               </div>
-              {open.org && <OrgLogo org={open.org} className="h-11 self-start" />}
-              <dl className="grid gap-1 border-l-2 border-[var(--tone)] pl-5">
-                <dt className="text-xs text-text-secondary">{labels.role}</dt>
-                <dd className="text-text-primary">{open.title ?? groupLabel}</dd>
-                {open.affiliation && <dd className="text-text-secondary">{open.affiliation}</dd>}
-              </dl>
-              <section className="flex flex-col gap-3">
-                <h3 className="text-xs text-text-secondary">{labels.biography}</h3>
+              {showPlaceholderBadge && open.isPlaceholder && (
+                <span className="self-start rounded-md border border-gold/50 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-gold">{labels.placeholder}</span>
+              )}
+              <section aria-label={labels.biography} className="flex min-h-0 flex-col gap-[0.7em] border-l-2 border-[var(--tone)] pl-4 text-[clamp(13px,1.75svh,15.5px)] leading-[1.62] text-text-primary/90">
                 {open.bio ? (
-                  open.bio.split(/\n{2,}/).map((para, i) => (
-                    <p key={i} className="leading-relaxed text-text-primary/90">
-                      {para}
-                    </p>
-                  ))
+                  <>
+                    {/* Phones get a shorter cut than wide screens, and short phones a shorter one still. */}
+                    {fitBio(open.bio, 420).map((para, i) => (
+                      <p key={`s${i}`} className="md:hidden [@media(min-height:720px)]:hidden">
+                        {para}
+                      </p>
+                    ))}
+                    {fitBio(open.bio, 820).map((para, i) => (
+                      <p key={`m${i}`} className="hidden [@media(min-height:720px)]:block md:!hidden">
+                        {para}
+                      </p>
+                    ))}
+                    {fitBio(open.bio, 1350).map((para, i) => (
+                      <p key={`l${i}`} className="hidden md:block">
+                        {para}
+                      </p>
+                    ))}
+                  </>
                 ) : (
                   <p className="text-text-secondary italic">{labels.bioPending}</p>
                 )}
               </section>
-              {(open.email || open.linkedinUrl) && (
-                <div className="mt-auto flex flex-wrap gap-3">
-                  <ContactLinks p={open} labels={labels} size="lg" />
-                </div>
-              )}
+              <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-fg/[0.08] pt-4">
+                {open.email ? (
+                  <a
+                    href={`mailto:${open.email}`}
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-fg/15 px-4 text-sm font-semibold text-text-primary transition-colors hover:border-[var(--tone)]"
+                  >
+                    <SocialIcon kind="email" className="size-4" />
+                    <span className="hidden max-w-[16rem] truncate sm:inline">{open.email}</span>
+                    <span className="sr-only sm:hidden">{open.email}</span>
+                  </a>
+                ) : (
+                  <MutedIcon kind="email" size="size-10" />
+                )}
+                {open.linkedinUrl ? (
+                  <a
+                    href={open.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-fg/15 px-4 text-sm font-semibold text-text-primary transition-colors hover:border-[#0a66c2] hover:bg-[#0a66c2] hover:text-white"
+                  >
+                    <SocialIcon kind="linkedin" className="size-4" />
+                    {labels.linkedin} <span aria-hidden="true">↗</span>
+                  </a>
+                ) : (
+                  <MutedIcon kind="linkedin" size="size-10" />
+                )}
+                {open.org && <OrgLogo org={open.org} className="ml-auto h-9 md:hidden" />}
+              </div>
             </div>
           </div>
         )}

@@ -126,6 +126,10 @@ Imported testimonials arrive as drafts: open each in Admin → Testimonials, tic
 
 ## Testimonials
 
+### Credentials (memberships and exchange certifications)
+
+Admin → Credentials lists what XFL holds, e.g. BASIS associate membership, FIX & FAST certification by CSE and FIX & ITCH certification by DSE. Each row names the granting organization from Admin → Organizations (its logo, name and website are used) and says what XFL holds, in English and Bangla. They show in the home-page hero, in the footer of every page, and as a badge on the DSE and CSE integration cards of each product page. The content seed adds the three above and the BASIS organization once; later edits are kept.
+
 ### Market institution logos (DSE, CSE, BSEC, CDBL)
 
 The content seed creates DSE, CSE, BSEC and CDBL in Admin → Organizations (keys `dse`, `cse`, `bsec`, `cdbl`). Upload each one's official logo there and tick **Logo permission**: it then appears on the home-page ecosystem map, the hero's index panel, the market cards and the Markets page. Alternatively place the files in `prisma/seed-media/logos/` as `dse.png`, `cse.png`, `bsec.png`, `cdbl.png` and run `npm run db:seed:content`; they are attached to organizations that have no logo yet. Consortium brokerages whose logos are shown take turns inside the map's "Brokerage house" circle.

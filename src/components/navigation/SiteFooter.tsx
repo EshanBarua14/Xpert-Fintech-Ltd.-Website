@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { CredentialsBand } from "@/components/blocks/CredentialsBand";
+import { getCredentials } from "@/lib/content/credentials";
 import { BrandLockup } from "@/components/brand/BrandLockup";
 import { Container } from "@/components/ui/Layout";
 import { Icon } from "@/components/ui/Icon";
@@ -30,10 +32,11 @@ function FooterLink({ item }: { item: NavLink }) {
  *  - description, email, phone, address, social links: Settings and Offices
  */
 export async function SiteFooter({ locale }: { locale: AppLocale }) {
-  const [columns, legal, info] = await Promise.all([
+  const [columns, legal, info, credentials] = await Promise.all([
     getNavMenu("footer", locale),
     getNavMenu("footer-legal", locale),
     getSiteInfo(locale),
+    getCredentials(locale),
   ]);
   const t = getMessages(locale);
   const year = new Date().getFullYear();
@@ -101,6 +104,12 @@ export async function SiteFooter({ locale }: { locale: AppLocale }) {
         </div>
       </Container>
 
+
+      {credentials.length > 0 && (
+        <Container className="relative border-t border-fg/[0.06] py-8">
+          <CredentialsBand items={credentials} title={t.credentialsTitle} by={t.credentialsBy} variant="footer" />
+        </Container>
+      )}
 
       {(info.registration || info.regulatory) && (
         <Container className="relative border-t border-fg/[0.06] py-6">

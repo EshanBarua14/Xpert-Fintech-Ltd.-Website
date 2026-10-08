@@ -878,6 +878,9 @@ html.has-ticker {
     transform: translateY(8px);
     transform-box: fill-box;
   }
+  .eco-logo {
+    transform: translate(-6px, 8px);
+  }
   .eco-hub-text {
     font-size: 21px !important;
   }

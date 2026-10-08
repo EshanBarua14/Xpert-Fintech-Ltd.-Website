@@ -34,6 +34,8 @@ import { MarketPulse } from "@/components/market/MarketPulse";
 import { MarketReach } from "@/components/market/MarketReach";
 import { HeroIndices } from "@/components/market/HeroIndices";
 import { exchangeLogos } from "@/components/market/ExchangeMark";
+import { CredentialsInline } from "@/components/blocks/CredentialsBand";
+import { getCredentials } from "@/lib/content/credentials";
 import { getMarketGoal } from "@/lib/content/leaders";
 import { blockContext, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
@@ -77,7 +79,7 @@ export default async function HomePage({ params }: Props) {
   );
 
   const t = getMessages(locale);
-  const [data, events, market, showcase] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale)]);
+  const [data, events, market, showcase, credentials] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]);
   const [apps, eco, ecoInDb, testimonials, goal] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal()]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
@@ -104,6 +106,7 @@ export default async function HomePage({ params }: Props) {
         modules={withEcosystem(ecosystemModules(data.offerings, locale), eco, ecoInDb)}
         graph={eco}
         logos={data.logos}
+        credentials={credentials.length ? <CredentialsInline items={credentials} label={t.credentialsTitle} /> : undefined}
         // The figures follow right below in "Our share of the market".
         facts={showReach ? [] : proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
         market={market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} /> : undefined}

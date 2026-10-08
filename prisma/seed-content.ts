@@ -28,6 +28,7 @@ import { BOARD, MANAGEMENT, TEAM, type RosterPerson } from "../src/content/xfl2/
 import { LEADER_MESSAGES, MARKET_GOAL } from "../src/content/xfl2/messages";
 import { LEGAL_DRAFTS } from "../src/content/xfl2/legal";
 import { CLIENT_LOGOS, NOT_CLIENTS, orgNameKey } from "../src/content/xfl2/client-logos";
+import { CREDENTIALS } from "../src/content/xfl2/credentials";
 import { sniff } from "../src/lib/media/inspect";
 
 const db = new PrismaClient();
@@ -678,6 +679,7 @@ const INSTITUTIONS = [
   { key: "dse", kind: "EXCHANGE", url: "https://www.dsebd.org", en: "Dhaka Stock Exchange", enShort: "DSE", bn: "ঢাকা স্টক এক্সচেঞ্জ", bnShort: "ডিএসই" },
   { key: "cse", kind: "EXCHANGE", url: "https://www.cse.com.bd", en: "Chittagong Stock Exchange", enShort: "CSE", bn: "চট্টগ্রাম স্টক এক্সচেঞ্জ", bnShort: "সিএসই" },
   { key: "bsec", kind: "REGULATOR", url: "https://sec.gov.bd", en: "Bangladesh Securities and Exchange Commission", enShort: "BSEC", bn: "বাংলাদেশ সিকিউরিটিজ অ্যান্ড এক্সচেঞ্জ কমিশন", bnShort: "বিএসইসি" },
+  { key: "basis", kind: "PARTNER", url: "https://basis.org.bd", en: "Bangladesh Association of Software and Information Services", enShort: "BASIS", bn: "বাংলাদেশ অ্যাসোসিয়েশন অব সফটওয়্যার অ্যান্ড ইনফরমেশন সার্ভিসেস", bnShort: "বেসিস" },
   { key: "cdbl", kind: "OTHER", url: "https://www.cdbl.com.bd", en: "Central Depository Bangladesh Limited", enShort: "CDBL", bn: "সেন্ট্রাল ডিপোজিটরি বাংলাদেশ লিমিটেড", bnShort: "সিডিবিএল" },
 ] as const;
 
@@ -722,6 +724,14 @@ async function seedInstitutions() {
     logos++;
   }
   if (added || logos) console.log(`• Market institutions: ${added} added, ${logos} logo(s) attached`);
+}
+
+/** XFL's memberships and certifications (Admin → Credentials), set once; editors' changes are kept. */
+async function seedCredentials() {
+  const existing = await db.siteSetting.findUnique({ where: { key: "site.credentials" } });
+  if (existing) return;
+  await db.siteSetting.create({ data: { key: "site.credentials", value: { published: true, items: CREDENTIALS } } });
+  console.log(`• Credentials: ${CREDENTIALS.length} saved (BASIS membership, CSE and DSE certifications)`);
 }
 
 /**
@@ -1089,6 +1099,7 @@ async function main() {
   await mergePlatformIntoProducts();
   await seedClientLogos();
   await seedInstitutions();
+  await seedCredentials();
   await seedReviewDrafts();
   await seedDeployments();
   await seedTeamLinks();

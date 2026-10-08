@@ -219,6 +219,7 @@ export function FlagshipHero({
   graph,
   facts,
   logos,
+  credentials,
 }: {
   t: Messages;
   locale: AppLocale;
@@ -238,6 +239,8 @@ export function FlagshipHero({
   graph?: EcoGraph;
   /** Institution and brokerage logos for the ecosystem map. */
   logos?: EcosystemLogos;
+  /** Memberships and exchange certifications, shown in place of the member-count line. */
+  credentials?: ReactNode;
 }) {
   return (
     <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
@@ -274,6 +277,10 @@ export function FlagshipHero({
                 </div>
               ))}
             </dl>
+          ) : credentials ? (
+            <div data-reveal style={delay(4)}>
+              {credentials}
+            </div>
           ) : memberCount > 0 && (
             <Link
               href={`/${locale}/consortium`}

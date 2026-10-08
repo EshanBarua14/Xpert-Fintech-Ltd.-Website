@@ -28,9 +28,9 @@ export type TourLabels = {
 const LAYERS: EcoNode["layer"][] = ["MARKET", "XFL", "PRODUCT", "INSTITUTION", "USER"];
 
 /**
- * The ecosystem: the interactive map on tablets and up; on phones a vertical
- * flow (market → Xpert → products → institutions → users) whose nodes open a
- * bottom sheet with details and links.
+ * The ecosystem: the stepped, interactive map on every screen; on phones it
+ * is followed by a collapsible vertical flow (market → Xpert → products →
+ * institutions → users) whose nodes open a bottom sheet with details and links.
  */
 export function EcosystemExplorer({
   labels,
@@ -49,10 +49,19 @@ export function EcosystemExplorer({
 }) {
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      <div className="hidden md:block">
-        <EcosystemMap labels={labels} modules={modules} logos={logos} />
-      </div>
-      <MobileFlow graph={graph} tour={tour} activeKey={null} />
+      <EcosystemMap labels={labels} modules={modules} logos={logos} />
+      {/* Phones: every part of the ecosystem, one tap away, below the stepped map. */}
+      <details className="group rounded-2xl border border-fg/10 md:hidden">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-text-primary [&::-webkit-details-marker]:hidden">
+          {tour.start}
+          <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0 fill-none stroke-current stroke-[1.6] transition-transform group-open:rotate-180">
+            <path d="m4 6 4 4 4-4" />
+          </svg>
+        </summary>
+        <div className="px-3 pb-4">
+          <MobileFlow graph={graph} tour={tour} activeKey={null} />
+        </div>
+      </details>
     </div>
   );
 }

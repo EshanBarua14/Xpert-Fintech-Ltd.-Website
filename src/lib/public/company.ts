@@ -3,6 +3,7 @@ import { cache } from "react";
 import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
 import type { AppLocale } from "@/lib/i18n/config";
+import { mediaMap } from "./content";
 import { pick } from "./text";
 
 /** A setting stored as { en, bn } (or a plain string), in the visitor's language with English fallback. */
@@ -65,12 +66,18 @@ export const getLiveApps = cache(async (locale: AppLocale) => {
     orderBy: { sortOrder: "asc" },
     include: { organization: { include: { translations: true } } },
   });
+  const live = (d: (typeof rows)[number]) => (d.organization && d.organization.status === "PUBLISHED" && !d.organization.deletedAt ? d.organization : null);
+  // The brokerage's logo, when uploaded with permission (Admin → Organizations).
+  const logos = await mediaMap(rows.map((d) => (live(d)?.logoPermission ? live(d)!.logoMediaId : null)), locale);
   return rows.map((d) => {
-    const org = d.organization && d.organization.status === "PUBLISHED" && !d.organization.deletedAt ? pick(d.organization.translations, locale) : null;
+    const o = live(d);
+    const org = o ? pick(o.translations, locale) : null;
+    const logo = o?.logoPermission && o.logoMediaId ? logos.get(o.logoMediaId) : undefined;
     return {
       id: d.id,
       appName: d.appName!,
       brokerage: org?.name ?? null,
+      logo: logo ? { url: logo.url, width: logo.width, height: logo.height } : null,
       playStoreUrl: d.playStoreUrl,
       appStoreUrl: d.appStoreUrl,
       webUrl: d.webUrl,

@@ -143,7 +143,7 @@ export function WorkflowBlock({ block, ctx }: { block: BlockData; ctx: BlockCont
     <div className="flex flex-col gap-12">
       <BlockHeading text={{ ...block.text, title: null }} />
       <div data-reveal className="glass rounded-3xl p-4 md:p-8">
-        <OrderFlow steps={steps} title={block.text.title ?? ctx.t.howItWorks} caption={bool(block.props.conceptual, true) ? ctx.t.conceptualView : undefined} />
+        <OrderFlow steps={steps} title={block.text.title ?? ctx.t.howItWorks} caption={bool(block.props.conceptual, false) ? ctx.t.conceptualView : undefined} />
       </div>
     </div>
   );
@@ -162,7 +162,7 @@ export function NetworkBlock({ block, ctx }: { block: BlockData; ctx: BlockConte
           nodes={nodes}
           locale={ctx.locale}
           hint={ctx.t.selectNode}
-          caption={bool(block.props.conceptual, true) ? ctx.t.conceptualView : undefined}
+          caption={bool(block.props.conceptual, false) ? ctx.t.conceptualView : undefined}
           readMore={ctx.t.readMore}
         />
       </div>

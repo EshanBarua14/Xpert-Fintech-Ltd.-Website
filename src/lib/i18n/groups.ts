@@ -29,7 +29,7 @@ const RULES: [RegExp, TextGroup][] = [
   [/^(menu|closeMenu|mainNavigation|nav|footer|language|skip|theme|overview|followUs|address|legal|copyright|brand)/, "Header, footer and menus"],
   [/^(market|ticker|top(Gainers|Losers)|most|col|watch|price|symbol|last|change|turnover|volume|trades|advanced|declined|unchanged|asOf|demoData|sortBy|showing|page|rowsPerPage|noMovers|notPublished|dse|cse|openBoard|quote|xpert|index|breadth|delay|share)/, "Markets and ticker"],
   [/^(oms|eco|cap|product|platform|module|capabilit|integration|architecture|howItWorks|useCases|whoItsFor|security|deployments|faq|demoTitle|demoBody|screens|playVideo|whereItFits|explore|getAndroid|getIos|openWeb|liveApps|theProblem|theSolution|conceptual)/, "Products and platform"],
-  [/^(team|people|board|management|leadership|role|biography|bio|viewProfile|linkedin|emailPerson|placeholder|chairman|md|about|company|mission|vision|ourStory|consortium|members|exchanges|ownedBy|milestones|stat)/, "Company and people"],
+  [/^(credentials|team|people|board|management|leadership|role|biography|bio|viewProfile|linkedin|emailPerson|placeholder|chairman|md|about|company|mission|vision|ourStory|consortium|members|exchanges|ownedBy|milestones|stat)/, "Company and people"],
   [/^(news|event|gallery|video|album|photo|resources|res|case|cs|read|allEvents|article|category|tag|insight|openPhoto|prevPhoto|nextPhoto)/, "News, events and gallery"],
   [/^(job|career|apply|cv|vacanc|deadline|employment)/, "Careers"],
   [/^(form|demo|thanks|contact|request|consent|security|type|send|name|email|phone|organization|designation|visit|hours|directions)/, "Forms and contact"],

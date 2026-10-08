@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils/cn";
 import { monogram } from "./LogoWall";
@@ -6,6 +7,8 @@ export type LiveApp = {
   id: string;
   appName: string;
   brokerage: string | null;
+  /** The brokerage's logo (with permission), shown instead of the app's initials. */
+  logo?: { url: string; width: number | null; height: number | null } | null;
   playStoreUrl: string | null;
   appStoreUrl: string | null;
   webUrl: string | null;
@@ -27,9 +30,15 @@ export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android:
           <>
             <span aria-hidden="true" className="live-app-pulse absolute inset-0 rounded-3xl" style={{ "--i": i } as CSSProperties} />
             <span className="relative flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-brand-sky/30 bg-gradient-to-br from-brand-sky/20 to-brand-royal/20 font-mono text-[max(11px,0.6875rem)] font-semibold tracking-wider text-cyan-300">
-                {monogram(a.appName)}
-              </span>
+              {a.logo ? (
+                <span className="flex h-11 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">
+                  <Image src={a.logo.url} alt="" width={a.logo.width ?? 120} height={a.logo.height ?? 60} className="h-full w-full object-contain" />
+                </span>
+              ) : (
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-brand-sky/30 bg-gradient-to-br from-brand-sky/20 to-brand-royal/20 font-mono text-[max(11px,0.6875rem)] font-semibold tracking-wider text-accent">
+                  {monogram(a.appName)}
+                </span>
+              )}
               <span className="flex w-full min-w-0 flex-col">
                 <span className="font-display text-sm leading-snug font-semibold text-text-primary sm:text-base">{a.appName}</span>
                 {a.brokerage && <span className="line-clamp-2 text-xs leading-snug text-text-secondary">{a.brokerage}</span>}

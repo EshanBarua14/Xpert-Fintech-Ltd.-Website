@@ -1,13 +1,15 @@
 import { cn } from "@/lib/utils/cn";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { ecosystemLabels, ecosystemModules, GhostButton, moduleForSlug, PrimaryButton, SectionHeader } from "@/components/flagship/Sections";
 import { EcosystemMap } from "@/components/flagship/EcosystemMap";
 import OmsPreview from "@/components/products/oms-preview/OmsPreview";
-import { getFlagshipData } from "@/lib/public/flagship";
+import { getFlagshipData, getPartyLogos } from "@/lib/public/flagship";
+import { getCredentials } from "@/lib/content/credentials";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { omsLabels } from "@/lib/public/labels";
 import { CapabilityVisual, type VisualKind } from "@/components/flagship/Visuals";
@@ -69,7 +71,8 @@ function itemsOf(offering: Offering, kind: ItemKind, locale: AppLocale) {
     .filter((i) => i.kind === kind)
     .map((i) => {
       const tr = pick(i.translations, locale);
-      return { id: i.id, icon: i.iconName, title: tr?.title ?? "", body: tr?.body ?? null };
+      const en = i.translations.find((x) => x.locale === "en")?.title ?? "";
+      return { id: i.id, icon: i.iconName, title: tr?.title ?? "", body: tr?.body ?? null, en };
     })
     .filter((i) => i.title);
 }
@@ -87,6 +90,11 @@ export default async function ProductPage({ params }: Props) {
     found.locale,
   );
   const hero = images.get(offering.heroMediaId ?? "");
+  const [partyLogos, credentials] = await Promise.all([getPartyLogos(found.locale), getCredentials(found.locale)]);
+  const deploymentLogos = await mediaMap(
+    offering.deployments.map((d) => (d.organization?.logoPermission ? d.organization.logoMediaId : null)),
+    found.locale,
+  );
   const capabilities = itemsOf(offering, "CAPABILITY", found.locale);
   const steps = itemsOf(offering, "WORKFLOW_STEP", found.locale);
   const layers = itemsOf(offering, "ARCHITECTURE_LAYER", found.locale);
@@ -258,7 +266,6 @@ export default async function ProductPage({ params }: Props) {
         <Band title={t.howItWorks}>
           <div data-reveal className="glass rounded-3xl p-4 md:p-8">
           <OrderFlow
-            caption={t.conceptualView}
             steps={steps.map((s, i) => ({ key: s.id, label: s.title, note: s.body, highlight: i === 0 }))}
           />
           </div>
@@ -300,7 +307,7 @@ export default async function ProductPage({ params }: Props) {
 
       {integrations.length > 0 && (
         <Band title={t.integrations} alt>
-          <ItemGrid items={integrations} />
+          <ItemGrid items={integrations} marks={exchangeMarks(integrations, partyLogos, credentials)} />
         </Band>
       )}
 
@@ -351,7 +358,7 @@ export default async function ProductPage({ params }: Props) {
         </Band>
       )}
 
-      {offering.deployments.length > 0 && <Deployments offering={offering} locale={found.locale} t={t} />}
+      {offering.deployments.length > 0 && <Deployments offering={offering} locale={found.locale} t={t} logos={deploymentLogos} />}
 
       {faqs.length > 0 && (
         <Band title={t.faq}>
@@ -414,15 +421,44 @@ function Band({ title, body, alt, children }: { title?: string; body?: string; a
   );
 }
 
-function ItemGrid({ items, icon }: { items: { id: string; title: string; body: string | null; icon: string | null }[]; icon?: string }) {
+type Mark = { logo?: { url: string; width: number | null; height: number | null }; badge?: string };
+
+/** Integration items that are DSE or CSE get the exchange's logo and XFL's certification with it. */
+function exchangeMarks(
+  items: { id: string; en: string }[],
+  logos: Partial<Record<string, { url: string; width: number | null; height: number | null }>>,
+  credentials: { orgKey: string; title: string }[],
+): Record<string, Mark> {
+  const out: Record<string, Mark> = {};
+  for (const i of items) {
+    const key = /dhaka stock exchange|\bdse\b/i.test(i.en) ? "dse" : /chittagong stock exchange|chattogram stock exchange|\bcse\b/i.test(i.en) ? "cse" : null;
+    if (!key) continue;
+    out[i.id] = { logo: logos[key], badge: credentials.find((c) => c.orgKey === key)?.title };
+  }
+  return out;
+}
+
+function ItemGrid({ items, icon, marks }: { items: { id: string; title: string; body: string | null; icon: string | null }[]; icon?: string; marks?: Record<string, Mark> }) {
   return (
     <ul className={cn("grid gap-4", gridCols(items.length))}>
       {items.map((i, n) => (
         <li key={i.id} data-reveal style={{ "--d": n % 3 } as CSSProperties} className="spotlight glass flex flex-col gap-4 rounded-3xl p-6 md:p-7">
-          <span className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-sky/25 to-brand-royal/20 text-cyan-300">
-            <Icon name={i.icon ?? icon ?? "check"} className="size-5" />
-          </span>
+          {marks?.[i.id]?.logo ? (
+            <span className="flex size-12 items-center justify-center overflow-hidden rounded-2xl bg-white p-1 ring-1 ring-black/5">
+              <Image src={marks[i.id]!.logo!.url} alt="" width={marks[i.id]!.logo!.width ?? 96} height={marks[i.id]!.logo!.height ?? 96} className="h-full w-full object-contain" />
+            </span>
+          ) : (
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-sky/25 to-brand-royal/20 text-accent">
+              <Icon name={i.icon ?? icon ?? "check"} className="size-5" />
+            </span>
+          )}
           <h3 className="font-display text-lg font-semibold tracking-tight">{i.title}</h3>
+          {marks?.[i.id]?.badge && (
+            <span className="inline-flex items-center gap-1.5 self-start rounded-full border border-market-up/40 bg-market-up/10 px-2.5 py-1 text-xs font-semibold text-market-up">
+              <Icon name="check" className="size-3.5" />
+              {marks[i.id]!.badge}
+            </span>
+          )}
           {i.body && <p className="text-sm leading-relaxed whitespace-pre-line text-text-secondary">{i.body}</p>}
         </li>
       ))}
@@ -447,16 +483,27 @@ function ItemList({ items }: { items: { id: string; title: string; body: string 
   );
 }
 
-function Deployments({ offering, locale, t }: { offering: Offering; locale: AppLocale; t: Messages }) {
+function Deployments({ offering, locale, t, logos }: { offering: Offering; locale: AppLocale; t: Messages; logos: Awaited<ReturnType<typeof mediaMap>> }) {
   return (
     <Band title={t.deployments} alt>
       <ul className={cn("grid gap-4", gridCols(offering.deployments.length))}>
         {offering.deployments.map((d) => {
-          const org = d.organization && d.organization.status === "PUBLISHED" && !d.organization.deletedAt ? pick(d.organization.translations, locale) : null;
+          const live = d.organization && d.organization.status === "PUBLISHED" && !d.organization.deletedAt ? d.organization : null;
+          const org = live ? pick(live.translations, locale) : null;
+          const logo = live?.logoPermission && live.logoMediaId ? logos.get(live.logoMediaId) : undefined;
           return (
             <li key={d.id} data-reveal className="spotlight glass flex flex-col gap-3 rounded-3xl p-6">
-              <span className="font-display text-lg font-semibold">{d.appName}</span>
-              {org && <span className="text-sm text-text-secondary">{org.name}</span>}
+              <span className="flex items-center gap-3">
+                {logo && (
+                  <span className="flex h-11 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">
+                    <Image src={logo.url} alt="" width={logo.width ?? 120} height={logo.height ?? 60} className="h-full w-full object-contain" />
+                  </span>
+                )}
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="font-display text-lg font-semibold">{d.appName}</span>
+                  {org && <span className="text-sm text-text-secondary">{org.name}</span>}
+                </span>
+              </span>
               <span className="mt-auto flex flex-wrap gap-3 text-sm">
                 {d.playStoreUrl && (
                   <a href={d.playStoreUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-fg/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-fg">

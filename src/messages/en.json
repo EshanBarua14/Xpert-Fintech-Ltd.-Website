@@ -581,5 +581,7 @@
   "ecoStep3c": "Money settles through the banks",
   "ecoStep4a": "BSEC regulates exchanges and CDBL",
   "ecoStep4b": "RMS and back office report to the regulator",
-  "ecoStepsLabel": "Steps in this scene"
+  "ecoStepsLabel": "Steps in this scene",
+  "credentialsTitle": "Memberships and exchange certifications",
+  "credentialsBy": "{org}"
 }

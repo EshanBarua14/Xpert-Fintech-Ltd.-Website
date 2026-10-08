@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -403,8 +403,10 @@ export function EcosystemMap({
         />
         {logo ? (
           <>
-            <rect x={left} y={n.y - 24} width={P} height={P} rx={7} fill="#ffffff" stroke="rgb(0 0 0 / 0.08)" />
-            <image href={logo.url} x={left + 3} y={n.y - 21} width={P - 6} height={P - 6} preserveAspectRatio="xMidYMid meet" />
+            <g className="eco-logo">
+              <rect x={left} y={n.y - 24} width={P} height={P} rx={7} fill="#ffffff" stroke="rgb(0 0 0 / 0.08)" />
+              <image href={logo.url} x={left + 3} y={n.y - 21} width={P - 6} height={P - 6} preserveAspectRatio="xMidYMid meet" />
+            </g>
             <text x={left + P + 7} y={n.y - 3} style={{ fill: "var(--eco-text)" }} className="eco-name font-display text-[21px] font-semibold">
               {title}
             </text>
@@ -600,7 +602,6 @@ export function EcosystemMap({
           {node("cdbl", labels.names.cdbl || NODES.cdbl.name!)}
           {node("bank", labels.names.bank)}
         </svg>
-        <span className="glass absolute top-0 right-0 rounded-full px-3 py-1 text-xs text-text-secondary">{labels.caption}</span>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -633,7 +634,11 @@ export function EcosystemMap({
         </div>
 
         {stepped && (
-          <ol aria-label={labels.stepsLabel} className="grid gap-2" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
+          <ol
+            aria-label={labels.stepsLabel}
+            className="grid gap-2 sm:[grid-template-columns:repeat(var(--steps),minmax(0,1fr))]"
+            style={{ "--steps": steps.length } as CSSProperties}
+          >
             {steps.map((st, i) => {
               const state = i < cur ? "done" : i === cur ? "now" : "next";
               return (

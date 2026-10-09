@@ -1017,6 +1017,8 @@ html.has-ticker {
   height: 100%;
   mask-image: radial-gradient(ellipse 60% 55% at 28% 42%, rgb(0 0 0 / 0.12), #000 85%);
 }
+/* Home: the hero already animates (ecosystem, live prices), so the board behind stays quieter. */
+.ambient[data-home] .bourse-canvas { opacity: 0.55; }
 
 /* Scrollbar */
 html {

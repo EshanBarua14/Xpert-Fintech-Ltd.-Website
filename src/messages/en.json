@@ -616,5 +616,14 @@
   "emailMissing": "Email not listed yet",
   "marketShareAverage": "Daily average {pct}%",
   "marketShareAverageBody": "Xpert's average daily share of {exchange} turnover. The day's own figure appears here once Xpert's turnover for the day is entered.",
-  "layerShort": "L{n}"
+  "layerShort": "L{n}",
+  "rolesTitle": "Built for every desk in a brokerage",
+  "roleInvestorTitle": "Investors",
+  "roleInvestorBody": "Open a BO account from a phone, verify identity online, follow the market and trade.",
+  "roleDealerTitle": "Dealers",
+  "roleDealerBody": "Enter and manage client orders on DSE and CSE, with limits checked before they leave.",
+  "roleOpsTitle": "Operations and compliance",
+  "roleOpsBody": "Settle trades, keep client documents in order and report to the regulator.",
+  "roleMgmtTitle": "Brokerage management",
+  "roleMgmtBody": "See trading and operations across the house, on one platform run for the consortium."
 }

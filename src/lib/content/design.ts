@@ -27,6 +27,7 @@ export const HOME_SECTIONS = [
   { key: "clients", label: "Client logos" },
   { key: "reach", label: "Market share and client base" },
   { key: "showcase", label: "Product showcase" },
+  { key: "roles", label: "Built for every desk (products by role)" },
   { key: "testimonials", label: "Client reviews" },
   { key: "market", label: "Today on DSE and CSE" },
   { key: "apps", label: "Live branded apps" },

@@ -42,7 +42,7 @@ export function AmbientBackground() {
   }, [pathname]);
   const scene = (product && PRODUCT_SCENE[product]) || sceneFor(pathname);
   return (
-    <div aria-hidden="true" className="ambient" data-scene={scene}>
+    <div aria-hidden="true" className="ambient" data-scene={scene} data-home={/^\/(en|bn)\/?$/.test(pathname) ? "" : undefined}>
       <div className="ambient-orb ambient-orb-1" />
       <div className="ambient-orb ambient-orb-2" />
       {scene === "market" ? <BourseCanvas /> : <SceneCanvas key={scene} scene={scene} />}

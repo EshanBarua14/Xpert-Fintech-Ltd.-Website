@@ -24,6 +24,7 @@ import { ProductShowcase } from "@/components/products/ProductShowcase";
 import { LiveApps } from "@/components/organizations/LiveApps";
 import { getLiveApps } from "@/lib/public/company";
 import { getShowcase } from "@/lib/public/showcase";
+import { RoleGuide } from "@/components/flagship/RoleGuide";
 import { showcaseLabels } from "@/lib/public/labels";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
@@ -162,6 +163,15 @@ export default async function HomePage({ params }: Props) {
               <GhostButton href={`/${locale}/products`}>{t.exploreProducts}</GhostButton>
             </div>
             <ProductShowcase products={showcase} labels={showcaseLabels(t)} />
+          </div>
+        </Shell>
+      )}
+
+      {show("roles") && showcase.length > 0 && (
+        <Shell id="roles" className="py-12 md:py-16">
+          <div className="flex flex-col gap-10">
+            <SectionHeader title={t.rolesTitle} />
+            <RoleGuide t={t} products={showcase} />
           </div>
         </Shell>
       )}

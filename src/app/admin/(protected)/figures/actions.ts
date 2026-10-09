@@ -27,5 +27,5 @@ export async function saveFigures(_prev: FiguresState, formData: FormData): Prom
   await db.siteSetting.upsert({ where: { key: FIGURES_KEY }, update: { value: out, updatedById: admin.id }, create: { key: FIGURES_KEY, value: out, updatedById: admin.id } });
   revalidatePath("/", "layout");
   revalidatePath("/admin/figures");
-  return { ok: true, savedAt: Date.now(), message: out.length ? `Saved ${out.length} figure(s). They show on the home page as “In numbers”.` : "Saved: no figures, so the section is hidden." };
+  return { ok: true, savedAt: Date.now(), message: out.length ? `Saved ${out.length} figure(s). They show on the home page as “Xpert in numbers”.` : "Saved: no figures, so the section is hidden." };
 }

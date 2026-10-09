@@ -60,6 +60,11 @@ export default async function CaseStudiesPage({ params }: Props) {
                     )}
                   </span>
                   <span className="flex flex-1 flex-col gap-3 p-7">
+                    {c.draft && (
+                      <span className="self-start rounded-md border border-gold/50 bg-gold/10 px-2 py-0.5 text-xs font-semibold text-gold">
+                        {loc === "bn" ? "খসড়া — লাইভ সাইটে দেখা যায় না" : "Draft — not on the live site"}
+                      </span>
+                    )}
                     <span className="font-display text-2xl leading-snug font-semibold tracking-tight text-balance">{c.title}</span>
                     {c.summary && <span className="line-clamp-3 text-text-secondary">{c.summary}</span>}
                     <span className="mt-auto pt-2 text-sm font-semibold text-brand-sky">{t.readCaseStudy}</span>

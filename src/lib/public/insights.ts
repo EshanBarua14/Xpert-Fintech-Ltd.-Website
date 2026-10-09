@@ -1,4 +1,5 @@
 import "server-only";
+import { contentSlots } from "@/lib/env/hints";
 import { cache } from "react";
 import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
@@ -399,21 +400,24 @@ export const getResources = cache(async (locale: AppLocale): Promise<ResourceCar
 
 // ── Case studies ─────────────────────────────────────────────────────────────
 
+/** Outside the live site, draft case studies are shown too (marked), so editors can review them before publishing. */
+const caseWhere = () => (contentSlots() ? { deletedAt: null } : publishedWhere());
+
 export const getCaseStudies = cache(async (locale: AppLocale) => {
-  const rows = await db.caseStudy.findMany({ where: publishedWhere(), orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }], include: { translations: true } });
+  const rows = await db.caseStudy.findMany({ where: caseWhere(), orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }], include: { translations: true } });
   const covers = await mediaMap(rows.map((r) => r.coverMediaId), locale);
   return rows
     .map((c) => {
       const tr = pick(c.translations, locale);
       if (!tr) return null;
       const own = c.translations.find((x) => x.locale === locale);
-      return { id: c.id, title: tr.title, summary: tr.summary, href: `/${own ? locale : "en"}/case-studies/${(own ?? tr).slug}`, cover: covers.get(c.coverMediaId ?? "") ?? null };
+      return { id: c.id, title: tr.title, summary: tr.summary, href: `/${own ? locale : "en"}/case-studies/${(own ?? tr).slug}`, cover: covers.get(c.coverMediaId ?? "") ?? null, draft: c.status !== "PUBLISHED" };
     })
     .filter((c): c is NonNullable<typeof c> => c !== null);
 });
 
 export const getCaseStudyBySlug = cache(async (locale: AppLocale, slug: string) => {
-  const c = await db.caseStudy.findFirst({ where: { ...publishedWhere(), translations: { some: { locale, slug } } }, include: { translations: true } });
+  const c = await db.caseStudy.findFirst({ where: { ...caseWhere(), translations: { some: { locale, slug } } }, include: { translations: true } });
   if (!c) return null;
   const covers = await mediaMap([c.coverMediaId], locale);
   return { caseStudy: c, tr: pick(c.translations, locale)!, cover: covers.get(c.coverMediaId ?? "") ?? null };

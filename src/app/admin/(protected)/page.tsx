@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
+import { contentTodos } from "@/lib/admin/todo";
 
 type Stat = { label: string; value: number; href?: string; note?: string };
 
@@ -22,6 +23,7 @@ export default async function DashboardPage() {
     recent,
     followUpsDue,
     recentLeads,
+    todos,
   ] = await Promise.all([
     db.offering.count({ where: live }),
     db.offering.count({ where: draft }),
@@ -39,7 +41,9 @@ export default async function DashboardPage() {
     }),
     db.lead.count({ where: { deletedAt: null, followUpAt: { lte: new Date() }, status: { notIn: ["WON", "LOST"] } } }),
     db.lead.findMany({ where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 5, select: { id: true, name: true, organization: true, createdAt: true, status: true } }),
+    contentTodos(),
   ]);
+  const open = todos.filter((x) => !x.done);
 
   const stats: Stat[] = [
     { label: "Products published", value: productsLive, href: "/admin/products?status=PUBLISHED" },
@@ -82,6 +86,30 @@ export default async function DashboardPage() {
           );
         })}
       </ul>
+
+      <section className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-xl font-semibold">Still to add to the website</h2>
+          <span className="text-sm text-text-secondary">
+            {todos.length - open.length} of {todos.length} done
+          </span>
+        </div>
+        <p className="text-sm text-text-secondary">The same items the dashed placeholders on the site point to. Each ticks itself off once the content is added and published.</p>
+        <ul className="grid gap-2 md:grid-cols-2">
+          {todos.map((x) => (
+            <li key={x.label}>
+              <Link href={x.href} className="flex h-full items-start gap-3 rounded-card border border-fg/10 bg-ink-950/50 p-4 hover:border-brand-sky/40">
+                <span aria-hidden="true" className={x.done ? "mt-0.5 text-market-up" : "mt-0.5 text-gold"}>{x.done ? "✓" : "○"}</span>
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="font-semibold">{x.label}</span>
+                  <span className="text-sm text-text-secondary">{x.detail}</span>
+                </span>
+                <span className="sr-only">{x.done ? "Done" : "To do"}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-4">

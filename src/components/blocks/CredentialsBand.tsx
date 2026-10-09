@@ -32,12 +32,12 @@ export function CredentialsBand({ items, title, by, variant = "band" }: { items:
   return (
     <section aria-label={title} className={cn(!footer && "flex flex-col gap-6")}>
       {footer ? <h2 className="sr-only">{title}</h2> : <h2 className="text-sm font-semibold text-text-secondary">{title}</h2>}
-      <ul className={cn("grid gap-px overflow-hidden", footer ? "gap-4 sm:grid-cols-3" : "rounded-2xl border border-fg/10 bg-fg/10 md:grid-cols-3")}>
+      <ul className={cn("grid gap-px overflow-hidden", footer ? "mx-auto w-fit max-w-5xl gap-x-10 gap-y-5 justify-items-start sm:w-auto sm:grid-cols-3 sm:justify-items-center" : "rounded-2xl border border-fg/10 bg-fg/10 md:grid-cols-3")}>
         {items.map((c, i) => {
           const body = (
             <>
               <Plate c={c} size={footer ? "sm" : "lg"} />
-              <span className="flex min-w-0 flex-col gap-0.5">
+              <span className={cn("flex min-w-0 flex-col gap-0.5", footer && "max-w-[15rem]")}>
                 <span className={cn("font-semibold leading-snug text-text-primary", footer ? "text-sm" : "text-base")}>{c.title}</span>
                 <span className={cn("leading-snug text-text-secondary", footer ? "text-xs" : "text-sm")}>
                   {by.replace("{org}", c.name)}
@@ -46,7 +46,7 @@ export function CredentialsBand({ items, title, by, variant = "band" }: { items:
               </span>
             </>
           );
-          const cls = cn("flex h-full items-center gap-4", !footer && "bg-navy-900 p-5 md:p-6", c.websiteUrl && "group transition-colors", c.websiteUrl && !footer && "hover:bg-navy-800");
+          const cls = cn("flex h-full items-center gap-4", footer && "justify-center", !footer && "bg-navy-900 p-5 md:p-6", c.websiteUrl && "group transition-colors", c.websiteUrl && !footer && "hover:bg-navy-800");
           return (
             <li key={`${c.name}-${i}`} data-reveal={footer ? undefined : true} style={footer ? undefined : ({ "--d": i } as CSSProperties)}>
               {c.websiteUrl ? (

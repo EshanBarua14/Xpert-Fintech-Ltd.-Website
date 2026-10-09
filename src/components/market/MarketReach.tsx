@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { CountUp } from "@/components/motion/CountUp";
 import type { ShareFigure } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
@@ -26,6 +26,12 @@ type Props = {
   headline?: { pct: number; asOf: string | null } | null;
   goal: { targetPct: number; year: number; note: string | null } | null;
   clientBase: { value: number; label: string }[];
+  /** Admin → Figures: more numbers with their source, in the same card. */
+  figures?: { value: string; label: string; source: string }[];
+  /** Outside the live site: where figures still to come go. */
+  figureSlot?: ReactNode;
+  /** Card heading when figures are shown with the client base (e.g. "Xpert in numbers"). */
+  numbersTitle?: string;
   locale: "en" | "bn";
   labels: ReachLabels;
 };
@@ -67,7 +73,7 @@ function useCountUp(target: number) {
  * figures combined), the progress towards the goal set in Admin → Market
  * data, and the client base. With no figure yet, the goal stands on its own.
  */
-export function MarketReach({ shares, headline, goal, clientBase, locale, labels }: Props) {
+export function MarketReach({ shares, headline, goal, clientBase, figures = [], figureSlot, numbersTitle, locale, labels }: Props) {
   const xpert = shares.reduce((s, f) => s + f.xpertTurnover, 0);
   const market = shares.reduce((s, f) => s + f.marketTurnover, 0);
   const pct = headline ? headline.pct : market > 0 ? (xpert / market) * 100 : null;
@@ -154,7 +160,7 @@ export function MarketReach({ shares, headline, goal, clientBase, locale, labels
 
       {clientBase.length > 0 && (
         <div data-reveal style={{ "--d": 1 } as CSSProperties} className="flex flex-col gap-6 rounded-3xl border border-fg/10 bg-navy-900 p-6 sm:p-8 md:p-10">
-          <h3 className="font-display text-2xl leading-tight">{labels.clients}</h3>
+          <h3 className="font-display text-2xl leading-tight">{(figures.length || figureSlot) && numbersTitle ? numbersTitle : labels.clients}</h3>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-7 lg:grid-cols-1 xl:grid-cols-2">
             {clientBase.map((c) => (
               <div key={c.label} className="flex flex-col gap-1 border-l-2 border-brand-sky/50 pl-4">
@@ -164,7 +170,15 @@ export function MarketReach({ shares, headline, goal, clientBase, locale, labels
                 <dt className="order-2 text-sm text-text-secondary">{c.label}</dt>
               </div>
             ))}
+            {figures.map((f) => (
+              <div key={`${f.value}-${f.label}`} className="flex flex-col gap-1 border-l-2 border-gold/60 pl-4">
+                <dd className="order-1 font-display text-4xl leading-none tracking-[-0.02em] text-text-primary md:text-5xl">{f.value}</dd>
+                <dt className="order-2 text-sm text-text-secondary">{f.label}</dt>
+                <dd className="order-3 text-xs text-text-secondary/80">{f.source}</dd>
+              </div>
+            ))}
           </dl>
+          {figureSlot}
         </div>
       )}
     </div>

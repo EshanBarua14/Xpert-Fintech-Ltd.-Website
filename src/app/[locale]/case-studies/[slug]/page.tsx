@@ -61,6 +61,13 @@ export default async function CaseStudyPage({ params }: Props) {
         </div>
       )}
       <Shell className="py-10 md:py-12">
+        {found.caseStudy.status !== "PUBLISHED" && (
+          <p className="mx-auto mb-6 max-w-4xl rounded-2xl border border-gold/50 bg-gold/10 px-5 py-3 text-sm text-gold">
+            {loc === "bn"
+              ? "খসড়া — লাইভ সাইটে দেখা যায় না। বন্ধনীর তথ্য গ্রাহকের সঙ্গে নিশ্চিত করে অনুমোদন নিন, তারপর প্রকাশ করুন।"
+              : "Draft — not on the live site. Confirm the bracketed facts with the client, get their approval, then publish."}
+          </p>
+        )}
         <ol className="mx-auto flex max-w-4xl flex-col gap-6">
           {parts.map((p, i) => (
             <li key={p.n} data-reveal style={{ "--d": i } as CSSProperties} className="glass grid gap-4 rounded-3xl p-7 md:grid-cols-[8rem_1fr] md:p-10">

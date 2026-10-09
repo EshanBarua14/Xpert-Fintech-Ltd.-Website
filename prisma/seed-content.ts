@@ -31,6 +31,7 @@ import { CLIENT_LOGOS, NOT_CLIENTS, orgNameKey } from "../src/content/xfl2/clien
 import { CREDENTIALS } from "../src/content/xfl2/credentials";
 import { DIRECTOR_PROFILES } from "../src/content/xfl2/director-profiles";
 import { sniff } from "../src/lib/media/inspect";
+import { CASE_STUDY_DRAFTS } from "../src/content/xfl2/case-study-drafts";
 import { BLOCK_BN, EVENT_BN, ITEM_BN, LEGAL_BN, NAV_BN, NODE_BN, OFFERING_BN, OFFICE_BN, ORG_BN, PAGE_BN, PERSON_BN } from "../src/content/xfl2/bangla";
 
 const db = new PrismaClient();
@@ -1493,6 +1494,40 @@ async function seedNavAdditions() {
   await add("header", "events", null, "case-studies", "Case studies");
 }
 
+/**
+ * Draft case studies for three member brokerages (src/content/xfl2/case-study-drafts.ts),
+ * added once, as DRAFT: results, figures and the quote stay in [brackets] until
+ * the client confirms them. Not shown on the live site until an editor publishes.
+ */
+async function seedCaseStudyDrafts() {
+  const MARK = "seed.case-study-drafts-2026-10-09";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  let added = 0;
+  for (const [i, c] of CASE_STUDY_DRAFTS.entries()) {
+    if (await db.caseStudyTranslation.findFirst({ where: { slug: c.slug } })) continue;
+    await db.caseStudy.create({
+      data: {
+        status: "DRAFT",
+        sortOrder: i,
+        translations: {
+          create: (["en", "bn"] as const).map((l) => ({
+            locale: l === "en" ? EN : BN,
+            slug: c.slug,
+            title: c.title[l],
+            summary: c.summary[l],
+            challenge: c.challenge[l],
+            solution: c.solution[l],
+            outcome: c.outcome[l],
+          })),
+        },
+      },
+    });
+    added++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  if (added) console.log(`• ${added} draft case studies added: fill in the [bracketed] results with each client and publish in Admin → Case studies`);
+}
+
 /** Older databases: mark seeded stand-in profiles as placeholders (until an editor changes that). */
 async function markPlaceholders() {
   const res = await db.person.updateMany({ where: { key: { startsWith: "placeholder-" }, isPlaceholder: false, translations: { some: { name: "Name to be confirmed" } } }, data: { isPlaceholder: true } });
@@ -1531,6 +1566,7 @@ async function main() {
   await seedRmsInOms();
   await seedProductScreens();
   await seedNavAdditions();
+  await seedCaseStudyDrafts();
   await seedBanglaGaps();
   console.log("Content seed complete.");
 }

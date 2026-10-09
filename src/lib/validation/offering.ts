@@ -15,13 +15,13 @@ export const OFFERING_ITEM_KINDS = [
 ] as const;
 
 export const ITEM_KIND_LABELS: Record<(typeof OFFERING_ITEM_KINDS)[number], string> = {
-  CAPABILITY: "Capabilities",
-  WORKFLOW_STEP: "Workflow steps",
+  CAPABILITY: "Key features (shown first on the product page)",
+  WORKFLOW_STEP: "How it works (automated steps)",
   ARCHITECTURE_LAYER: "Architecture layers",
   INTEGRATION: "Integrations",
   SECURITY: "Security",
   USE_CASE: "Use cases",
-  TARGET_USER: "Target users",
+  TARGET_USER: "Built for (target users, also shown at a glance)",
   FAQ: "FAQs",
 };
 

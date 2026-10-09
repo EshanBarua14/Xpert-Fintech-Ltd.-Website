@@ -127,17 +127,19 @@ function PersonCard({
   p,
   labels,
   groupLabel,
+  company,
   showPlaceholderBadge,
   onOpen,
 }: {
   p: GalleryPerson;
   labels: GalleryLabels;
   groupLabel: string;
+  company?: string;
   showPlaceholderBadge: boolean;
   featured?: boolean;
   onOpen: (trigger: HTMLButtonElement) => void;
 }) {
-  const role = p.title ?? groupLabel;
+  const role = company ? `${p.title ?? groupLabel}, ${company}` : (p.title ?? groupLabel);
   return (
     <article
       // The whole card opens the profile (links inside it keep their own action); the name button is the keyboard route.
@@ -205,6 +207,7 @@ export function PeopleGallery({
   labels,
   showPlaceholderBadge,
   groupLabel,
+  company,
   featureFirst = false,
   tone = "management",
 }: {
@@ -214,6 +217,8 @@ export function PeopleGallery({
   showPlaceholderBadge: boolean;
   /** Shown as the role when a person has no title yet, e.g. "Management". */
   groupLabel: string;
+  /** Added after the role on board and consultant cards: "Chairman, Xpert Fintech Ltd." */
+  company?: string;
   /** Board and management: the first person (Chairman, MD) sits alone on the top row, same card size, centred. */
   featureFirst?: boolean;
   /** Accent colour of the cards and profile: board gold, management blue, consultant teal. */
@@ -240,7 +245,7 @@ export function PeopleGallery({
         <ul className="mb-5 flex justify-center">
           {/* Exactly one grid column wide, so the lead card matches the others. */}
           <li data-reveal className={COLUMN}>
-            <PersonCard p={people[0]!} labels={labels} groupLabel={groupLabel} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(people[0]!, t)} />
+            <PersonCard p={people[0]!} labels={labels} groupLabel={groupLabel} company={company} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(people[0]!, t)} />
           </li>
         </ul>
       )}
@@ -248,7 +253,7 @@ export function PeopleGallery({
       <ul className="flex flex-wrap justify-center gap-5">
         {(featureFirst && people.length > 2 ? people.slice(1) : people).map((p, i) => (
           <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className={COLUMN}>
-            <PersonCard p={p} labels={labels} groupLabel={groupLabel} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(p, t)} />
+            <PersonCard p={p} labels={labels} groupLabel={groupLabel} company={company} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(p, t)} />
           </li>
         ))}
       </ul>
@@ -290,7 +295,7 @@ export function PeopleGallery({
                 <div className="flex min-w-0 flex-col gap-1.5">
                   <p className="flex items-center gap-2 text-sm font-semibold text-[var(--tone-ink)]">
                     <span aria-hidden="true" className="size-2 rounded-full bg-[var(--tone)]" />
-                    {open.title ?? groupLabel}
+                    {company ? `${open.title ?? groupLabel}, ${company}` : (open.title ?? groupLabel)}
                   </p>
                   <h2 id="person-dialog-name" className="font-display text-[clamp(1.5rem,3.4svh,2.25rem)] leading-tight font-semibold tracking-[-0.02em] text-balance">
                     {open.name}

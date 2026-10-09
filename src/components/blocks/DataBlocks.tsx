@@ -109,6 +109,8 @@ export async function PeopleGrid({
     <PeopleGallery
       people={rows.filter((r) => r.name)}
       groupLabel={groupLabel}
+      // Board members and consultants hold their position at Xpert: say so after it.
+      company={group === "BOARD" || group === "CONSULTANT" ? (locale === "bn" ? "এক্সপার্ট ফিনটেক লিমিটেড" : "Xpert Fintech Ltd.") : undefined}
       showPlaceholderBadge={editorHints()}
       featureFirst={group === "BOARD" || group === "MANAGEMENT" || group === "CONSULTANT"}
       tone={group === "BOARD" ? "board" : group === "MANAGEMENT" ? "management" : group === "CONSULTANT" ? "consultant" : "team"}

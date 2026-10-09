@@ -26,6 +26,8 @@ import { getLiveApps } from "@/lib/public/company";
 import { getShowcase } from "@/lib/public/showcase";
 import { RoleGuide } from "@/components/flagship/RoleGuide";
 import { FiguresStrip } from "@/components/flagship/FiguresStrip";
+import { ContentSlot } from "@/components/ui/ContentSlot";
+import { digits } from "@/lib/i18n/digits";
 import { getFigures } from "@/lib/content/figures";
 import { showcaseLabels } from "@/lib/public/labels";
 import { isLocale } from "@/lib/i18n/config";
@@ -138,6 +140,14 @@ export default async function HomePage({ params }: Props) {
               headline={headline}
               goal={goal ? { targetPct: goal.targetPct, year: goal.year, note: (locale === "bn" ? goal.bn : goal.en) || goal.en || null } : null}
               clientBase={clientBase}
+              // Admin → Figures join the client base in one card ("Xpert in numbers").
+              figures={figures.map((f) => ({
+                value: digits(f.value, locale === "bn"),
+                label: (locale === "bn" && f.labelBn) || f.labelEn,
+                source: `${t.marketSource}: ${f.source}${f.asOf ? ` (${new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${f.asOf}T00:00:00Z`))})` : ""}`,
+              }))}
+              figureSlot={figures.length === 0 && contentSlots() ? <ContentSlot kind="figure" locale={locale} title={`${t.figureSlotOrders}, ${t.figureSlotYears}, ${t.figureSlotMembers}`} adminHref="/admin/figures" className="min-h-0" /> : undefined}
+              numbersTitle={t.figuresTitle}
               locale={locale}
               labels={{
                 share: t.reachShareLabel,
@@ -157,7 +167,8 @@ export default async function HomePage({ params }: Props) {
         </Shell>
       )}
 
-      {show("figures") && (figures.length > 0 || contentSlots()) && (
+      {/* Figures sit in the market-share card; on their own only when that section is not shown. */}
+      {show("figures") && !(show("reach") && showReach) && (figures.length > 0 || contentSlots()) && (
         <Shell id="figures" className="py-12 md:py-16">
           <div className="flex flex-col gap-10">
             <SectionHeader title={t.figuresTitle} />

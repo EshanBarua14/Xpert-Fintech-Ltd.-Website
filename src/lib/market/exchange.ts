@@ -98,7 +98,13 @@ export function parseDseStrip(html: string): Quote[] {
  * trades, volume and turnover, and the session's date.
  */
 export function parseDseRecent(html: string): (DseSummary & { date: string }) | null {
-  const rows = [...html.matchAll(/<tr\b[\s\S]*?<\/tr>/gi)].map((r) => [...r[0].matchAll(/<t[hd]\b[^>]*>([\s\S]*?)<\/t[hd]>/gi)].map((c) => decode(c[1]!)));
+  // Cells, with a colspan cell counted as that many columns.
+  const rows = [...html.matchAll(/<tr\b[\s\S]*?<\/tr>/gi)].map((r) =>
+    [...r[0].matchAll(/<t[hd]\b([^>]*)>([\s\S]*?)<\/t[hd]>/gi)].flatMap((c) => {
+      const span = Math.min(6, Math.max(1, Number(/colspan\s*=\s*["']?(\d+)/i.exec(c[1]!)?.[1] ?? 1)));
+      return [decode(c[2]!), ...Array<string>(span - 1).fill("")];
+    }),
+  );
   const headAt = rows.findIndex((c) => c.some((x) => /^date$/i.test(x)) && c.some((x) => /^DSEX$/i.test(x)));
   if (headAt < 0) return null;
   const head = rows[headAt]!;
@@ -110,12 +116,18 @@ export function parseDseRecent(html: string): (DseSummary & { date: string }) | 
   const data = rows.slice(headAt + 1).filter((c) => /^\d{4}-\d{2}-\d{2}$/.test(c[iDate] ?? ""));
   const [latest, before] = data;
   if (!latest) return null;
+  // The index columns are the last ones: when a row has more cells than the heading
+  // (e.g. two market-cap cells under one heading), count them from the right.
+  const shift = (row: string[], i: number) => (i > iTurn && row.length !== head.length ? i + row.length - head.length : i);
+  // Plausible ranges, so a misread column is left out rather than shown.
+  const RANGE: Record<string, [number, number]> = { DSEX: [1000, 50000], DSES: [100, 20000], DS30: [300, 20000] };
   const indices: IndexValue[] = [];
   for (const name of DSE_INDEX_NAMES) {
     const i = col(new RegExp(`^${name}$`, "i"));
-    const value = num(latest[i]);
-    if (i < 0 || !(value > 0)) continue;
-    const prev = before ? num(before[i]) : NaN;
+    const value = i < 0 ? NaN : num(latest[shift(latest, i)]);
+    const [lo, hi] = RANGE[name]!;
+    if (!(value >= lo && value <= hi)) continue;
+    const prev = before ? num(before[shift(before, i)]) : NaN;
     const change = prev > 0 ? value - prev : 0;
     indices.push({ name, value: round(value), change: round(change), changePct: prev > 0 ? round((change / prev) * 100) : 0 });
   }
@@ -278,10 +290,13 @@ export function parseDseSummary(html: string): DseSummary {
     const found = findIndex(text, name, html);
     if (found) indices.push(found);
   }
-  // Older layout: "Total Trade …", "Total Volume …", "Total Value in Taka (mn) …".
-  let trades = num(/Total\s*Trade[s]?\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
-  let volume = num(/Total\s*Volume\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
-  let turnover = num(/Total\s*Value\s*in\s*Taka\s*\(?\s*mn\s*\)?\s*:?\s*([\d,]+(?:\.\d+)?)/i.exec(text)?.[1]) * 1_000_000;
+  // old.dsebd.org: the three headings first, then the three values
+  // ("Total Trade Total Volume Total Value in Taka (mn) 172590 174532023 5332.06").
+  const row = /Total\s*Trades?\s*Total\s*Volume\s*Total\s*Value\s*in\s*Taka\s*\(?\s*mn\s*\)?\s*([\d,]+)\s+([\d,]+)\s+([\d,]+(?:\.\d+)?)/i.exec(text);
+  // Older layout: each heading followed by its own value ("Total Trade 172590 Total Volume …").
+  let trades = num(row?.[1] ?? /Total\s*Trades?\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
+  let volume = num(row?.[2] ?? /Total\s*Volume\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
+  let turnover = num(row?.[3] ?? /Total\s*Value\s*in\s*Taka\s*\(?\s*mn\s*\)?\s*:?\s*([\d,]+(?:\.\d+)?)/i.exec(text)?.[1]) * 1_000_000;
   // dse.com.bd: "Turnover BDT 5,332.06 mn Volume 174,532,023 Trades 172,590" (read near "Turnover").
   const tm = /\bTurnover\s*:?\s*(?:BDT|Tk\.?|৳)?\s*([\d,]+(?:\.\d+)?)\s*(mn|million|cr|crore|bn|billion)?/i.exec(text);
   if (tm && !(turnover > 0)) {
@@ -292,6 +307,8 @@ export function parseDseSummary(html: string): DseSummary {
   const near = tm ? text.slice(tm.index, tm.index + 240) : "";
   if (!(volume > 0)) volume = num(/\bVolume\s*:?\s*([\d,]{4,})/i.exec(near)?.[1]);
   if (!(trades > 0)) trades = num(/\bTrades?\s*:?\s*([\d,]{3,})/i.exec(near)?.[1]);
+  // A day's DSE turnover is in the hundreds of millions to hundreds of billions of taka: anything else is a misread.
+  if (!(turnover >= 1e8 && turnover <= 5e11)) turnover = NaN;
   const statusText = (/Market\s*Status\s*:?\s*([A-Za-z-]+)/i.exec(text)?.[1] ?? /●\s*(Closed|Halted|Suspended|Pre-?open\w*|Post-?clos\w*)/i.exec(text)?.[1] ?? "").toLowerCase();
   const status: DseSummary["status"] = /pre/.test(statusText) ? "PRE_OPEN" : /post/.test(statusText) ? "POST_CLOSE" : /open/.test(statusText) ? "OPEN" : /halt|suspend/.test(statusText) ? "HALTED" : /clos/.test(statusText) ? "CLOSED" : undefined;
   return {
@@ -397,10 +414,12 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
       } as DseSummary;
     }
   }
-  // No live index figures anywhere: the latest closed session's from the day-end table.
-  // Its totals count as today's only when the table's newest row is today.
+  // Not all three main indices read live: all three from the day-end table instead (one
+  // consistent set, labelled with its date when it is not today's). Its totals count as
+  // today's only when the table's newest row is today.
   let dsePrevious = false;
-  if (dseRecent && (!dse || !dse.indices.length)) {
+  const haveAll = !!dse && DSE_INDEX_NAMES.every((n) => dse!.indices.some((i) => i.name === n));
+  if (dseRecent && dseRecent.indices.length && !haveAll) {
     const today = dseRecent.date === dhakaToday;
     dsePrevious = !today;
     dse = {

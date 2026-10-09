@@ -198,7 +198,8 @@ async function recordTurnover(snapshot: MarketSnapshot) {
 export async function recordedTurnover(exchange: "DSE" | "CSE", day: string): Promise<number | null> {
   const row = await db.siteSetting.findUnique({ where: { key: TURNOVER_KEY(exchange) } }).catch(() => null);
   const v = Number((row?.value as Record<string, unknown> | null)?.[day]);
-  return v > 0 ? v : null;
+  // A misread figure (outside a day's plausible range) is ignored rather than used for the share.
+  return v >= 1e7 && v <= 5e11 ? v : null;
 }
 
 /** Forget cached settings and share figures (after an admin saves them). */

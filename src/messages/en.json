@@ -640,5 +640,14 @@
   "figuresTitle": "Xpert in numbers",
   "figureSlotOrders": "Orders a day",
   "figureSlotYears": "Years live",
-  "figureSlotMembers": "Members on the platform"
+  "figureSlotMembers": "Members on the platform",
+  "jobAbout": "About Xpert and this role",
+  "applyLinkedIn": "Apply on LinkedIn",
+  "applyLinkedInCompany": "See our jobs on LinkedIn",
+  "applyBdjobs": "Apply on Bdjobs",
+  "applyEmailName": "Your Name",
+  "applyEmailBody": "Please attach your CV, your portfolio (if any) and a short note on why you are a good fit.",
+  "applyHere": "or apply here",
+  "opensInNewTab": "(opens in a new tab)",
+  "applyByEmail": "Apply by email"
 }

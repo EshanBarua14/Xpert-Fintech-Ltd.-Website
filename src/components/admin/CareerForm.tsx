@@ -7,7 +7,7 @@ import { TranslatedFieldset, type FieldSpec } from "@/components/admin/Translate
 import { Select, TextInput } from "@/components/ui/Field";
 import { EMPLOYMENT_TYPES } from "@/lib/admin/labels";
 
-type Text = { title: string; slug: string; summary: string; responsibilities: string; requirements: string; benefits: string };
+type Text = { title: string; slug: string; summary: string; about: string; responsibilities: string; requirements: string; benefits: string };
 
 export type CareerFormValues = {
   id?: string;
@@ -20,14 +20,18 @@ export type CareerFormValues = {
   experience: string;
   deadline: string;
   isClosed: boolean;
+  linkedinUrl: string;
+  bdjobsUrl: string;
+  applyEmail: string;
   en: Text;
   bn: Text;
 };
 
-const LIST_HINT = "One item per line; each line becomes a bullet point.";
+const LIST_HINT = "One item per line; each line becomes a bullet point. Start a line with ## to make it a small heading (for example ## Education).";
 const FIELDS: FieldSpec[] = [
   { name: "Title", label: "Job title" },
-  { name: "Summary", label: "Summary", kind: "textarea", rows: 3, hint: "Shown on the jobs list." },
+  { name: "Summary", label: "Summary", kind: "textarea", rows: 3, hint: "Shown on the jobs list and at the top of the job." },
+  { name: "About", label: "About Xpert and why join", kind: "textarea", rows: 5, hint: "Optional. Paragraphs shown before the role details; leave a blank line between paragraphs." },
   { name: "Responsibilities", label: "Responsibilities", kind: "textarea", rows: 8, hint: LIST_HINT },
   { name: "Requirements", label: "Requirements", kind: "textarea", rows: 8, hint: LIST_HINT },
   { name: "Benefits", label: "What we offer", kind: "textarea", rows: 5, hint: LIST_HINT },
@@ -56,6 +60,13 @@ export function CareerForm({ values }: { values: CareerFormValues }) {
             </span>
           </label>
           <SubmitButton pending={pending}>Save</SubmitButton>
+        </fieldset>
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
+          <legend className="px-2 text-sm font-semibold">Ways to apply</legend>
+          <p className="text-xs text-text-secondary">Shown as buttons next to the application form on the website.</p>
+          <TextInput id="linkedinUrl" type="url" label="LinkedIn job post" placeholder="https://www.linkedin.com/jobs/view/…" hint="Empty: the button opens Xpert's LinkedIn jobs page." defaultValue={values.linkedinUrl} error={e.linkedinUrl} />
+          <TextInput id="bdjobsUrl" type="url" label="Bdjobs job post" placeholder="https://jobs.bdjobs.com/jobdetails/?id=…" hint="Empty: no Bdjobs button." defaultValue={values.bdjobsUrl} error={e.bdjobsUrl} />
+          <TextInput id="applyEmail" type="email" label="Apply by email to" placeholder="career@xpertfintech.com" hint="Empty: no email option. The subject is filled in with the job title." defaultValue={values.applyEmail} error={e.applyEmail} />
         </fieldset>
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Job details</legend>

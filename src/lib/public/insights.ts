@@ -171,8 +171,29 @@ export const getJobBySlug = cache(async (locale: AppLocale, slug: string) => {
 export function lines(text: string | null | undefined) {
   return (text ?? "")
     .split(/\r?\n/)
+    .filter((l) => !/^\s*#{2,3}\s/.test(l))
     .map((l) => l.replace(/^\s*[-•*]\s*/, "").trim())
     .filter(Boolean);
+}
+
+/**
+ * A bullet list with optional small headings: a line starting with "## "
+ * starts a new group ("## Education" → heading "Education").
+ */
+export function listGroups(text: string | null | undefined): { heading: string | null; items: string[] }[] {
+  const groups: { heading: string | null; items: string[] }[] = [];
+  for (const raw of (text ?? "").split(/\r?\n/)) {
+    const head = /^\s*#{2,3}\s+(.+)$/.exec(raw);
+    if (head) {
+      groups.push({ heading: head[1]!.trim(), items: [] });
+      continue;
+    }
+    const line = raw.replace(/^\s*[-•*]\s*/, "").trim();
+    if (!line) continue;
+    if (!groups.length) groups.push({ heading: null, items: [] });
+    groups[groups.length - 1]!.items.push(line);
+  }
+  return groups.filter((g) => g.items.length);
 }
 
 // ── Gallery ──────────────────────────────────────────────────────────────────

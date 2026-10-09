@@ -1,14 +1,19 @@
+import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Shell } from "@/components/flagship/Sections";
 import { ApplyForm } from "@/components/careers/ApplyForm";
+import { Paragraphs } from "@/components/blocks/Shared";
+import { Icon } from "@/components/ui/Icon";
+import { SocialIcon } from "@/components/ui/SocialIcon";
+import { getSiteInfo } from "@/lib/content/settings";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
-import { getJobBySlug, lines } from "@/lib/public/insights";
+import { getJobBySlug, listGroups } from "@/lib/public/insights";
 import { breadcrumbLd, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 import { turnstileSiteKey } from "@/lib/public/turnstile";
-import { employmentLabel } from "@/lib/public/labels";
+import { employmentLabel, jobTag } from "@/lib/public/labels";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -41,10 +46,24 @@ export default async function JobPage({ params }: Props) {
     ? new Intl.DateTimeFormat(loc === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" }).format(career.deadline)
     : null;
   const sections = [
-    { title: t.jobResponsibilities, items: lines(tr.responsibilities) },
-    { title: t.jobRequirements, items: lines(tr.requirements) },
-    { title: t.jobBenefits, items: lines(tr.benefits) },
-  ].filter((s) => s.items.length);
+    { title: t.jobResponsibilities, groups: listGroups(tr.responsibilities) },
+    { title: t.jobRequirements, groups: listGroups(tr.requirements) },
+    { title: t.jobBenefits, groups: listGroups(tr.benefits) },
+  ].filter((s) => s.groups.length);
+
+  // Other ways to apply: the same job on LinkedIn and Bdjobs, or by email.
+  const site = await getSiteInfo(loc);
+  const companyLinkedIn = site.socialLinks.find((l) => /linkedin\.com\/company\//i.test(l.url))?.url;
+  const linkedin = career.linkedinUrl ?? (companyLinkedIn ? `${companyLinkedIn.replace(/\/+$/, "")}/jobs/` : null);
+  const enTitle = career.translations.find((x) => x.locale === "en")?.title ?? tr.title;
+  const mailto = career.applyEmail
+    ? `mailto:${career.applyEmail}?subject=${encodeURIComponent(`${enTitle} – ${t.applyEmailName}`)}&body=${encodeURIComponent(t.applyEmailBody)}`
+    : null;
+  const routes = [
+    linkedin && { href: linkedin, label: career.linkedinUrl ? t.applyLinkedIn : t.applyLinkedInCompany, icon: <SocialIcon kind="linkedin" className="size-4" />, external: true },
+    career.bdjobsUrl && { href: career.bdjobsUrl, label: t.applyBdjobs, icon: <Icon name="briefcase" className="size-4" />, external: true },
+    mailto && { href: mailto, label: t.applyByEmail, note: career.applyEmail, icon: <SocialIcon kind="email" className="size-4" />, external: false },
+  ].filter(Boolean) as { href: string; label: string; note?: string | null; icon: ReactNode; external: boolean }[];
 
   return (
     <article>
@@ -70,10 +89,10 @@ export default async function JobPage({ params }: Props) {
             ← {t.allJobs}
           </Link>
           <p data-reveal className="flex flex-wrap gap-2 text-xs">
-            {career.department && <span className="rounded-full bg-brand-sky/10 px-2.5 py-1 font-semibold text-cyan-300">{career.department}</span>}
+            {career.department && <span className="rounded-full bg-brand-sky/10 px-2.5 py-1 font-semibold text-cyan-300">{jobTag(career.department, loc)}</span>}
             <span className="rounded-full border border-fg/10 px-2.5 py-1 text-text-secondary">{employmentLabel(t, career.employmentType)}</span>
-            {career.location && <span className="rounded-full border border-fg/10 px-2.5 py-1 text-text-secondary">{career.location}</span>}
-            {career.experience && <span className="rounded-full border border-fg/10 px-2.5 py-1 text-text-secondary">{career.experience}</span>}
+            {career.location && <span className="rounded-full border border-fg/10 px-2.5 py-1 text-text-secondary">{jobTag(career.location, loc)}</span>}
+            {career.experience && <span className="rounded-full border border-fg/10 px-2.5 py-1 text-text-secondary">{jobTag(career.experience, loc)}</span>}
           </p>
           <h1 data-reveal className="max-w-4xl font-display text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance text-text-primary md:text-6xl">
             {tr.title}
@@ -84,17 +103,28 @@ export default async function JobPage({ params }: Props) {
       <Shell className="pb-16 md:pb-20">
         <div className="grid gap-10 lg:grid-cols-[1fr_26rem]">
           <div className="flex flex-col gap-10">
+            {tr.about && (
+              <section data-reveal className="flex flex-col gap-4 rounded-3xl border border-fg/[0.08] bg-fg/[0.02] p-6 md:p-8">
+                <h2 className="font-display text-2xl font-semibold tracking-tight">{t.jobAbout}</h2>
+                <Paragraphs text={tr.about} className="leading-relaxed text-text-primary/90" />
+              </section>
+            )}
             {sections.map((s) => (
-              <section key={s.title} data-reveal className="flex flex-col gap-4">
+              <section key={s.title} data-reveal className="flex flex-col gap-5">
                 <h2 className="font-display text-2xl font-semibold tracking-tight">{s.title}</h2>
-                <ul className="flex flex-col gap-3">
-                  {s.items.map((item, i) => (
-                    <li key={i} className="flex gap-3 leading-relaxed text-text-primary/90">
-                      <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-cyan-300" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+                {s.groups.map((g, gi) => (
+                  <div key={gi} className="flex flex-col gap-3">
+                    {g.heading && <h3 className="text-base font-semibold text-text-primary">{g.heading}</h3>}
+                    <ul className="flex flex-col gap-3">
+                      {g.items.map((item, i) => (
+                        <li key={i} className="flex gap-3 leading-relaxed text-text-primary/90">
+                          <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-cyan-300" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </section>
             ))}
           </div>
@@ -104,7 +134,30 @@ export default async function JobPage({ params }: Props) {
                 <>
                   <h2 className="font-display text-2xl font-semibold">{t.applyTitle}</h2>
                   {deadline && <p className="mt-1 text-sm text-text-secondary">{t.applyBy.replace("{date}", deadline)}</p>}
-                  <div className="mt-6">
+                  {routes.length > 0 && (
+                    <>
+                      <ul className="mt-6 flex flex-col gap-2">
+                        {routes.map((r) => (
+                          <li key={r.label}>
+                            <a
+                              href={r.href}
+                              {...(r.external && { target: "_blank", rel: "noopener noreferrer" })}
+                              className="flex min-h-12 items-center gap-3 rounded-2xl border border-fg/12 px-4 py-2.5 text-sm font-semibold transition-colors hover:border-brand-sky/60 hover:text-brand-sky"
+                            >
+                              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-brand-sky/10 text-brand-sky">{r.icon}</span>
+                              <span className="flex min-w-0 flex-1 flex-col">
+                                {r.label}
+                                {r.note && <span className="truncate text-xs font-normal text-text-secondary">{r.note}</span>}
+                              </span>
+                              {r.external && <span className="sr-only">{t.opensInNewTab}</span>}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-6 flex items-center gap-3 text-xs text-text-secondary before:h-px before:flex-1 before:bg-fg/10 after:h-px after:flex-1 after:bg-fg/10">{t.applyHere}</p>
+                    </>
+                  )}
+                  <div className={routes.length ? "mt-4" : "mt-6"}>
                     <ApplyForm careerId={career.id} t={t} locale={loc} turnstileSiteKey={turnstileSiteKey()} />
                   </div>
                 </>

@@ -1037,6 +1037,11 @@ model Career {
   deadline       DateTime?
   /// Closed jobs stay published (marked closed) but stop accepting applications.
   isClosed       Boolean        @default(false)
+  /// The same job posted on LinkedIn and Bdjobs; empty LinkedIn = the company's LinkedIn jobs page, empty Bdjobs = no Bdjobs button.
+  linkedinUrl    String?
+  bdjobsUrl      String?
+  /// Where emailed applications go; empty = no email option.
+  applyEmail     String?
   status         ContentStatus  @default(DRAFT)
   publishAt      DateTime?
   sortOrder      Int            @default(0)
@@ -1060,6 +1065,8 @@ model CareerTranslation {
   slug             String
   title            String
   summary          String?
+  /// About Xpert and why join, shown above the role details (paragraphs).
+  about            String?
   responsibilities String?
   requirements     String?
   benefits         String?

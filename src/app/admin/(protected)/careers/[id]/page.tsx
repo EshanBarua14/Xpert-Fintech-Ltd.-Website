@@ -12,7 +12,7 @@ import { toLocalInput } from "@/lib/validation/common";
 import { toDateInput } from "@/lib/validation/organizations";
 import { deleteCareerForever, restoreCareer, trashCareer } from "../actions";
 
-const emptyText = { title: "", slug: "", summary: "", responsibilities: "", requirements: "", benefits: "" };
+const emptyText = { title: "", slug: "", summary: "", about: "", responsibilities: "", requirements: "", benefits: "" };
 
 export default async function CareerPage({
   params,
@@ -28,7 +28,7 @@ export default async function CareerPage({
   if (id === "new") {
     const values: CareerFormValues = {
       status: "DRAFT", publishAt: "", sortOrder: 0, department: "", location: "Dhaka", employmentType: "FULL_TIME",
-      experience: "", deadline: "", isClosed: false, en: { ...emptyText }, bn: { ...emptyText },
+      experience: "", deadline: "", isClosed: false, linkedinUrl: "", bdjobsUrl: "", applyEmail: "career@xpertfintech.com", en: { ...emptyText }, bn: { ...emptyText },
     };
     return (
       <div className="flex flex-col gap-6">
@@ -48,7 +48,7 @@ export default async function CareerPage({
   const text = (l: string) => {
     const t = job.translations.find((x) => x.locale === l);
     return t
-      ? { title: t.title, slug: t.slug, summary: t.summary ?? "", responsibilities: t.responsibilities ?? "", requirements: t.requirements ?? "", benefits: t.benefits ?? "" }
+      ? { title: t.title, slug: t.slug, summary: t.summary ?? "", about: t.about ?? "", responsibilities: t.responsibilities ?? "", requirements: t.requirements ?? "", benefits: t.benefits ?? "" }
       : { ...emptyText };
   };
 
@@ -98,6 +98,9 @@ export default async function CareerPage({
             experience: job.experience ?? "",
             deadline: toDateInput(job.deadline),
             isClosed: job.isClosed,
+            linkedinUrl: job.linkedinUrl ?? "",
+            bdjobsUrl: job.bdjobsUrl ?? "",
+            applyEmail: job.applyEmail ?? "",
             en: text("en"),
             bn: text("bn"),
           }}

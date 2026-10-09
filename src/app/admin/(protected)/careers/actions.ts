@@ -8,7 +8,7 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { formInput } from "@/lib/admin/forms";
 import { purgeApplication, purgeCareer } from "@/lib/admin/purge";
-import { checkbox, optionalText, parseLocalDateTime, slugField, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
+import { checkbox, optionalHttpsUrl, optionalText, parseLocalDateTime, slugField, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { parseDateOnly } from "@/lib/validation/organizations";
 
 export type CareerState = { errors?: FieldErrors; message?: string };
@@ -24,15 +24,25 @@ const schema = z.object({
   experience: optionalText(120),
   deadline: z.string().optional(),
   isClosed: checkbox,
+  linkedinUrl: optionalHttpsUrl.refine((v) => !v || /^https:\/\/([a-z]+\.)?linkedin\.com\//i.test(v), "Enter a linkedin.com address."),
+  bdjobsUrl: optionalHttpsUrl.refine((v) => !v || /^https:\/\/([a-z0-9]+\.)?bdjobs\.com\//i.test(v), "Enter a bdjobs.com address."),
+  applyEmail: z
+    .string()
+    .trim()
+    .max(160)
+    .refine((v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "Enter an email address.")
+    .transform((v) => v.toLowerCase() || null),
   enTitle: z.string().trim().min(1, "English job title is required.").max(200),
   enSlug: slugField,
   enSummary: optionalText(800),
+  enAbout: optionalText(4000),
   enResponsibilities: optionalText(10000),
   enRequirements: optionalText(10000),
   enBenefits: optionalText(5000),
   bnTitle: z.string().trim().max(200),
   bnSlug: slugField,
   bnSummary: optionalText(800),
+  bnAbout: optionalText(4000),
   bnResponsibilities: optionalText(10000),
   bnRequirements: optionalText(10000),
   bnBenefits: optionalText(5000),
@@ -60,12 +70,16 @@ export async function saveCareer(_prev: CareerState, formData: FormData): Promis
     experience: v.experience ?? null,
     deadline: parseDateOnly(v.deadline),
     isClosed: v.isClosed,
+    linkedinUrl: v.linkedinUrl,
+    bdjobsUrl: v.bdjobsUrl,
+    applyEmail: v.applyEmail,
     updatedById: admin.id,
   };
   const text = (l: "en" | "bn") => ({
     title: l === "en" ? v.enTitle : v.bnTitle,
     slug: l === "en" ? enSlug : bnSlug,
     summary: (l === "en" ? v.enSummary : v.bnSummary) ?? null,
+    about: (l === "en" ? v.enAbout : v.bnAbout) ?? null,
     responsibilities: (l === "en" ? v.enResponsibilities : v.bnResponsibilities) ?? null,
     requirements: (l === "en" ? v.enRequirements : v.bnRequirements) ?? null,
     benefits: (l === "en" ? v.enBenefits : v.bnBenefits) ?? null,

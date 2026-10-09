@@ -32,6 +32,7 @@ import { CREDENTIALS } from "../src/content/xfl2/credentials";
 import { DIRECTOR_PROFILES } from "../src/content/xfl2/director-profiles";
 import { sniff } from "../src/lib/media/inspect";
 import { CASE_STUDY_DRAFTS } from "../src/content/xfl2/case-study-drafts";
+import { CAREER_SEED } from "../src/content/xfl2/careers";
 import { BLOCK_BN, EVENT_BN, ITEM_BN, LEGAL_BN, NAV_BN, NODE_BN, OFFERING_BN, OFFICE_BN, ORG_BN, PAGE_BN, PERSON_BN } from "../src/content/xfl2/bangla";
 
 const db = new PrismaClient();
@@ -1528,6 +1529,49 @@ async function seedCaseStudyDrafts() {
   if (added) console.log(`• ${added} draft case studies added: fill in the [bracketed] results with each client and publish in Admin → Case studies`);
 }
 
+/**
+ * The open roles from XFL HR (src/content/xfl2/careers.ts), added once as
+ * published jobs in English and Bangla. A job already there with the same
+ * address is left alone; after this they are managed in Admin → Careers.
+ */
+async function seedCareers() {
+  const MARK = "seed.careers-2026-10-09";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  let added = 0;
+  for (const [i, c] of CAREER_SEED.entries()) {
+    if (await db.careerTranslation.findFirst({ where: { slug: c.slug } })) continue;
+    await db.career.create({
+      data: {
+        status: "PUBLISHED",
+        publishAt: new Date(),
+        sortOrder: i,
+        department: c.department,
+        location: c.location,
+        employmentType: "FULL_TIME",
+        experience: c.experience,
+        linkedinUrl: c.linkedinUrl,
+        bdjobsUrl: c.bdjobsUrl,
+        applyEmail: c.applyEmail,
+        translations: {
+          create: (["en", "bn"] as const).map((l) => ({
+            locale: l === "en" ? EN : BN,
+            slug: c.slug,
+            title: c.title[l],
+            summary: c.summary[l],
+            about: c.about[l],
+            responsibilities: c.responsibilities[l],
+            requirements: c.requirements[l],
+            benefits: c.benefits?.[l] ?? null,
+          })),
+        },
+      },
+    });
+    added++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  if (added) console.log(`• ${added} open role(s) added to Careers`);
+}
+
 /** Older databases: mark seeded stand-in profiles as placeholders (until an editor changes that). */
 async function markPlaceholders() {
   const res = await db.person.updateMany({ where: { key: { startsWith: "placeholder-" }, isPlaceholder: false, translations: { some: { name: "Name to be confirmed" } } }, data: { isPlaceholder: true } });
@@ -1567,6 +1611,7 @@ async function main() {
   await seedProductScreens();
   await seedNavAdditions();
   await seedCaseStudyDrafts();
+  await seedCareers();
   await seedBanglaGaps();
   console.log("Content seed complete.");
 }

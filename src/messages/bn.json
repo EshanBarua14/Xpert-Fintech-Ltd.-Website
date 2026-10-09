@@ -640,5 +640,14 @@
   "figuresTitle": "সংখ্যায় এক্সপার্ট",
   "figureSlotOrders": "দৈনিক অর্ডার",
   "figureSlotYears": "চালু থাকার বছর",
-  "figureSlotMembers": "প্ল্যাটফর্মে সদস্য"
+  "figureSlotMembers": "প্ল্যাটফর্মে সদস্য",
+  "jobAbout": "এক্সপার্ট ও এই পদ সম্পর্কে",
+  "applyLinkedIn": "লিংকডইনে আবেদন করুন",
+  "applyLinkedInCompany": "লিংকডইনে আমাদের চাকরিগুলো দেখুন",
+  "applyBdjobs": "বিডিজবসে আবেদন করুন",
+  "applyEmailName": "Your Name",
+  "applyEmailBody": "অনুগ্রহ করে আপনার সিভি, পোর্টফোলিও (যদি থাকে) এবং আপনি কেন এই পদের জন্য উপযুক্ত তা নিয়ে একটি সংক্ষিপ্ত নোট সংযুক্ত করুন।",
+  "applyHere": "অথবা এখানে আবেদন করুন",
+  "opensInNewTab": "(নতুন ট্যাবে খোলে)",
+  "applyByEmail": "ইমেইলে আবেদন করুন"
 }

@@ -160,10 +160,10 @@ export function HeaderClient({
   return (
     <header className="fixed inset-x-0 top-0 z-(--z-sticky)">
       {ticker && <TickerBar {...ticker} />}
-      <div className="px-3 pt-3 md:px-6 md:pt-4">
+      <div className="site-bar-wrap px-3 pt-3 md:px-6 md:pt-4">
       <div
         className={cn(
-          "relative mx-auto flex h-14 max-w-7xl items-center gap-2 rounded-full border px-2 pl-4 transition-[background-color,border-color,box-shadow] duration-500 md:h-16",
+          "site-bar relative mx-auto flex h-14 max-w-7xl items-center gap-2 rounded-full border px-2 pl-4 transition-[background-color,border-color,box-shadow] duration-500 md:h-16",
           scrolled || openId ? "glass-strong shadow-[0_12px_40px_-12px_rgb(0_0_0/0.7)]" : "border-transparent bg-transparent",
         )}
         onMouseLeave={scheduleClose}

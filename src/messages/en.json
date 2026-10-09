@@ -625,5 +625,20 @@
   "roleOpsTitle": "Operations and compliance",
   "roleOpsBody": "Settle trades, keep client documents in order and report to the regulator.",
   "roleMgmtTitle": "Brokerage management",
-  "roleMgmtBody": "See trading and operations across the house, on one platform run for the consortium."
+  "roleMgmtBody": "See trading and operations across the house, on one platform run for the consortium.",
+  "keyFeatures": "Key features",
+  "keyFeaturesBody": "What the product does, at a glance.",
+  "resultsTitle": "Results",
+  "resultsBody": "Where it is live, and what it has changed for the brokerages using it.",
+  "figureSlotProduct": "Verified figure for this product",
+  "glanceFor": "Built for",
+  "glanceConnects": "Connects to",
+  "glanceLive": "Live at",
+  "glanceLiveValue": "{n} brokerages",
+  "ecosystemShort": "Ecosystem",
+  "onThisPage": "On this page",
+  "figuresTitle": "Xpert in numbers",
+  "figureSlotOrders": "Orders a day",
+  "figureSlotYears": "Years live",
+  "figureSlotMembers": "Members on the platform"
 }

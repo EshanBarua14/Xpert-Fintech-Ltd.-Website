@@ -8,6 +8,8 @@ import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getCaseStudies } from "@/lib/public/insights";
 import { buildMetadata } from "@/lib/public/seo";
+import { contentSlots } from "@/lib/env/hints";
+import { ContentSlot } from "@/components/ui/ContentSlot";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -29,10 +31,21 @@ export default async function CaseStudiesPage({ params }: Props) {
       <PageHero eyebrow={t.insightsEyebrow} title={t.caseStudiesTitle} body={t.caseStudiesBody} />
       <Shell className="pb-16 md:pb-20">
         {items.length === 0 ? (
-          <div data-reveal className="glass rounded-[2rem] p-10 text-center md:p-16">
-            <p className="font-display text-2xl font-semibold">{t.caseStudiesEmptyTitle}</p>
-            <p className="mx-auto mt-3 max-w-xl text-text-secondary">{t.caseStudiesEmptyBody}</p>
-          </div>
+          contentSlots() ? (
+            // Outside the live site: where the first case studies go.
+            <ul className="grid gap-4 md:grid-cols-3">
+              {[0, 1, 2].map((i) => (
+                <li key={i}>
+                  <ContentSlot kind="caseStudy" locale={loc} adminHref="/admin/case-studies/new" className="min-h-56" />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div data-reveal className="glass rounded-[2rem] p-10 text-center md:p-16">
+              <p className="font-display text-2xl font-semibold">{t.caseStudiesEmptyTitle}</p>
+              <p className="mx-auto mt-3 max-w-xl text-text-secondary">{t.caseStudiesEmptyBody}</p>
+            </div>
+          )
         ) : (
           <ul className="grid gap-5 md:grid-cols-2">
             {items.map((c, i) => (
@@ -43,7 +56,6 @@ export default async function CaseStudiesPage({ params }: Props) {
                       <Image src={c.cover.url} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
                     ) : (
                       <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-brand-royal/40 via-navy-800 to-ink-950">
-                        <span className="grid-fade pointer-events-none absolute inset-0 opacity-60" />
                       </span>
                     )}
                   </span>

@@ -1465,6 +1465,34 @@ async function seedBanglaGaps() {
   if (added) console.log(`• Bangla added to ${added} item(s) that had English only (menus, products, events, names, address, pages)`);
 }
 
+/**
+ * Menu links for pages added later: Security and compliance (footer, next to
+ * the legal pages) and Case studies (under Insights). Each is added once if
+ * missing; a link shows on the site only once its page is published.
+ */
+async function seedNavAdditions() {
+  const add = async (menuKey: string, parentHref: string | null, parentLabel: string | null, href: string, label: string) => {
+    const menu = await db.navMenu.findUnique({ where: { key: menuKey } });
+    if (!menu) return;
+    if (await db.navItem.findFirst({ where: { menuId: menu.id, href } })) return;
+    let parentId: string | null = null;
+    if (parentHref || parentLabel) {
+      const parent = parentHref
+        ? await db.navItem.findFirst({ where: { menuId: menu.id, children: { some: { href: parentHref } } } })
+        : await db.navItem.findFirst({ where: { menuId: menu.id, parentId: null, translations: { some: { locale: EN, label: parentLabel! } } } });
+      if (!parent) return;
+      parentId = parent.id;
+    }
+    const last = await db.navItem.findFirst({ where: { menuId: menu.id, parentId }, orderBy: { sortOrder: "desc" } });
+    await db.navItem.create({
+      data: { menuId: menu.id, parentId, linkType: "INTERNAL", href, sortOrder: (last?.sortOrder ?? -1) + 1, translations: { create: { locale: EN, label } } },
+    });
+    console.log(`• Menu: added “${label}” (shows once its page is published)`);
+  };
+  await add("footer-legal", null, null, "security", "Security and compliance");
+  await add("header", "events", null, "case-studies", "Case studies");
+}
+
 /** Older databases: mark seeded stand-in profiles as placeholders (until an editor changes that). */
 async function markPlaceholders() {
   const res = await db.person.updateMany({ where: { key: { startsWith: "placeholder-" }, isPlaceholder: false, translations: { some: { name: "Name to be confirmed" } } }, data: { isPlaceholder: true } });
@@ -1502,6 +1530,7 @@ async function main() {
   await seedEcosystem();
   await seedRmsInOms();
   await seedProductScreens();
+  await seedNavAdditions();
   await seedBanglaGaps();
   console.log("Content seed complete.");
 }

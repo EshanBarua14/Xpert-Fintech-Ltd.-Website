@@ -1333,3 +1333,11 @@ html {
   .contact-icon:hover, .contact-icon:focus-visible { transform: none; }
 }
 
+
+/* ── Phones turned sideways and other short screens: a slimmer header, so content keeps the room ── */
+@media (orientation: landscape) and (max-height: 520px) {
+  .site-bar-wrap { padding-top: 0.375rem; }
+  .site-bar { height: 3rem; }
+  main#main { padding-top: calc(3.75rem + var(--ticker-h, 0px)) !important; }
+  main h1 { font-size: clamp(1.75rem, 10svh, 2.75rem) !important; line-height: 1.08 !important; }
+}

@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils/cn";
 import { getDesign } from "@/lib/content/design";
-import { editorHints } from "@/lib/env/hints";
+import { contentSlots } from "@/lib/env/hints";
+import { ContentSlot } from "@/components/ui/ContentSlot";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -24,7 +25,7 @@ import { getOfferingBySlug, getSeo, mediaMap } from "@/lib/public/content";
 import { breadcrumbLd, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 import { parseVideoUrl, pick, videoEmbedUrl } from "@/lib/public/text";
 import { ProductDemo } from "@/components/products/ProductDemo";
-import { DemoPlaceholder, ScreensPlaceholder } from "@/components/products/MediaPlaceholder";
+import { DemoPlaceholder } from "@/components/products/MediaPlaceholder";
 import { DeviceShowcase } from "@/components/products/DeviceShowcase";
 import { ProductMark, productVars } from "@/components/products/ProductMark";
 import { AutomationFlow } from "@/components/products/AutomationFlow";
@@ -112,9 +113,8 @@ export default async function ProductPage({ params }: Props) {
   const faqs = itemsOf(offering, "FAQ", found.locale);
   const screenshots = offering.media.filter((m) => m.kind !== "VIDEO" && m.mediaId && images.has(m.mediaId));
   // The first playable video is the product demo (a link, or an uploaded file).
-  const preview = editorHints();
   // Where the demo video and screens go, shown outside the live site until they are added.
-  const mediaSlots = preview || process.env.APP_ENV !== "production";
+  const slots = contentSlots();
   const demo = offering.media.find((m) => m.kind === "VIDEO" && (videoEmbedUrl(m.videoUrl) || (m.mediaId && images.has(m.mediaId))));
   const demoPoster = demo ? (images.get(demo.posterMediaId ?? "")?.url ?? parseVideoUrl(demo.videoUrl)?.thumbnail ?? null) : null;
   const shots: (GalleryPhoto & { device: string | null })[] = screenshots.map((m) => {
@@ -134,6 +134,28 @@ export default async function ProductPage({ params }: Props) {
   const ecoNode = eco.nodes.find((n) => n.product === offering.key)?.key ?? null;
   const showOmsPreview = offering.key === "trading-platform";
   const look = (offering.key && (await getDesign()).products[offering.key]) || null;
+  // At a glance: who it is for, what it connects to in the market, where it is live.
+  const marketLinks = ecoNode
+    ? [...new Set(eco.edges.flatMap((e) => (e.from === ecoNode ? [e.to] : e.to === ecoNode ? [e.from] : [])))]
+        .map((k) => eco.nodes.find((n) => n.key === k))
+        .filter((n): n is NonNullable<typeof n> => !!n && n.layer === "MARKET")
+        .map((n) => n.label)
+    : [];
+  const glance = [
+    { label: t.glanceFor, value: targetUsers.length ? targetUsers.slice(0, 3).map((u) => u.title).join(", ") : null },
+    { label: t.glanceConnects, value: marketLinks.length ? marketLinks.join(", ") : null },
+    { label: t.glanceLive, value: offering.deployments.length ? fill(t.glanceLiveValue, { n: offering.deployments.length }) : null },
+  ].filter((g): g is { label: string; value: string } => !!g.value);
+  // In-page links to the sections this product has.
+  const jump = [
+    (capabilities.length > 0 || slots) && { id: "features", label: t.keyFeatures },
+    (shots.length > 0 || slots) && { id: "screens", label: t.screensTitle },
+    (demo || slots) && { id: "demo", label: t.demoTitle },
+    steps.length > 1 && { id: "how", label: t.howItWorks },
+    (ecoNode || ecoModule) && { id: "ecosystem", label: t.ecosystemShort },
+    (offering.deployments.length > 0 || slots) && { id: "results", label: t.resultsTitle },
+    faqs.length > 0 && { id: "faq", label: t.faq },
+  ].filter((x): x is { id: string; label: string } => !!x);
 
   return (
     <>
@@ -158,6 +180,7 @@ export default async function ProductPage({ params }: Props) {
 
       {/* Marks the page for the background: this product's icons and colour. */}
       <span hidden data-product-key={offering.key ?? undefined} />
+      <div style={productVars(offering.key, look)}>
 
       {/* Hero */}
       <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
@@ -215,10 +238,49 @@ export default async function ProductPage({ params }: Props) {
             />
           </div>
         </div>
+        {glance.length > 0 && (
+          <dl data-reveal className="relative mx-auto grid w-full max-w-7xl gap-4 px-4 pb-8 sm:grid-cols-2 md:px-8 lg:grid-cols-3">
+            {glance.map((g) => (
+              <div key={g.label} className="flex flex-col gap-1 border-l-2 border-[var(--p-to)] py-1 pl-4">
+                <dt className="text-xs font-semibold text-text-secondary">{g.label}</dt>
+                <dd className="font-display text-base leading-snug font-semibold text-text-primary">{g.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </section>
 
+      {jump.length > 2 && (
+        <nav aria-label={t.onThisPage} className="sticky top-[calc(4.5rem+var(--ticker-h,0px))] z-20 border-y border-fg/[0.06] bg-ink-950/85 backdrop-blur-xl md:top-[calc(5.5rem+var(--ticker-h,0px))]">
+          <ul className="mx-auto flex w-full max-w-7xl gap-1 overflow-x-auto px-4 py-2 md:px-8 [scrollbar-width:none]">
+            {jump.map((j) => (
+              <li key={j.id} className="shrink-0">
+                <a href={`#${j.id}`} className="inline-flex h-9 items-center rounded-full px-3.5 text-sm font-semibold whitespace-nowrap text-text-secondary transition-colors hover:bg-fg/[0.06] hover:text-text-primary">
+                  {j.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      {(capabilities.length > 0 || slots) && (
+        <Band id="features" title={t.keyFeatures} body={t.keyFeaturesBody}>
+          <FeatureGrid
+            items={capabilities.slice(0, 9)}
+            extra={
+              slots
+                ? Array.from({ length: Math.max(0, (capabilities.length < 3 ? 3 : capabilities.length < 6 ? 6 : 0) - capabilities.length) }, (_, i) => (
+                    <ContentSlot key={i} kind="feature" locale={found.locale} adminHref={`/admin/products/${offering.id}#items`} />
+                  ))
+                : []
+            }
+          />
+        </Band>
+      )}
+
       {(tr.problem || tr.solution) && (
-        <Band>
+        <Band id="overview">
           <div className="grid gap-4 md:grid-cols-2">
             {tr.problem && (
               <div data-reveal className="glass flex flex-col gap-5 rounded-3xl p-8">
@@ -236,8 +298,32 @@ export default async function ProductPage({ params }: Props) {
         </Band>
       )}
 
+      {(shots.length > 0 || slots) && (
+        <Band id="screens" title={t.screensTitle} body={t.screensBody} alt>
+          <Lightbox
+            layout="grid"
+            photos={shots}
+            labels={{ open: t.openPhoto, close: t.close, prev: t.prevPhoto, next: t.nextPhoto, counter: t.photoCounter }}
+            extra={
+              slots
+                ? // At least three tiles in all; the last empty one asks for a phone screen when there is none yet.
+                  Array.from({ length: Math.max(0, 3 - shots.length) }, (_, i) => (
+                    <ContentSlot
+                      key={`s${i}`}
+                      kind={i === 2 - shots.length && !shots.some((x) => x.device === "PHONE" || (x.width && x.height && x.height > x.width)) ? "phone" : "screen"}
+                      locale={found.locale}
+                      aspect="aspect-[16/10]"
+                      adminHref={`/admin/products/${offering.id}#media`}
+                    />
+                  ))
+                : []
+            }
+          />
+        </Band>
+      )}
+
       {demo && (
-        <Band title={t.demoTitle} body={t.demoBody}>
+        <Band id="demo" title={t.demoTitle} body={t.demoBody}>
           <div data-reveal className="mx-auto w-full max-w-5xl">
             <ProductDemo
               title={pick(demo.translations, found.locale)?.caption ?? `${tr.name}: ${t.demoTitle}`}
@@ -252,33 +338,27 @@ export default async function ProductPage({ params }: Props) {
       )}
 
       {/* Until the demo video and screens are added, outside production show where they go. */}
-      {!demo && mediaSlots && (
-        <Band title={t.demoTitle} body={t.demoBody}>
+      {!demo && slots && (
+        <Band id="demo" title={t.demoTitle} body={t.demoBody}>
           <div className="mx-auto w-full max-w-5xl">
             <DemoPlaceholder name={tr.name} locale={found.locale} adminHref={`/admin/products/${offering.id}#media`} />
           </div>
         </Band>
       )}
 
-      {shots.length > 0 && (
-        <Band title={t.screensTitle} body={t.screensBody} alt>
-          <div>
-            <Lightbox layout="feature" photos={shots} labels={{ open: t.openPhoto, close: t.close, prev: t.prevPhoto, next: t.nextPhoto, counter: t.photoCounter }} />
+      {steps.length > 1 && (
+        <Band id="how" title={t.automationTitle} body={t.automationBody} alt>
+          <div data-reveal>
+            <AutomationFlow
+              steps={steps.map((s) => ({ id: s.id, title: s.title, body: s.body }))}
+              productKey={offering.key}
+              look={look}
+              labels={{ running: t.automationRunning, done: t.automationDone, step: t.ecoTourStep, pause: t.ecoTourPause, play: t.ecoTourPlay }}
+            />
           </div>
         </Band>
       )}
 
-      {shots.length === 0 && mediaSlots && (
-        <Band title={t.screensTitle} body={t.screensBody} alt>
-          <ScreensPlaceholder locale={found.locale} adminHref={`/admin/products/${offering.id}#media`} />
-        </Band>
-      )}
-
-      {capabilities.length > 0 && (
-        <Band title={t.capabilities}>
-          <ItemGrid items={capabilities} />
-        </Band>
-      )}
 
       {showOmsPreview && (
         <Band title={t.omsPreviewTitle} alt>
@@ -290,7 +370,7 @@ export default async function ProductPage({ params }: Props) {
       )}
 
       {(ecoNode || (ecoModule && flagship)) && (
-        <Band title={t.whereItFits} body={t.whereItFitsBody}>
+        <Band id="ecosystem" title={t.whereItFits} body={t.whereItFitsBody}>
           <div data-reveal className="glass flex flex-col gap-8 rounded-3xl p-5 md:p-8" style={productVars(offering.key, look)}>
             {ecoNode && (
               <EcosystemPosition
@@ -318,20 +398,6 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </Band>
       )}
-
-      {steps.length > 1 && (
-        <Band title={t.automationTitle} body={t.automationBody} alt>
-          <div data-reveal>
-            <AutomationFlow
-              steps={steps.map((s) => ({ id: s.id, title: s.title, body: s.body }))}
-              productKey={offering.key}
-              look={look}
-              labels={{ running: t.automationRunning, done: t.automationDone, step: t.ecoTourStep, pause: t.ecoTourPause, play: t.ecoTourPlay }}
-            />
-          </div>
-        </Band>
-      )}
-
 
       {layers.length > 0 && (
         <Band title={t.architecture}>
@@ -396,10 +462,22 @@ export default async function ProductPage({ params }: Props) {
         </Band>
       )}
 
-      {offering.deployments.length > 0 && <Deployments offering={offering} locale={found.locale} t={t} logos={deploymentLogos} />}
+
+      {(offering.deployments.length > 0 || slots) && (
+        <Band id="results" title={t.resultsTitle} body={t.resultsBody} alt>
+          {offering.deployments.length > 0 && <DeploymentList offering={offering} locale={found.locale} t={t} logos={deploymentLogos} />}
+          {slots && (
+            <ul className="grid gap-4 md:grid-cols-3">
+              <li><ContentSlot kind="caseStudy" locale={found.locale} adminHref="/admin/case-studies/new" /></li>
+              <li><ContentSlot kind="review" locale={found.locale} adminHref="/admin/testimonials/new" /></li>
+              <li><ContentSlot kind="figure" locale={found.locale} title={t.figureSlotProduct} adminHref="/admin/figures" /></li>
+            </ul>
+          )}
+        </Band>
+      )}
 
       {faqs.length > 0 && (
-        <Band title={t.faq}>
+        <Band id="faq" title={t.faq}>
           <div className="flex max-w-3xl flex-col gap-3">
             {faqs.map((f) => (
               <details key={f.id} data-reveal className="group glass rounded-2xl px-6 py-5 open:border-brand-sky/30">
@@ -433,6 +511,7 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </Band>
       )}
+      </div>
     </>
   );
 }
@@ -448,9 +527,9 @@ function gridCols(n: number) {
   return "sm:grid-cols-2 lg:grid-cols-3";
 }
 
-function Band({ title, body, alt, children }: { title?: string; body?: string; alt?: boolean; children: React.ReactNode }) {
+function Band({ id, title, body, alt, children }: { id?: string; title?: string; body?: string; alt?: boolean; children: React.ReactNode }) {
   return (
-    <section className={alt ? "border-y border-fg/[0.06] bg-fg/[0.015]" : undefined}>
+    <section id={id} className={cn("scroll-mt-36", alt && "border-y border-fg/[0.06] bg-fg/[0.015]")}>
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 md:px-8 md:py-12">
         {title && <SectionHeader title={title} body={body} />}
         {children}
@@ -504,6 +583,46 @@ function ItemGrid({ items, icon, marks }: { items: { id: string; title: string; 
   );
 }
 
+/** A fitting symbol for a feature without one chosen in the admin, from its English or Bangla words. */
+function featureIcon(title: string): string {
+  const t = title.toLowerCase();
+  if (/chart|graph|চার্ট/.test(t)) return "chart";
+  if (/depth|portfolio|balance|gain|loss|ডেপথ|পোর্টফোলিও|লাভ/.test(t)) return "chart";
+  if (/order|trade|অর্ডার|লেনদেন/.test(t)) return "exchange";
+  if (/watch|ওয়াচ/.test(t)) return "bolt";
+  if (/news|sector|খবর/.test(t)) return "newspaper";
+  if (/search|history|খোঁজ|পুরোনো/.test(t)) return "book";
+  if (/keyboard|dashboard|desktop|ড্যাশবোর্ড|কিবোর্ড/.test(t)) return "cloud";
+  if (/document|file|নথি/.test(t)) return "document";
+  if (/kyc|identity|verify|যাচাই|পরিচয়/.test(t)) return "id";
+  if (/risk|limit|secure|ঝুঁকি|সুরক্ষ/.test(t)) return "shield";
+  if (/account|client|investor|অ্যাকাউন্ট|গ্রাহক/.test(t)) return "users";
+  if (/settle|ledger|report|সেটেলমেন্ট|রিপোর্ট/.test(t)) return "briefcase";
+  return "check";
+}
+
+/** Key features: the product's capabilities as a grid, numbered by order of importance. */
+function FeatureGrid({ items, extra = [] }: { items: { id: string; title: string; body: string | null; icon: string | null }[]; extra?: React.ReactNode[] }) {
+  return (
+    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((i, n) => (
+        <li key={i.id} data-reveal style={{ "--d": n % 3 } as CSSProperties} className="feature-card flex gap-4 rounded-3xl border border-fg/[0.08] bg-fg/[0.02] p-5 md:p-6">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--p-from,#1d4ed8)] to-[var(--p-to,#22bceb)] text-white shadow-[0_10px_24px_-12px_var(--p-to,#22bceb)]">
+            <Icon name={i.icon ?? featureIcon(i.title)} className="size-5" />
+          </span>
+          <span className="flex min-w-0 flex-col gap-1.5">
+            <h3 className="font-display text-lg leading-snug font-semibold">{i.title}</h3>
+            {i.body && <p className="text-sm leading-relaxed whitespace-pre-line text-text-secondary">{i.body}</p>}
+          </span>
+        </li>
+      ))}
+      {extra.map((node, k) => (
+        <li key={`slot-${k}`}>{node}</li>
+      ))}
+    </ul>
+  );
+}
+
 function ItemList({ items }: { items: { id: string; title: string; body: string | null }[] }) {
   if (!items.length) return null;
   return (
@@ -521,9 +640,10 @@ function ItemList({ items }: { items: { id: string; title: string; body: string 
   );
 }
 
-function Deployments({ offering, locale, t, logos }: { offering: Offering; locale: AppLocale; t: Messages; logos: Awaited<ReturnType<typeof mediaMap>> }) {
+function DeploymentList({ offering, locale, t, logos }: { offering: Offering; locale: AppLocale; t: Messages; logos: Awaited<ReturnType<typeof mediaMap>> }) {
   return (
-    <Band title={t.deployments} alt>
+    <div className="flex flex-col gap-4">
+      <h3 className="font-display text-xl font-semibold">{t.deployments}</h3>
       <ul className={cn("grid gap-4", gridCols(offering.deployments.length))}>
         {offering.deployments.map((d) => {
           const live = d.organization && d.organization.status === "PUBLISHED" && !d.organization.deletedAt ? d.organization : null;
@@ -563,7 +683,7 @@ function Deployments({ offering, locale, t, logos }: { offering: Offering; local
           );
         })}
       </ul>
-    </Band>
+    </div>
   );
 }
 

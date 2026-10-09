@@ -123,7 +123,7 @@ export default async function EditProductPage({
         <>
           <ProductForm values={toProductFormValues(offering)} parentOptions={await parentOptions(offering.id)} images={await imageOptions()} />
 
-          <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
+          <section id="items" className="flex scroll-mt-24 flex-col gap-4 border-t border-fg/10 pt-8">
             <div>
               <h2 className="font-display text-2xl font-semibold">Page content</h2>
               <p className="mt-1 text-sm text-text-secondary">

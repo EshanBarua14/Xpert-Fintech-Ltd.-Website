@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getReviewSeconds } from "@/lib/content/reviews";
 import { getDesign, type HomeSection } from "@/lib/content/design";
-import { editorHints } from "@/lib/env/hints";
+import { contentSlots, editorHints } from "@/lib/env/hints";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Sections } from "@/components/blocks/BlockRenderer";
@@ -25,6 +25,8 @@ import { LiveApps } from "@/components/organizations/LiveApps";
 import { getLiveApps } from "@/lib/public/company";
 import { getShowcase } from "@/lib/public/showcase";
 import { RoleGuide } from "@/components/flagship/RoleGuide";
+import { FiguresStrip } from "@/components/flagship/FiguresStrip";
+import { getFigures } from "@/lib/content/figures";
 import { showcaseLabels } from "@/lib/public/labels";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
@@ -84,7 +86,7 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   const [data, events, market, showcase, credentials] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]);
-  const [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline, design, reviewSeconds] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds()]);
+  const [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline, design, reviewSeconds, figures] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds(), getFigures()]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -151,6 +153,15 @@ export default async function HomePage({ params }: Props) {
                 overall: t.reachOverall,
               }}
             />
+          </div>
+        </Shell>
+      )}
+
+      {show("figures") && (figures.length > 0 || contentSlots()) && (
+        <Shell id="figures" className="py-12 md:py-16">
+          <div className="flex flex-col gap-10">
+            <SectionHeader title={t.figuresTitle} />
+            <FiguresStrip figures={figures} t={t} locale={locale} slots={contentSlots()} />
           </div>
         </Shell>
       )}

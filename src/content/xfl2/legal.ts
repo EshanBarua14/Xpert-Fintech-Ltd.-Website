@@ -1,6 +1,6 @@
 /**
- * Starting drafts for the Privacy policy, Terms of use and Accessibility
- * statement linked from the footer. They describe what THIS website does
+ * Starting drafts for the Privacy policy, Terms of use, Accessibility
+ * statement and Security and compliance page linked from the footer. They describe what THIS website does
  * (forms, cookies, storage) and nothing else. Each section becomes a text
  * block: a heading and paragraphs (lines starting with • read as a list).
  * Seeded once as DRAFT pages by `npm run db:seed:content`: XFL's legal adviser must review them before they
@@ -111,6 +111,42 @@ export const LEGAL_DRAFTS: LegalDraft[] = [
       {
         "title": "Tell us about a problem",
         "body": "If something on this website is hard to use, write to info@xpertfintech.com and tell us the page and what happened. We will reply within [5] working days. Last reviewed: [date]."
+      }
+    ]
+  },
+  {
+    "key": "security",
+    "path": "security",
+    "title": "Security and compliance",
+    "intro": "How Xpert protects brokerage and investor data, and the rules it works under.",
+    "sections": [
+      {
+        "title": "The rules we work under",
+        "body": "Xpert's products serve brokerage houses licensed by the Bangladesh Securities and Exchange Commission (BSEC) and connect to the Dhaka Stock Exchange, the Chittagong Stock Exchange and CDBL. Exchange connections are certified as listed on our Credentials. [List any BSEC, DSE or CSE approvals with their dates.]"
+      },
+      {
+        "title": "Where data is hosted",
+        "body": "[Name the data centre(s) and country, and say whether client data stays in Bangladesh.]"
+      },
+      {
+        "title": "How data is protected",
+        "body": "• [Encryption in transit and at rest.]\n• [Who can reach production systems, and how access is granted and removed.]\n• [Backups: how often, where they are kept, and how restores are tested.]"
+      },
+      {
+        "title": "Monitoring and activity records",
+        "body": "[Two-step sign-in for staff, what is logged, and how long logs are kept.]"
+      },
+      {
+        "title": "Certifications and audits",
+        "body": "[Only certifications Xpert actually holds — for example ISO/IEC 27001 — with the certificate number, scope and expiry, and the date of the latest independent audit.]"
+      },
+      {
+        "title": "Business continuity",
+        "body": "[Uptime target, the disaster-recovery site, and how brokerages are told about an incident.]"
+      },
+      {
+        "title": "Report a security issue",
+        "body": "Write to [security@xpertfintech.com] with what you found and how to reproduce it. We will acknowledge within [2] working days."
       }
     ]
   }

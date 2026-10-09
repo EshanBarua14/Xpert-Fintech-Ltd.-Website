@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { OfferingItemsEditor, type EditorItem } from "@/components/admin/OfferingItemsEditor";
 import { ProductMediaForm } from "@/components/admin/ProductMediaForm";
+import { ScreenDetailsForm } from "@/components/admin/ScreenDetailsForm";
 import { imageOptions, videoFileOptions } from "@/lib/admin/media";
 import { ConfirmButton, StatusBadge } from "@/components/admin/AdminUi";
 import { buttonClasses } from "@/components/ui/Button";
@@ -47,6 +48,15 @@ export default async function EditProductPage({
     captionEn: demo?.translations.find((t) => t.locale === "en")?.caption ?? "",
     captionBn: demo?.translations.find((t) => t.locale === "bn")?.caption ?? "",
   };
+
+  const screenRows = offering.media
+    .filter((m) => m.kind !== "VIDEO" && m.mediaId)
+    .flatMap((m) => {
+      const img = images.find((x) => x.id === m.mediaId);
+      if (!img) return [];
+      const cap = (l: string) => m.translations.find((t) => t.locale === l)?.caption ?? "";
+      return [{ id: m.id, url: img.url, width: img.width, height: img.height, device: m.device ?? "", captionEn: cap("en"), captionBn: cap("bn") }];
+    });
 
   const en = offering.translations.find((t) => t.locale === "en");
   const items: EditorItem[] = offering.items.map((item) => {
@@ -129,6 +139,17 @@ export default async function EditProductPage({
               <p className="mt-1 text-sm text-text-secondary">Shown on the product page as “See it working” and “Inside the product”.</p>
             </div>
             <ProductMediaForm offeringId={offering.id} values={mediaValues} images={images} files={files} />
+            <div className="flex flex-col gap-3 border-t border-fg/10 pt-6">
+              <h3 className="font-semibold">Screen details</h3>
+              <p className="text-sm text-text-secondary">
+                Where each screenshot appears in the 3D web, tablet and phone display, and its caption. Upload as many screens as you like; the order above is the order on the page.
+              </p>
+              <ScreenDetailsForm
+                key={screenRows.map((r) => r.id).join()}
+                offeringId={offering.id}
+                rows={screenRows}
+              />
+            </div>
           </section>
 
           <section className="flex items-center justify-between gap-4 border-t border-fg/10 pt-8">

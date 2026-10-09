@@ -30,7 +30,7 @@ export type ShowcaseProduct = {
   visual: VisualKind;
   image: { url: string; alt: string; width: number | null; height: number | null } | null;
   /** Images for the device screens (hero image first, then screenshots); wide ones go on web, tall on the phone. */
-  shots: { url: string; alt: string; width: number | null; height: number | null }[];
+  shots: { url: string; alt: string; width: number | null; height: number | null; device?: string | null }[];
   /** Product logo (Admin → Products → Product logo). */
   logo: { url: string; width: number | null; height: number | null } | null;
   /** Colours and symbol from Admin → Design → Products. */
@@ -51,7 +51,7 @@ export const getShowcase = cache(async (locale: AppLocale): Promise<ShowcaseProd
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
         include: { translations: true },
       },
-      media: { where: { isHidden: false, kind: "SCREENSHOT" }, orderBy: { sortOrder: "asc" }, take: 6 },
+      media: { where: { isHidden: false, kind: "SCREENSHOT" }, orderBy: { sortOrder: "asc" }, take: 12 },
     },
   });
   const design = await getDesign();
@@ -78,9 +78,11 @@ export const getShowcase = cache(async (locale: AppLocale): Promise<ShowcaseProd
         href: `/${own ? locale : "en"}/products/${(own ?? tr).slug}`,
         visual: visualForSlug(tr.slug),
         image,
-        shots: [r.heroMediaId, ...r.media.map((m) => m.mediaId)]
-          .map((id) => (id ? images.get(id) : undefined))
-          .filter((x): x is NonNullable<typeof x> => Boolean(x)),
+        shots: [{ id: r.heroMediaId, device: null as string | null }, ...r.media.map((m) => ({ id: m.mediaId, device: m.device }))]
+          .flatMap(({ id, device }) => {
+            const img = id ? images.get(id) : undefined;
+            return img ? [{ ...img, device }] : [];
+          }),
         logo: r.iconMediaId ? (images.get(r.iconMediaId) ?? null) : null,
         look: (r.key && design.products[r.key]) || null,
         capabilities: titles("CAPABILITY").slice(0, 4),

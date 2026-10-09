@@ -5,6 +5,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { fmt, signed } from "@/lib/market/format";
 import { uniqueQuotes, type ExchangeSnapshot, type MarketPayload } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
+import { SessionDot } from "./SessionStatus";
 import { useMarket } from "./useMarket";
 
 type Locale = "en" | "bn";
@@ -151,7 +152,7 @@ function Lane({ items, locale, logos, className }: { items: Item[]; locale: Loca
 }
 
 function StatusDot({ status }: { status?: ExchangeSnapshot["status"] }) {
-  return <span aria-hidden="true" className={cn("size-1.5 shrink-0 rounded-full", status === "OPEN" ? "animate-pulse bg-market-up" : status === "PRE_OPEN" ? "bg-gold" : "bg-text-secondary/60")} />;
+  return <SessionDot status={status} className="size-1.5" />;
 }
 
 /** Fixed head of a lane: exchange name (links to its price board) and its status. */

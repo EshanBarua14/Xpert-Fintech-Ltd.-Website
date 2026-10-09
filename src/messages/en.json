@@ -221,7 +221,8 @@
   "marketShareBody": "Share of {exchange} turnover traded through Xpert on {date}.",
   "marketStatusOPEN": "Market open",
   "marketStatusCLOSED": "Market closed",
-  "marketStatusPRE_OPEN": "Pre-open",
+  "marketStatusPRE_OPEN": "Pre-opening",
+  "marketStatusPOST_CLOSE": "Post-closing",
   "marketStatusHALTED": "Trading halted",
   "tickerLabel": "DSE and CSE prices",
   "tickerPause": "Pause the ticker",
@@ -612,5 +613,7 @@
   "posLayerXFL": "Xpert Fintech",
   "posMapTitle": "On the market map",
   "linkedinSearch": "Find {name} on LinkedIn",
-  "emailMissing": "Email not listed yet"
+  "emailMissing": "Email not listed yet",
+  "marketShareAverage": "Daily average {pct}%",
+  "marketShareAverageBody": "Xpert's average daily share of {exchange} turnover. The day's own figure appears here once Xpert's turnover for the day is entered."
 }

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { clearMarketInfoCache, dhakaToday, REFRESH_CHOICES, REFRESH_KEY, testFeed } from "@/lib/market/data";
+import { clearMarketInfoCache, dhakaToday, REFRESH_CHOICES, REFRESH_KEY, SESSIONS_KEY, testFeed } from "@/lib/market/data";
 import { saveShares, type ShareInput } from "@/lib/market/share";
 import { HEADLINE_SHARE_KEY } from "@/lib/content/leaders";
 import { checkbox, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
@@ -156,6 +156,8 @@ const headlineSchema = z.object({
     .transform((v) => v.replace(/[%\s]/g, ""))
     .refine((v) => v === "" || (Number(v) > 0 && Number(v) <= 100), "Enter a percentage above 0 and up to 100, or leave empty."),
   asOf: z.string().trim().refine((v) => v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v), "Pick a date."),
+  dse: z.string().trim().transform((v) => v.replace(/[%\s]/g, "")).refine((v) => v === "" || (Number(v) > 0 && Number(v) <= 100), "Enter a percentage above 0 and up to 100, or leave empty."),
+  cse: z.string().trim().transform((v) => v.replace(/[%\s]/g, "")).refine((v) => v === "" || (Number(v) > 0 && Number(v) <= 100), "Enter a percentage above 0 and up to 100, or leave empty."),
 });
 
 /**
@@ -165,21 +167,25 @@ const headlineSchema = z.object({
  */
 export async function saveHeadlineShare(_prev: MarketState, formData: FormData): Promise<MarketState> {
   const admin = await requireAdmin();
-  const parsed = headlineSchema.safeParse({ pct: formData.get("headlinePct") ?? "", asOf: formData.get("headlineAsOf") ?? "" });
+  const parsed = headlineSchema.safeParse({ pct: formData.get("headlinePct") ?? "", asOf: formData.get("headlineAsOf") ?? "", dse: formData.get("avgDse") ?? "", cse: formData.get("avgCse") ?? "" });
   if (!parsed.success) {
     const e = toFieldErrors(parsed.error);
-    return { errors: { headlinePct: e.pct ?? "", headlineAsOf: e.asOf ?? "" }, message: "Please fix the highlighted fields." };
+    return { errors: { headlinePct: e.pct ?? "", headlineAsOf: e.asOf ?? "", avgDse: e.dse ?? "", avgCse: e.cse ?? "" }, message: "Please fix the highlighted fields." };
   }
-  const { pct, asOf } = parsed.data;
-  if (pct === "") {
+  const { pct, asOf, dse, cse } = parsed.data;
+  if (pct === "" && dse === "" && cse === "") {
     await db.siteSetting.deleteMany({ where: { key: HEADLINE_SHARE_KEY } });
     refresh();
     return { ok: true, savedAt: Date.now(), message: "Removed. The home page shows the share worked out from the daily figures." };
   }
-  const value = { pct: Number(pct), asOf: asOf || null };
+  const value = { pct: Number(pct || dse || cse), asOf: asOf || null, ...(dse && { dse: Number(dse) }), ...(cse && { cse: Number(cse) }) };
   await db.siteSetting.upsert({ where: { key: HEADLINE_SHARE_KEY }, update: { value, updatedById: admin.id }, create: { key: HEADLINE_SHARE_KEY, value, updatedById: admin.id } });
   refresh();
-  return { ok: true, savedAt: Date.now(), message: `Saved: ${value.pct}% overall${value.asOf ? ` (as of ${value.asOf})` : ""}.` };
+  return {
+    ok: true,
+    savedAt: Date.now(),
+    message: `Saved: ${value.pct}% overall${dse ? `, DSE daily average ${dse}%` : ""}${cse ? `, CSE daily average ${cse}%` : ""}${value.asOf ? ` (as of ${value.asOf})` : ""}.`,
+  };
 }
 
 /** How often DSE/CSE prices refresh on the site: 15, 30 or 60 seconds. */
@@ -191,4 +197,31 @@ export async function saveRefreshInterval(_prev: MarketState, formData: FormData
   await db.siteSetting.upsert({ where: { key: REFRESH_KEY }, update: { value, updatedById: admin.id }, create: { key: REFRESH_KEY, value, updatedById: admin.id } });
   refresh();
   return { ok: true, savedAt: Date.now(), message: `Saved: prices refresh every ${seconds} seconds.` };
+}
+
+const TIME = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+/** Admin → Market data → Trading hours: each exchange's session times, trading days and holidays. */
+export async function saveTradingHours(_prev: MarketState, formData: FormData): Promise<MarketState> {
+  const admin = await requireAdmin();
+  const errors: FieldErrors = {};
+  const out: Record<string, unknown> = {};
+  for (const ex of ["DSE", "CSE"] as const) {
+    const t = (k: string) => String(formData.get(`${ex}_${k}`) ?? "").trim();
+    const times = { preOpen: t("preOpen"), open: t("open"), close: t("close"), postClose: t("postClose") };
+    for (const [k, v] of Object.entries(times)) if (!TIME.test(v)) errors[`${ex}_${k}`] = "Use 24-hour time, e.g. 14:20.";
+    if (Object.values(times).every((v) => TIME.test(v)) && !(times.preOpen <= times.open && times.open < times.close && times.close <= times.postClose)) {
+      errors[`${ex}_close`] = "Times must run pre-opening ≤ opening < closing ≤ post-closing end.";
+    }
+    const days = formData.getAll(`${ex}_days`).map(Number).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6);
+    if (!days.length) errors[`${ex}_days`] = "Tick at least one trading day.";
+    const raw = t("holidays").split(/[\s,]+/).filter(Boolean);
+    const bad = raw.filter((d) => !/^\d{4}-\d{2}-\d{2}$/.test(d) || Number.isNaN(Date.parse(d)));
+    if (bad.length) errors[`${ex}_holidays`] = `Not a date (YYYY-MM-DD): ${bad.slice(0, 3).join(", ")}`;
+    out[ex] = { ...times, days, holidays: [...new Set(raw)].sort() };
+  }
+  if (Object.keys(errors).length) return { errors, message: "Please fix the highlighted fields." };
+  await db.siteSetting.upsert({ where: { key: SESSIONS_KEY }, update: { value: out as object, updatedById: admin.id }, create: { key: SESSIONS_KEY, value: out as object, updatedById: admin.id } });
+  refresh();
+  return { ok: true, savedAt: Date.now(), message: "Saved: trading hours and holidays. The status on the site follows them at once." };
 }

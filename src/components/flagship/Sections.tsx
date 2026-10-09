@@ -241,17 +241,18 @@ export function FlagshipHero({
 }) {
   return (
     <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
-      <div className="relative mx-auto grid min-h-[calc(100svh-9rem)] w-full max-w-7xl items-center gap-12 px-4 pt-10 pb-16 md:px-8 lg:grid-cols-[1fr_1fr] lg:pt-0">
-        <div className="flex flex-col gap-8">
+      {/* Exactly one screen on desktop: the viewport less the header and the price ticker, with even room above and below. */}
+      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 pt-10 pb-16 md:px-8 lg:min-h-[calc(100svh-6rem-var(--ticker-h,0px))] lg:grid-cols-[1fr_1fr] lg:gap-10 lg:py-[clamp(1.25rem,4svh,3rem)]">
+        <div className="flex flex-col gap-8 lg:gap-[clamp(0.9rem,2.6svh,2rem)]">
           {status && <div data-reveal>{status}</div>}
           <h1
             data-reveal
             style={{ ...delay(1) }}
-            className="font-display text-[clamp(2.4rem,min(4.4vw,7.5svh),4.6rem)] leading-[1.03] text-balance text-text-primary"
+            className="font-display text-[clamp(2.4rem,min(4.4vw,7svh),4.6rem)] leading-[1.03] text-balance text-text-primary"
           >
             {t.heroTitleA} {t.heroTitleB}
           </h1>
-          <p data-reveal style={delay(2)} className="max-w-[34rem] text-lg leading-relaxed text-text-secondary md:text-xl">
+          <p data-reveal style={delay(2)} className="max-w-[38rem] text-lg leading-relaxed text-text-secondary md:text-xl lg:text-[clamp(1rem,2.2svh,1.25rem)]">
             {body || t.heroBody}
           </p>
           <div data-reveal style={delay(3)} className="flex flex-wrap items-center gap-3">

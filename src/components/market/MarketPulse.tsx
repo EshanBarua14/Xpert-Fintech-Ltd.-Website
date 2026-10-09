@@ -6,6 +6,7 @@ import type { Messages } from "@/lib/i18n/messages";
 import { compact, crore, dhakaTime, fmt, signed } from "@/lib/market/format";
 import { INDEX_SLOTS, movers, type ExchangeSnapshot, type MarketPayload, type Quote, type ShareFigure } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
+import { SessionStatus } from "./SessionStatus";
 import { MarketBadge } from "./MarketBadge";
 import { useMarket } from "./useMarket";
 
@@ -74,7 +75,7 @@ function Movers({ title, rows, locale, t, tone, exchange }: { title: string; row
 }
 
 /** Xpert's share of the exchange's turnover: a ring that fills once in view. */
-function ShareBlock({ share, t, locale }: { share: ShareFigure; t: Messages; locale: Locale }) {
+function ShareBlock({ share, t, locale, average }: { share: ShareFigure; t: Messages; locale: Locale; average?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(share.sharePct);
   useEffect(() => {
@@ -121,7 +122,12 @@ function ShareBlock({ share, t, locale }: { share: ShareFigure; t: Messages; loc
         <span className="text-gradient-brand absolute inset-0 flex items-center justify-center font-display text-2xl font-semibold tabular-nums">{fmt(locale, shown, 2)}%</span>
       </div>
       <div className="flex min-w-0 flex-col gap-2">
-        <h4 className="font-display text-base font-semibold">{t.marketShareTitle}</h4>
+        <h4 className="flex flex-wrap items-baseline gap-x-3 font-display text-base font-semibold">
+          {t.marketShareTitle}
+          {average !== undefined && (
+            <span className="font-sans text-xs font-semibold text-gold">{t.marketShareAverage.replace("{pct}", fmt(locale, average, Number.isInteger(average) ? 0 : 2))}</span>
+          )}
+        </h4>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <dt className="text-xs text-text-secondary">{t.xpertTurnover}</dt>
@@ -148,6 +154,27 @@ function ShareBlock({ share, t, locale }: { share: ShareFigure; t: Messages; loc
 
 const DASH = "—";
 
+/** Before a day's figure is entered: Xpert's daily average share (Admin → Market data), when set. */
+function AverageBlock({ exchange, pct, t, locale }: { exchange: "DSE" | "CSE"; pct: number; t: Messages; locale: Locale }) {
+  const R = 58;
+  const C = 2 * Math.PI * R;
+  return (
+    <div className="flex flex-col gap-4 rounded-2xl border border-brand-sky/20 bg-brand-sky/[0.05] p-4 sm:flex-row sm:items-center sm:gap-5">
+      <div className="relative size-28 shrink-0 self-center sm:self-auto">
+        <svg viewBox="0 0 140 140" className="size-full -rotate-90" aria-hidden="true">
+          <circle cx="70" cy="70" r={R} fill="none" strokeWidth="12" className="stroke-fg/[0.08]" />
+          <circle cx="70" cy="70" r={R} fill="none" strokeWidth="12" strokeLinecap="round" className="stroke-brand-sky" strokeDasharray={`${(C * Math.min(100, pct)) / 100} ${C}`} />
+        </svg>
+        <span className="text-gradient-brand absolute inset-0 flex items-center justify-center font-display text-2xl font-semibold tabular-nums">{fmt(locale, pct, Number.isInteger(pct) ? 0 : 2)}%</span>
+      </div>
+      <div className="flex min-w-0 flex-col gap-2">
+        <h4 className="font-display text-base font-semibold">{t.marketShareTitle}</h4>
+        <p className="text-sm leading-relaxed text-text-secondary">{t.marketShareAverageBody.replace("{exchange}", exchange)}</p>
+      </div>
+    </div>
+  );
+}
+
 /** Xpert's share before a figure is entered: the same block as ShareBlock, with the ring empty. */
 function SharePending({ exchange, t }: { exchange: "DSE" | "CSE"; t: Messages }) {
   return (
@@ -172,7 +199,7 @@ function SharePending({ exchange, t }: { exchange: "DSE" | "CSE"; t: Messages })
  * totals, top gainers and losers); a figure the exchange does not publish
  * shows as a dash instead of the part disappearing.
  */
-function ExchangeGlance({ exchange, ex, share, t, locale, className, logo }: { exchange: "DSE" | "CSE"; ex?: ExchangeSnapshot; share?: ShareFigure; t: Messages; locale: Locale; className?: string; logo?: ExchangeLogo }) {
+function ExchangeGlance({ exchange, ex, share, average, t, locale, className, logo }: { exchange: "DSE" | "CSE"; ex?: ExchangeSnapshot; share?: ShareFigure; average?: number; t: Messages; locale: Locale; className?: string; logo?: ExchangeLogo }) {
   const { gainers, losers } = ex ? movers(ex) : { gainers: [], losers: [] };
   const hasBreadth = !!ex && (ex.advancers !== undefined || ex.decliners !== undefined);
   const breadthTotal = ex ? (ex.advancers ?? 0) + (ex.decliners ?? 0) + (ex.unchanged ?? 0) : 0;
@@ -190,16 +217,19 @@ function ExchangeGlance({ exchange, ex, share, t, locale, className, logo }: { e
         <h3 id={`glance-${exchange}`} className="font-mono text-xl font-semibold tracking-widest">
           {exchange}
         </h3>
-        <span className="inline-flex items-center gap-2 rounded-full border border-fg/10 px-3 py-1 text-xs font-semibold text-text-secondary">
-          <span className={cn("size-1.5 rounded-full", ex?.status === "OPEN" ? "animate-pulse bg-market-up" : "bg-text-secondary")} />
-          {ex?.status ? t[`marketStatus${ex.status}` as keyof Messages] : DASH}
-        </span>
+        <SessionStatus status={ex?.status} label={ex?.status ? (t[`marketStatus${ex.status}` as keyof Messages] as string) : DASH} pill />
         <a href={`/${locale}/markets/${exchange.toLowerCase()}`} className="ml-auto text-sm font-semibold text-brand-sky hover:underline">
           {t.tickerBoard.replace("{exchange}", exchange)}
         </a>
       </header>
 
-      {share ? <ShareBlock share={share} t={t} locale={locale} /> : <SharePending exchange={exchange} t={t} />}
+      {share ? (
+        <ShareBlock share={share} t={t} locale={locale} average={average} />
+      ) : average !== undefined ? (
+        <AverageBlock exchange={exchange} pct={average} t={t} locale={locale} />
+      ) : (
+        <SharePending exchange={exchange} t={t} />
+      )}
 
       <ul className="grid grid-cols-3 gap-2 sm:gap-3">
         {indices.map(({ name, i }) => (
@@ -311,7 +341,7 @@ export function MarketPulse({ initial, t, locale, logos }: { initial: MarketPayl
       <div className={cn("grid gap-6", list.length > 1 && "lg:grid-cols-2")}>
         {list.map((x) => (
           <div key={x} id={`glance-panel-${x}`} className={cn(x === active ? "flex" : "hidden lg:flex", "min-w-0 flex-col")}>
-            <ExchangeGlance exchange={x} ex={snapOf(x)} share={shareOf(x)} t={t} locale={locale} logo={logos?.[x]} className="flex h-full" />
+            <ExchangeGlance exchange={x} ex={snapOf(x)} share={shareOf(x)} average={data.averages?.[x]} t={t} locale={locale} logo={logos?.[x]} className="flex h-full" />
           </div>
         ))}
       </div>

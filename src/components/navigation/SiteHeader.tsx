@@ -41,7 +41,7 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
             markets: t.tickerAllMarkets,
             board: t.tickerBoard,
             demo: t.demoData,
-            status: { OPEN: t.marketStatusOPEN, CLOSED: t.marketStatusCLOSED, PRE_OPEN: t.marketStatusPRE_OPEN, HALTED: t.marketStatusHALTED },
+            status: { OPEN: t.marketStatusOPEN, CLOSED: t.marketStatusCLOSED, PRE_OPEN: t.marketStatusPRE_OPEN, POST_CLOSE: t.marketStatusPOST_CLOSE, HALTED: t.marketStatusHALTED },
           },
         };
   return (

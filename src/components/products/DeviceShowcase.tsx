@@ -3,7 +3,8 @@ import { CapabilityVisual, type VisualKind } from "@/components/flagship/Visuals
 import { cn } from "@/lib/utils/cn";
 import { ProductMark, productStyle, productVars, type MarkLogo, type ProductLook } from "./ProductMark";
 
-export type DeviceShot = { url: string; alt: string; width: number | null; height: number | null };
+/** A screenshot; `device` is the frame chosen in Admin → Products → Screen details (else by shape). */
+export type DeviceShot = { url: string; alt: string; width: number | null; height: number | null; device?: string | null };
 
 /** What a device screen shows: the product's own screenshot, else its illustration under its name bar. */
 function Screen({ shot, name, productKey, logo, visual, compact, look, anchor }: { shot?: DeviceShot; name: string; productKey: string | null; logo?: MarkLogo | null; visual: VisualKind; compact?: boolean; look?: ProductLook | null; anchor?: "left" }) {
@@ -75,9 +76,12 @@ const ratio = (s?: DeviceShot) => (s?.width && s?.height ? s.width / s.height : 
  * desktop screen is never squeezed into a phone.
  */
 export function shotsForDevices(shots: DeviceShot[]) {
-  const wide = shots.filter((s) => (ratio(s) ?? 1.6) >= 1);
-  const tall = shots.filter((s) => (ratio(s) ?? 1.6) < 1);
-  return { web: wide[0], tab: wide[1] ?? wide[0], phone: tall[0] };
+  const chosen = (d: string) => shots.find((s) => s.device === d);
+  const free = shots.filter((s) => !s.device);
+  const wide = free.filter((s) => (ratio(s) ?? 1.6) >= 1);
+  const tall = free.filter((s) => (ratio(s) ?? 1.6) < 1);
+  const web = chosen("WEB") ?? wide[0];
+  return { web, tab: chosen("TABLET") ?? wide.find((s) => s !== web) ?? web, phone: chosen("PHONE") ?? tall[0] };
 }
 
 /**

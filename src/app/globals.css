@@ -262,12 +262,9 @@ select.field-select option[value=""] {
 }
 
 /* Precise grid texture for dark sections (decorative) */
+/* No grid lines behind content (kept as a class so older markup does nothing). */
 .bg-grid {
-  background-image:
-    linear-gradient(var(--hairline) 1px, transparent 1px),
-    linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
-  background-size: 48px 48px;
-  background-position: -1px -1px;
+  background-image: none;
 }
 
 /* ── Order-flow animation ───────────────────────────────────────────── */
@@ -384,11 +381,8 @@ body {
 .ambient-grid {
   position: absolute;
   inset: -64px;
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 20%, transparent 85%);
+  /* No grid: kept as an empty layer for older markup. */
+  background-image: none;
   opacity: 0.55;
   animation: grid-pan 30s linear infinite;
 }
@@ -471,12 +465,9 @@ body::before {
 }
 
 /* Grid that fades out from the top centre */
+/* Formerly a square grid; the page scenes carry the texture now, so it draws nothing. */
 .grid-fade {
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 80%);
+  background-image: none;
 }
 
 /* Headlines are solid; colour carries meaning, not decoration */
@@ -690,8 +681,6 @@ body::before {
 }
 .demo-placeholder {
   background:
-    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
-    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px) 0 0 / 32px 32px,
     radial-gradient(120% 90% at 30% 20%, #1f4f8f 0%, #0b1c31 60%, #06111f 100%);
 }
 /* Page-change bar (NavProgress) */
@@ -1342,26 +1331,3 @@ html {
   .contact-icon:hover, .contact-icon:focus-visible { transform: none; }
 }
 
-/* ── Page icons: a few faint line icons drifting behind the page (see IconDrift) ── */
-.icon-drift { position: absolute; inset: 0; --drift: var(--color-brand-sky); }
-.icon-drift-item {
-  position: absolute;
-  fill: none;
-  stroke: var(--drift);
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.09;
-  animation: icon-drift ease-in-out infinite alternate;
-  will-change: transform;
-}
-[data-theme="light"] .icon-drift-item { opacity: 0.12; stroke-width: 1.5; }
-@keyframes icon-drift {
-  0% { transform: translate3d(0, 0, 0) rotate(-6deg); }
-  50% { transform: translate3d(14px, -36px, 0) rotate(4deg); }
-  100% { transform: translate3d(-10px, -70px, 0) rotate(-2deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .icon-drift-item { animation: none; }
-}
-.motion-paused .icon-drift-item { animation-play-state: paused; }

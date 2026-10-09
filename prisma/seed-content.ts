@@ -1357,6 +1357,7 @@ async function seedProductScreens() {
           offeringId: offering.id,
           kind: "SCREENSHOT",
           mediaId,
+          device: file.match(/-(web|tablet|phone)$/)?.[1]?.toUpperCase() ?? null,
           sortOrder: (last?.sortOrder ?? -1) + 1,
           translations: { create: [{ locale: EN, caption: caption.en }, { locale: BN, caption: caption.bn }] },
         },

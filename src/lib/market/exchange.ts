@@ -180,7 +180,7 @@ export function parseCseSummary(html: string): CseSummary {
  */
 function findIndex(text: string, name: string, html: string): IndexValue | null {
   const re = new RegExp(
-    String.raw`\b${name}\b(?:\s*Index)?[^\d]{0,30}?([\d,]+\.\d+)[^\d+\-−▲▼]{0,15}?([+\-−▲▼]?\s*[\d,]*\.?\d+)[^\d+\-−▲▼]{0,15}?\(?\s*([+\-−▲▼]?\s*[\d.]+)\s*\)?\s*%`,
+    String.raw`\b${name}\b(?:\s*Index)?(?:[^\d]|\b\d{1,2}\b(?![.,]\d)){0,30}?(\d{1,3}(?:,\d{3})+\.\d+|\d{3,}\.\d+)[^\d+\-−▲▼]{0,15}?([+\-−▲▼]?\s*[\d,]*\.?\d+)[^\d+\-−▲▼]{0,15}?\(?\s*([+\-−▲▼]?\s*[\d.]+)\s*\)?\s*%`,
     "g",
   );
   for (const m of text.matchAll(re)) {
@@ -224,17 +224,28 @@ export function parseDseSummary(html: string): DseSummary {
     const found = findIndex(text, name, html);
     if (found) indices.push(found);
   }
-  const trades = num(/Total\s*Trade[s]?\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
-  const volume = num(/Total\s*Volume\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
-  const valueMn = num(/Total\s*Value\s*in\s*Taka\s*\(?\s*mn\s*\)?\s*:?\s*([\d,]+(?:\.\d+)?)/i.exec(text)?.[1]);
-  const statusText = /Market\s*Status\s*:?\s*([A-Za-z-]+)/i.exec(text)?.[1]?.toLowerCase() ?? "";
-  const status: DseSummary["status"] = /pre/.test(statusText) ? "PRE_OPEN" : /open/.test(statusText) ? "OPEN" : /halt|suspend/.test(statusText) ? "HALTED" : /clos/.test(statusText) ? "CLOSED" : undefined;
+  // Older layout: "Total Trade …", "Total Volume …", "Total Value in Taka (mn) …".
+  let trades = num(/Total\s*Trade[s]?\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
+  let volume = num(/Total\s*Volume\s*:?\s*([\d,]+)/i.exec(text)?.[1]);
+  let turnover = num(/Total\s*Value\s*in\s*Taka\s*\(?\s*mn\s*\)?\s*:?\s*([\d,]+(?:\.\d+)?)/i.exec(text)?.[1]) * 1_000_000;
+  // dse.com.bd: "Turnover BDT 5,332.06 mn Volume 174,532,023 Trades 172,590" (read near "Turnover").
+  const tm = /\bTurnover\s*:?\s*(?:BDT|Tk\.?|৳)?\s*([\d,]+(?:\.\d+)?)\s*(mn|million|cr|crore|bn|billion)?/i.exec(text);
+  if (tm && !(turnover > 0)) {
+    const unit = (tm[2] ?? "").toLowerCase();
+    const mult = unit.startsWith("m") ? 1e6 : unit.startsWith("c") ? 1e7 : unit.startsWith("b") ? 1e9 : 1;
+    turnover = num(tm[1]) * mult;
+  }
+  const near = tm ? text.slice(tm.index, tm.index + 240) : "";
+  if (!(volume > 0)) volume = num(/\bVolume\s*:?\s*([\d,]{4,})/i.exec(near)?.[1]);
+  if (!(trades > 0)) trades = num(/\bTrades?\s*:?\s*([\d,]{3,})/i.exec(near)?.[1]);
+  const statusText = (/Market\s*Status\s*:?\s*([A-Za-z-]+)/i.exec(text)?.[1] ?? /●\s*(Closed|Halted|Suspended|Pre-?open\w*|Post-?clos\w*)/i.exec(text)?.[1] ?? "").toLowerCase();
+  const status: DseSummary["status"] = /pre/.test(statusText) ? "PRE_OPEN" : /post/.test(statusText) ? "POST_CLOSE" : /open/.test(statusText) ? "OPEN" : /halt|suspend/.test(statusText) ? "HALTED" : /clos/.test(statusText) ? "CLOSED" : undefined;
   return {
     status,
     indices,
     ...(trades > 0 && { trades }),
     ...(volume > 0 && { volume }),
-    ...(valueMn > 0 && { turnover: Math.round(valueMn * 1_000_000) }),
+    ...(turnover > 0 && { turnover: Math.round(turnover) }),
   };
 }
 

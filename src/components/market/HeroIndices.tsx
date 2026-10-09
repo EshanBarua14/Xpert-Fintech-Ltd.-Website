@@ -4,6 +4,7 @@ import type { Messages } from "@/lib/i18n/messages";
 import { fmt } from "@/lib/market/format";
 import { INDEX_SLOTS, type MarketPayload } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
+import { SessionStatus } from "./SessionStatus";
 import { ExchangeMark, type ExchangeLogos } from "./ExchangeMark";
 import { useMarket } from "./useMarket";
 
@@ -20,15 +21,13 @@ export function HeroIndices({ initial, t, locale, logos }: { initial: MarketPayl
     <div className="flex max-w-[36rem] flex-col gap-2">
       <div className="grid gap-px overflow-hidden rounded-2xl border border-fg/10 bg-fg/10 sm:grid-cols-2">
         {exchanges.map(({ x, ex }) => {
-          const open = ex!.status === "OPEN";
           const indices = INDEX_SLOTS[x].map((n) => ex!.indices.find((i) => i.name.toUpperCase() === n)).filter((i): i is NonNullable<typeof i> => !!i);
           return (
             <a key={x} href={`/${locale}/markets/${x.toLowerCase()}`} className="group flex flex-col gap-2.5 bg-ink-950/85 p-4 transition-colors hover:bg-navy-900">
               <span className="flex items-center gap-2 text-sm">
                 <ExchangeMark logo={logos?.[x]} className="size-6" />
                 <span className="font-semibold tracking-wide text-text-primary">{x}</span>
-                <span className={cn("size-2 rounded-full", open ? "live-dot bg-market-up" : "bg-text-secondary/60")} aria-hidden="true" />
-                {ex!.status && <span className="text-text-secondary">{open ? t.marketOpenShort : t.marketClosedShort}</span>}
+                {ex!.status ? <SessionStatus status={ex!.status} label={t[`marketStatus${ex!.status}` as keyof Messages] as string} className="text-xs" /> : null}
               </span>
               {indices.length > 0 ? (
                 <dl className="flex flex-col gap-1.5 font-mono text-[max(13px,0.8125rem)] tabular-nums">

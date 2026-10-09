@@ -1,6 +1,6 @@
 "use client";
 
-import { saveRefreshInterval, saveHeadlineShare, saveMarketGoal, saveMarketShare, saveMarketSource, testMarketFeed, type MarketState } from "@/app/admin/(protected)/market/actions";
+import { saveRefreshInterval, saveHeadlineShare, saveTradingHours, saveMarketGoal, saveMarketShare, saveMarketSource, testMarketFeed, type MarketState } from "@/app/admin/(protected)/market/actions";
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
 import { Select, TextInput } from "@/components/ui/Field";
@@ -130,7 +130,7 @@ export function MarketGoalForm({ values }: { values: GoalValues }) {
 }
 
 /** Xpert's overall share as XFL states it (e.g. 45%), with the date it applies to. Empty removes it. */
-export function HeadlineShareForm({ pct, asOf }: { pct: string; asOf: string }) {
+export function HeadlineShareForm({ pct, asOf, dse = "", cse = "" }: { pct: string; asOf: string; dse?: string; cse?: string }) {
   const { state, pending, onSubmit } = useActionForm<MarketState>(saveHeadlineShare, {});
   const e = state.errors ?? {};
   return (
@@ -139,9 +139,11 @@ export function HeadlineShareForm({ pct, asOf }: { pct: string; asOf: string }) 
       <div className="grid gap-5 sm:grid-cols-2">
         <TextInput id="headlinePct" inputMode="decimal" label="Overall market share (%)" placeholder="45" defaultValue={pct} hint="Leave empty to show the share worked out from the daily figures." error={e.headlinePct || undefined} />
         <TextInput id="headlineAsOf" type="date" label="As of" defaultValue={asOf} hint="Shown next to the figure. Optional." error={e.headlineAsOf || undefined} />
+        <TextInput id="avgDse" inputMode="decimal" label="DSE daily average share (%)" placeholder="45" defaultValue={dse} hint="Shown on the DSE market card next to the day's figure (and alone until one is entered)." error={e.avgDse || undefined} />
+        <TextInput id="avgCse" inputMode="decimal" label="CSE daily average share (%)" defaultValue={cse} hint="The same for CSE. Leave empty if not stated." error={e.avgCse || undefined} />
       </div>
       <div>
-        <SubmitButton pending={pending}>Save overall share</SubmitButton>
+        <SubmitButton pending={pending}>Save shares</SubmitButton>
       </div>
     </form>
   );
@@ -167,6 +169,63 @@ export function RefreshIntervalForm({ seconds }: { seconds: number }) {
       </div>
       <SubmitButton pending={pending}>Save</SubmitButton>
       <FormMessage message={state.message} isError={!state.ok && Boolean(state.errors)} />
+    </form>
+  );
+}
+
+export type ScheduleValues = { days: number[]; preOpen: string; open: string; close: string; postClose: string; holidays: string[] };
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+/** Session times, trading days and holidays for DSE and CSE: the site's open / closed status follows them. */
+export function TradingHoursForm({ values }: { values: { DSE: ScheduleValues; CSE: ScheduleValues } }) {
+  const { state, pending, onSubmit } = useActionForm<MarketState>(saveTradingHours, {});
+  const e = state.errors ?? {};
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
+      <FormMessage message={state.message} isError={!state.ok && Boolean(state.errors)} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        {(["DSE", "CSE"] as const).map((ex) => {
+          const v = values[ex];
+          return (
+            <fieldset key={ex} className="flex flex-col gap-4 rounded-card border border-fg/10 p-4">
+              <legend className="px-1 font-semibold">{ex}</legend>
+              <div className="grid grid-cols-2 gap-4">
+                <TextInput id={`${ex}_preOpen`} type="time" label="Pre-opening starts" defaultValue={v.preOpen} error={e[`${ex}_preOpen`]} />
+                <TextInput id={`${ex}_open`} type="time" label="Trading opens" defaultValue={v.open} error={e[`${ex}_open`]} />
+                <TextInput id={`${ex}_close`} type="time" label="Trading closes" defaultValue={v.close} error={e[`${ex}_close`]} />
+                <TextInput id={`${ex}_postClose`} type="time" label="Post-closing ends" defaultValue={v.postClose} error={e[`${ex}_postClose`]} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium">Trading days</span>
+                <div className="flex flex-wrap gap-3">
+                  {DAY_NAMES.map((d, i) => (
+                    <label key={d} className="flex items-center gap-1.5 text-sm">
+                      <input type="checkbox" name={`${ex}_days`} value={i} defaultChecked={v.days.includes(i)} className="size-4 accent-brand-royal" />
+                      {d}
+                    </label>
+                  ))}
+                </div>
+                {e[`${ex}_days`] && <span className="text-sm text-market-down">{e[`${ex}_days`]}</span>}
+              </div>
+              <label className="flex flex-col gap-1.5 text-sm">
+                <span className="font-medium">Holidays (no trading)</span>
+                <textarea
+                  name={`${ex}_holidays`}
+                  rows={4}
+                  defaultValue={v.holidays.join("\n")}
+                  placeholder={"2026-12-16\n2026-12-25"}
+                  className="rounded-control border border-fg/15 bg-transparent px-3 py-2 font-mono text-sm"
+                />
+                <span className="text-text-secondary">One date per line (YYYY-MM-DD), from the exchange&rsquo;s holiday notice.</span>
+                {e[`${ex}_holidays`] && <span className="text-market-down">{e[`${ex}_holidays`]}</span>}
+              </label>
+            </fieldset>
+          );
+        })}
+      </div>
+      <div>
+        <SubmitButton pending={pending}>Save trading hours</SubmitButton>
+      </div>
     </form>
   );
 }

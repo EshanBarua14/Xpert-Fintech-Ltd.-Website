@@ -36,6 +36,19 @@ function ask(question: string): Promise<string> {
 }
 
 async function main() {
+  // npm run admin:password -- --list : who can sign in, and whether an account is locked or switched off.
+  if (process.argv.includes("--list")) {
+    rl.close();
+    const db = new PrismaClient();
+    const admins = await db.adminUser.findMany({ orderBy: { createdAt: "asc" }, select: { email: true, isActive: true, lockedUntil: true, totpEnabled: true, lastLoginAt: true } });
+    if (!admins.length) console.log("No admin accounts yet. Create one: npm run admin:password -- you@example.com");
+    for (const a of admins) {
+      const notes = [!a.isActive && "switched off", a.lockedUntil && a.lockedUntil > new Date() && "locked", a.totpEnabled && "two-step on"].filter(Boolean).join(", ");
+      console.log(`${a.email}${notes ? `  (${notes})` : ""}  last sign-in: ${a.lastLoginAt?.toISOString() ?? "never"}`);
+    }
+    await db.$disconnect();
+    return;
+  }
   const email = (process.argv[2] ?? process.env.SEED_ADMIN_EMAIL ?? "").trim().toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     console.error("Usage: npm run admin:password -- you@example.com");

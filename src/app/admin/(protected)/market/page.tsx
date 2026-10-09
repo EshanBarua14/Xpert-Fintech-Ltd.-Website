@@ -1,8 +1,8 @@
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
-import { DEFAULT_REFRESH, dhakaToday, liveMarketTurnover, marketMode, REFRESH_KEY } from "@/lib/market/data";
+import { DEFAULT_REFRESH, dhakaToday, liveMarketTurnover, marketMode, readSessions, REFRESH_KEY, SESSIONS_KEY } from "@/lib/market/data";
 import { ConfirmButton } from "@/components/admin/AdminUi";
-import { RefreshIntervalForm, HeadlineShareForm, MarketGoalForm, MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
+import { RefreshIntervalForm, TradingHoursForm, HeadlineShareForm, MarketGoalForm, MarketShareForm, MarketSourceForm, TestFeedButton } from "@/components/admin/MarketForms";
 import { getHeadlineShare, readGoal } from "@/lib/content/leaders";
 import { clearMarketGoal, deleteMarketShare } from "./actions";
 
@@ -17,6 +17,7 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
   await requireAdmin();
   const { edit } = await searchParams;
   const headline = await getHeadlineShare();
+  const sessions = readSessions((await db.siteSetting.findUnique({ where: { key: SESSIONS_KEY } }))?.value);
   const refreshRow = await db.siteSetting.findUnique({ where: { key: REFRESH_KEY } });
   const refreshSeconds = Number((refreshRow?.value as { seconds?: unknown } | null)?.seconds) || DEFAULT_REFRESH;
   const [source, shares, goalRow] = await Promise.all([
@@ -166,12 +167,27 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
       </section>
 
       <section id="overall-share" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">
-        <h2 className="font-display text-xl font-semibold">Overall market share</h2>
+        <h2 className="font-display text-xl font-semibold">Market share figures</h2>
         <p className="text-sm text-text-secondary">
           Xpert&rsquo;s share of DSE and CSE turnover combined, as XFL states it. When set, the home page leads with this figure (and its goal bar
           uses it) instead of the one worked out from the daily entries above. {headline ? `Now: ${headline.pct}%${headline.asOf ? ` as of ${headline.asOf}` : ""}.` : "Not set."}
         </p>
-        <HeadlineShareForm key={headline ? `${headline.pct}-${headline.asOf}` : "none"} pct={headline ? String(headline.pct) : ""} asOf={headline?.asOf ?? ""} />
+        <HeadlineShareForm
+          key={headline ? `${headline.pct}-${headline.asOf}-${headline.dse}-${headline.cse}` : "none"}
+          pct={headline ? String(headline.pct) : ""}
+          asOf={headline?.asOf ?? ""}
+          dse={headline?.dse !== undefined ? String(headline.dse) : ""}
+          cse={headline?.cse !== undefined ? String(headline.cse) : ""}
+        />
+      </section>
+
+      <section id="trading-hours" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">
+        <h2 className="font-display text-xl font-semibold">Trading hours</h2>
+        <p className="text-sm text-text-secondary">
+          The status shown everywhere (pre-opening amber, open green, post-closing violet, closed red) follows these times in Dhaka, minute by minute. Update them when an exchange
+          announces new hours (e.g. in Ramadan) and add its holidays. A halt or an unscheduled closure reported on the exchange&rsquo;s own page still wins.
+        </p>
+        <TradingHoursForm values={sessions} />
       </section>
 
       <section id="goal" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">

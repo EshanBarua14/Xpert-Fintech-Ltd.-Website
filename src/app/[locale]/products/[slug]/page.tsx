@@ -116,9 +116,9 @@ export default async function ProductPage({ params }: Props) {
   const mediaSlots = preview || process.env.APP_ENV !== "production";
   const demo = offering.media.find((m) => m.kind === "VIDEO" && (videoEmbedUrl(m.videoUrl) || (m.mediaId && images.has(m.mediaId))));
   const demoPoster = demo ? (images.get(demo.posterMediaId ?? "")?.url ?? parseVideoUrl(demo.videoUrl)?.thumbnail ?? null) : null;
-  const shots: GalleryPhoto[] = screenshots.map((m) => {
+  const shots: (GalleryPhoto & { device: string | null })[] = screenshots.map((m) => {
     const img = images.get(m.mediaId!)!;
-    return { id: m.id, url: img.url, alt: pick(m.translations, found.locale)?.caption ?? img.alt ?? tr.name, width: img.width, height: img.height };
+    return { id: m.id, url: img.url, alt: pick(m.translations, found.locale)?.caption ?? img.alt ?? tr.name, width: img.width, height: img.height, device: m.device };
   });
   const parent = offering.parent && offering.parent.status === "PUBLISHED" && !offering.parent.deletedAt ? offering.parent : null;
   const parentTr = parent ? pick(parent.translations, found.locale) : null;

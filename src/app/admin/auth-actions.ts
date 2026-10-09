@@ -46,7 +46,8 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     return { error: `Too many attempts. Try again in ${Math.ceil(limit.retryAfterSec / 60)} minutes.`, email };
   }
 
-  const admin = await db.adminUser.findUnique({ where: { email: parsed.data.email } });
+  // Emails are matched without regard to capitals (older accounts may have been saved with some).
+  const admin = await db.adminUser.findFirst({ where: { email: { equals: parsed.data.email, mode: "insensitive" } } });
   if (!admin || !admin.isActive) return { error: GENERIC_ERROR, email };
 
   if (admin.lockedUntil && admin.lockedUntil > new Date()) {

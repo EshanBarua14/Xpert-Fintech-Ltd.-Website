@@ -6,6 +6,7 @@ import type { Messages } from "@/lib/i18n/messages";
 import { compact, crore, dhakaTime, fmt, signed } from "@/lib/market/format";
 import { movers, type MarketPayload, type Quote } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
+import { SessionStatus } from "./SessionStatus";
 import { MarketBadge } from "./MarketBadge";
 import { useMarket } from "./useMarket";
 import { useWatchlist } from "./useWatchlist";
@@ -131,10 +132,7 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-center gap-3 text-xs text-text-secondary">
         {ex.status && (
-          <span className="inline-flex items-center gap-2 rounded-full border border-fg/10 px-3 py-1 font-semibold">
-            <span className={cn("size-1.5 rounded-full", ex.status === "OPEN" ? "animate-pulse bg-market-up" : "bg-text-secondary")} />
-            {t[`marketStatus${ex.status}` as keyof Messages]}
-          </span>
+          <SessionStatus status={ex.status} label={t[`marketStatus${ex.status}` as keyof Messages] as string} pill />
         )}
         <MarketBadge data={data} t={t} />
         {data.snapshot && (

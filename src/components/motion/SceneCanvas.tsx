@@ -13,8 +13,11 @@ import { useEffect, useRef } from "react";
  *  - wire:    a newsroom wire — rows of headline-like bars sliding across
  *  - bokeh:   soft out-of-focus light, like a photograph's background
  *  - signal:  rings radiating from a point, as from an office on a map
+ *  - ledger:  back office — ledger rows rising in columns, entries ticked off in gold
+ *  - docs:    DMS — document sheets drifting up, filed with a gold check
+ *  - identity: eKYC and account opening — ID cards scanned by a passing light, then verified
  */
-export type SceneName = "network" | "people" | "wire" | "bokeh" | "signal";
+export type SceneName = "network" | "people" | "wire" | "bokeh" | "signal" | "ledger" | "docs" | "identity";
 
 type Ctx = CanvasRenderingContext2D;
 type Scene = { draw: (ctx: Ctx, now: number, dt: number, light: boolean, still: boolean) => void };
@@ -211,14 +214,10 @@ function bokeh(w: number, h: number, rand: Rand): Scene {
 function signal(w: number, h: number, rand: Rand): Scene {
   const cx = w * (w < 768 ? 0.7 : 0.78);
   const cy = h * 0.42;
-  const dots: { x: number; y: number }[] = [];
-  // A faint dot grid, like a map.
-  for (let x = 12; x < w; x += 26) for (let y = 12; y < h; y += 26) if (rand() < 0.55) dots.push({ x, y });
+  void rand;
   return {
     draw(ctx, now, _dt, light, still) {
       const c = C(light);
-      ctx.fillStyle = `rgba(${c},${light ? 0.08 : 0.07})`;
-      for (const d of dots) ctx.fillRect(d.x, d.y, 1.5, 1.5);
       const max = Math.hypot(w, h) * 0.55;
       const t = still ? 0.35 : (now / 5200) % 1;
       for (let k = 0; k < 4; k++) {
@@ -241,7 +240,141 @@ function signal(w: number, h: number, rand: Rand): Scene {
   };
 }
 
-const SCENES: Record<SceneName, (w: number, h: number, rand: Rand) => Scene> = { network, people, wire, bokeh, signal };
+function rr(ctx: Ctx, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+  else ctx.rect(x, y, w, h);
+}
+
+function tick(ctx: Ctx, x: number, y: number, size: number, rgba: string) {
+  ctx.strokeStyle = rgba;
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(x - size * 0.5, y);
+  ctx.lineTo(x - size * 0.1, y + size * 0.4);
+  ctx.lineTo(x + size * 0.6, y - size * 0.45);
+  ctx.stroke();
+}
+
+function ledger(w: number, h: number, rand: Rand): Scene {
+  const ROW = 30;
+  const cols = w < 640 ? [0.08, 0.5] : [0.06, 0.3, 0.55, 0.78];
+  const rows = Array.from({ length: Math.ceil(h / ROW) + 2 }, (_, i) => ({ y: i * ROW, cells: cols.map(() => 40 + rand() * 90), done: rand() < 0.25, at: rand() * 8000 }));
+  let offset = 0;
+  return {
+    draw(ctx, now, dt, light, still) {
+      const c = C(light);
+      if (!still) offset = (offset + dt * 9) % ROW;
+      for (const r of rows) {
+        const y = r.y - offset;
+        cols.forEach((cx, k) => {
+          const x = cx * w;
+          ctx.fillStyle = `rgba(${c},${light ? 0.07 : 0.06})`;
+          rr(ctx, x, y, r.cells[k]!, 5, 2.5);
+          ctx.fill();
+          // Amounts right-aligned in the next column, like debit and credit.
+          ctx.fillRect(x + r.cells[k]! + 24, y, 26, 5);
+        });
+        const lit = !still && (now + r.at) % 9000 < 1600;
+        if (r.done || lit) tick(ctx, w * (w < 640 ? 0.94 : 0.97), y + 2, 9, `rgba(${GOLD(light)},${lit ? 0.4 : 0.14})`);
+      }
+    },
+  };
+}
+
+function docs(w: number, h: number, rand: Rand): Scene {
+  const count = w < 640 ? 7 : 14;
+  const sheets = Array.from({ length: count }, () => ({
+    x: rand() * w,
+    y: rand() * h,
+    s: 0.7 + rand() * 0.7,
+    vy: -6 - rand() * 8,
+    rot: (rand() - 0.5) * 0.3,
+    at: rand() * 10000,
+  }));
+  return {
+    draw(ctx, now, dt, light, still) {
+      const c = C(light);
+      for (const d of sheets) {
+        if (!still) {
+          d.y += d.vy * dt;
+          if (d.y < -120) d.y = h + 60;
+        }
+        const W = 54 * d.s;
+        const H = 70 * d.s;
+        ctx.save();
+        ctx.translate(d.x, d.y);
+        ctx.rotate(d.rot);
+        ctx.strokeStyle = `rgba(${c},${light ? 0.16 : 0.13})`;
+        ctx.lineWidth = 1.2;
+        // Sheet with a folded corner.
+        ctx.beginPath();
+        ctx.moveTo(-W / 2, -H / 2);
+        ctx.lineTo(W / 2 - 12 * d.s, -H / 2);
+        ctx.lineTo(W / 2, -H / 2 + 12 * d.s);
+        ctx.lineTo(W / 2, H / 2);
+        ctx.lineTo(-W / 2, H / 2);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillStyle = `rgba(${c},${light ? 0.08 : 0.07})`;
+        for (let i = 0; i < 4; i++) ctx.fillRect(-W / 2 + 8 * d.s, -H / 2 + (16 + i * 11) * d.s, (i === 3 ? 0.45 : 0.75) * W, 3 * d.s);
+        const filed = !still && (now + d.at) % 11000 < 1800;
+        if (filed) tick(ctx, W / 2 - 10 * d.s, H / 2 - 12 * d.s, 10 * d.s, `rgba(${GOLD(light)},0.45)`);
+        ctx.restore();
+      }
+    },
+  };
+}
+
+function identity(w: number, h: number, rand: Rand): Scene {
+  const count = w < 640 ? 4 : 8;
+  const cards = Array.from({ length: count }, (_, i) => ({
+    x: ((i * 0.618 + 0.1) % 1) * (w - 160) + 20,
+    y: ((i * 0.382 + 0.15) % 1) * (h - 110) + 20,
+    vy: -3 - rand() * 4,
+    at: rand() * 7000,
+  }));
+  return {
+    draw(ctx, now, dt, light, still) {
+      const c = C(light);
+      for (const k of cards) {
+        if (!still) {
+          k.y += k.vy * dt;
+          if (k.y < -110) k.y = h + 20;
+        }
+        const W = 150;
+        const H = 92;
+        ctx.strokeStyle = `rgba(${c},${light ? 0.15 : 0.12})`;
+        ctx.lineWidth = 1.2;
+        rr(ctx, k.x, k.y, W, H, 10);
+        ctx.stroke();
+        // Portrait and text lines.
+        ctx.beginPath();
+        ctx.arc(k.x + 32, k.y + 38, 13, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(k.x + 32, k.y + 74, 20, Math.PI * 1.15, Math.PI * 1.85);
+        ctx.stroke();
+        ctx.fillStyle = `rgba(${c},${light ? 0.08 : 0.07})`;
+        for (let i = 0; i < 3; i++) ctx.fillRect(k.x + 62, k.y + 26 + i * 14, i === 2 ? 44 : 70, 4);
+        // A light passes across the card, then it is verified.
+        const t = still ? -1 : ((now + k.at) % 7000) / 7000;
+        if (t >= 0 && t < 0.4) {
+          const sx = k.x + (t / 0.4) * W;
+          const g = ctx.createLinearGradient(sx - 18, 0, sx + 2, 0);
+          g.addColorStop(0, `rgba(${c},0)`);
+          g.addColorStop(1, `rgba(${c},${light ? 0.35 : 0.4})`);
+          ctx.fillStyle = g;
+          ctx.fillRect(Math.max(k.x, sx - 18), k.y + 3, Math.min(20, sx - k.x), H - 6);
+        } else if (t >= 0.4 && t < 0.6) {
+          tick(ctx, k.x + W - 20, k.y + H - 22, 12, `rgba(${GOLD(light)},0.5)`);
+        }
+      }
+    },
+  };
+}
+
+const SCENES: Record<SceneName, (w: number, h: number, rand: Rand) => Scene> = { network, people, wire, bokeh, signal, ledger, docs, identity };
 
 export function SceneCanvas({ scene }: { scene: SceneName }) {
   const ref = useRef<HTMLCanvasElement>(null);

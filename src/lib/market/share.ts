@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db/client";
-import { dhakaToday, liveMarketTurnover } from "./data";
+import { dhakaToday, liveMarketTurnover, recordedTurnover } from "./data";
 
 export type ShareInput = {
   exchange: "DSE" | "CSE";
@@ -23,9 +23,11 @@ export async function saveShares(tradeDate: string, inputs: ShareInput[], source
   for (let f of inputs) {
     let market = f.marketTurnover ?? null;
     let note = sourceNote;
-    if (!(market && market > 0) && tradeDate === dhakaToday()) {
-      market = await liveMarketTurnover(f.exchange);
-      if (market) note = [sourceNote, `market turnover from ${f.exchange} live data`].filter(Boolean).join("; ");
+    // The exchange's own total for the day, read from its page, always wins over a typed figure.
+    const official = (await recordedTurnover(f.exchange, tradeDate)) ?? (tradeDate === dhakaToday() ? await liveMarketTurnover(f.exchange) : null);
+    if (official) {
+      market = official;
+      note = [sourceNote, `market turnover from ${f.exchange}`].filter(Boolean).join("; ");
     }
     if (!(market && market > 0)) {
       results.push({ exchange: f.exchange, ok: false, message: `${f.exchange}: enter the exchange's total turnover (it is not available from the live data for this day).` });

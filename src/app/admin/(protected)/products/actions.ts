@@ -342,3 +342,37 @@ export async function saveOfferingMedia(_prev: FormState, formData: FormData): P
   revalidatePath(`/admin/products/${v.offeringId}`);
   return { message: "Screens and demo video saved.", savedAt: Date.now() };
 }
+
+const DEVICES = ["", "WEB", "TABLET", "PHONE"] as const;
+
+/**
+ * Admin → Products → Screen details: for each saved screenshot, the device
+ * frame it appears in on the 3D display (web, tablet, phone, or by its shape)
+ * and its caption in English and Bangla.
+ */
+export async function saveScreenDetails(_prev: FormState, formData: FormData): Promise<FormState> {
+  await requireAdmin();
+  const offeringId = String(formData.get("offeringId") ?? "");
+  if (!z.string().uuid().safeParse(offeringId).success) return { message: "Unknown product." };
+  const rows = await db.offeringMedia.findMany({ where: { offeringId, kind: { not: "VIDEO" } } });
+  const errors: Record<string, string> = {};
+  await db.$transaction(async (tx) => {
+    for (const row of rows) {
+      const device = String(formData.get(`device_${row.id}`) ?? "");
+      if (!(DEVICES as readonly string[]).includes(device)) {
+        errors[`device_${row.id}`] = "Choose a device.";
+        continue;
+      }
+      await tx.offeringMedia.update({ where: { id: row.id }, data: { device: device || null } });
+      for (const locale of ["en", "bn"] as const) {
+        const caption = String(formData.get(`caption_${locale}_${row.id}`) ?? "").trim().slice(0, 300);
+        if (caption) await tx.offeringMediaTranslation.upsert({ where: { itemId_locale: { itemId: row.id, locale } }, update: { caption }, create: { itemId: row.id, locale, caption } });
+        else await tx.offeringMediaTranslation.deleteMany({ where: { itemId: row.id, locale } });
+      }
+    }
+  });
+  if (Object.keys(errors).length) return { errors, message: "Please fix the highlighted fields." };
+  revalidatePath("/", "layout");
+  revalidatePath(`/admin/products/${offeringId}`);
+  return { message: "Saved: screen details." };
+}

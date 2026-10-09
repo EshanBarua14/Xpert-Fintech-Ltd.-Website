@@ -3,7 +3,8 @@ import { db } from "@/lib/db/client";
 import { demoSnapshot } from "./demo";
 import { exchangeSnapshot } from "./exchange";
 import { snapshotSchema } from "./schema";
-import { uniqueQuotes, type MarketPayload, type MarketSnapshot, type ShareFigure } from "./types";
+import { uniqueQuotes, withSessions, type MarketPayload, type MarketSnapshot, type ShareFigure } from "./types";
+import { DEFAULT_SESSIONS, readSchedule, tradedToday, type Sessions } from "./session";
 
 type Mode = MarketPayload["mode"];
 
@@ -50,6 +51,7 @@ function refreshBoard(): Promise<MarketSnapshot | null> {
         return null;
       })
       .then((snapshot) => {
+        if (snapshot) void recordTurnover(snapshot);
         // Keep the last good board if both exchanges fail this time.
         boardCache = { at: Date.now(), value: snapshot ?? boardCache?.value ?? null };
         return boardCache.value;
@@ -109,12 +111,15 @@ export async function latestShares(): Promise<ShareFigure[]> {
     for (const ex of ["DSE", "CSE"] as const) {
       const r = rows.find((x) => x.exchange === ex);
       if (!r) continue;
-      const market = Number(r.marketTurnover);
+      const tradeDate = r.tradeDate.toISOString().slice(0, 10);
+      // The exchange's own total for that day, when it was read from its page, over the one typed in.
+      const official = await recordedTurnover(ex, tradeDate);
+      const market = official ?? Number(r.marketTurnover);
       const xpert = Number(r.xpertTurnover);
       if (!(market > 0)) continue;
       out.push({
         exchange: ex,
-        tradeDate: r.tradeDate.toISOString().slice(0, 10),
+        tradeDate,
         sharePct: (xpert / market) * 100,
         xpertTurnover: xpert,
         marketTurnover: market,
@@ -130,7 +135,7 @@ export async function latestShares(): Promise<ShareFigure[]> {
 
 // Admin settings and share figures change rarely: read them at most every 30 s
 // (browsers poll /api/market at the refresh interval; saving in the admin clears this at once).
-let infoCache: { at: number; value: Promise<{ source: Awaited<ReturnType<typeof db.marketDataSource.findFirst>>; shares: ShareFigure[] }> } | null = null;
+let infoCache: { at: number; value: Promise<{ source: Awaited<ReturnType<typeof db.marketDataSource.findFirst>>; shares: ShareFigure[]; averages: { DSE?: number; CSE?: number } }> } | null = null;
 function settingsAndShares() {
   if (!infoCache || Date.now() - infoCache.at > 30_000) {
     infoCache = {
@@ -139,14 +144,61 @@ function settingsAndShares() {
         db.marketDataSource.findFirst({ orderBy: { createdAt: "asc" } }).catch(() => null),
         latestShares(),
         db.siteSetting.findUnique({ where: { key: REFRESH_KEY } }).catch(() => null),
-      ]).then(([source, shares, refresh]) => {
+        db.siteSetting.findUnique({ where: { key: SESSIONS_KEY } }).catch(() => null),
+        db.siteSetting.findUnique({ where: { key: "market.headlineShare" } }).catch(() => null),
+      ]).then(([source, shares, refresh, sessionsRow, headline]) => {
         const v = Number((refresh?.value as { seconds?: unknown } | null)?.seconds);
         refreshSeconds = (REFRESH_CHOICES as readonly number[]).includes(v) ? v : DEFAULT_REFRESH;
-        return { source, shares };
+        sessions = readSessions(sessionsRow?.value);
+        const h = (headline?.value ?? {}) as Record<string, unknown>;
+        const avg = (x: unknown) => (Number(x) > 0 && Number(x) <= 100 ? Number(x) : undefined);
+        const averages = { DSE: avg(h.dse) ?? avg(h.pct), CSE: avg(h.cse) };
+        return { source, shares, averages };
       }),
     };
   }
   return infoCache.value;
+}
+
+/** Trading hours and holidays per exchange (Admin → Market data → Trading hours). */
+export const SESSIONS_KEY = "market.sessions";
+let sessions: Sessions = DEFAULT_SESSIONS;
+export function readSessions(v: unknown): Sessions {
+  const o = v && typeof v === "object" ? (v as Record<string, unknown>) : {};
+  return { DSE: readSchedule(o.DSE), CSE: readSchedule(o.CSE) };
+}
+
+/**
+ * The exchanges' official total turnover for each trading day, as read from
+ * their own pages: kept (60 days) so a market-share figure entered later for
+ * that day is worked out against the exchange's real total.
+ */
+export const TURNOVER_KEY = (ex: "DSE" | "CSE") => `market.turnover.${ex}`;
+const lastRecorded: Record<string, number> = {};
+async function recordTurnover(snapshot: MarketSnapshot) {
+  for (const e of snapshot.exchanges) {
+    const t = e.turnover;
+    if (!(t && t > 0) || !tradedToday(sessions[e.exchange])) continue;
+    const day = dhakaToday();
+    const k = `${e.exchange}:${day}`;
+    if (lastRecorded[k] === t) continue;
+    lastRecorded[k] = t;
+    try {
+      const row = await db.siteSetting.findUnique({ where: { key: TURNOVER_KEY(e.exchange) } });
+      const days = { ...((row?.value as Record<string, number> | null) ?? {}), [day]: t };
+      const kept = Object.fromEntries(Object.entries(days).sort(([a], [b]) => b.localeCompare(a)).slice(0, 60));
+      await db.siteSetting.upsert({ where: { key: TURNOVER_KEY(e.exchange) }, update: { value: kept }, create: { key: TURNOVER_KEY(e.exchange), value: kept } });
+    } catch (error) {
+      console.error("[market] could not record turnover", error);
+    }
+  }
+}
+
+/** The exchange's official turnover for a day, when it was read from its page that day. */
+export async function recordedTurnover(exchange: "DSE" | "CSE", day: string): Promise<number | null> {
+  const row = await db.siteSetting.findUnique({ where: { key: TURNOVER_KEY(exchange) } }).catch(() => null);
+  const v = Number((row?.value as Record<string, unknown> | null)?.[day]);
+  return v > 0 ? v : null;
 }
 
 /** Forget cached settings and share figures (after an admin saves them). */
@@ -160,7 +212,7 @@ export function clearMarketInfoCache() {
  */
 export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = {}): Promise<MarketPayload> {
   const mode = marketMode();
-  const { source, shares } = await settingsAndShares();
+  const { source, shares, averages } = await settingsAndShares();
   let snapshot: MarketSnapshot | null = null;
   if (mode === "demo") snapshot = demoSnapshot();
   // A licensed feed is shown only once an admin switches it on in Admin → Market data.
@@ -173,13 +225,15 @@ export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = 
       ...snapshot,
       exchanges: snapshot.exchanges.map((e) => ({
         ...e,
+        // What the exchange's page said; the status shown comes from the trading hours (withSessions).
+        reported: e.reported ?? e.status,
         quotes: uniqueQuotes(e.quotes),
         ...(e.gainers && { gainers: uniqueQuotes(e.gainers) }),
         ...(e.losers && { losers: uniqueQuotes(e.losers) }),
       })),
     };
   }
-  return {
+  return withSessions({
     // "none" only when prices are really off; a board still loading keeps its
     // mode so the page's widgets go on to fetch it from /api/market.
     mode: snapshot || mode === "exchange" ? mode : "none",
@@ -188,7 +242,9 @@ export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = 
     snapshot,
     shares,
     refreshSeconds,
-  };
+    sessions,
+    averages,
+  });
 }
 
 /** For the admin "test connection" button. */
@@ -219,6 +275,8 @@ export async function liveMarketTurnover(exchange: "DSE" | "CSE"): Promise<numbe
   let snapshot: MarketSnapshot | null = null;
   if (mode === "exchange") snapshot = await boardSnapshot(12_000);
   else if (mode === "licensed") snapshot = await licensedSnapshot();
+  // Before today's trading starts the exchange still shows the previous session's total: not today's.
+  if (!tradedToday(sessions[exchange])) return null;
   const t = snapshot?.exchanges.find((e) => e.exchange === exchange)?.turnover;
   return t && t > 0 ? t : null;
 }

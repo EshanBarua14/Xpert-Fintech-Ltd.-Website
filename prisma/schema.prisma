@@ -683,6 +683,8 @@ model OfferingMedia {
   videoProvider VideoProvider?
   videoUrl      String?
   posterMediaId String?           @db.Uuid
+  /// Screenshots: the device frame it is shown in — WEB, TABLET or PHONE; empty = by its shape.
+  device        String?
   isConceptual  Boolean           @default(false)
   isHidden      Boolean           @default(false)
   sortOrder     Int               @default(0)

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { MarketPayload } from "@/lib/market/types";
+import { useEffect, useMemo, useState } from "react";
+import { withSessions, type MarketPayload } from "@/lib/market/types";
 
 /** Default poll interval; the server tells the real one (Admin → Market data: 15, 30 or 60 s). */
 let pollMs = 30_000;
@@ -97,5 +97,13 @@ export function useMarket(initial: MarketPayload) {
     };
   }, [initial]);
 
-  return current;
+  // The session (pre-opening, open, post-closing, closed) follows the clock in Dhaka,
+  // so it changes on time even between refreshes: checked every 20 seconds.
+  const [minute, setMinute] = useState(() => Math.floor(Date.now() / 60_000));
+  useEffect(() => {
+    const id = setInterval(() => setMinute(Math.floor(Date.now() / 60_000)), 20_000);
+    return () => clearInterval(id);
+  }, []);
+  const data = useMemo(() => withSessions(current.data, new Date()), [current.data, minute]);
+  return { ...current, data };
 }

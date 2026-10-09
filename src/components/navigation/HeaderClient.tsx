@@ -168,7 +168,7 @@ export function HeaderClient({
         )}
         onMouseLeave={scheduleClose}
       >
-        <Link href={`/${locale}`} className="group flex shrink-0 items-center gap-3 rounded-full focus-visible:outline-offset-4" aria-label="Xpert Fintech Ltd. — home">
+        <Link href={`/${locale}`} className="group flex shrink-0 items-center gap-3 rounded-full focus-visible:outline-offset-4" aria-label={locale === "bn" ? "এক্সপার্ট ফিনটেক লিমিটেড — হোম" : "Xpert Fintech Ltd. — home"}>
           {logo}
         </Link>
 

@@ -4,7 +4,8 @@
  * video". Same frame sizes as the real thing, so the page layout can be
  * reviewed before the media arrives.
  */
-export function DemoPlaceholder({ adminHref, name }: { adminHref: string; name: string }) {
+export function DemoPlaceholder({ adminHref, name, locale = "en" }: { adminHref: string; name: string; locale?: "en" | "bn" }) {
+  const bn = locale === "bn";
   return (
     <figure className="flex flex-col gap-4">
       <div className="demo-frame relative flex min-h-[15rem] aspect-video flex-col items-center justify-center gap-5 overflow-hidden rounded-2xl border border-dashed border-gold/50 bg-[#06111f] p-6 text-center">
@@ -15,18 +16,19 @@ export function DemoPlaceholder({ adminHref, name }: { adminHref: string; name: 
           </svg>
         </span>
         <span className="relative flex flex-col gap-1.5">
-          <span className="font-display text-xl text-white md:text-2xl">Demo video for {name}</span>
-          <span className="text-sm text-white/70">Placeholder, only visible outside the live site. Add a YouTube/Vimeo link or upload an MP4.</span>
+          <span className="font-display text-xl text-white md:text-2xl">{bn ? `${name}: ডেমো ভিডিও` : `Demo video for ${name}`}</span>
+          <span className="text-sm text-white/70">{bn ? "অস্থায়ী জায়গা, শুধু লাইভ সাইটের বাইরে দেখা যায়। ইউটিউব/ভিমিও লিংক দিন বা MP4 আপলোড করুন।" : "Placeholder, only visible outside the live site. Add a YouTube/Vimeo link or upload an MP4."}</span>
         </span>
         <a href={adminHref} className="relative inline-flex h-10 items-center rounded-full border border-gold/60 px-4 text-sm font-semibold text-[#e0b252] hover:bg-white/5">
-          Add the demo video
+          {bn ? "ডেমো ভিডিও যোগ করুন" : "Add the demo video"}
         </a>
       </div>
     </figure>
   );
 }
 
-export function ScreensPlaceholder({ adminHref }: { adminHref: string }) {
+export function ScreensPlaceholder({ adminHref, locale = "en" }: { adminHref: string; locale?: "en" | "bn" }) {
+  const bn = locale === "bn";
   return (
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
@@ -37,15 +39,15 @@ export function ScreensPlaceholder({ adminHref }: { adminHref: string }) {
               <path d="M3 15l5-5 4 4 3-3 6 6" />
               <circle cx="15.5" cy="8.5" r="1.5" />
             </svg>
-            <span className="font-display text-lg text-text-primary">Main product screen</span>
-            <span className="max-w-sm text-sm text-text-secondary">Placeholder, only visible outside the live site.</span>
+            <span className="font-display text-lg text-text-primary">{bn ? "পণ্যের প্রধান স্ক্রিন" : "Main product screen"}</span>
+            <span className="max-w-sm text-sm text-text-secondary">{bn ? "অস্থায়ী জায়গা, শুধু লাইভ সাইটের বাইরে দেখা যায়।" : "Placeholder, only visible outside the live site."}</span>
             <a href={adminHref} className="inline-flex h-10 items-center rounded-full border border-gold/60 px-4 text-sm font-semibold text-gold hover:bg-gold/10">
-              Add screenshots
+              {bn ? "স্ক্রিনশট যোগ করুন" : "Add screenshots"}
             </a>
           </span>
         </div>
         <div className="grid min-w-0 grid-cols-2 gap-4 md:grid-cols-1">
-          {["Screen 2", "Screen 3"].map((l) => (
+          {(bn ? ["স্ক্রিন ২", "স্ক্রিন ৩"] : ["Screen 2", "Screen 3"]).map((l) => (
             <div key={l} className="flex aspect-[16/10] min-w-0 items-center justify-center rounded-2xl border border-dashed border-gold/40 bg-fg/[0.03] text-sm text-text-secondary">
               {l}
             </div>

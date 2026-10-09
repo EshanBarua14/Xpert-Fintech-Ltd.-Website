@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { GalleryPhoto } from "@/lib/public/insights";
+import { fill } from "@/lib/i18n/digits";
 
 /**
  * Photo grid that opens a full-screen viewer. Keyboard: ←/→ to move, Esc to
@@ -103,7 +104,7 @@ export function Lightbox({
                 priority
               />
               <figcaption className="text-center text-sm text-white/80">
-                {current.alt} <span className="ml-2 font-mono text-xs text-white/50">{labels.counter.replace("{i}", String((index ?? 0) + 1)).replace("{n}", String(photos.length))}</span>
+                {current.alt} <span className="ml-2 font-mono text-xs text-white/50">{fill(labels.counter, { i: (index ?? 0) + 1, n: photos.length })}</span>
               </figcaption>
             </figure>
             {photos.length > 1 && (

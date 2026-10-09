@@ -9,6 +9,7 @@ import type { Messages } from "@/lib/i18n/messages";
 import { BUSINESS_TYPES } from "@/lib/validation/lead-constants";
 import type { LeadFormState } from "@/lib/validation/lead";
 import { useActionForm } from "./useActionForm";
+import { fill } from "@/lib/i18n/digits";
 
 type Props = {
   mode: "demo" | "contact";
@@ -289,7 +290,7 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
               ))}
             </ol>
             <p ref={stepHeadingRef} tabIndex={-1} className="font-display text-xl font-semibold focus:outline-none">
-              <span className="mr-2 font-mono text-xs tracking-widest text-accent">{t.demoStepOf.replace("{i}", String(step + 1)).replace("{n}", "3")}</span>
+              <span className="mr-2 font-mono text-xs tracking-widest text-accent">{fill(t.demoStepOf, { i: step + 1, n: 3 })}</span>
               {stepTitles[step]}
             </p>
             <p className="text-sm text-text-secondary">{t.formRequiredNote}</p>

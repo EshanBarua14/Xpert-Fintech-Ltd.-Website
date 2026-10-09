@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { SmartLinkClient } from "./SmartLinkClient";
 import type { AppLocale } from "@/lib/i18n/config";
+import { digits } from "@/lib/i18n/digits";
 
 type Node = { id: string; name: string; detail: string | null; href: string | null };
 
@@ -66,7 +67,7 @@ export function NetworkDiagram({
                   (selected ? "border-brand-sky bg-navy-800 text-text-primary" : "border-fg/10 bg-ink-950 text-text-secondary hover:border-brand-sky/50")
                 }
               >
-                <span className="tabular text-xs text-brand-sky">{String(i + 1).padStart(2, "0")}</span>
+                <span className="tabular text-xs text-brand-sky">{digits(String(i + 1).padStart(2, "0"), locale === "bn")}</span>
                 <span className="font-medium">{n.name}</span>
               </button>
             );

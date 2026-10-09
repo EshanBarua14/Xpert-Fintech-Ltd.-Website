@@ -12,6 +12,7 @@ import type { EcoGraph } from "@/lib/public/ecosystem";
 import { ECOSYSTEM_MODULES, type EcosystemModuleKey } from "./ecosystem-modules";
 import { pick } from "@/lib/public/text";
 import { CapabilityVisual, type VisualKind } from "./Visuals";
+import { digits } from "@/lib/i18n/digits";
 
 /**
  * Flagship sections shared by the home, platform, products and consortium
@@ -458,7 +459,7 @@ export function FlowStory({
                 ) : (
                   <Icon name={s.icon} className="size-7" />
                 )}
-                <span className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">{i + 1}</span>
+                <span className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">{digits(i + 1, /[\u0980-\u09FF]/.test(t.home))}</span>
               </span>
               <span className="flex flex-col items-center gap-0.5">
                 {s.exchanges && !s.items.length && <span className="text-sm font-semibold leading-snug text-gold">DSE · CSE</span>}
@@ -490,7 +491,7 @@ function FlowStoryShort({ t }: { t: Messages }) {
         <li key={s.tag} data-reveal style={delay(i)} className="flex flex-col items-center gap-4 text-center">
           <span className="glass relative flex size-24 items-center justify-center rounded-3xl text-brand-sky">
             <Icon name={s.icon} className="size-8" />
-            <span className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">{i + 1}</span>
+            <span className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">{digits(i + 1, /[\u0980-\u09FF]/.test(t.home))}</span>
           </span>
           <span className="text-sm font-semibold text-gold">{s.tag}</span>
           <p className="max-w-[16rem] text-sm leading-relaxed text-text-primary">{s.label}</p>

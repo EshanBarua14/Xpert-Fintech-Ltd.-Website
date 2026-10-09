@@ -10,6 +10,7 @@ import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getArticleBySlug } from "@/lib/public/insights";
 import { breadcrumbLd, buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
+import { fill } from "@/lib/i18n/digits";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -76,7 +77,7 @@ export default async function ArticlePage({ params }: Props) {
             {card.category && <span className="font-semibold text-gold">{card.category}</span>}
             <time dateTime={card.date.toISOString()}>{formatNewsDate(card.date, loc)}</time>
             <span aria-hidden="true">·</span>
-            <span>{t.minRead.replace("{n}", String(card.minutes))}</span>
+            <span>{fill(t.minRead, { n: card.minutes })}</span>
           </p>
           <h1 data-reveal style={{ "--d": 1 } as CSSProperties} className="font-display text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance text-text-primary md:text-6xl">
             {tr.title}

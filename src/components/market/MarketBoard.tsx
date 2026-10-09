@@ -10,6 +10,7 @@ import { SessionStatus } from "./SessionStatus";
 import { MarketBadge } from "./MarketBadge";
 import { useMarket } from "./useMarket";
 import { useWatchlist } from "./useWatchlist";
+import { fill } from "@/lib/i18n/digits";
 
 type Locale = "en" | "bn";
 type SortKey = "symbol" | "ltp" | "change" | "changePct" | "volume";
@@ -342,7 +343,7 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
                   n === null ? (
                     <span key={`gap-${i}`} aria-hidden="true" className="px-1 text-text-secondary">…</span>
                   ) : (
-                    <PageButton key={n} label={t.pageN.replace("{n}", String(n))} current={n === current} onClick={() => goTo(n)}>
+                    <PageButton key={n} label={fill(t.pageN, { n })} current={n === current} onClick={() => goTo(n)}>
                       {fmt(locale, n, 0)}
                     </PageButton>
                   ),

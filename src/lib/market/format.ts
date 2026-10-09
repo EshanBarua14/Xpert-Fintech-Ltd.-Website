@@ -24,5 +24,7 @@ export function dhakaTime(locale: "en" | "bn", iso: string) {
     minute: "2-digit",
     day: "numeric",
     month: "short",
+    // 24-hour clock: Bangla has no AM/PM of its own (Intl writes "PM" in Latin letters).
+    hour12: false,
   }).format(new Date(iso));
 }

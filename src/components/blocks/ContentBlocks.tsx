@@ -125,7 +125,6 @@ export function ValuesBlock({ block }: { block: BlockData }) {
       <ul className={cn("grid gap-4", gridCols[str(block.props.columns, "3")])}>
         {block.items.map((item, i) => (
           <li key={item.id} data-reveal style={revealDelay(i)} className={cn(CARD, "flex flex-col gap-3")}>
-            <span className="font-mono text-xs text-cyan-300">{String(i + 1).padStart(2, "0")}</span>
             <h3 className="font-display text-2xl font-semibold tracking-tight">{item.title}</h3>
             {item.body && <p className="text-sm leading-relaxed text-text-secondary">{item.body}</p>}
           </li>

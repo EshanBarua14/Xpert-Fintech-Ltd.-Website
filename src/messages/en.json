@@ -615,5 +615,6 @@
   "linkedinSearch": "Find {name} on LinkedIn",
   "emailMissing": "Email not listed yet",
   "marketShareAverage": "Daily average {pct}%",
-  "marketShareAverageBody": "Xpert's average daily share of {exchange} turnover. The day's own figure appears here once Xpert's turnover for the day is entered."
+  "marketShareAverageBody": "Xpert's average daily share of {exchange} turnover. The day's own figure appears here once Xpert's turnover for the day is entered.",
+  "layerShort": "L{n}"
 }

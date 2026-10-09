@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils/cn";
 import { productVars, type ProductLook } from "./ProductMark";
+import { digits, fill } from "@/lib/i18n/digits";
 
 export type AutomationStep = { id: string; title: string; body: string | null };
 export type AutomationLabels = { running: string; done: string; step: string; pause: string; play: string };
@@ -45,7 +46,7 @@ export function AutomationFlow({ steps, productKey, labels, look }: { steps: Aut
   if (n < 2) return null;
   const cur = reduce ? n : active;
   const pct = (i: number) => (n === 1 ? 50 : (i / (n - 1)) * 100);
-  const fill = Math.min(100, pct(Math.min(cur, n - 1)));
+  const progress = Math.min(100, pct(Math.min(cur, n - 1)));
   const status = cur >= n ? labels.done : `${labels.running}: ${steps[cur]!.title}`;
 
   return (
@@ -79,7 +80,7 @@ export function AutomationFlow({ steps, productKey, labels, look }: { steps: Aut
       {/* Rail with the moving signal (horizontal from tablet up, vertical on phones) */}
       <div className="relative">
         <div aria-hidden="true" className="absolute top-6 right-[calc(50%/var(--n))] left-[calc(50%/var(--n))] hidden h-1 rounded-full bg-fg/[0.08] md:block" style={{ "--n": n } as CSSProperties}>
-          <div className="h-full rounded-full bg-gradient-to-r from-[var(--p-from)] to-[var(--p-to)] transition-[width] duration-700" style={{ width: `${fill}%` }} />
+          <div className="h-full rounded-full bg-gradient-to-r from-[var(--p-from)] to-[var(--p-to)] transition-[width] duration-700" style={{ width: `${progress}%` }} />
           {cur < n && (
             <span
               className="auto-packet absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_16px_4px_var(--p-to)]"
@@ -88,7 +89,7 @@ export function AutomationFlow({ steps, productKey, labels, look }: { steps: Aut
           )}
         </div>
         <div aria-hidden="true" className="absolute top-6 bottom-6 left-6 w-1 rounded-full bg-fg/[0.08] md:hidden">
-          <div className="w-full rounded-full bg-gradient-to-b from-[var(--p-from)] to-[var(--p-to)] transition-[height] duration-700" style={{ height: `${fill}%` }} />
+          <div className="w-full rounded-full bg-gradient-to-b from-[var(--p-from)] to-[var(--p-to)] transition-[height] duration-700" style={{ height: `${progress}%` }} />
         </div>
         <ol className="auto-grid relative grid gap-6 md:gap-4" style={{ "--n": n } as CSSProperties}>
           {steps.map((s, i) => {
@@ -107,13 +108,13 @@ export function AutomationFlow({ steps, productKey, labels, look }: { steps: Aut
                   {done ? (
                     <svg aria-hidden="true" viewBox="0 0 16 16" className="size-5 fill-none stroke-current stroke-[2]"><path d="m3.5 8.5 3 3 6-7" /></svg>
                   ) : (
-                    i + 1
+                    digits(i + 1, /[\u0980-\u09FF]/.test(labels.step))
                   )}
                 </span>
                 <span className="flex min-w-0 flex-col gap-1 pt-1 md:pt-0">
                   <span className={cn("font-semibold leading-snug transition-colors", on || done ? "text-text-primary" : "text-text-secondary")}>{s.title}</span>
                   {s.body && <span className="text-sm leading-relaxed text-text-secondary">{s.body}</span>}
-                  <span className="sr-only">{labels.step.replace("{i}", String(i + 1)).replace("{n}", String(n))}</span>
+                  <span className="sr-only">{fill(labels.step, { i: i + 1, n })}</span>
                 </span>
               </li>
             );

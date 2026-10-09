@@ -44,7 +44,9 @@ export type OmsPreviewLabels = typeof DEFAULT_LABELS;
 type Tab = keyof OmsPreviewLabels["tabs"];
 const TABS: Tab[] = ["watch", "orders", "positions", "risk"];
 
-const fmt = (n: number, d = 2) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+// Numbers follow the page's language (Bangla digits on the Bangla site); set from the labels below.
+let NUM_LOCALE = "en-US";
+const fmt = (n: number, d = 2) => n.toLocaleString(NUM_LOCALE, { minimumFractionDigits: d, maximumFractionDigits: d });
 
 function useReducedMotion() {
   const [r, setR] = useState(false);
@@ -64,6 +66,7 @@ export default function OmsPreview({ labels: partial, tickMs = 1500, seed = 42 }
   seed?: number;
 }) {
   const L = useMemo(() => ({ ...DEFAULT_LABELS, ...partial }), [partial]);
+  NUM_LOCALE = /[\u0980-\u09FF]/.test(JSON.stringify(partial ?? {})) ? "bn-BD" : "en-US";
   const [sim, setSim] = useState<SimState>(() => createState(seed));
   const [tab, setTab] = useState<Tab>("watch");
   const [symbol, setSymbol] = useState(sim.instruments[0]!.symbol);
@@ -202,7 +205,7 @@ export default function OmsPreview({ labels: partial, tickMs = 1500, seed = 42 }
                         <td className={styles.hideSm}>{i.name}</td>
                         <td className={styles.num}>{fmt(i.ltp)}</td>
                         <td className={styles.num}>{move(i.ltp, i.prevClose)}</td>
-                        <td className={`${styles.num} ${styles.hideSm}`}>{i.volume.toLocaleString("en-US")}</td>
+                        <td className={`${styles.num} ${styles.hideSm}`}>{i.volume.toLocaleString(NUM_LOCALE)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -224,7 +227,7 @@ export default function OmsPreview({ labels: partial, tickMs = 1500, seed = 42 }
                       <tr key={o.id}>
                         <td>{o.id}</td><th scope="row">{o.symbol}</th>
                         <td className={styles.side} data-side={o.side}>{o.side === "BUY" ? L.buy : L.sell}</td>
-                        <td className={styles.num}>{o.qty.toLocaleString("en-US")}</td>
+                        <td className={styles.num}>{o.qty.toLocaleString(NUM_LOCALE)}</td>
                         <td className={styles.num}>{fmt(o.price)}</td>
                         <td><span className={styles.badge} data-status={o.status}>{L.status[o.status]}</span>
                           {o.reason && <span className={styles.reason}> — {L.checks[o.reason as keyof typeof L.checks]}</span>}</td>
@@ -253,7 +256,7 @@ export default function OmsPreview({ labels: partial, tickMs = 1500, seed = 42 }
                       return (
                         <tr key={p.symbol}>
                           <th scope="row">{p.symbol}</th>
-                          <td className={styles.num}>{p.qty.toLocaleString("en-US")}</td>
+                          <td className={styles.num}>{p.qty.toLocaleString(NUM_LOCALE)}</td>
                           <td className={styles.num}>{fmt(p.avgPrice)}</td>
                           <td className={styles.num}>{fmt(i.ltp)}</td>
                           <td className={styles.num}>{fmt(p.qty * i.ltp)}</td>

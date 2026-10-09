@@ -31,6 +31,7 @@ import { CLIENT_LOGOS, NOT_CLIENTS, orgNameKey } from "../src/content/xfl2/clien
 import { CREDENTIALS } from "../src/content/xfl2/credentials";
 import { DIRECTOR_PROFILES } from "../src/content/xfl2/director-profiles";
 import { sniff } from "../src/lib/media/inspect";
+import { BLOCK_BN, EVENT_BN, ITEM_BN, LEGAL_BN, NAV_BN, NODE_BN, OFFERING_BN, OFFICE_BN, ORG_BN, PAGE_BN, PERSON_BN } from "../src/content/xfl2/bangla";
 
 const db = new PrismaClient();
 const EN: Locale = "en";
@@ -1369,6 +1370,101 @@ async function seedProductScreens() {
   if (added) console.log(`• Product screens: added ${added} screenshot(s) supplied by XFL`);
 }
 
+/**
+ * Bangla wherever content still has only English (src/content/xfl2/bangla.ts):
+ * menu labels, product names and items, events, institution and team names,
+ * the office address, page titles, the about page's values and the legal
+ * pages. Runs every time but only adds what is missing; an existing Bangla
+ * text, or an English text an editor has changed, is never touched.
+ */
+async function seedBanglaGaps() {
+  let added = 0;
+  const has = (rows: { locale: string }[]) => rows.some((r) => r.locale === BN);
+  for (const item of await db.navItem.findMany({ include: { translations: true } })) {
+    const en = item.translations.find((t) => t.locale === EN);
+    const bn = en && NAV_BN[en.label];
+    if (!bn || has(item.translations)) continue;
+    await db.navItemTranslation.create({ data: { itemId: item.id, locale: BN, label: bn, description: null } });
+    added++;
+  }
+  for (const [key, v] of Object.entries(OFFERING_BN)) {
+    const o = await db.offering.findUnique({ where: { key }, include: { translations: true } });
+    const en = o?.translations.find((t) => t.locale === EN);
+    if (!o || !en || has(o.translations)) continue;
+    await db.offeringTranslation.create({ data: { offeringId: o.id, locale: BN, slug: en.slug, name: v.name, tagline: v.tagline ?? null } });
+    added++;
+  }
+  for (const t of await db.offeringItemTranslation.findMany({ where: { locale: EN, title: { in: Object.keys(ITEM_BN) } } })) {
+    if (await db.offeringItemTranslation.findFirst({ where: { itemId: t.itemId, locale: BN } })) continue;
+    await db.offeringItemTranslation.create({ data: { itemId: t.itemId, locale: BN, title: ITEM_BN[t.title]! } });
+    added++;
+  }
+  for (const [key, v] of Object.entries(EVENT_BN)) {
+    const e = await db.event.findUnique({ where: { key }, include: { translations: true } });
+    const en = e?.translations.find((t) => t.locale === EN);
+    if (!e || !en || has(e.translations)) continue;
+    await db.eventTranslation.create({ data: { eventId: e.id, locale: BN, slug: en.slug, title: v.title, summary: v.summary } });
+    added++;
+  }
+  for (const [key, name] of Object.entries(ORG_BN)) {
+    const o = await db.organization.findUnique({ where: { key }, include: { translations: true } });
+    if (!o || has(o.translations)) continue;
+    await db.organizationTranslation.create({ data: { organizationId: o.id, locale: BN, name } });
+    added++;
+  }
+  for (const [key, name] of Object.entries(PERSON_BN)) {
+    const p = await db.person.findUnique({ where: { key }, include: { translations: true } });
+    if (!p || has(p.translations)) continue;
+    await db.personTranslation.create({ data: { personId: p.id, locale: BN, name } });
+    added++;
+  }
+  for (const [key, v] of Object.entries(NODE_BN)) {
+    const n = await db.ecosystemNode.findUnique({ where: { key }, include: { translations: true } });
+    if (!n || has(n.translations)) continue;
+    await db.ecosystemNodeTranslation.create({ data: { nodeId: n.id, locale: BN, label: v.label, description: v.description ?? null } });
+    added++;
+  }
+  for (const t of await db.officeTranslation.findMany({ where: { locale: EN } })) {
+    const v = OFFICE_BN[t.address.trim()];
+    if (!v || (await db.officeTranslation.findFirst({ where: { officeId: t.officeId, locale: BN } }))) continue;
+    await db.officeTranslation.create({ data: { officeId: t.officeId, locale: BN, name: v.name, address: v.address, hours: null } });
+    added++;
+  }
+  const pageKeys = [...Object.keys(PAGE_BN), ...Object.keys(LEGAL_BN)];
+  for (const page of await db.page.findMany({ where: { key: { in: pageKeys } }, include: { translations: true, sections: { orderBy: { sortOrder: "asc" }, include: { blocks: { orderBy: { sortOrder: "asc" }, include: { translations: true } } } } } })) {
+    const en = page.translations.find((t) => t.locale === EN);
+    if (!en || has(page.translations)) continue;
+    const legal = LEGAL_BN[page.key ?? ""];
+    const head = legal ?? PAGE_BN[page.key ?? ""]!;
+    await db.pageTranslation.create({ data: { pageId: page.id, locale: BN, path: en.path, title: head.title, intro: head.intro ?? null } });
+    added++;
+    if (!legal) continue;
+    // Legal text blocks, in the order of the English drafts, while their English is unchanged.
+    const draft = LEGAL_DRAFTS.find((d) => d.key === page.key);
+    const blocks = page.sections.flatMap((s) => s.blocks);
+    for (const [i, b] of blocks.entries()) {
+      const enB = b.translations.find((t) => t.locale === EN);
+      const part = legal.sections[i];
+      if (!part || !enB || enB.title !== draft?.sections[i]?.title || has(b.translations)) continue;
+      await db.contentBlockTranslation.create({ data: { blockId: b.id, locale: BN, title: part.title, body: part.body } });
+      added++;
+    }
+  }
+  for (const t of await db.contentBlockTranslation.findMany({ where: { locale: EN, title: { in: Object.keys(BLOCK_BN) } } })) {
+    if (await db.contentBlockTranslation.findFirst({ where: { blockId: t.blockId, locale: BN } })) continue;
+    const v = BLOCK_BN[t.title!]!;
+    await db.contentBlockTranslation.create({ data: { blockId: t.blockId, locale: BN, title: v.title ?? null, body: v.body ?? null } });
+    added++;
+  }
+  for (const t of await db.blockItemTranslation.findMany({ where: { locale: EN, title: { in: Object.keys(BLOCK_BN) } } })) {
+    if (await db.blockItemTranslation.findFirst({ where: { itemId: t.itemId, locale: BN } })) continue;
+    const v = BLOCK_BN[t.title!]!;
+    await db.blockItemTranslation.create({ data: { itemId: t.itemId, locale: BN, title: v.title ?? null, body: v.body ?? null } });
+    added++;
+  }
+  if (added) console.log(`• Bangla added to ${added} item(s) that had English only (menus, products, events, names, address, pages)`);
+}
+
 /** Older databases: mark seeded stand-in profiles as placeholders (until an editor changes that). */
 async function markPlaceholders() {
   const res = await db.person.updateMany({ where: { key: { startsWith: "placeholder-" }, isPlaceholder: false, translations: { some: { name: "Name to be confirmed" } } }, data: { isPlaceholder: true } });
@@ -1406,6 +1502,7 @@ async function main() {
   await seedEcosystem();
   await seedRmsInOms();
   await seedProductScreens();
+  await seedBanglaGaps();
   console.log("Content seed complete.");
 }
 

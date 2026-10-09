@@ -51,7 +51,7 @@ export const getShowcase = cache(async (locale: AppLocale): Promise<ShowcaseProd
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
         include: { translations: true },
       },
-      media: { where: { isHidden: false, kind: "SCREENSHOT" }, orderBy: { sortOrder: "asc" }, take: 12 },
+      media: { where: { isHidden: false, kind: "SCREENSHOT" }, orderBy: { sortOrder: "asc" }, take: 12, include: { translations: true } },
     },
   });
   const design = await getDesign();
@@ -78,11 +78,14 @@ export const getShowcase = cache(async (locale: AppLocale): Promise<ShowcaseProd
         href: `/${own ? locale : "en"}/products/${(own ?? tr).slug}`,
         visual: visualForSlug(tr.slug),
         image,
-        shots: [{ id: r.heroMediaId, device: null as string | null }, ...r.media.map((m) => ({ id: m.mediaId, device: m.device }))]
-          .flatMap(({ id, device }) => {
-            const img = id ? images.get(id) : undefined;
-            return img ? [{ ...img, device }] : [];
-          }),
+        shots: [
+          { id: r.heroMediaId, device: null as string | null, caption: null as string | null },
+          // The screen's caption in this language (Admin → Products → Screen details) describes it best.
+          ...r.media.map((m) => ({ id: m.mediaId, device: m.device, caption: pick(m.translations, locale)?.caption ?? null })),
+        ].flatMap(({ id, device, caption }) => {
+          const img = id ? images.get(id) : undefined;
+          return img ? [{ ...img, alt: caption || img.alt, device }] : [];
+        }),
         logo: r.iconMediaId ? (images.get(r.iconMediaId) ?? null) : null,
         look: (r.key && design.products[r.key]) || null,
         capabilities: titles("CAPABILITY").slice(0, 4),

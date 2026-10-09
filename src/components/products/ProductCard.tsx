@@ -5,14 +5,9 @@ import { pick } from "@/lib/public/text";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { Messages } from "@/lib/i18n/messages";
 
-const TYPE_LABEL: Record<string, string> = {
-  PRODUCT: "Product",
-  PLATFORM: "Platform",
-  MODULE: "Module",
-  CAPABILITY: "Capability",
-  SERVICE: "Service",
-  INTEGRATION: "Integration",
-};
+/** The product's type in the page's language (Site text: typeProduct, typePlatform…). */
+const typeLabel = (type: string, t: Messages) =>
+  ({ PRODUCT: t.typeProduct, PLATFORM: t.typePlatform, MODULE: t.typeModule, CAPABILITY: t.typeCapability, SERVICE: t.typeService, INTEGRATION: t.typeIntegration })[type] ?? type;
 
 type Offering = {
   id: string;
@@ -45,7 +40,7 @@ export function ProductCard({
     >
       <span className="flex items-center justify-between gap-3">
         <Badge tone="brand" className="self-start">
-          {TYPE_LABEL[offering.type] ?? offering.type}
+          {typeLabel(offering.type, t)}
         </Badge>
         {logo && (
           <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">

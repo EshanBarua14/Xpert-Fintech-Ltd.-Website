@@ -31,6 +31,7 @@ import { AutomationFlow } from "@/components/products/AutomationFlow";
 import { EcosystemPosition } from "@/components/products/EcosystemPosition";
 import { Lightbox } from "@/components/gallery/Lightbox";
 import type { GalleryPhoto } from "@/lib/public/insights";
+import { fill } from "@/lib/i18n/digits";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 type Offering = NonNullable<Awaited<ReturnType<typeof getOfferingBySlug>>>;
@@ -164,7 +165,7 @@ export default async function ProductPage({ params }: Props) {
         <div className="grid-fade pointer-events-none absolute inset-0" />
         <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-6 md:px-8 lg:grid-cols-[1.05fr_1fr] lg:py-10">
           <div className="flex flex-col gap-7">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-text-secondary" data-reveal>
+            <nav aria-label={found.locale === "bn" ? "অবস্থান" : "Breadcrumb"} className="flex items-center gap-2 text-sm text-text-secondary" data-reveal>
               <Link href={`/${found.locale}/products`} className="hover:text-fg">
                 {t.products}
               </Link>
@@ -254,7 +255,7 @@ export default async function ProductPage({ params }: Props) {
       {!demo && mediaSlots && (
         <Band title={t.demoTitle} body={t.demoBody}>
           <div className="mx-auto w-full max-w-5xl">
-            <DemoPlaceholder name={tr.name} adminHref={`/admin/products/${offering.id}#media`} />
+            <DemoPlaceholder name={tr.name} locale={found.locale} adminHref={`/admin/products/${offering.id}#media`} />
           </div>
         </Band>
       )}
@@ -269,7 +270,7 @@ export default async function ProductPage({ params }: Props) {
 
       {shots.length === 0 && mediaSlots && (
         <Band title={t.screensTitle} body={t.screensBody} alt>
-          <ScreensPlaceholder adminHref={`/admin/products/${offering.id}#media`} />
+          <ScreensPlaceholder locale={found.locale} adminHref={`/admin/products/${offering.id}#media`} />
         </Band>
       )}
 
@@ -342,7 +343,7 @@ export default async function ProductPage({ params }: Props) {
                 style={{ "--d": i } as CSSProperties}
                 className="spotlight glass grid items-center gap-2 rounded-2xl p-5 md:grid-cols-[3rem_240px_1fr]"
               >
-                <span className="font-mono text-xs text-cyan-300">L{i + 1}</span>
+                <span className="font-mono text-xs text-cyan-300">{fill(t.layerShort, { n: i + 1 })}</span>
                 <span className="font-display font-semibold">{l.title}</span>
                 {l.body && <span className="text-sm text-text-secondary">{l.body}</span>}
               </li>

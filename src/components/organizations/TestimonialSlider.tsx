@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { TestimonialCard } from "@/lib/public/content";
 import { cn } from "@/lib/utils/cn";
+import { fill } from "@/lib/i18n/digits";
 
 type Labels = { region: string; prev: string; next: string; pause: string; play: string; slide: string; /** "Rated {n} out of 5" */ rating: string; /** "{n}/5" */ ratingShort?: string; /** Digits 0–9 (Bangla numerals on the Bangla site). */ digits?: string };
 
@@ -107,7 +108,7 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
             key={t.id}
             role="group"
             aria-roledescription="slide"
-            aria-label={labels.slide.replace("{i}", String(i + 1)).replace("{n}", String(items.length))}
+            aria-label={fill(labels.slide, { i: i + 1, n: items.length })}
             data-reveal
             style={{ "--d": i % 3 } as CSSProperties}
             className="w-[86%] shrink-0 snap-start sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)]"
@@ -138,7 +139,7 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
                 </span>
               </figcaption>
               {t.rating ? (
-                <p className="flex items-center gap-0.5" role="img" aria-label={labels.rating.replace("{n}", String(t.rating))}>
+                <p className="flex items-center gap-0.5" role="img" aria-label={fill(labels.rating, { n: t.rating })}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <svg key={n} aria-hidden="true" viewBox="0 0 20 20" className={cn("size-[1.15rem]", n <= t.rating! ? "fill-gold" : "fill-fg/15")}>
                       <path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L10 14.8 4.8 17.6l1-5.8L1.5 7.7l5.9-.8z" />
@@ -213,7 +214,7 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
             </button>
           )}
           <span className="font-mono text-sm text-text-secondary tabular-nums" aria-live="polite">
-            {active + 1} / {stops}
+            {(labels.digits ? `${active + 1} / ${stops}`.replace(/\d/g, (d) => labels.digits![Number(d)] ?? d) : `${active + 1} / ${stops}`)}
           </span>
         </div>
       )}

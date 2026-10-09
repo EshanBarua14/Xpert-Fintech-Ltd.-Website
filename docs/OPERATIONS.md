@@ -116,11 +116,14 @@ Visitors and admins get their device's setting on the first visit; the sun/moon 
 
 ## Importing the old website
 
-`npm run import:live-site` copies www.xpertfintech.com (WordPress) into this site once: every image into the media library, news posts into News with redirects from their old addresses, and the people, client logos and testimonials it can recognise from the page layouts. It also adds the portraits in `prisma/seed-media/people/` to the media library. Re-running only adds what is new. Check `live-site-import/report.md` afterwards; each old page's text is saved next to it.
+`npm run import:live-site` copies www.xpertfintech.com (WordPress) into this site once: every image into the media library, news posts into News (filed under their old categories) and event posts into Events (with dates, venue and a photo gallery of the pictures in each post), each with a redirect from its old address, and the people, client logos and testimonials it can recognise from the page layouts. It also adds the portraits in `prisma/seed-media/people/` to the media library. Re-running only adds what is new. Check `live-site-import/report.md` afterwards; each old page's text is saved next to it.
 
 - `-- --dry` shows what would be imported without changing anything.
 - `-- --allow-expired-certificate` reads the old site although its security certificate has expired (renew it: visitors see a warning).
+- `-- --events-category=csr,agm` also treats posts in these old categories as events. Posts in categories named like Events, Seminar, Workshop, Conference, Webinar, Expo, Fair, Summit, Programme, Ceremony or Training are events automatically, as are entries from an events plugin. The report lists every old category and where it went.
 - `-- --logos-approved` shows imported client logos straight away (only if XFL has permission to display them).
+
+Imported news and events are published in English. Their Bangla versions are added in Admin → News and Admin → Events (until then the Bangla site shows the English text). An event or story already on this site is not repeated: only its empty fields are filled.
 
 Imported testimonials arrive as drafts: open each in Admin → Testimonials, tick “Written approval from this person is on file” and publish.
 

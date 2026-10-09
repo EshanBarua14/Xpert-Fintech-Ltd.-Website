@@ -1,7 +1,8 @@
 /**
  * Copies the content of the current website (www.xpertfintech.com, WordPress)
  * into this site's database, once and for good: every image into the media
- * library, news posts into News (with redirects from their old addresses),
+ * library, news posts into News and event posts into Events (with their
+ * photo galleries and redirects from their old addresses),
  * and — recognised from the page layouts — people with their photos and
  * titles, client logos and testimonials. Nothing is deleted; re-running only
  * adds what is new. Everything stays editable in the admin.
@@ -11,6 +12,8 @@
  *   npm run import:live-site -- --allow-expired-certificate
  *        the current site's security certificate has expired; this reads its
  *        public pages anyway (only from xpertfintech.com, read-only)
+ *   npm run import:live-site -- --events-category=csr,agm
+ *        also treat posts in these old categories as events
  *   npm run import:live-site -- --logos-approved   show imported client logos (you confirm
  *                                                  XFL has permission, as the old site shows them)
  *
@@ -268,7 +271,7 @@ function recognise(items: Item[], page: string) {
 
 // ── Media library ──
 
-const stats = { media: 0, reused: 0, articles: 0, redirects: 0, people: 0, peopleUpdated: 0, quotes: 0, clients: 0, portraits: 0, skipped: [] as string[] };
+const stats = { media: 0, reused: 0, articles: 0, events: 0, eventsUpdated: 0, redirects: 0, people: 0, peopleUpdated: 0, quotes: 0, clients: 0, portraits: 0, skipped: [] as string[] };
 const mediaBySrc = new Map<string, string | null>();
 
 async function storeImage(data: Buffer, originalName: string, altText: string, tags: string[]): Promise<string | null> {
@@ -327,7 +330,7 @@ async function imageFromUrl(src: string, alt: string, tags: string[]): Promise<s
   return id;
 }
 
-async function usage(mediaId: string | null, entityType: "PERSON" | "ORGANIZATION" | "ARTICLE", entityId: string, field: string) {
+async function usage(mediaId: string | null, entityType: "PERSON" | "ORGANIZATION" | "ARTICLE" | "EVENT", entityId: string, field: string) {
   if (DRY || !mediaId || mediaId.startsWith("dry-")) return;
   await db.mediaUsage.deleteMany({ where: { entityType, entityId, field } });
   await db.mediaUsage.create({ data: { mediaId, entityType, entityId, field } });
@@ -336,7 +339,7 @@ async function usage(mediaId: string | null, entityType: "PERSON" | "ORGANIZATIO
 // ── Importers ──
 
 type WpRendered = { rendered: string };
-type WpPost = { id: number; date: string; slug: string; link: string; title: WpRendered; excerpt: WpRendered; content: WpRendered; featured_media: number };
+type WpPost = { id: number; date: string; slug: string; link: string; title: WpRendered; excerpt: WpRendered; content: WpRendered; featured_media: number; categories?: number[]; date_gmt?: string };
 type WpPage = { id: number; slug: string; link: string; title: WpRendered; content: WpRendered };
 type WpMedia = { id: number; source_url: string; alt_text: string; title: WpRendered; mime_type: string };
 
@@ -361,43 +364,324 @@ async function importMediaLibrary(): Promise<Map<number, string | null>> {
   return byWpId;
 }
 
-async function importPosts(mediaIds: Map<number, string | null>) {
-  const posts = await getAll<WpPost>("posts", "id,date,slug,link,title,excerpt,content,featured_media");
-  log(`\n## News\n\n${posts.length} posts.`);
-  for (const p of posts) {
-    const title = decode(p.title.rendered.replace(/<[^>]+>/g, "")).trim();
-    const slug = slugify(decodeURIComponent(p.slug)) || slugify(title);
-    if (!slug || !title) continue;
-    const exists = await db.articleTranslation.findFirst({ where: { locale: "en", slug } });
-    const oldPath = new URL(p.link).pathname.replace(/\/+$/, "") || "/";
-    if (exists) {
-      log(`- already here: ${title}`);
-    } else {
-      const body = htmlToText(p.content.rendered);
-      const excerpt = htmlToText(p.excerpt.rendered).slice(0, 600) || body.slice(0, 280);
-      const cover = mediaIds.get(p.featured_media) ?? null;
-      const date = new Date(p.date);
-      log(`- ${p.date.slice(0, 10)} ${title}`);
-      stats.articles++;
-      if (!DRY) {
-        const a = await db.article.create({
-          data: {
-            status: "PUBLISHED",
-            publishAt: date,
-            displayDate: date,
-            legacyUrl: p.link,
-            coverMediaId: cover && !cover.startsWith("dry-") ? cover : null,
-            translations: { create: { locale: "en", slug, title: title.slice(0, 200), excerpt: excerpt || null, body: body || null } },
-          },
+// ── News and events ──
+//
+// WordPress keeps both as posts. A post is an event when one of its
+// categories says so (Events, Seminar, Workshop, Conference, Webinar, Expo,
+// Summit, Programme, Ceremony…, or the categories given with
+// --events-category=slug,slug), or when it comes from an events plugin
+// (The Events Calendar's API, or any custom post type named like "event").
+// Every other post is a news story, filed under its old category.
+
+const EVENT_WORDS = /\b(events?|seminars?|workshops?|conferences?|webinars?|expos?|fairs?|summits?|meet-?ups?|programmes?|programs?|ceremon(?:y|ies)|trainings?)\b/i;
+const EVENT_CATS = (process.argv.find((a) => a.startsWith("--events-category="))?.split("=")[1] ?? "")
+  .split(",")
+  .map((x) => x.trim().toLowerCase())
+  .filter(Boolean);
+
+type WpCategory = { id: number; slug: string; name: string };
+type WpType = { slug: string; name: string; rest_base: string };
+type TribeEvent = {
+  id: number;
+  url: string;
+  slug: string;
+  title: string;
+  description: string;
+  excerpt: string;
+  start_date: string;
+  end_date: string;
+  all_day?: boolean;
+  image?: { url?: string } | false;
+  venue?: { venue?: string; address?: string; city?: string } | unknown[];
+};
+
+/** WordPress gives the time in UTC as date_gmt; date is the site's own clock (Dhaka). */
+const postDate = (p: WpPost) => new Date(p.date_gmt ? `${p.date_gmt}Z` : `${p.date}+06:00`);
+const plain = (html: string) => decode(html.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
+const pathOf = (link: string) => {
+  try {
+    return new URL(link).pathname.replace(/\/+$/, "") || "/";
+  } catch {
+    return "/";
+  }
+};
+/** Images inside a post's text, in order, without the theme's icons. */
+const contentImages = (html: string) =>
+  [...new Map(flatten(html).filter((i): i is Extract<Item, { t: "img" }> => i.t === "img").filter((i) => !/\.svg(\?|$)|emoji|gravatar|icon|logo/i.test(i.src)).map((i) => [i.src.replace(/-\d{2,4}x\d{2,4}(\.\w+)$/, "$1"), i])).values()];
+
+async function redirect(oldPath: string, toPath: string, note: string) {
+  if (oldPath === "/" || oldPath === toPath) return;
+  if (await db.redirect.findUnique({ where: { fromPath: oldPath } })) return;
+  stats.redirects++;
+  if (!DRY) await db.redirect.create({ data: { fromPath: oldPath, toPath, statusCode: 301, note } });
+}
+
+/** Makes a slug free in the given table by adding -2, -3… */
+async function freeSlug(base: string, taken: (slug: string) => Promise<boolean>) {
+  let slug = base;
+  for (let n = 2; await taken(slug); n++) slug = `${base}-${n}`.slice(0, 90);
+  return slug;
+}
+
+async function newsCategory(cat: WpCategory | undefined): Promise<string | null> {
+  if (!cat || /^uncategori[sz]ed$/i.test(cat.slug)) return null;
+  const key = `old-${slugify(cat.slug) || cat.id}`;
+  const found = await db.articleCategory.findFirst({
+    where: { OR: [{ key }, { translations: { some: { locale: "en", name: { equals: plain(cat.name), mode: "insensitive" } } } }] },
+    select: { id: true },
+  });
+  if (found) return found.id;
+  if (DRY) return null;
+  const slug = await freeSlug(slugify(cat.slug) || key, async (x) => !!(await db.articleCategoryTranslation.findFirst({ where: { locale: "en", slug: x } })));
+  const c = await db.articleCategory.create({ data: { key, sortOrder: 100, translations: { create: { locale: "en", slug, name: plain(cat.name).slice(0, 80) } } } });
+  return c.id;
+}
+
+type EventInput = {
+  link: string;
+  slug: string;
+  title: string;
+  summary: string;
+  body: string;
+  startsAt: Date | null;
+  endsAt: Date | null;
+  location: string | null;
+  coverMediaId: string | null;
+  coverSrc: string | null;
+  images: { src: string; alt: string }[];
+  source: string;
+};
+
+async function saveEvent(e: EventInput) {
+  const existing = await db.event.findFirst({
+    where: {
+      deletedAt: null,
+      OR: [{ legacyUrl: e.link }, { translations: { some: { locale: "en", OR: [{ slug: e.slug }, { title: { equals: e.title, mode: "insensitive" } }] } } }],
+    },
+    include: { translations: { where: { locale: "en" } }, gallery: true },
+  });
+  if (existing?.coverMediaId && existing.gallery.length) {
+    log(`- already here: ${e.title}`);
+    await redirect(pathOf(e.link), `/en/events/${existing.translations[0]?.slug ?? e.slug}`, `Old website event (${e.source})`);
+    return;
+  }
+  // The photos: the featured image, then every picture in the post (the full-size files).
+  let cover = e.coverMediaId;
+  if (!cover && e.coverSrc) cover = await imageFromUrl(e.coverSrc, e.title, ["imported", "old-site", "event"]);
+  const gallery: string[] = [];
+  for (const img of e.images) {
+    const id = await imageFromUrl(img.src, img.alt || e.title, ["imported", "old-site", "event"]);
+    if (id && id !== cover && !gallery.includes(id)) gallery.push(id);
+  }
+  if (!cover && gallery.length) cover = gallery[0]!;
+  const real = (id: string | null) => (id && !id.startsWith("dry-") ? id : null);
+  const date = e.startsAt ? e.startsAt.toISOString().slice(0, 10) : "no date";
+  const photos = gallery.length ? ` · ${gallery.length} photo${gallery.length === 1 ? "" : "s"}` : "";
+
+  if (existing) {
+    // Already here (from the content seed or an earlier run): only fill what is empty, never overwrite an edit.
+    const tr = existing.translations[0];
+    log(`- ${date} ${e.title} (already here — filled in what was missing)${photos}`);
+    stats.eventsUpdated++;
+    if (!DRY) {
+      await db.event.update({
+        where: { id: existing.id },
+        data: {
+          ...(!existing.legacyUrl && { legacyUrl: e.link }),
+          ...(!existing.coverMediaId && real(cover) && { coverMediaId: real(cover) }),
+          ...(!existing.startsAt && e.startsAt && { startsAt: e.startsAt, endsAt: e.endsAt, dateIsApprox: false }),
+        },
+      });
+      if (tr && !existing.updatedById) {
+        await db.eventTranslation.update({
+          where: { id: tr.id },
+          data: { ...(!tr.body && e.body && { body: e.body }), ...(!tr.summary && e.summary && { summary: e.summary }), ...(!tr.location && e.location && { location: e.location }) },
         });
-        await usage(cover, "ARTICLE", a.id, "cover");
       }
+      if (!existing.gallery.length) await saveGallery(existing.id, gallery.map(real).filter((x): x is string => !!x));
+      if (!existing.coverMediaId) await usage(real(cover), "EVENT", existing.id, "cover");
     }
-    // Old address → new address, so links and search results keep working.
-    if (oldPath !== "/" && !(await db.redirect.findUnique({ where: { fromPath: oldPath } }))) {
-      stats.redirects++;
-      if (!DRY) await db.redirect.create({ data: { fromPath: oldPath, toPath: `/en/news/${slug}`, statusCode: 301, note: "Old website news post" } });
+    await redirect(pathOf(e.link), `/en/events/${tr?.slug ?? e.slug}`, `Old website event (${e.source})`);
+    return;
+  }
+
+  const slug = await freeSlug(e.slug, async (x) => !!(await db.eventTranslation.findFirst({ where: { locale: "en", slug: x } })));
+  log(`- ${date} ${e.title}${e.location ? ` — ${e.location}` : ""}${photos}`);
+  stats.events++;
+  if (!DRY) {
+    const ev = await db.event.create({
+      data: {
+        status: "PUBLISHED",
+        publishAt: e.startsAt ?? new Date(),
+        startsAt: e.startsAt,
+        endsAt: e.endsAt,
+        dateIsApprox: !e.startsAt,
+        legacyUrl: e.link,
+        coverMediaId: real(cover),
+        translations: {
+          create: { locale: "en", slug, title: e.title.slice(0, 200), summary: e.summary.slice(0, 600) || null, body: e.body || null, location: e.location?.slice(0, 200) || null },
+        },
+      },
+    });
+    await usage(real(cover), "EVENT", ev.id, "cover");
+    await saveGallery(ev.id, gallery.map(real).filter((x): x is string => !!x));
+  }
+  await redirect(pathOf(e.link), `/en/events/${slug}`, `Old website event (${e.source})`);
+}
+
+async function saveGallery(eventId: string, ids: string[]) {
+  if (DRY || !ids.length) return;
+  await db.eventMedia.createMany({ data: ids.map((mediaId, i) => ({ eventId, mediaId, sortOrder: i })) });
+  await db.mediaUsage.deleteMany({ where: { entityType: "EVENT", entityId: eventId, field: "gallery" } });
+  await db.mediaUsage.createMany({ data: ids.map((mediaId) => ({ mediaId, entityType: "EVENT" as const, entityId: eventId, field: "gallery" })), skipDuplicates: true });
+}
+
+async function saveArticle(p: WpPost, cats: Map<number, WpCategory>, mediaIds: Map<number, string | null>, eventPaths: Map<string, string>) {
+  const title = plain(p.title.rendered);
+  const slug = slugify(decodeURIComponent(p.slug)) || slugify(title);
+  if (!slug || !title) return;
+  // Already on this site as an event (the content seed adds some, with their old address): not repeated as news.
+  const asEvent = eventPaths.get(pathOf(p.link));
+  if (asEvent) {
+    log(`- already here as an event: ${title}`);
+    await redirect(pathOf(p.link), `/en/events/${asEvent}`, "Old website news post");
+    return;
+  }
+  const exists = await db.article.findFirst({
+    where: { deletedAt: null, OR: [{ legacyUrl: p.link }, { translations: { some: { locale: "en", OR: [{ slug }, { title: { equals: title, mode: "insensitive" } }] } } }] },
+    include: { translations: { where: { locale: "en" }, select: { slug: true } } },
+  });
+  if (exists) {
+    log(`- already here: ${title}`);
+    await redirect(pathOf(p.link), `/en/news/${exists.translations[0]?.slug ?? slug}`, "Old website news post");
+    return;
+  }
+  const body = htmlToText(p.content.rendered);
+  const excerpt = htmlToText(p.excerpt.rendered).replace(/\s*(\[…\]|\[\.\.\.\]|Read more.*)$/i, "").slice(0, 600) || body.slice(0, 280);
+  let cover = mediaIds.get(p.featured_media) ?? null;
+  // No featured image: the first picture in the story becomes its cover.
+  if (!cover) {
+    const first = contentImages(p.content.rendered)[0];
+    if (first) cover = await imageFromUrl(first.src, first.alt || title, ["imported", "old-site", "news"]);
+  }
+  const date = postDate(p);
+  const category = await newsCategory((p.categories ?? []).map((id) => cats.get(id)).find((c) => c && !/^uncategori[sz]ed$/i.test(c.slug)));
+  const finalSlug = await freeSlug(slug, async (x) => !!(await db.articleTranslation.findFirst({ where: { locale: "en", slug: x } })));
+  log(`- ${p.date.slice(0, 10)} ${title}`);
+  stats.articles++;
+  if (!DRY) {
+    const a = await db.article.create({
+      data: {
+        status: "PUBLISHED",
+        publishAt: date,
+        displayDate: date,
+        legacyUrl: p.link,
+        categoryId: category,
+        coverMediaId: cover && !cover.startsWith("dry-") ? cover : null,
+        translations: { create: { locale: "en", slug: finalSlug, title: title.slice(0, 200), excerpt: excerpt || null, body: body || null } },
+      },
+    });
+    await usage(cover, "ARTICLE", a.id, "cover");
+  }
+  // Old address → new address, so links and search results keep working.
+  await redirect(pathOf(p.link), `/en/news/${finalSlug}`, "Old website news post");
+}
+
+function postToEvent(p: WpPost, mediaIds: Map<number, string | null>, source: string, eventDate?: Date | null): EventInput {
+  const title = plain(p.title.rendered);
+  const body = htmlToText(p.content.rendered);
+  return {
+    link: p.link,
+    slug: slugify(decodeURIComponent(p.slug)) || slugify(title),
+    title,
+    summary: htmlToText(p.excerpt?.rendered ?? "").replace(/\s*(\[…\]|\[\.\.\.\]|Read more.*)$/i, "") || body.slice(0, 280),
+    body,
+    startsAt: eventDate ?? (p.date ? postDate(p) : null),
+    endsAt: null,
+    location: null,
+    coverMediaId: mediaIds.get(p.featured_media) ?? null,
+    coverSrc: null,
+    images: contentImages(p.content.rendered),
+    source,
+  };
+}
+
+async function importNewsAndEvents(mediaIds: Map<number, string | null>) {
+  // Categories: which ones mean "event".
+  let categories: WpCategory[] = [];
+  try {
+    categories = await getAll<WpCategory>("categories", "id,slug,name");
+  } catch {
+    /* categories hidden: every post is news */
+  }
+  const cats = new Map(categories.map((c) => [c.id, c]));
+  const eventCats = new Set(categories.filter((c) => EVENT_CATS.includes(c.slug.toLowerCase()) || EVENT_WORDS.test(c.slug) || EVENT_WORDS.test(plain(c.name))).map((c) => c.id));
+  if (categories.length) {
+    log(`\n## Categories on the old site\n\n${categories.map((c) => `- ${plain(c.name)} (${c.slug})${eventCats.has(c.id) ? " → Events" : " → News"}`).join("\n")}`);
+  }
+
+  const posts = await getAll<WpPost>("posts", "id,date,date_gmt,slug,link,title,excerpt,content,featured_media,categories");
+  const asEvents = posts.filter((p) => (p.categories ?? []).some((id) => eventCats.has(id)));
+  const asNews = posts.filter((p) => !asEvents.includes(p));
+
+  const known = await db.event.findMany({ where: { deletedAt: null, legacyUrl: { not: null } }, select: { legacyUrl: true, translations: { where: { locale: "en" }, select: { slug: true } } } });
+  const eventPaths = new Map<string, string>(known.filter((e) => e.translations[0]).map((e): [string, string] => [pathOf(new URL(e.legacyUrl!, SITE).toString()), e.translations[0]!.slug]));
+
+  log(`\n## News\n\n${asNews.length} posts.`);
+  for (const p of asNews) await saveArticle(p, cats, mediaIds, eventPaths);
+
+  log(`\n## Events\n\n${asEvents.length} posts in event categories.`);
+  for (const p of asEvents) await saveEvent(postToEvent(p, mediaIds, "post"));
+
+  // The Events Calendar plugin: real start and end times and the venue.
+  try {
+    const all: TribeEvent[] = [];
+    for (let page = 1; page <= 50; page++) {
+      const { data } = await getJson<{ events: TribeEvent[]; total_pages?: number }>(`${SITE}/wp-json/tribe/events/v1/events?per_page=50&page=${page}&start_date=2000-01-01`);
+      all.push(...(data.events ?? []));
+      if (!data.total_pages || page >= data.total_pages) break;
     }
+    if (all.length) log(`\n${all.length} events from the events calendar.`);
+    for (const t of all) {
+      const venue = Array.isArray(t.venue) ? null : t.venue;
+      const title = plain(t.title);
+      const body = htmlToText(t.description ?? "");
+      const when = (s: string) => (s ? new Date(s.replace(" ", "T") + "+06:00") : null);
+      await saveEvent({
+        link: t.url,
+        slug: slugify(decodeURIComponent(t.slug)) || slugify(title),
+        title,
+        summary: htmlToText(t.excerpt ?? "") || body.slice(0, 280),
+        body,
+        startsAt: when(t.start_date),
+        endsAt: when(t.end_date),
+        location: venue ? [venue.venue, venue.city].filter(Boolean).map((x) => plain(String(x))).join(", ") || null : null,
+        coverMediaId: null,
+        coverSrc: t.image && t.image.url ? t.image.url : null,
+        images: contentImages(t.description ?? ""),
+        source: "events calendar",
+      });
+    }
+  } catch {
+    /* no events calendar on the old site */
+  }
+
+  // Any other post type named like an event (from a theme or another plugin).
+  try {
+    const { data: types } = await getJson<Record<string, WpType>>(`${SITE}/wp-json/wp/v2/types`);
+    for (const type of Object.values(types)) {
+      if (!/event|tribe/i.test(`${type.slug} ${type.name}`) || type.slug === "tribe_events" || !type.rest_base) continue;
+      let items: WpPost[] = [];
+      try {
+        items = await getAll<WpPost>(type.rest_base, "id,date,date_gmt,slug,link,title,excerpt,content,featured_media");
+      } catch {
+        continue;
+      }
+      log(`\n${items.length} from “${plain(type.name)}”.`);
+      for (const p of items) await saveEvent(postToEvent({ ...p, excerpt: p.excerpt ?? { rendered: "" } }, mediaIds, plain(type.name)));
+    }
+  } catch {
+    /* post types hidden */
   }
 }
 
@@ -419,7 +703,7 @@ async function importPages() {
     log(`- ${title} (${p.link}): ${found.people.length} people, ${found.quotes.length} quotes, ${found.logos.length} logos`);
     // Old page address → nearest new page, when the slug says what it is.
     const oldPath = new URL(p.link).pathname.replace(/\/+$/, "") || "/";
-    const target = /about/.test(p.slug) ? "/en/company/about" : /board/.test(p.slug) ? "/en/company/board" : /management/.test(p.slug) ? "/en/company/management" : /team/.test(p.slug) ? "/en/company/team" : /contact/.test(p.slug) ? "/en/contact" : /career/.test(p.slug) ? "/en/careers" : /news|blog/.test(p.slug) ? "/en/news" : /product|service|solution/.test(p.slug) ? "/en/products" : null;
+    const target = /about/.test(p.slug) ? "/en/company/about" : /board/.test(p.slug) ? "/en/company/board" : /management/.test(p.slug) ? "/en/company/management" : /team/.test(p.slug) ? "/en/company/team" : /contact/.test(p.slug) ? "/en/contact" : /career/.test(p.slug) ? "/en/careers" : /event/.test(p.slug) ? "/en/events" : /gallery|photo/.test(p.slug) ? "/en/gallery" : /news|blog|media/.test(p.slug) ? "/en/news" : /product|service|solution/.test(p.slug) ? "/en/products" : null;
     if (target && oldPath !== "/" && !(await db.redirect.findUnique({ where: { fromPath: oldPath } }))) {
       stats.redirects++;
       if (!DRY) await db.redirect.create({ data: { fromPath: oldPath, toPath: target, statusCode: 301, note: `Old website page: ${title}` } });
@@ -540,12 +824,12 @@ async function main() {
     return;
   }
   const mediaIds = await importMediaLibrary();
-  await importPosts(mediaIds);
+  await importNewsAndEvents(mediaIds);
   const found = await importPages();
   await savePeople(found.people);
   await saveQuotes(found.quotes);
   await saveLogos(found.logos);
-  const summary = `\n## Summary\n\n- Images added to the media library: ${stats.media} (already there: ${stats.reused})\n- Portraits added for Admin → People: ${stats.portraits}\n- News stories: ${stats.articles}\n- Redirects from old addresses: ${stats.redirects}\n- People: ${stats.people} new, ${stats.peopleUpdated} updated\n- Testimonials (drafts): ${stats.quotes}\n- New clients: ${stats.clients}\n${stats.skipped.length ? `\nSkipped:\n${stats.skipped.map((s) => `- ${s}`).join("\n")}\n` : ""}`;
+  const summary = `\n## Summary\n\n- Images added to the media library: ${stats.media} (already there: ${stats.reused})\n- Portraits added for Admin → People: ${stats.portraits}\n- News stories: ${stats.articles}\n- Events: ${stats.events} new, ${stats.eventsUpdated} already here (gaps filled)\n- Redirects from old addresses: ${stats.redirects}\n- People: ${stats.people} new, ${stats.peopleUpdated} updated\n- Testimonials (drafts): ${stats.quotes}\n- New clients: ${stats.clients}\n${stats.skipped.length ? `\nSkipped:\n${stats.skipped.map((s) => `- ${s}`).join("\n")}\n` : ""}`;
   log(summary);
   await writeFile(path.join(OUT, "report.md"), report.join("\n") + "\n");
   console.log(`Report: ${path.join(OUT, "report.md")}\n`);

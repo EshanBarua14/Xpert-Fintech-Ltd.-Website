@@ -26,10 +26,10 @@ export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android:
       {apps.map((a, i) => {
         // Every public link the app has: Google Play, App Store and the web app.
         const links = [
-          a.playStoreUrl && { href: a.playStoreUrl, label: labels.android },
-          a.appStoreUrl && { href: a.appStoreUrl, label: labels.ios },
-          a.webUrl && { href: a.webUrl, label: labels.web },
-        ].filter((l): l is { href: string; label: string } => Boolean(l));
+          a.playStoreUrl && { href: a.playStoreUrl, label: labels.android, kind: "play" as const },
+          a.appStoreUrl && { href: a.appStoreUrl, label: labels.ios, kind: "ios" as const },
+          a.webUrl && { href: a.webUrl, label: labels.web, kind: "web" as const },
+        ].filter((l): l is { href: string; label: string; kind: "play" | "ios" | "web" } => Boolean(l));
         return (
           <li key={a.id} data-reveal style={{ "--d": i % 5 } as CSSProperties}>
             <div className="spotlight glass group relative flex h-full flex-col overflow-hidden rounded-3xl p-4 sm:p-5">
@@ -50,7 +50,7 @@ export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android:
                 </span>
               </span>
               {links.length > 0 && (
-                <span className="relative mt-auto flex flex-wrap gap-2 pt-4">
+                <span className="relative mt-auto flex flex-wrap gap-1.5 pt-4">
                   {links.map((l) => (
                     <a
                       key={l.href}
@@ -58,10 +58,10 @@ export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android:
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${a.appName}: ${l.label}`}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-full border border-fg/15 px-3 text-xs font-semibold text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-fg"
+                      className="inline-flex h-8 items-center gap-1.5 rounded-full border border-fg/15 px-2.5 text-xs font-semibold whitespace-nowrap text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-fg"
                     >
-                      <span className="size-1.5 rounded-full bg-market-up shadow-[0_0_8px_2px_rgb(34_197_94/0.5)]" aria-hidden="true" />
-                      {l.label} <span aria-hidden="true">↗</span>
+                      <StoreGlyph kind={l.kind} />
+                      {l.label}
                     </a>
                   ))}
                 </span>
@@ -71,5 +71,24 @@ export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android:
         );
       })}
     </ul>
+  );
+}
+
+/** A small generic mark for each kind of link: a play triangle, a phone, a globe. */
+function StoreGlyph({ kind }: { kind: "play" | "ios" | "web" }) {
+  const common = { "aria-hidden": true as const, viewBox: "0 0 16 16", className: "size-3.5 shrink-0" };
+  if (kind === "play") return <svg {...common} fill="currentColor"><path d="M4 2.6v10.8c0 .5.5.8.9.5l8.4-5.4a.6.6 0 0 0 0-1L4.9 2.1c-.4-.3-.9 0-.9.5Z" /></svg>;
+  if (kind === "ios")
+    return (
+      <svg {...common} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+        <rect x="4" y="1.5" width="8" height="13" rx="2" />
+        <path d="M7 12.2h2" />
+      </svg>
+    );
+  return (
+    <svg {...common} fill="none" stroke="currentColor" strokeWidth="1.4">
+      <circle cx="8" cy="8" r="6" />
+      <path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" />
+    </svg>
   );
 }

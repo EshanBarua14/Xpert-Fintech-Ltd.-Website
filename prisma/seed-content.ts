@@ -1572,6 +1572,74 @@ async function seedCareers() {
   if (added) console.log(`• ${added} open role(s) added to Careers`);
 }
 
+/**
+ * Store links checked on 9 October 2026 against Google Play (developer "Xpert
+ * Fintech") and the App Store:
+ * - Rem is now listed as "RemX" (com.xfltrade.rem).
+ * - UTrade by UCB STOCK runs on Xpert (package com.xfltrade.ubr) and is on both
+ *   Google Play and the App Store; it is added, published like the other apps.
+ * - None of the other ten apps has an App Store listing yet.
+ * Fills only what an editor has not changed.
+ */
+const STORE_LINKS: { key: string; appName: string; org: string | null; play: string; ios: string | null }[] = [
+  { key: "ebl-fast-trade", appName: "EBL Fast Trade", org: null, play: "com.xfltrade.ebs", ios: null },
+  { key: "shahjalal-trade", appName: "Shahjalal Trade", org: null, play: "com.xfltrade.sjb", ios: null },
+  { key: "ail-trade", appName: "AIL Trade", org: null, play: "com.xfltrade.snm", ios: null },
+  { key: "gds-trade", appName: "GDS TRADE", org: null, play: "com.xfltrade.gdf", ios: null },
+  { key: "nls-smarttrade", appName: "NLS SmartTrade", org: null, play: "com.xfltrade.nls", ios: null },
+  { key: "ba-secure-trade", appName: "BA SECURE TRADE", org: null, play: "com.xfltrade.bal", ios: null },
+  { key: "tradeibs", appName: "TradeiBS", org: null, play: "com.xfltrade.ibb", ios: null },
+  { key: "one-trade", appName: "ONE TRADE", org: null, play: "com.xfltrade.one", ios: null },
+  { key: "rem", appName: "RemX", org: null, play: "com.xfltrade.rem", ios: null },
+  { key: "skytrade", appName: "SkyTrade", org: null, play: "com.xfltrade.sky", ios: null },
+  { key: "utrade-ucb-stock", appName: "UTrade by UCB STOCK", org: "ucb-stock-brokerage", play: "com.xfltrade.ubr", ios: "https://apps.apple.com/us/app/utrade-by-ucb-stock/id6753627888" },
+];
+
+async function seedStoreLinks() {
+  const MARK = "seed.store-links-2026-10-09";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const existing = await db.deployment.findMany({ where: { deletedAt: null }, select: { status: true } });
+  // New apps follow the others: published if the branded apps are already shown on the site.
+  const shown = existing.some((d) => d.status === "PUBLISHED");
+  const offering = await db.offering.findUnique({ where: { key: "trading-platform" }, select: { id: true } });
+  let added = 0;
+  let updated = 0;
+  for (const [i, a] of STORE_LINKS.entries()) {
+    const playStoreUrl = `https://play.google.com/store/apps/details?id=${a.play}`;
+    const d = await db.deployment.findUnique({ where: { key: a.key } });
+    if (!d) {
+      const org = a.org ? await db.organization.findUnique({ where: { key: a.org }, select: { id: true } }) : null;
+      await db.deployment.create({
+        data: {
+          key: a.key,
+          appName: a.appName,
+          androidPackage: a.play,
+          playStoreUrl,
+          appStoreUrl: a.ios,
+          organizationId: org?.id ?? null,
+          offeringId: offering?.id ?? null,
+          linksCheckedAt: new Date("2026-10-09"),
+          status: shown ? "PUBLISHED" : "DRAFT",
+          sortOrder: i,
+        },
+      });
+      added++;
+      continue;
+    }
+    if (d.updatedById) continue;
+    const data = {
+      ...(d.appName !== a.appName && { appName: a.appName }),
+      ...(!d.playStoreUrl && { playStoreUrl }),
+      ...(!d.androidPackage && { androidPackage: a.play }),
+      ...(!d.appStoreUrl && a.ios && { appStoreUrl: a.ios }),
+    };
+    await db.deployment.update({ where: { id: d.id }, data: { ...data, linksCheckedAt: new Date("2026-10-09") } });
+    if (Object.keys(data).length) updated++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  if (added || updated) console.log(`• Branded apps: ${added} added, ${updated} updated from Google Play and the App Store`);
+}
+
 /** Older databases: mark seeded stand-in profiles as placeholders (until an editor changes that). */
 async function markPlaceholders() {
   const res = await db.person.updateMany({ where: { key: { startsWith: "placeholder-" }, isPlaceholder: false, translations: { some: { name: "Name to be confirmed" } } }, data: { isPlaceholder: true } });
@@ -1599,6 +1667,7 @@ async function main() {
   await seedCredentials();
   await seedStoryBangla();
   await seedReviewDrafts();
+  await seedStoreLinks();
   await seedDeployments();
   await seedTeamLinks();
   await seedConsultantLinks();

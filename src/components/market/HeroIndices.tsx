@@ -43,7 +43,16 @@ export function HeroIndices({ initial, t, locale, logos }: { initial: MarketPayl
                     </div>
                   ))}
                 </dl>
-              ) : (
+              ) : null}
+              {indices.length > 0 && ex!.indicesAsOf ? (
+                <span className="text-[max(11px,0.6875rem)] text-text-secondary">
+                  {t.marketIndicesAsOf.replace(
+                    "{date}",
+                    new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${ex!.indicesAsOf}T00:00:00Z`)),
+                  )}
+                </span>
+              ) : null}
+              {indices.length > 0 ? null : (
                 ex!.advancers !== undefined && (
                   <span className="font-mono text-[max(13px,0.8125rem)] tabular-nums">
                     <span className="text-market-up">▲ {fmt(locale, ex!.advancers, 0)}</span>{" "}

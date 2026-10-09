@@ -125,6 +125,9 @@ export async function PeopleGrid({
         emailMissing: t.emailMissing,
         placeholder: t.placeholderBadge,
         role: t.roleLabel,
+        prevPage: t.bioPrev,
+        nextPage: t.bioNext,
+        pageOf: t.bioPageOf,
       }}
     />
   );

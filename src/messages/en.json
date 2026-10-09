@@ -649,5 +649,9 @@
   "applyEmailBody": "Please attach your CV, your portfolio (if any) and a short note on why you are a good fit.",
   "applyHere": "or apply here",
   "opensInNewTab": "(opens in a new tab)",
-  "applyByEmail": "Apply by email"
+  "applyByEmail": "Apply by email",
+  "marketIndicesAsOf": "Closing values, {date}",
+  "bioPrev": "Previous part",
+  "bioNext": "Next part",
+  "bioPageOf": "Part {n} of {total}"
 }

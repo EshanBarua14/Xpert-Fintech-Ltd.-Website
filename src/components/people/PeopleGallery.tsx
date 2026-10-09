@@ -46,6 +46,10 @@ export type GalleryLabels = {
   emailMissing: string;
   placeholder: string;
   role: string;
+  /** Biography pages: "Previous part", "Next part", "Part {n} of {total}". */
+  prevPage?: string;
+  nextPage?: string;
+  pageOf?: string;
 };
 
 const PLACEHOLDER_PHOTO = "/placeholders/person.svg";
@@ -80,32 +84,67 @@ function Affiliation({ text, className }: { text: string; className?: string }) 
 }
 
 /**
- * A biography cut to fit the profile window: whole paragraphs and sentences
- * up to `max` characters, ending with "…" when something was left out.
+ * The whole biography split into pages that each fit the profile window:
+ * whole paragraphs where they fit, otherwise whole sentences, up to `max`
+ * characters a page. Nothing is left out — long profiles are read page by page.
  */
-function fitBio(bio: string, max: number): string[] {
-  const paras = bio.split(/\n{2,}/).map((x) => x.trim()).filter(Boolean);
-  const out: string[] = [];
+function pagesOf(bio: string, max: number): string[][] {
+  const pages: string[][] = [];
+  let page: string[] = [];
   let used = 0;
-  for (const para of paras) {
+  const flush = () => {
+    if (page.length) pages.push(page);
+    page = [];
+    used = 0;
+  };
+  for (const para of bio.split(/\n{2,}/).map((x) => x.trim()).filter(Boolean)) {
     if (used + para.length <= max) {
-      out.push(para);
+      page.push(para);
       used += para.length;
       continue;
     }
-    // Fit as many whole sentences of this paragraph as there is room for.
-    const sentences = para.match(/[^.!?।]+[.!?।]+["'”’)]*\s*|[^.!?।]+$/g) ?? [para];
+    // Split this paragraph at sentence ends; a part carries on onto the next page.
     let part = "";
-    for (const sen of sentences) {
-      if (used + part.length + sen.length > max) break;
-      part += sen;
+    for (const sen of sentences(para)) {
+      if (used + part.length + sen.length > max && (part || used)) {
+        if (part.trim()) page.push(part.trim());
+        flush();
+        part = "";
+      }
+      part = part ? `${part} ${sen}` : sen;
     }
-    if (part.trim()) out.push(`${part.trim()} …`);
-    else if (!out.length) out.push(`${para.slice(0, max).replace(/\s+\S*$/, "")} …`);
-    else out[out.length - 1] = `${out[out.length - 1]} …`;
-    break;
+    if (part.trim()) {
+      page.push(part.trim());
+      used += part.length;
+    }
   }
+  flush();
+  return pages;
+}
+
+/** Sentences of a paragraph, not split after titles and abbreviations ("Mr.", "Md.", "Ltd.", "Dr.", "e.g.", initials). */
+const ABBR = /(?:^|\s)(?:Mr|Mrs|Ms|Md|Mohd|Dr|Prof|Engr|Ltd|Co|Inc|Jr|Sr|St|No|vs|etc|e\.g|i\.e|[A-Z])\.$/;
+function sentences(para: string): string[] {
+  const out: string[] = [];
+  let cur = "";
+  for (const piece of para.split(/(?<=[.!?।]["'”’)]*)\s+/)) {
+    cur = cur ? `${cur} ${piece}` : piece;
+    if (!ABBR.test(cur)) {
+      out.push(cur);
+      cur = "";
+    }
+  }
+  if (cur) out.push(cur);
   return out;
+}
+
+/** Characters a biography page holds in this window (phones, short screens and wide screens differ). */
+function pageBudget() {
+  if (typeof window === "undefined") return 1300;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (w < 768) return h < 720 ? 380 : 560;
+  return h < 760 ? 800 : h < 900 ? 1050 : 1300;
 }
 
 /** The organization a person comes from, as a logo on a white plate. */
@@ -227,11 +266,20 @@ export function PeopleGallery({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState<GalleryPerson | null>(null);
+  const [page, setPage] = useState(0);
+  const [budget, setBudget] = useState(1300);
+  const pages = open?.bio ? pagesOf(open.bio, budget) : [];
+  const at = Math.min(page, Math.max(0, pages.length - 1));
+  const go = (i: number) => setPage(Math.max(0, Math.min(pages.length - 1, i)));
+  // A sideways swipe on the biography turns its page on phones.
+  const swipeX = useRef<number | null>(null);
 
   const show = (p: GalleryPerson, trigger: HTMLButtonElement) => {
     // Focus goes back to the name button (the portrait button is not in the tab order).
     triggerRef.current = trigger.closest("article")?.querySelector<HTMLButtonElement>(".person-name") ?? trigger;
     setOpen(p);
+    setPage(0);
+    setBudget(pageBudget());
     // Open after the content has rendered so the dialog sizes itself correctly.
     requestAnimationFrame(() => dialogRef.current?.showModal());
   };
@@ -268,11 +316,17 @@ export function PeopleGallery({
         onClick={(e) => {
           if (e.target === dialogRef.current) close();
         }}
+        onKeyDown={(e) => {
+          // Arrow keys turn the biography's pages (not while typing in a field).
+          if (pages.length < 2 || (e.target as Element).closest("input, textarea")) return;
+          if (e.key === "ArrowRight") go(at + 1);
+          else if (e.key === "ArrowLeft") go(at - 1);
+        }}
         className="person-dialog m-auto h-fit max-h-[calc(100dvh-1.5rem)] w-[min(72rem,calc(100vw-1.5rem))] overflow-hidden rounded-[1.75rem] border border-t-[3px] border-fg/10 border-t-[var(--tone)] bg-navy-900 p-0 text-text-primary shadow-[0_60px_160px_-40px_rgb(0_0_0/0.8)] backdrop:bg-ink-950/75 backdrop:backdrop-blur-sm"
       >
         {open && (
           // One screen, no scrolling: the photo fills the left column on wide screens and becomes a portrait beside the name on phones;
-          // the biography is cut to fit (see fitBio) and its type scales with the window height.
+          // a long biography is read in pages (see pagesOf) and its type scales with the window height.
           <div className="relative grid max-h-[calc(100dvh-1.5rem)] md:grid-cols-[minmax(15rem,21rem)_1fr]">
             <button
               type="button"
@@ -306,28 +360,71 @@ export function PeopleGallery({
               {showPlaceholderBadge && open.isPlaceholder && (
                 <span className="self-start rounded-md border border-gold/50 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-gold">{labels.placeholder}</span>
               )}
-              <section aria-label={labels.biography} className="flex min-h-0 flex-col gap-[0.7em] border-l-2 border-[var(--tone)] pl-4 text-[clamp(13px,1.75svh,15.5px)] leading-[1.62] text-text-primary/90">
-                {open.bio ? (
-                  <>
-                    {/* Phones get a shorter cut than wide screens, and short phones a shorter one still. */}
-                    {fitBio(open.bio, 420).map((para, i) => (
-                      <p key={`s${i}`} className="md:hidden [@media(min-height:720px)]:hidden">
-                        {para}
-                      </p>
+              <section
+                aria-label={labels.biography}
+                onTouchStart={(e) => (swipeX.current = e.touches[0]?.clientX ?? null)}
+                onTouchEnd={(e) => {
+                  const start = swipeX.current;
+                  const end = e.changedTouches[0]?.clientX;
+                  swipeX.current = null;
+                  if (start == null || end == null || Math.abs(end - start) < 45 || pages.length < 2) return;
+                  go(end < start ? at + 1 : at - 1);
+                }}
+                className="flex min-h-0 flex-col gap-[0.7em] border-l-2 border-[var(--tone)] pl-4 text-[clamp(13px,1.75svh,15.5px)] leading-[1.62] text-text-primary/90">
+                {pages.length ? (
+                  <div key={`${open.id}-${at}`} className={cn("bio-page flex flex-col gap-[0.7em]", pages.length > 1 && "min-h-[8em]")} aria-live="polite">
+                    {pages[at]!.map((para, i) => (
+                      <p key={i}>{para}</p>
                     ))}
-                    {fitBio(open.bio, 820).map((para, i) => (
-                      <p key={`m${i}`} className="hidden [@media(min-height:720px)]:block md:!hidden">
-                        {para}
-                      </p>
-                    ))}
-                    {fitBio(open.bio, 1350).map((para, i) => (
-                      <p key={`l${i}`} className="hidden md:block">
-                        {para}
-                      </p>
-                    ))}
-                  </>
+                  </div>
                 ) : (
                   <p className="text-text-secondary italic">{labels.bioPending}</p>
+                )}
+                {pages.length > 1 && (
+                  // Page bars in the card's colour (the same bar that underlines the name on hover), with arrows.
+                  <div className="mt-[0.4em] flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => go(at - 1)}
+                      disabled={at === 0}
+                      aria-label={labels.prevPage ?? "Previous"}
+                      className="flex size-8 shrink-0 items-center justify-center rounded-full border border-fg/15 text-[var(--tone-ink)] transition-colors hover:border-[var(--tone)] disabled:opacity-35 disabled:hover:border-fg/15"
+                    >
+                      <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 fill-none stroke-current stroke-[1.8]"><path d="M13 8H3M7 4 3 8l4 4" /></svg>
+                    </button>
+                    <ol className="flex flex-1 items-center gap-1.5">
+                      {pages.map((_, i) => (
+                        <li key={i} className="flex-1">
+                          <button
+                            type="button"
+                            onClick={() => go(i)}
+                            aria-current={i === at ? "step" : undefined}
+                            aria-label={(labels.pageOf ?? "Part {n} of {total}").replace("{n}", String(i + 1)).replace("{total}", String(pages.length))}
+                            className="group/bar block w-full py-2"
+                          >
+                            <span className="relative block h-[3px] overflow-hidden rounded-full bg-fg/12">
+                              <span
+                                className="bio-bar absolute inset-y-0 left-0 rounded-full bg-[var(--tone)]"
+                                style={{ width: i < at ? "100%" : i === at ? "100%" : "0%", opacity: i < at ? 0.5 : 1 }}
+                              />
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ol>
+                    <span className="shrink-0 font-mono text-xs tabular-nums text-text-secondary" aria-hidden="true">
+                      {at + 1}/{pages.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => go(at + 1)}
+                      disabled={at === pages.length - 1}
+                      aria-label={labels.nextPage ?? "Next"}
+                      className="flex size-8 shrink-0 items-center justify-center rounded-full border border-fg/15 text-[var(--tone-ink)] transition-colors hover:border-[var(--tone)] disabled:opacity-35 disabled:hover:border-fg/15"
+                    >
+                      <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 fill-none stroke-current stroke-[1.8]"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
+                    </button>
+                  </div>
                 )}
               </section>
               <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-fg/[0.08] pt-4">

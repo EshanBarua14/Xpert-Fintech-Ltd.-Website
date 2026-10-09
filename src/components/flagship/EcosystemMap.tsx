@@ -142,7 +142,9 @@ type Step = { modules: ModuleKey[]; flows: Flow[] };
  * earlier steps stay lit (without packets) so the scene builds up.
  * Captions come from `labels.steps[scene][step]` (Admin → Site text, ecoStep*).
  */
-const INV_HUB = "M161 300 C 220 300, 262 298, 304 297";
+// The investor's order goes into the brokerage above the eKYC pill (an order is not an eKYC step),
+// meeting the hub's edge at 200°.
+const INV_HUB = "M161 291 C 212 288, 262 272, 309.3 265.9";
 const SCENES: Step[][] = [
   // Onboard
   [
@@ -189,8 +191,9 @@ const SCENES: Step[][] = [
       modules: [],
       flows: [
         { id: "bsec-dse", d: "M475 52 C 570 54, 670 96, 690 169", from: "bsec", to: "dse", dotted: true },
-        { id: "bsec-cse", d: "M475 52 C 690 50, 805 120, 802 230 S 790 370, 765 396", from: "bsec", to: "cse", dotted: true },
-        { id: "bsec-cdbl", d: "M462 76 C 560 170, 600 330, 585 491", from: "bsec", to: "cdbl", dotted: true },
+        // Round the right of DSE and into CSE's right edge, inside the drawing (x ≤ 790) so it is never cut off.
+        { id: "bsec-cse", d: "M475 52 C 705 46, 790 118, 790 232 S 781 362, 765 388", from: "bsec", to: "cse", dotted: true },
+        { id: "bsec-cdbl", d: "M462 83 C 560 170, 600 330, 585 491", from: "bsec", to: "cdbl", dotted: true },
       ],
     },
     {

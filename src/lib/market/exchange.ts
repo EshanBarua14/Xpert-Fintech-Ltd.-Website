@@ -14,9 +14,14 @@ import { getWithCompletedChain, isChainError } from "./fetch-chain";
  *    page (https://www.cse.com.bd/) for the market status, the five indices
  *    (CASPI, CSE30, CSCX, CSI, CSE50) and the day's trades, volume and value.
  *  - DSE index values (DSEX, DSES, DS30), market status, trades, volume and
- *    turnover come from the text of DSE's long-standing site (www.dsebd.org);
- *    its full price table (latest_share_price_scroll_l.php) is the fallback
- *    when the dse.com.bd strip cannot be read. dse.com.bd's /api is never used.
+ *    turnover come from the text of DSE's long-standing site, which moved to
+ *    old.dsebd.org in September 2026 when www.dsebd.org started redirecting to
+ *    the new site; its full price table (latest_share_price_scroll_l.php) is
+ *    the fallback when the dse.com.bd strip cannot be read. On the new site
+ *    the live index figures are filled in by script from /api (not read), so
+ *    when the old site is gone the day-end table on
+ *    dse.com.bd/recent-market-information gives the latest closed session's
+ *    indices and totals, marked as the previous session.
  *
  * One request per exchange per minute at most, shared by all visitors. If an
  * exchange's page changes shape, that exchange is simply left out (and the
@@ -26,8 +31,12 @@ import { getWithCompletedChain, isChainError } from "./fetch-chain";
 
 const DSE_URL = () => process.env.MARKET_DSE_URL || "https://www.dse.com.bd/markets";
 /** DSE's long-standing site: a full price table and the index/turnover summary on its home page. */
-const DSE_TABLE_URL = () => process.env.MARKET_DSE_TABLE_URL || "https://www.dsebd.org/latest_share_price_scroll_l.php";
-const DSE_HOME_URL = () => process.env.MARKET_DSE_HOME_URL || "https://www.dsebd.org/";
+/** www.dsebd.org now redirects to the new site's home page: an address copied into .env before the move is read from old.dsebd.org. */
+const legacyDse = (url: string) => url.replace(/^https?:\/\/(www\.)?dsebd\.org\//i, "https://old.dsebd.org/");
+const DSE_TABLE_URL = () => legacyDse(process.env.MARKET_DSE_TABLE_URL || "https://old.dsebd.org/latest_share_price_scroll_l.php");
+const DSE_HOME_URL = () => legacyDse(process.env.MARKET_DSE_HOME_URL || "https://old.dsebd.org/");
+/** The new DSE site's day-end table: date, trades, volume, turnover (mn), DSEX, DSES, DS30 per session. */
+const DSE_RECENT_URL = () => process.env.MARKET_DSE_RECENT_URL || "https://www.dse.com.bd/recent-market-information";
 const DSE_INDEX_NAMES = ["DSEX", "DSES", "DS30"] as const;
 const CSE_URL = () => process.env.MARKET_CSE_URL || "https://www.cse.com.bd/market/current_price";
 const CSE_HOME_URL = () => process.env.MARKET_CSE_HOME_URL || "https://www.cse.com.bd/";
@@ -53,28 +62,73 @@ const num = (s: string | undefined) => {
 
 const round = (v: number, d = 2) => Math.round(v * 10 ** d) / 10 ** d;
 
-/** DSE price strip: links to /company/CODE whose text is "CODE LTP ▲ ±change ±pct%". */
+/**
+ * DSE price strip: links to /company/CODE whose text is "CODE LTP ▲ ±change ±pct%"
+ * (with or without spaces between the parts; ▬ marks an unchanged price). The
+ * code is taken from the link, so codes ending in digits are not confused with the price.
+ */
 export function parseDseStrip(html: string): Quote[] {
   const out = new Map<string, Quote>();
-  const link = /<a\b[^>]*href="[^"]*\/company\/([A-Z0-9][A-Z0-9&-]*)"[^>]*>([\s\S]*?)<\/a>/g;
-  const pattern = /^([A-Z0-9&-]+)\s+([\d,]+(?:\.\d+)?)\s*([▲▼])?\s*([+\-−]?\s*[\d,]+(?:\.\d+)?)\s*([+\-−]?\s*[\d,]+(?:\.\d+)?)\s*%/;
+  const link = /<a\b[^>]*href="[^"]*\/company\/([A-Z0-9][A-Z0-9&-]*)\/?(?:[?#][^"]*)?"[^>]*>([\s\S]*?)<\/a>/g;
+  const rest = /^\s*([\d,]+(?:\.\d+)?)\s*([▲▼▬▬=])?\s*([+\-−]?\s*[\d,]+(?:\.\d+)?)\s*([+\-−]?\s*[\d,]+(?:\.\d+)?)\s*%/;
   for (const m of html.matchAll(link)) {
     const code = m[1]!;
-    const text = decode(m[2]!);
-    const p = pattern.exec(text);
-    if (!p || p[1] !== code) continue;
-    const ltp = num(p[2]);
-    let change = num(p[4]);
-    let pct = num(p[5]);
+    const text = decode(m[2]!.replace(/&amp;/g, "&")).replace(/&#x25B2;|&#x25b2;/g, "▲").replace(/&#x25BC;|&#x25bc;/g, "▼");
+    if (!text.startsWith(code)) continue;
+    const p = rest.exec(text.slice(code.length));
+    if (!p) continue;
+    const ltp = num(p[1]);
+    let change = num(p[3]);
+    let pct = num(p[4]);
     if (!(ltp > 0) || !Number.isFinite(change) || !Number.isFinite(pct)) continue;
     // The arrow carries the sign when the numbers are written without one.
-    if (p[3] === "▼") {
+    if (p[2] === "▼") {
       change = -Math.abs(change);
       pct = -Math.abs(pct);
     }
     out.set(code, { symbol: code, ltp, change: round(change), changePct: round(pct) });
   }
   return [...out.values()];
+}
+
+/**
+ * dse.com.bd/recent-market-information: one row per session, newest first —
+ * Date | Total Trades | Total Volume | Turnover (mn) | Market Cap… | DSEX | DSES | DS30 | DGEN.
+ * Gives the latest session's indices (change against the session before),
+ * trades, volume and turnover, and the session's date.
+ */
+export function parseDseRecent(html: string): (DseSummary & { date: string }) | null {
+  const rows = [...html.matchAll(/<tr\b[\s\S]*?<\/tr>/gi)].map((r) => [...r[0].matchAll(/<t[hd]\b[^>]*>([\s\S]*?)<\/t[hd]>/gi)].map((c) => decode(c[1]!)));
+  const headAt = rows.findIndex((c) => c.some((x) => /^date$/i.test(x)) && c.some((x) => /^DSEX$/i.test(x)));
+  if (headAt < 0) return null;
+  const head = rows[headAt]!;
+  const col = (re: RegExp) => head.findIndex((h) => re.test(h));
+  const iDate = col(/^date$/i);
+  const iTrades = col(/trade/i);
+  const iVol = col(/volume/i);
+  const iTurn = col(/turnover|value/i);
+  const data = rows.slice(headAt + 1).filter((c) => /^\d{4}-\d{2}-\d{2}$/.test(c[iDate] ?? ""));
+  const [latest, before] = data;
+  if (!latest) return null;
+  const indices: IndexValue[] = [];
+  for (const name of DSE_INDEX_NAMES) {
+    const i = col(new RegExp(`^${name}$`, "i"));
+    const value = num(latest[i]);
+    if (i < 0 || !(value > 0)) continue;
+    const prev = before ? num(before[i]) : NaN;
+    const change = prev > 0 ? value - prev : 0;
+    indices.push({ name, value: round(value), change: round(change), changePct: prev > 0 ? round((change / prev) * 100) : 0 });
+  }
+  const trades = num(latest[iTrades]);
+  const volume = num(latest[iVol]);
+  const turnover = num(latest[iTurn]) * 1_000_000;
+  return {
+    date: latest[iDate]!,
+    indices,
+    ...(trades > 0 && { trades }),
+    ...(volume > 0 && { volume }),
+    ...(turnover > 0 && { turnover: Math.round(turnover) }),
+  };
 }
 
 /** Any HTML price table, read by its headings (used for CSE, and as a DSE fallback). */
@@ -212,7 +266,7 @@ function findIndex(text: string, name: string, html: string): IndexValue | null 
 export type DseSummary = { status?: ExchangeSnapshot["status"]; indices: IndexValue[]; turnover?: number; volume?: number; trades?: number };
 
 /**
- * DSE home page (dsebd.org): "DSEX Index 5,123.45 12.34 0.24%", the same for
+ * DSE home page (old.dsebd.org): "DSEX Index 5,123.45 12.34 0.24%", the same for
  * DSES and DS30, then "Total Trade …", "Total Volume …", "Total Value in Taka (mn) …"
  * and "Market Status: Open/Closed". Read from the page text, so styling changes
  * do not break it; anything not found is simply left out.
@@ -307,7 +361,8 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
     ],
     ["CSE", async () => parsePriceTable(await getHtml(CSE_URL()))],
   ];
-  const [results, cse, dseHome] = await Promise.all([
+  const dhakaToday = new Date(Date.now() + 6 * 3600_000).toISOString().slice(0, 10);
+  const [results, cse, dseHome, dseRecent] = await Promise.all([
     Promise.allSettled(tasks.map(([, run]) => run())),
     getHtml(CSE_HOME_URL())
       .then(parseCseSummary)
@@ -319,6 +374,12 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
       .then(parseDseSummary)
       .catch((error: unknown) => {
         console.error("[market] DSE summary unavailable:", (error as Error)?.message ?? error);
+        return null;
+      }),
+    getHtml(DSE_RECENT_URL())
+      .then(parseDseRecent)
+      .catch((error: unknown) => {
+        console.error("[market] DSE day-end table unavailable:", (error as Error)?.message ?? error);
         return null;
       }),
   ]);
@@ -335,6 +396,18 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
         indices: [...dse.indices, ...alt.indices.filter((i) => !have.has(i.name))],
       } as DseSummary;
     }
+  }
+  // No live index figures anywhere: the latest closed session's from the day-end table.
+  // Its totals count as today's only when the table's newest row is today.
+  let dsePrevious = false;
+  if (dseRecent && (!dse || !dse.indices.length)) {
+    const today = dseRecent.date === dhakaToday;
+    dsePrevious = !today;
+    dse = {
+      ...(dse ?? {}),
+      indices: dseRecent.indices,
+      ...(today && { turnover: dseRecent.turnover, volume: dseRecent.volume, trades: dseRecent.trades }),
+    } as DseSummary;
   }
   if (dse) dse.indices.sort((a, b) => DSE_INDEX_NAMES.indexOf(a.name as (typeof DSE_INDEX_NAMES)[number]) - DSE_INDEX_NAMES.indexOf(b.name as (typeof DSE_INDEX_NAMES)[number]));
   const exchanges: ExchangeSnapshot[] = [];
@@ -353,9 +426,10 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
       }
       if (exchange === "DSE" && dse) {
         snap.indices = dse.indices;
+        if (dsePrevious && dseRecent) snap.indicesAsOf = dseRecent.date;
         if (dse.status) snap.status = dse.status;
         Object.assign(snap, { turnover: dse.turnover, volume: dse.volume, trades: dse.trades });
-        extra = `, ${dse.indices.length} indices${dse.turnover ? ", turnover" : ""}`;
+        extra = `, ${dse.indices.length} indices${dsePrevious ? ` (session of ${dseRecent?.date})` : ""}${dse.turnover ? ", turnover" : ""}`;
       }
       exchanges.push(snap);
       reports.push({ exchange, ok: true, count: r.value.length, message: `${r.value.length} prices read${extra}` });

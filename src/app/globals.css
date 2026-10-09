@@ -1138,10 +1138,18 @@ html {
 .person-dialog[open]::backdrop { animation: backdrop-in 380ms ease-out; }
 @keyframes dialog-in { from { opacity: 0; transform: translateY(18px) scale(0.98); } }
 @keyframes backdrop-in { from { opacity: 0; } }
+/* Biography pages in the profile window: each new page slides in; its bar fills like the name's hover underline. */
+.bio-page { animation: bio-in 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes bio-in { from { opacity: 0; transform: translateX(14px); } }
+.bio-bar { transition: width 400ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms; }
+[aria-current="step"] .bio-bar { animation: bio-bar-in 400ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes bio-bar-in { from { width: 0%; } }
 @media (prefers-reduced-motion: reduce) {
   .person-photo, .person-name { transition: none; }
   .person-card:hover .person-photo, .person-card:focus-within .person-photo { transform: none; }
   .person-dialog[open], .person-dialog[open]::backdrop { animation: none; }
+  .bio-page, [aria-current="step"] .bio-bar { animation: none; }
+  .bio-bar { transition: none; }
 }
 
 /* ── Client and member logos: full colour on a white plate, so every logo reads

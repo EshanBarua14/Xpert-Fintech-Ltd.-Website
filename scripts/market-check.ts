@@ -10,7 +10,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { exchangeSnapshot, getHtml, parseCseSummary, parseDseStrip, parseDseSummary, parsePriceTable } from "../src/lib/market/exchange";
+import { exchangeSnapshot, getHtml, parseCseSummary, parseDseRecent, parseDseStrip, parseDseSummary, parsePriceTable } from "../src/lib/market/exchange";
 
 // Load .env (only the MARKET_* lines matter here).
 const envFile = path.resolve(process.cwd(), ".env");
@@ -21,16 +21,30 @@ if (fs.existsSync(envFile)) {
   }
 }
 
+// www.dsebd.org now redirects to DSE's new site; its old pages live at old.dsebd.org (as the website reads them).
+for (const k of ["MARKET_DSE_TABLE_URL", "MARKET_DSE_HOME_URL"]) {
+  const v = process.env[k];
+  if (v && /^https?:\/\/(www\.)?dsebd\.org\//i.test(v)) process.env[k] = v.replace(/^https?:\/\/(www\.)?dsebd\.org\//i, "https://old.dsebd.org/");
+}
+
 const SAVE = process.argv.includes("--save");
 const pages = [
   { name: "dse-markets", url: process.env.MARKET_DSE_URL || "https://www.dse.com.bd/markets", read: (h: string) => `${parseDseStrip(h).length || parsePriceTable(h).length} prices` },
-  { name: "dse-price-table", url: process.env.MARKET_DSE_TABLE_URL || "https://www.dsebd.org/latest_share_price_scroll_l.php", read: (h: string) => `${parsePriceTable(h).length} prices` },
+  { name: "dse-price-table", url: process.env.MARKET_DSE_TABLE_URL || "https://old.dsebd.org/latest_share_price_scroll_l.php", read: (h: string) => `${parsePriceTable(h).length} prices` },
   {
     name: "dse-home",
-    url: process.env.MARKET_DSE_HOME_URL || "https://www.dsebd.org/",
+    url: process.env.MARKET_DSE_HOME_URL || "https://old.dsebd.org/",
     read: (h: string) => {
       const s = parseDseSummary(h);
       return `indices: ${s.indices.map((i) => `${i.name} ${i.value} (${i.changePct}%)`).join(", ") || "none"}; status: ${s.status ?? "?"}; turnover: ${s.turnover ?? "?"}; trades: ${s.trades ?? "?"}`;
+    },
+  },
+  {
+    name: "dse-recent",
+    url: process.env.MARKET_DSE_RECENT_URL || "https://www.dse.com.bd/recent-market-information",
+    read: (h: string) => {
+      const s = parseDseRecent(h);
+      return s ? `session ${s.date}: ${s.indices.map((i) => `${i.name} ${i.value} (${i.changePct}%)`).join(", ")}; turnover: ${s.turnover ?? "?"}; trades: ${s.trades ?? "?"}` : "no day-end table found";
     },
   },
   { name: "cse-current-price", url: process.env.MARKET_CSE_URL || "https://www.cse.com.bd/market/current_price", read: (h: string) => `${parsePriceTable(h).length} prices` },

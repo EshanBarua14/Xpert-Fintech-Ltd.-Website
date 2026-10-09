@@ -27,6 +27,7 @@ export const exchangeSnapshotSchema = z.object({
   exchange: z.enum(["DSE", "CSE"]),
   status: z.enum(["OPEN", "CLOSED", "PRE_OPEN", "POST_CLOSE", "HALTED"]).optional(),
   indices: z.array(indexSchema).max(10).default([]),
+  indicesAsOf: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   turnover: num.nonnegative().optional(),
   volume: num.nonnegative().optional(),
   trades: num.nonnegative().optional(),

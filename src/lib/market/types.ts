@@ -12,6 +12,8 @@ export type ExchangeSnapshot = {
   /** What the exchange's own page said, when it said anything. */
   reported?: "OPEN" | "CLOSED" | "PRE_OPEN" | "POST_CLOSE" | "HALTED";
   indices: IndexValue[];
+  /** Set when the index values are an earlier session's close (YYYY-MM-DD), not today's. */
+  indicesAsOf?: string;
   turnover?: number;
   volume?: number;
   trades?: number;

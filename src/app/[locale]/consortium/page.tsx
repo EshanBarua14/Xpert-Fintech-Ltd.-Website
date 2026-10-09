@@ -32,7 +32,7 @@ export default async function ConsortiumPage({ params }: Props) {
 
 
       {data.members.length > 0 && (
-        <Shell className="py-12 md:py-16">
+        <Shell className="py-10 md:py-12">
           <div className="grid gap-14 lg:grid-cols-[1fr_1.2fr] lg:items-start">
             <div className="flex flex-col gap-8 lg:sticky lg:top-[calc(8rem+var(--ticker-h))]">
               <SectionHeader title={t.members} />
@@ -46,7 +46,7 @@ export default async function ConsortiumPage({ params }: Props) {
       )}
 
       {data.exchanges.length > 0 && (
-        <Shell className="py-16">
+        <Shell className="py-12">
           <div className="flex flex-col gap-10">
             <SectionHeader title={t.exchanges} />
             <ul className="grid gap-4 md:grid-cols-2">

@@ -60,7 +60,7 @@ export default async function CareersPage({ params }: Props) {
   return (
     <>
       <PageHero eyebrow={t.companyEyebrow} title={t.careersTitle} body={t.careersBody} />
-      <Shell className="pb-20">
+      <Shell className="pb-14 md:pb-16">
         <ul className="grid gap-4 md:grid-cols-3">
           {why.map((w, i) => (
             <li key={w.title} data-reveal style={{ "--d": i } as CSSProperties} className="spotlight glass flex flex-col gap-4 rounded-3xl p-7">
@@ -73,7 +73,7 @@ export default async function CareersPage({ params }: Props) {
           ))}
         </ul>
       </Shell>
-      <Shell id="openings" className="pb-24">
+      <Shell id="openings" className="pb-16 md:pb-20">
         <div className="flex flex-col gap-10">
           <SectionHeader title={t.openRoles} />
           {jobs.length === 0 ? (

@@ -30,7 +30,7 @@ export default async function RequestDemoPage({ params, searchParams }: Props) {
   return (
     <>
       <PageHero eyebrow={t.demoEyebrow} title={t.requestDemo} body={t.requestDemoIntro} />
-      <Shell className="pb-24">
+      <Shell className="pb-16 md:pb-20">
       <div className="grid gap-8 lg:grid-cols-12">
         <div data-reveal className="glass rounded-3xl p-6 md:p-10 lg:col-span-8">
           <LeadFormSection mode="demo" locale={locale} defaultOfferingId={offering?.id ?? null} />

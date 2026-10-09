@@ -33,7 +33,7 @@ export default async function SymbolPage({ params }: Props) {
   const t = getMessages(locale);
   const market = await getMarketPayload();
   return (
-    <Shell className="pt-12 pb-24 md:pt-16">
+    <Shell className="pt-8 pb-16 md:pt-10">
       <div className="flex flex-col gap-6">
         <Link href={`/${locale}/markets/${exchange}`} className="w-fit rounded-full border border-fg/15 px-4 py-2 text-sm font-semibold hover:border-brand-sky/60">
           ← {t.backToBoard.replace("{exchange}", ex)}

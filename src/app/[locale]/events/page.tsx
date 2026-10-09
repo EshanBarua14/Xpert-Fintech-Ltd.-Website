@@ -23,7 +23,7 @@ export default async function EventsPage({ params }: Props) {
   return (
     <>
       <PageHero eyebrow={t.latestEyebrow} title={t.events} />
-      <Shell className="pb-16">
+      <Shell className="pb-12">
         {events.length ? <EventCards events={events} locale={locale} /> : <p className="text-text-secondary">{t.noItems}</p>}
       </Shell>
       <CtaBand t={t} locale={locale} />

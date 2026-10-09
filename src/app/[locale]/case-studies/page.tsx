@@ -27,7 +27,7 @@ export default async function CaseStudiesPage({ params }: Props) {
   return (
     <>
       <PageHero eyebrow={t.insightsEyebrow} title={t.caseStudiesTitle} body={t.caseStudiesBody} />
-      <Shell className="pb-24">
+      <Shell className="pb-16 md:pb-20">
         {items.length === 0 ? (
           <div data-reveal className="glass rounded-[2rem] p-10 text-center md:p-16">
             <p className="font-display text-2xl font-semibold">{t.caseStudiesEmptyTitle}</p>

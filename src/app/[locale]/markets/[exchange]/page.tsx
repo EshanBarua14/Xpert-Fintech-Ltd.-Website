@@ -42,7 +42,7 @@ export default async function ExchangePage({ params }: Props) {
           </Link>
         </nav>
       </PageHero>
-      <Shell className="pb-20">
+      <Shell className="pb-14 md:pb-16">
         <MarketBoard initial={market} exchange={ex} t={t} locale={locale} basePath={`/${locale}/markets/${exchange}`} />
       </Shell>
       <CtaBand t={t} locale={locale} />

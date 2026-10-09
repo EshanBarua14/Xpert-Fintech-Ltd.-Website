@@ -73,12 +73,12 @@ export default async function GalleryPage({ params }: Props) {
       </PageHero>
 
       {lead && (
-        <Shell className="pb-16">
+        <Shell className="pb-12">
           <FeaturedVideo v={lead} labels={videoLabels} />
         </Shell>
       )}
 
-      <Shell id="photos" className="pb-20">
+      <Shell id="photos" className="pb-14 md:pb-16">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
           <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">{t.photosTitle}</h2>
           {albums.length > 0 && <p className="font-mono text-xs text-text-secondary">{t.albumsCount.replace("{n}", nf.format(albums.length))}</p>}
@@ -126,7 +126,7 @@ export default async function GalleryPage({ params }: Props) {
         )}
       </Shell>
 
-      <Shell id="videos" className="pb-16 md:pb-24">
+      <Shell id="videos" className="pb-12 md:pb-16">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
           <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">{t.videosTitle}</h2>
           {videos.length > 0 && <p className="font-mono text-xs text-text-secondary">{t.videosCount.replace("{n}", nf.format(videos.length))}</p>}

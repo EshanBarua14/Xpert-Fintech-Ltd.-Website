@@ -54,11 +54,11 @@ export default async function AlbumPage({ params }: Props) {
           <span>{t.photosCount.replace("{n}", nf.format(photos.length))}</span>
         </div>
       </PageHero>
-      <Shell className="pb-20">
+      <Shell className="pb-14 md:pb-16">
         <Lightbox photos={photos} labels={{ open: t.openPhoto, close: t.close, prev: t.prevPhoto, next: t.nextPhoto, counter: t.photoCounter }} />
       </Shell>
       {more.length > 0 && (
-        <Shell className="pb-24">
+        <Shell className="pb-16 md:pb-20">
           <h2 className="mb-6 font-display text-2xl font-semibold tracking-tight">{t.moreAlbums}</h2>
           <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {more.map((a, i) => (

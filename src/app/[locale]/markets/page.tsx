@@ -35,7 +35,7 @@ export default async function MarketsPage({ params }: Props) {
   return (
     <>
       <PageHero eyebrow={t.marketsNav} title={t.marketsTitle} body={t.marketsBody} />
-      <Shell className="pb-16">
+      <Shell className="pb-12">
         <div className="flex flex-col gap-10">
           <div className="grid gap-4 md:grid-cols-2">
             {(["DSE", "CSE"] as const).map((code) => {

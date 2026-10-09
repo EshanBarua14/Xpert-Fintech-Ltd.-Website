@@ -53,7 +53,7 @@ export default async function TeamPage({ params }: Props) {
       <PageHero eyebrow={t.companyEyebrow} title={t.teamTitle} body={t.teamBody} />
 
       {leadership.length > 0 && (
-        <Shell className="pb-16 md:pb-24">
+        <Shell className="pb-12 md:pb-16">
           <div className="flex flex-col gap-12">
             <SectionHeader title={t.leadershipTitle} />
             <PeopleGrid people={leadership} photos={photos} locale={locale as AppLocale} group="LEADERSHIP" />
@@ -62,7 +62,7 @@ export default async function TeamPage({ params }: Props) {
       )}
 
       {team.length > 0 && (
-        <Shell className="pb-16 md:pb-24">
+        <Shell className="pb-12 md:pb-16">
           <div className="flex flex-col gap-12">
             {leadership.length > 0 && <SectionHeader title={t.teamMembersTitle} />}
             <TeamDirectory
@@ -84,7 +84,7 @@ export default async function TeamPage({ params }: Props) {
       )}
 
       {empty && (
-        <Shell className="pb-16 md:pb-24">
+        <Shell className="pb-12 md:pb-16">
           <div data-reveal className="beam glass relative overflow-hidden rounded-[2rem] p-8 md:p-14">
             <div className="grid-fade pointer-events-none absolute inset-0 opacity-50" />
             <div className="relative flex max-w-2xl flex-col gap-6">

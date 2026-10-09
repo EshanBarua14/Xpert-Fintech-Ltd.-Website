@@ -162,7 +162,7 @@ export default async function ProductPage({ params }: Props) {
       <section className="relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
         <div className="aurora" />
         <div className="grid-fade pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-10 md:px-8 lg:grid-cols-[1.05fr_1fr] lg:py-16">
+        <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-6 md:px-8 lg:grid-cols-[1.05fr_1fr] lg:py-10">
           <div className="flex flex-col gap-7">
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-text-secondary" data-reveal>
               <Link href={`/${found.locale}/products`} className="hover:text-fg">
@@ -450,7 +450,7 @@ function gridCols(n: number) {
 function Band({ title, body, alt, children }: { title?: string; body?: string; alt?: boolean; children: React.ReactNode }) {
   return (
     <section className={alt ? "border-y border-fg/[0.06] bg-fg/[0.015]" : undefined}>
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-12 md:px-8 md:py-16">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 md:px-8 md:py-12">
         {title && <SectionHeader title={title} body={body} />}
         {children}
       </div>

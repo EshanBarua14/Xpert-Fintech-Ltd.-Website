@@ -60,7 +60,7 @@ export default async function CaseStudyPage({ params }: Props) {
           </div>
         </div>
       )}
-      <Shell className="py-12 md:py-16">
+      <Shell className="py-10 md:py-12">
         <ol className="mx-auto flex max-w-4xl flex-col gap-6">
           {parts.map((p, i) => (
             <li key={p.n} data-reveal style={{ "--d": i } as CSSProperties} className="glass grid gap-4 rounded-3xl p-7 md:grid-cols-[8rem_1fr] md:p-10">

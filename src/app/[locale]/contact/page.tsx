@@ -39,7 +39,7 @@ export default async function ContactPage({ params }: Props) {
   return (
     <>
       <PageHero eyebrow={t.contactEyebrow} title={tr?.title ?? t.contactTitle} body={tr?.intro ?? t.contactIntro} />
-      <Shell className="pb-24">
+      <Shell className="pb-16 md:pb-20">
         <div className="grid gap-8 lg:grid-cols-12">
           <div data-reveal className="glass rounded-3xl p-6 md:p-10 lg:col-span-8">
             <LeadFormSection mode="contact" locale={locale} />
@@ -53,7 +53,7 @@ export default async function ContactPage({ params }: Props) {
         </div>
       </Shell>
       {info.mapEmbed && (
-        <Shell className="pb-24">
+        <Shell className="pb-16 md:pb-20">
           <OfficeMap info={info} t={t} />
         </Shell>
       )}

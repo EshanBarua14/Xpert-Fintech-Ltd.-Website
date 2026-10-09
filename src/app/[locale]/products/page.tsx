@@ -32,11 +32,11 @@ export default async function ProductsPage({ params }: Props) {
     <>
       <PageHero eyebrow={t.platformEyebrow} title={t.products} body={t.platformPageBody} />
       {showcase.length > 0 && (
-        <Shell className="pb-14 md:pb-16">
+        <Shell className="pb-10 md:pb-12">
           <ProductShowcase products={showcase} labels={showcaseLabels(t)} />
         </Shell>
       )}
-      <Shell className="pb-16 md:pb-20">
+      <Shell className="pb-12 md:pb-14">
         {sorted.length > 0 && (
           <div className="mb-12">
             <SectionHeader title={t.allProducts} />

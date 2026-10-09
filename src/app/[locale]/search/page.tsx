@@ -47,7 +47,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
           </button>
         </form>
       </PageHero>
-      <Shell className="pb-24">
+      <Shell className="pb-16 md:pb-20">
         {q.length < 2 ? (
           <p className="text-text-secondary">{t.searchHint}</p>
         ) : hits.length === 0 ? (

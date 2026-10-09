@@ -81,7 +81,7 @@ export default async function JobPage({ params }: Props) {
           {tr.summary && <p data-reveal className="max-w-3xl text-xl leading-relaxed text-text-secondary">{tr.summary}</p>}
         </div>
       </header>
-      <Shell className="pb-24">
+      <Shell className="pb-16 md:pb-20">
         <div className="grid gap-10 lg:grid-cols-[1fr_26rem]">
           <div className="flex flex-col gap-10">
             {sections.map((s) => (

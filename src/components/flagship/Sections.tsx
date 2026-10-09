@@ -242,7 +242,7 @@ export function FlagshipHero({
   return (
     <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
       {/* Exactly one screen on desktop: the viewport less the header and the price ticker, with even room above and below. */}
-      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 pt-10 pb-16 md:px-8 lg:min-h-[calc(100svh-6rem-var(--ticker-h,0px))] lg:grid-cols-[1fr_1fr] lg:gap-10 lg:py-[clamp(1.25rem,4svh,3rem)]">
+      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-4 pt-14 pb-16 md:px-8 md:pt-16 lg:min-h-[calc(100svh-6rem-var(--ticker-h,0px))] lg:grid-cols-[1fr_1fr] lg:gap-10 lg:pt-[clamp(2.75rem,7svh,5.5rem)] lg:pb-[clamp(1.25rem,4svh,3rem)]">
         <div className="flex flex-col gap-8 lg:gap-[clamp(0.9rem,2.6svh,2rem)]">
           {status && <div data-reveal>{status}</div>}
           <h1
@@ -599,7 +599,7 @@ export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
 export function PageHero({ eyebrow, title, body, children }: { eyebrow?: string; title: string; body?: string | null; children?: ReactNode }) {
   return (
     <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 pt-10 pb-8 md:px-8 md:pt-14 md:pb-10">
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pt-6 pb-6 md:px-8 md:pt-8 md:pb-8">
         <SectionHeader as="h1" eyebrow={eyebrow} title={title} body={body} />
         {children}
       </div>

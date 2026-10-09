@@ -38,7 +38,7 @@ export default async function NewsPage({ params, searchParams }: Props) {
   return (
     <>
       <PageHero eyebrow={t.insightsEyebrow} title={t.newsTitle} body={t.newsBody} />
-      <Shell className="pb-24">
+      <Shell className="pb-16 md:pb-20">
         <div className="flex flex-col gap-12">
           {categories.length > 0 && (
             <nav aria-label={t.newsCategories} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">

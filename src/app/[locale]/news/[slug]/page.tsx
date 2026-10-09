@@ -135,7 +135,7 @@ export default async function ArticlePage({ params }: Props) {
       </div>
 
       {related.length > 0 && (
-        <Shell className="border-t border-fg/[0.06] py-12 md:py-16">
+        <Shell className="border-t border-fg/[0.06] py-10 md:py-12">
           <div className="flex flex-col gap-10">
             <SectionHeader title={t.relatedNews} />
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

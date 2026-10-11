@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -276,7 +276,9 @@ export function EcosystemMap({
   const rootRef = useRef<HTMLDivElement>(null);
   const exploreRef = useRef<HTMLAnchorElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const uid = useId().replace(/:/g, "");
+  // A fixed prefix (not useId): the packets follow paths by id, and a server/browser id
+  // mismatch would leave them pointing at nothing. One map per page.
+  const uid = `eco-${(emphasis ?? focus ?? "map").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   const titleId = `${uid}-t`;
 
   const isAvailable = (m: ModuleKey) => modules?.[m]?.available !== false;

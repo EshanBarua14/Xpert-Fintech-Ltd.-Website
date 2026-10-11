@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { SmartLinkClient } from "./SmartLinkClient";
 import type { AppLocale } from "@/lib/i18n/config";
@@ -27,7 +27,8 @@ export function NetworkDiagram({
   readMore: string;
 }) {
   const [active, setActive] = useState(0);
-  const baseId = useId();
+  // Same id on the server and in the browser (useId can differ between them in development).
+  const baseId = `net-${(nodes[0]?.id ?? "map").replace(/[^A-Za-z0-9_-]/g, "")}`;
   const current = nodes[active] ?? nodes[0]!;
 
   function onKey(e: React.KeyboardEvent, index: number) {

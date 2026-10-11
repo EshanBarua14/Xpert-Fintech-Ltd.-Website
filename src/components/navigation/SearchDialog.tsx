@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 
 type Hit = { kind: string; title: string; subtitle: string | null; href: string };
@@ -29,7 +29,7 @@ export function SearchDialog({ locale, labels }: { locale: "en" | "bn"; labels: 
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(0);
   const [mac, setMac] = useState(false);
-  const listId = useId();
+  const listId = "site-search-results"; // one search box per page; a fixed id never differs between server and browser
 
   const open = useCallback(() => {
     dialogRef.current?.showModal();

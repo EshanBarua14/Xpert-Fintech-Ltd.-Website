@@ -3,7 +3,7 @@
 import { TickerBar, type TickerProps } from "@/components/market/TickerBar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { NavLink } from "@/lib/content/navigation";
 import type { AppLocale } from "@/lib/i18n/config";
 import { Icon } from "@/components/ui/Icon";
@@ -103,8 +103,10 @@ export function HeaderClient({
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
-  const drawerId = useId();
-  const panelBase = useId();
+  // Fixed ids (one header per page): ids made by useId can differ between the server and
+  // the browser in development, which React reports as a hydration mismatch.
+  const drawerId = "site-menu-drawer";
+  const panelBase = "site-menu-panel";
 
   const links = items.filter((i) => !i.isCta);
   const cta = items.find((i) => i.isCta && i.href);

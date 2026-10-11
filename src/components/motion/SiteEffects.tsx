@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 /**
  * Page-wide motion, set up once:
@@ -13,10 +13,18 @@ import { useEffect } from "react";
  */
 export function SiteEffects() {
   const pathname = usePathname();
+  const firstPage = useRef(true);
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const pending = () => Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]:not(.is-in)"));
+    // Moving between pages: the new page's first screen shows at once with a short fade
+    // (the slower entrance plays only on the first page of a visit).
+    if (firstPage.current) firstPage.current = false;
+    else {
+      document.documentElement.dataset.nav = "soft";
+      for (const el of pending()) if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add("is-in");
+    }
     if (reduce || !("IntersectionObserver" in window)) {
       pending().forEach((el) => el.classList.add("is-in"));
       // Content that arrives later (prices, dialogs) is shown straight away too.

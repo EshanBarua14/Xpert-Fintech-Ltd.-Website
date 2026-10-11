@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { Messages } from "@/lib/i18n/messages";
 import { fmt } from "@/lib/market/format";
 import { INDEX_SLOTS, type MarketPayload } from "@/lib/market/types";
@@ -23,7 +24,7 @@ export function HeroIndices({ initial, t, locale, logos }: { initial: MarketPayl
         {exchanges.map(({ x, ex }) => {
           const indices = INDEX_SLOTS[x].map((n) => ex!.indices.find((i) => i.name.toUpperCase() === n)).filter((i): i is NonNullable<typeof i> => !!i);
           return (
-            <a key={x} href={`/${locale}/markets/${x.toLowerCase()}`} className="group flex flex-col gap-2.5 bg-ink-950/85 p-4 transition-colors hover:bg-navy-900">
+            <Link key={x} href={`/${locale}/markets/${x.toLowerCase()}`} className="group flex flex-col gap-2.5 bg-ink-950/85 p-4 transition-colors hover:bg-navy-900">
               <span className="flex items-center gap-2 text-sm">
                 <ExchangeMark logo={logos?.[x]} className="size-6" />
                 <span className="font-semibold tracking-wide text-text-primary">{x}</span>
@@ -64,7 +65,7 @@ export function HeroIndices({ initial, t, locale, logos }: { initial: MarketPayl
                   </span>
                 )
               )}
-            </a>
+            </Link>
           );
         })}
       </div>

@@ -597,11 +597,21 @@ body::before {
 }
 [data-reveal] {
   transition:
-    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
-    filter 900ms cubic-bezier(0.16, 1, 0.3, 1),
-    clip-path 1000ms cubic-bezier(0.16, 1, 0.3, 1);
-  transition-delay: calc(var(--d, 0) * 80ms);
+    opacity 550ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    clip-path 800ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--d, 0) * 70ms);
+}
+/* After the first page of a visit, pages appear quickly: a short fade, no blur, almost no stagger. */
+html[data-nav="soft"] [data-reveal] {
+  transition-duration: 260ms, 320ms, 320ms, 360ms;
+  transition-delay: calc(var(--d, 0) * 25ms);
+}
+html[data-nav="soft"] .hero-seq [data-reveal]:not(.is-in),
+html[data-nav="soft"] main [data-reveal]:not(.is-in) {
+  filter: none;
+  transform: translateY(8px);
 }
 /* Below the hero: content settles in as it is reached; headlines rise out of a mask. */
 .js main [data-reveal]:not(.is-in) {
@@ -1348,4 +1358,19 @@ html {
   .site-bar { height: 3rem; }
   main#main { padding-top: calc(3.75rem + var(--ticker-h, 0px)) !important; }
   main h1 { font-size: clamp(1.75rem, 10svh, 2.75rem) !important; line-height: 1.08 !important; }
+}
+
+/* Page outline shown while the next page is prepared (app/[locale]/loading.tsx).
+   It fades in after a short pause, so quick page changes never flash it. */
+.page-loading { animation: page-loading-in 220ms ease-out 180ms both; }
+@keyframes page-loading-in { from { opacity: 0; } }
+.skeleton {
+  display: block;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--color-fg, #fff) 5%, transparent) 0%, color-mix(in srgb, var(--color-fg, #fff) 10%, transparent) 50%, color-mix(in srgb, var(--color-fg, #fff) 5%, transparent) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shine 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-shine { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .page-loading, .skeleton { animation: none; }
 }

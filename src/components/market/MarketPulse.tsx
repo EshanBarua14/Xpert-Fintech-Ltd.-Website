@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ExchangeMark, type ExchangeLogo, type ExchangeLogos } from "./ExchangeMark";
 import type { Messages } from "@/lib/i18n/messages";
@@ -50,9 +51,9 @@ function Movers({ title, rows, locale, t, tone, exchange }: { title: string; row
             {rows.map((q) => (
               <tr key={q.symbol} className="border-t border-fg/[0.06] first:border-t-0">
                 <td className="py-2 pr-2 font-mono text-[max(13px,0.8125rem)] font-semibold whitespace-nowrap">
-                  <a href={`/${locale}/markets/${exchange.toLowerCase()}/${encodeURIComponent(q.symbol)}`} className="hover:text-brand-sky">
+                  <Link href={`/${locale}/markets/${exchange.toLowerCase()}/${encodeURIComponent(q.symbol)}`} className="hover:text-brand-sky">
                     {q.symbol}
-                  </a>
+                  </Link>
                 </td>
                 <td className="py-2 pr-2 text-right font-mono tabular-nums text-text-secondary">{fmt(locale, q.ltp)}</td>
                 <td className="relative w-24 py-2 text-right">
@@ -218,9 +219,9 @@ function ExchangeGlance({ exchange, ex, share, average, t, locale, className, lo
           {exchange}
         </h3>
         <SessionStatus status={ex?.status} label={ex?.status ? (t[`marketStatus${ex.status}` as keyof Messages] as string) : DASH} pill />
-        <a href={`/${locale}/markets/${exchange.toLowerCase()}`} className="ml-auto text-sm font-semibold text-brand-sky hover:underline">
+        <Link href={`/${locale}/markets/${exchange.toLowerCase()}`} className="ml-auto text-sm font-semibold text-brand-sky hover:underline">
           {t.tickerBoard.replace("{exchange}", exchange)}
-        </a>
+        </Link>
         {ex?.lastSession && <p className="w-full text-xs text-text-secondary">{t.marketLastSession}</p>}
       </header>
 

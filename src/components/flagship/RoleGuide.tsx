@@ -23,9 +23,9 @@ export function RoleGuide({ t, products }: { t: Messages; products: ShowcaseProd
   const roles = ROLES.map((r) => ({ ...r, items: r.products.map((k) => byKey.get(k)).filter((p): p is ShowcaseProduct => !!p) })).filter((r) => r.items.length);
   if (!roles.length) return null;
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[repeat(3,auto)]">
       {roles.map((r, i) => (
-        <li key={r.key} data-reveal style={{ "--d": i } as CSSProperties} className="flex flex-col gap-5 rounded-3xl border border-fg/[0.08] bg-fg/[0.02] p-6">
+        <li key={r.key} data-reveal style={{ "--d": i } as CSSProperties} className="flex flex-col gap-5 lg:row-span-3 lg:grid lg:grid-rows-subgrid rounded-3xl border border-fg/[0.08] bg-fg/[0.02] p-6">
           <span className="flex size-11 items-center justify-center rounded-2xl bg-brand-sky/10 text-brand-sky">
             <Icon name={r.icon} className="size-5" />
           </span>
@@ -33,7 +33,7 @@ export function RoleGuide({ t, products }: { t: Messages; products: ShowcaseProd
             <h3 className="font-display text-xl leading-snug font-semibold">{t[`role${r.key}Title`]}</h3>
             <p className="text-sm leading-relaxed text-text-secondary">{t[`role${r.key}Body`]}</p>
           </div>
-          <ul className="mt-auto flex flex-col gap-2 border-t border-fg/[0.08] pt-4">
+          <ul className="mt-auto lg:mt-0 flex flex-col gap-2 border-t border-fg/[0.08] pt-4">
             {r.items.map((p) => (
               <li key={p.id}>
                 <Link href={p.href} className="group flex items-center gap-3 rounded-xl py-1 text-sm font-semibold text-text-primary hover:text-brand-sky">

@@ -68,3 +68,5 @@ export default async function FlowPage({ params, searchParams }: { params: Promi
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

@@ -54,3 +54,5 @@ export default async function MessagesPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

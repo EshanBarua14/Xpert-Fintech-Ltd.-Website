@@ -56,3 +56,5 @@ export default async function EditPersonPage({
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

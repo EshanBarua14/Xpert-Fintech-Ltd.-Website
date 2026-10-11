@@ -46,3 +46,5 @@ export default async function ListPage({ searchParams }: { searchParams: Promise
     />
   );
 }
+
+export const dynamic = "force-dynamic";

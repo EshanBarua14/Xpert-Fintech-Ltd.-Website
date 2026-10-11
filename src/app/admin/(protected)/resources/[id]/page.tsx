@@ -66,3 +66,5 @@ export default async function ResourcePage({ params, searchParams }: { params: P
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

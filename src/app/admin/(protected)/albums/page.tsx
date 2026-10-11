@@ -49,3 +49,5 @@ export default async function AlbumsPage({ searchParams }: { searchParams: Promi
     />
   );
 }
+
+export const dynamic = "force-dynamic";

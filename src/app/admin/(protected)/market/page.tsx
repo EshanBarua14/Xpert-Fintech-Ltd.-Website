@@ -213,3 +213,5 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

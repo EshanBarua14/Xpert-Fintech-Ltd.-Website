@@ -59,3 +59,5 @@ export default async function PagesPage({ searchParams }: { searchParams: Promis
     />
   );
 }
+
+export const dynamic = "force-dynamic";

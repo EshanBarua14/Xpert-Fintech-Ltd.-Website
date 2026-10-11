@@ -41,3 +41,5 @@ export default async function CategoriesPage({ searchParams }: { searchParams: P
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

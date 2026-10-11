@@ -49,3 +49,5 @@ export default async function UsersPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

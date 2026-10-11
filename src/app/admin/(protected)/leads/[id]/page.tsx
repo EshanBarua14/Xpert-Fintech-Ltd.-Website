@@ -253,3 +253,5 @@ export default async function LeadPage({ params, searchParams }: { params: Promi
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

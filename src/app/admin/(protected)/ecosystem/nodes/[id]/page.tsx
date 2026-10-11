@@ -113,3 +113,5 @@ export default async function NodePage({ params, searchParams }: { params: Promi
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

@@ -97,3 +97,5 @@ export default async function CareersPage({ params }: Props) {
     </>
   );
 }
+
+export const dynamic = "force-dynamic";

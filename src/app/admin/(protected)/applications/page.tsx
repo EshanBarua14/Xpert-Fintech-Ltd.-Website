@@ -55,3 +55,5 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
     />
   );
 }
+
+export const dynamic = "force-dynamic";

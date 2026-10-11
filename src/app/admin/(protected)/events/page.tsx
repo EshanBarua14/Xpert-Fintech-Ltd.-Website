@@ -56,3 +56,5 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
     />
   );
 }
+
+export const dynamic = "force-dynamic";

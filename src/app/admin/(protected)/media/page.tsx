@@ -131,3 +131,5 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

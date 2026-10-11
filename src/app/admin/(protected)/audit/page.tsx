@@ -147,3 +147,5 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

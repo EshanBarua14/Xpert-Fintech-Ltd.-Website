@@ -28,3 +28,5 @@ export default async function RedirectsPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

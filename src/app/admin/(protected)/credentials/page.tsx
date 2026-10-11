@@ -28,3 +28,5 @@ export default async function CredentialsPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

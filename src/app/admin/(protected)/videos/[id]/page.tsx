@@ -123,3 +123,5 @@ export default async function VideoPage({ params, searchParams }: { params: Prom
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

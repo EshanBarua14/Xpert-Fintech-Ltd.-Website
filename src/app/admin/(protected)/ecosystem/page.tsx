@@ -77,3 +77,5 @@ export default async function EcosystemAdmin({ searchParams }: { searchParams: P
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

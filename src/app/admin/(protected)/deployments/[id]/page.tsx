@@ -109,3 +109,5 @@ function Back() {
     </Link>
   );
 }
+
+export const dynamic = "force-dynamic";

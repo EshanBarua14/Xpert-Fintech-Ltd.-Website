@@ -37,3 +37,5 @@ export default async function SiteTextPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

@@ -77,3 +77,5 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
     />
   );
 }
+
+export const dynamic = "force-dynamic";

@@ -41,3 +41,5 @@ export default async function TagsPage({ searchParams }: { searchParams: Promise
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

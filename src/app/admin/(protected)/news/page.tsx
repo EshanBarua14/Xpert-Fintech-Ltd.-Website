@@ -75,3 +75,5 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

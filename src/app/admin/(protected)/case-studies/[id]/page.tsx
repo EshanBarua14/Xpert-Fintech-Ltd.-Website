@@ -64,3 +64,5 @@ export default async function CaseStudyPage({ params, searchParams }: { params: 
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

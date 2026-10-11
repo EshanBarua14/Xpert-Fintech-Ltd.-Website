@@ -64,3 +64,5 @@ export default async function OrganizationsPage({ searchParams }: { searchParams
     />
   );
 }
+
+export const dynamic = "force-dynamic";

@@ -72,3 +72,5 @@ export default async function DesignPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

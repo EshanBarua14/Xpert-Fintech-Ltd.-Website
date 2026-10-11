@@ -62,3 +62,5 @@ export async function POST(request: Request) {
   }
   return Response.json({ tradeDate, results }, { status: results.every((r) => r.ok) ? 200 : 207 });
 }
+
+export const dynamic = "force-dynamic";

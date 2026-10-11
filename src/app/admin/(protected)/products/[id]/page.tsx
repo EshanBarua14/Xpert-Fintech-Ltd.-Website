@@ -172,3 +172,5 @@ function Notice({ children }: { children: React.ReactNode }) {
     </p>
   );
 }
+
+export const dynamic = "force-dynamic";

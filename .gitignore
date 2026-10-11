@@ -38,3 +38,6 @@ market-debug/
 
 # Report and page text written by npm run import:live-site
 /live-site-import/
+
+.vercel
+.env*

@@ -46,3 +46,5 @@ export default async function PeopleContactsPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

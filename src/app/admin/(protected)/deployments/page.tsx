@@ -59,3 +59,5 @@ export default async function DeploymentsPage({ searchParams }: { searchParams: 
     />
   );
 }
+
+export const dynamic = "force-dynamic";

@@ -69,3 +69,5 @@ function parseRange(header: string | null, size: number): [number, number] | "in
   if (start >= size || start > end) return "invalid";
   return [start, end];
 }
+
+export const dynamic = "force-dynamic";

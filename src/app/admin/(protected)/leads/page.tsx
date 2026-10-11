@@ -121,3 +121,5 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     />
   );
 }
+
+export const dynamic = "force-dynamic";

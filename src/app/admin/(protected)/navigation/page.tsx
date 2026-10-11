@@ -38,3 +38,5 @@ export default async function NavigationPage() {
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

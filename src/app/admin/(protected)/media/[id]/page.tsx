@@ -119,3 +119,5 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

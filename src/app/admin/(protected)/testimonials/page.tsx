@@ -67,3 +67,5 @@ export default async function TestimonialsPage({ searchParams }: { searchParams:
     />
   );
 }
+
+export const dynamic = "force-dynamic";

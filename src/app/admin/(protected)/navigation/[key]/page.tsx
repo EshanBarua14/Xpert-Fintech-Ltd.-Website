@@ -47,3 +47,5 @@ export default async function MenuPage({ params }: { params: Promise<{ key: stri
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

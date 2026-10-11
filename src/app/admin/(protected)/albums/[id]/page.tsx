@@ -84,3 +84,5 @@ export default async function AlbumPage({ params, searchParams }: { params: Prom
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

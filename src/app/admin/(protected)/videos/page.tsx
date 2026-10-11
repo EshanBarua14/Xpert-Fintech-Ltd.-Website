@@ -47,3 +47,5 @@ export default async function VideosPage({ searchParams }: { searchParams: Promi
     />
   );
 }
+
+export const dynamic = "force-dynamic";

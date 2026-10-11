@@ -75,3 +75,5 @@ export default async function ApplicationPage({ params, searchParams }: { params
     </div>
   );
 }
+
+export const dynamic = "force-dynamic";

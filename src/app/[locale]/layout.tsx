@@ -1,3 +1,6 @@
+import "@fontsource/noto-sans-bengali/400.css";
+import "@fontsource/noto-sans-bengali/500.css";
+import "@fontsource/noto-sans-bengali/600.css";
 import type { Metadata } from "next";
 import { ensureTextOverrides } from "@/lib/i18n/overrides";
 import { notFound } from "next/navigation";

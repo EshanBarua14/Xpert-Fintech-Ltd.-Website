@@ -77,6 +77,7 @@
 
 :root {
   /* Height of the DSE/CSE ticker bar above the header (0 when market data is off). */
+    --font-body-bn: "Noto Sans Bengali", sans-serif;
   --ticker-h: 0px;
   --z-base: 0;
   --z-sticky: 100;

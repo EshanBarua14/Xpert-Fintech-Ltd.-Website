@@ -89,3 +89,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return entries([fixed("", now)], 1);
   }
 }
+
+export const dynamic = "force-dynamic";

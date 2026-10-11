@@ -46,7 +46,6 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
-  outputFileTracingIncludes: { "/**/*": ["./storage/media/**/*"] },
   // The Docker image sets NEXT_OUTPUT=standalone for a small, self-contained server.
   ...(process.env.NEXT_OUTPUT === "standalone" ? { output: "standalone" as const } : {}),
   experimental: {

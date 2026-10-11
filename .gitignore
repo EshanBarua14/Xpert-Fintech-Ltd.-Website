@@ -23,7 +23,8 @@ npm-debug.log*
 *.tsbuildinfo
 
 # local uploads when using the local storage driver
-/storage/
+/storage/*
+!/storage/media/
 
 # Browser tests
 /playwright-report/
@@ -41,3 +42,4 @@ market-debug/
 
 .vercel
 .env*
+data.sql

@@ -44,12 +44,15 @@ export function HeroIndices({ initial, t, locale, logos }: { initial: MarketPayl
                   ))}
                 </dl>
               ) : null}
-              {indices.length > 0 && ex!.indicesAsOf ? (
+              {/* Earlier figures say so: the dated close when known, otherwise "Last session's close" before today's trading. */}
+              {indices.length > 0 && (ex!.indicesAsOf || ex!.lastSession) ? (
                 <span className="text-[max(11px,0.6875rem)] text-text-secondary">
-                  {t.marketIndicesAsOf.replace(
-                    "{date}",
-                    new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${ex!.indicesAsOf}T00:00:00Z`)),
-                  )}
+                  {ex!.indicesAsOf
+                    ? t.marketIndicesAsOf.replace(
+                        "{date}",
+                        new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${ex!.indicesAsOf}T00:00:00Z`)),
+                      )
+                    : t.marketLastSession}
                 </span>
               ) : null}
               {indices.length > 0 ? null : (

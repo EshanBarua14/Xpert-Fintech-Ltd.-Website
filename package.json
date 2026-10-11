@@ -7,10 +7,12 @@
     "node": ">=20.9.0"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
+    "dev:webpack": "next dev",
     "dev:fast": "next dev --turbopack",
     "build": "prisma generate && next build",
     "start": "next start",
+    "preview": "next build && next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "db:validate": "prisma validate",

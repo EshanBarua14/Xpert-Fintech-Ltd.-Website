@@ -13,6 +13,12 @@ export async function onNodeStart() {
   } catch {
     /* database not reachable yet: the defaults are used */
   }
+  // Read DSE and CSE once at start-up, so the first visitor does not wait for them.
+  if ((process.env.MARKET_DATA_MODE ?? "").toLowerCase() === "exchange") {
+    import("./lib/market/data")
+      .then(({ getMarketPayload }) => getMarketPayload({ waitMs: 0 }))
+      .catch(() => undefined);
+  }
   // Pre-launch reminder: stand-in leadership profiles still on the website.
   try {
     const { db } = await import("./lib/db/client");

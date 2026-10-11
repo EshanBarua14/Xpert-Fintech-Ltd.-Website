@@ -2,7 +2,7 @@
  * Market data shapes shared by the server and the browser widgets.
  * The feed format is validated in ./schema.ts (server only).
  */
-import { DEFAULT_SESSIONS, phaseAt, type Sessions } from "./session";
+import { DEFAULT_SESSIONS, phaseAt, tradedToday, type Sessions } from "./session";
 export type Quote = { symbol: string; ltp: number; change: number; changePct: number; volume?: number };
 export type IndexValue = { name: string; value: number; change: number; changePct: number };
 export type ExchangeSnapshot = {
@@ -14,6 +14,8 @@ export type ExchangeSnapshot = {
   indices: IndexValue[];
   /** Set when the index values are an earlier session's close (YYYY-MM-DD), not today's. */
   indicesAsOf?: string;
+  /** True before today's trading starts (and on days without trading): the figures shown are the last session's. */
+  lastSession?: boolean;
   turnover?: number;
   volume?: number;
   trades?: number;
@@ -57,7 +59,7 @@ export function withSessions(p: MarketPayload, at: Date = new Date()): MarketPay
     ...p,
     snapshot: {
       ...p.snapshot,
-      exchanges: p.snapshot.exchanges.map((e) => ({ ...e, status: phaseAt(sessions[e.exchange], at, e.reported) })),
+      exchanges: p.snapshot.exchanges.map((e) => ({ ...e, status: phaseAt(sessions[e.exchange], at, e.reported), lastSession: !tradedToday(sessions[e.exchange], at) })),
     },
   };
 }

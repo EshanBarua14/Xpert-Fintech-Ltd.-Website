@@ -4,7 +4,7 @@ import { demoSnapshot } from "./demo";
 import { exchangeSnapshot } from "./exchange";
 import { snapshotSchema } from "./schema";
 import { uniqueQuotes, withSessions, type MarketPayload, type MarketSnapshot, type ShareFigure } from "./types";
-import { DEFAULT_SESSIONS, readSchedule, tradedToday, type Sessions } from "./session";
+import { DEFAULT_SESSIONS, QUIET_SECONDS, marketActive as activeAt, readSchedule, tradedToday, type Sessions } from "./session";
 
 type Mode = MarketPayload["mode"];
 
@@ -29,15 +29,23 @@ export function marketMode(): Mode {
   return "none";
 }
 
-let cache: { at: number; value: MarketSnapshot | null } | null = null;
-let boardCache: { at: number; value: MarketSnapshot | null } | null = null;
+/*
+ * Caches live on globalThis so that, in development, a code reload does not
+ * empty them (an empty cache made every page wait for DSE and CSE again).
+ */
+type Cached = { at: number; value: MarketSnapshot | null } | null;
+const g = globalThis as unknown as { __xflMarket?: { cache: Cached; board: Cached } };
+g.__xflMarket ??= { cache: null, board: null };
+const store = g.__xflMarket;
 
 /** How often prices refresh, in seconds (Admin → Market data). Server reads and browser polls both follow it. */
 export const REFRESH_KEY = "market.refreshSeconds";
 export const REFRESH_CHOICES = [15, 30, 60] as const;
 export const DEFAULT_REFRESH = 30;
 let refreshSeconds: number = DEFAULT_REFRESH;
-const TTL = () => refreshSeconds * 1000;
+/** Outside trading hours the boards are read every 5 minutes (see marketActive in ./session). */
+const marketActive = () => activeAt(sessions);
+const TTL = () => (marketActive() ? refreshSeconds : QUIET_SECONDS) * 1000;
 
 let boardRefresh: Promise<MarketSnapshot | null> | null = null;
 
@@ -53,8 +61,8 @@ function refreshBoard(): Promise<MarketSnapshot | null> {
       .then((snapshot) => {
         if (snapshot) void recordTurnover(snapshot);
         // Keep the last good board if both exchanges fail this time.
-        boardCache = { at: Date.now(), value: snapshot ?? boardCache?.value ?? null };
-        return boardCache.value;
+        store.board = { at: Date.now(), value: snapshot ?? store.board?.value ?? null };
+        return store.board.value;
       })
       .finally(() => {
         boardRefresh = null;
@@ -70,15 +78,15 @@ function refreshBoard(): Promise<MarketSnapshot | null> {
  * (pages render without prices and the browser fills them in a moment later).
  */
 async function boardSnapshot(waitMs = 1500): Promise<MarketSnapshot | null> {
-  if (boardCache && Date.now() - boardCache.at < TTL()) return boardCache.value;
+  if (store.board && Date.now() - store.board.at < TTL()) return store.board.value;
   const pending = refreshBoard();
-  if (boardCache) return boardCache.value;
+  if (store.board) return store.board.value;
   return Promise.race([pending, new Promise<null>((r) => setTimeout(() => r(null), waitMs))]);
 }
 
 /** Calls the licensed feed adapter. Short cache so many visitors cause one upstream call. */
 async function licensedSnapshot(): Promise<MarketSnapshot | null> {
-  if (cache && Date.now() - cache.at < TTL()) return cache.value;
+  if (store.cache && Date.now() - store.cache.at < TTL()) return store.cache.value;
   const url = process.env.MARKET_DATA_API_URL;
   if (!url) return null;
   let value: MarketSnapshot | null = null;
@@ -93,9 +101,9 @@ async function licensedSnapshot(): Promise<MarketSnapshot | null> {
     value = parsed.data;
   } catch (error) {
     console.error("[market] feed unavailable", error);
-    value = cache?.value ?? null; // keep showing the last good snapshot
+    value = store.cache?.value ?? null; // keep showing the last good snapshot
   }
-  cache = { at: Date.now(), value };
+  store.cache = { at: Date.now(), value };
   return value;
 }
 
@@ -211,7 +219,7 @@ export function clearMarketInfoCache() {
  * What the site shows. Pages call it with the default short wait so a slow
  * exchange never delays them; /api/market (polled by browsers) waits longer.
  */
-export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = {}): Promise<MarketPayload> {
+export async function getMarketPayload({ waitMs = 800 }: { waitMs?: number } = {}): Promise<MarketPayload> {
   const mode = marketMode();
   const { source, shares, averages } = await settingsAndShares();
   let snapshot: MarketSnapshot | null = null;
@@ -242,6 +250,7 @@ export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = 
     delayMinutes: source?.displayDelayMinutes ?? 0,
     snapshot,
     shares,
+    // Browsers poll at this pace while the exchanges trade, every 5 minutes otherwise (see useMarket).
     refreshSeconds,
     sessions,
     averages,
@@ -252,14 +261,14 @@ export async function getMarketPayload({ waitMs = 1500 }: { waitMs?: number } = 
 export async function testFeed(): Promise<{ ok: boolean; message: string }> {
   if (marketMode() === "exchange") {
     const { reports } = await exchangeSnapshot();
-    boardCache = null;
+    store.board = null;
     return {
       ok: reports.some((r) => r.ok),
       message: reports.map((r) => `${r.exchange}: ${r.ok ? "OK" : "not available"} — ${r.message}`).join(" · "),
     };
   }
   if (!process.env.MARKET_DATA_API_URL) return { ok: false, message: "MARKET_DATA_API_URL is not set in the server's .env." };
-  cache = null;
+  store.cache = null;
   const snap = await licensedSnapshot();
   if (!snap) return { ok: false, message: "The feed did not return valid data. See the server log for the reason." };
   const q = snap.exchanges.reduce((n, e) => n + e.quotes.length, 0);

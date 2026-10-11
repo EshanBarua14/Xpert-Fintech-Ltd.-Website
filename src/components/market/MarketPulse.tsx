@@ -221,6 +221,7 @@ function ExchangeGlance({ exchange, ex, share, average, t, locale, className, lo
         <a href={`/${locale}/markets/${exchange.toLowerCase()}`} className="ml-auto text-sm font-semibold text-brand-sky hover:underline">
           {t.tickerBoard.replace("{exchange}", exchange)}
         </a>
+        {ex?.lastSession && <p className="w-full text-xs text-text-secondary">{t.marketLastSession}</p>}
       </header>
 
       {share ? (

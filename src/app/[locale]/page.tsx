@@ -87,8 +87,11 @@ export default async function HomePage({ params }: Props) {
   );
 
   const t = getMessages(locale);
-  const [data, events, market, showcase, credentials] = await Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]);
-  const [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline, design, reviewSeconds, figures] = await Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds(), getFigures()]);
+  // Everything the page needs, read at the same time (not one batch after another).
+  const [[data, events, market, showcase, credentials], [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline, design, reviewSeconds, figures]] = await Promise.all([
+    Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]),
+    Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds(), getFigures()]),
+  ]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },

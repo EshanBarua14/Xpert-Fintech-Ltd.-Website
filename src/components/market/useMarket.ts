@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { withSessions, type MarketPayload } from "@/lib/market/types";
+import { DEFAULT_SESSIONS, QUIET_SECONDS, marketActive } from "@/lib/market/session";
 
 /** Default poll interval; the server tells the real one (Admin → Market data: 15, 30 or 60 s). */
 let pollMs = 30_000;
@@ -62,7 +63,20 @@ async function load() {
 
 function schedule() {
   clearTimeout(timer);
-  if (listeners.size) timer = setTimeout(load, pollMs);
+  // Every few seconds while the exchanges trade; every 5 minutes otherwise (nothing moves),
+  // but never past the moment the next session's pre-opening starts.
+  if (!listeners.size) return;
+  const sessions = state?.data.sessions ?? DEFAULT_SESSIONS;
+  let wait = marketActive(sessions) ? pollMs : QUIET_SECONDS * 1000;
+  if (wait > pollMs) {
+    for (let m = 1; m * 60_000 < wait; m++) {
+      if (marketActive(sessions, new Date(Date.now() + m * 60_000))) {
+        wait = m * 60_000;
+        break;
+      }
+    }
+  }
+  timer = setTimeout(load, wait);
 }
 
 function onVisible() {

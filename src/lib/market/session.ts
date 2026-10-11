@@ -77,3 +77,20 @@ export function phaseAt(s: SessionSchedule, at: Date = new Date(), reported?: Se
 export function tradedToday(s: SessionSchedule, at: Date = new Date()) {
   return isTradingDay(s, at) && dhakaClock(at).minute >= minutes(s.open);
 }
+
+/** Seconds between price reads outside trading hours. */
+export const QUIET_SECONDS = 300;
+
+/**
+ * True while prices can move: on a trading day, from 5 minutes before
+ * pre-opening to 20 minutes after post-closing, on either exchange. Outside
+ * those hours the site reads and polls prices every 5 minutes, not every few seconds.
+ */
+export function marketActive(s: Sessions, at: Date = new Date()) {
+  return (["DSE", "CSE"] as const).some((x) => {
+    const sc = s[x];
+    if (!isTradingDay(sc, at)) return false;
+    const m = dhakaClock(at).minute;
+    return m >= minutes(sc.preOpen) - 5 && m <= minutes(sc.postClose) + 20;
+  });
+}

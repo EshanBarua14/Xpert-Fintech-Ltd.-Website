@@ -653,5 +653,7 @@
   "marketIndicesAsOf": "Closing values, {date}",
   "bioPrev": "Previous part",
   "bioNext": "Next part",
-  "bioPageOf": "Part {n} of {total}"
+  "bioPageOf": "Part {n} of {total}",
+  "marketLastSession": "Last session's close",
+  "marketTodayClose": "Today's close"
 }

@@ -182,6 +182,7 @@ export function MarketBoard({ initial, exchange, t, locale, basePath }: { initia
               </dl>
             </>
           )}
+          {ex.lastSession && <p className="text-xs text-text-secondary">{t.marketLastSession}</p>}
           {(ex.turnover !== undefined || ex.volume !== undefined || ex.trades !== undefined) && (
             <dl className="grid grid-cols-3 gap-3 border-t border-fg/[0.06] pt-4 text-sm">
               {ex.turnover !== undefined && (

@@ -653,5 +653,7 @@
   "marketIndicesAsOf": "{date} তারিখের সমাপনী মান",
   "bioPrev": "আগের অংশ",
   "bioNext": "পরের অংশ",
-  "bioPageOf": "{total}টির মধ্যে {n} নম্বর অংশ"
+  "bioPageOf": "{total}টির মধ্যে {n} নম্বর অংশ",
+  "marketLastSession": "গত সেশনের সমাপনী",
+  "marketTodayClose": "আজকের সমাপনী"
 }

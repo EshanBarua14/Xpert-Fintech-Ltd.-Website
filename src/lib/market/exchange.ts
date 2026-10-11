@@ -349,6 +349,21 @@ export async function getHtml(url: string): Promise<string> {
   return res.text();
 }
 
+/** The day-end table changes once a day: read it at most every 15 minutes (kept across code reloads). */
+const recentStore = globalThis as unknown as { __xflDseRecent?: { at: number; value: ReturnType<typeof parseDseRecent> } };
+async function dseRecentCached() {
+  const c = recentStore.__xflDseRecent;
+  if (c && Date.now() - c.at < 15 * 60_000) return c.value;
+  try {
+    const value = parseDseRecent(await getHtml(DSE_RECENT_URL()));
+    recentStore.__xflDseRecent = { at: Date.now(), value };
+    return value;
+  } catch (error) {
+    console.error("[market] DSE day-end table unavailable:", (error as Error)?.message ?? error);
+    return c?.value ?? null;
+  }
+}
+
 export type ExchangeReport = { exchange: "DSE" | "CSE"; ok: boolean; count: number; message: string };
 
 /** Reads both boards. Returns what worked, plus a per-exchange report for the admin test. */
@@ -393,12 +408,7 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
         console.error("[market] DSE summary unavailable:", (error as Error)?.message ?? error);
         return null;
       }),
-    getHtml(DSE_RECENT_URL())
-      .then(parseDseRecent)
-      .catch((error: unknown) => {
-        console.error("[market] DSE day-end table unavailable:", (error as Error)?.message ?? error);
-        return null;
-      }),
+    dseRecentCached(),
   ]);
   // DSE indices and totals: the home page first, the prices page for whatever it lacks.
   let dse = dseHome;
@@ -439,8 +449,9 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
       if (exchange === "CSE" && cse) {
         snap.indices = cse.indices;
         if (cse.status) snap.status = cse.status;
-        // Totals belong to today's session only; yesterday's are not shown as today's.
-        if (!cse.previousSession) Object.assign(snap, { turnover: cse.turnover, volume: cse.volume, trades: cse.trades });
+        // Before today's session these are the last session's totals: the page labels them so
+        // (lastSession), and they are never recorded as today's (see recordTurnover).
+        Object.assign(snap, { turnover: cse.turnover, volume: cse.volume, trades: cse.trades });
         extra = `, ${cse.indices.length} indices${cse.previousSession ? " (previous session)" : ""}`;
       }
       if (exchange === "DSE" && dse) {

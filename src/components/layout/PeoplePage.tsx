@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { editorHints } from "@/lib/env/hints";
 import { notFound } from "next/navigation";
@@ -31,10 +32,10 @@ export function peoplePage(group: PersonGroup, path: string, titleKey: "board" |
             <PeopleGrid people={people} photos={photos} locale={locale as AppLocale} group={group} />
           ) : editorHints() ? (
             // Outside production: say where the profile is added.
-            <a href="/admin/people/new" className="flex max-w-md flex-col gap-2 rounded-2xl border border-dashed border-gold/60 p-6 text-sm text-text-secondary hover:border-gold">
+            <Link href="/admin/people/new" className="flex max-w-md flex-col gap-2 rounded-2xl border border-dashed border-gold/60 p-6 text-sm text-text-secondary hover:border-gold">
               <span className="font-semibold text-gold">No profile yet</span>
               Add one in Admin → People and choose the group “{group === "CONSULTANT" ? "Consultants" : group}”. It appears here once published.
-            </a>
+            </Link>
           ) : (
             <p className="text-text-secondary">{t.noItems}</p>
           )}

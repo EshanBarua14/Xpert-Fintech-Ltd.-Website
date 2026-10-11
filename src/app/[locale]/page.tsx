@@ -212,9 +212,9 @@ export default async function HomePage({ params }: Props) {
                 Add one in Admin → Testimonials with the client&rsquo;s photo, name, job title, company and quote. Tick &ldquo;Written approval on file&rdquo; and publish it, and this
                 section shows the review cards on the live site.
               </p>
-              <a href="/admin/testimonials/new" className="inline-flex h-10 items-center rounded-full border border-gold/50 px-4 text-sm font-semibold text-gold hover:bg-gold/10">
+              <Link href="/admin/testimonials/new" className="inline-flex h-10 items-center rounded-full border border-gold/50 px-4 text-sm font-semibold text-gold hover:bg-gold/10">
                 Add a client review
-              </a>
+              </Link>
             </div>
           </div>
         </Shell>

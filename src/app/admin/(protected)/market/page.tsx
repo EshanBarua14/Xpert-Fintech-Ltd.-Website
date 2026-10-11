@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { DEFAULT_REFRESH, dhakaToday, liveMarketTurnover, marketMode, readSessions, REFRESH_KEY, SESSIONS_KEY } from "@/lib/market/data";
@@ -102,7 +103,7 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
         </ul>
         {initial && (
           <p className="rounded-control border border-brand-sky/30 bg-brand-sky/10 px-4 py-3 text-sm">
-            Editing {initial.tradeDate}. Change the figures and save; <a href="/admin/market#share-form" className="text-brand-sky underline">cancel</a>.
+            Editing {initial.tradeDate}. Change the figures and save; <Link href="/admin/market#share-form" className="text-brand-sky underline">cancel</Link>.
           </p>
         )}
         <MarketShareForm key={editDay ?? "new"} today={today} live={{ DSE: liveDse, CSE: liveCse }} initial={initial} />

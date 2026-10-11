@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { useRef, useState, type CSSProperties } from "react";
 import { SocialIcon } from "@/components/ui/SocialIcon";
@@ -61,14 +62,14 @@ const COLUMN = "w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)
 function ContactSlot({ kind, name }: { kind: "email" | "linkedin"; name: string }) {
   const what = kind === "email" ? "email" : "LinkedIn";
   return (
-    <a
+    <Link
       href="/admin/people/contacts"
       aria-label={`Add ${what} for ${name} (Admin)`}
       title={`No ${what} yet: add it in Admin → People → Contacts`}
       className="flex size-9 items-center justify-center rounded-full border border-dashed border-gold/60 text-gold transition-colors hover:border-gold hover:bg-gold/10"
     >
       <SocialIcon kind={kind} className="size-4" />
-    </a>
+    </Link>
   );
 }
 

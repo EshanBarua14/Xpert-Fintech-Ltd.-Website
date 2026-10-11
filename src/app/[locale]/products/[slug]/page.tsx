@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Badge } from "@/components/ui/Badge";
+
 import { ecosystemLabels, ecosystemModules, GhostButton, moduleForSlug, PrimaryButton, SectionHeader } from "@/components/flagship/Sections";
 import { EcosystemMap } from "@/components/flagship/EcosystemMap";
 import OmsPreview from "@/components/products/oms-preview/OmsPreview";

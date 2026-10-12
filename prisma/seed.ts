@@ -476,7 +476,7 @@ const HEADER_V2: MenuNode[] = [
     descBn: "ট্রেডিং, ঝুঁকি, অনবোর্ডিং ও ব্যাক অফিস, এক সঙ্গে।",
     children: [
       { en: "Trading (OMS)", bn: "ট্রেডিং (OMS)", href: "platform#trading", descEn: "Order entry and management for DSE and CSE.", descBn: "ডিএসই ও সিএসই-এর জন্য অর্ডার ব্যবস্থাপনা।" },
-      { en: "Risk management (RMS)", bn: "ঝুঁকি ব্যবস্থাপনা (RMS)", href: "platform#risk", descEn: "Pre-trade limits and exposure checks.", descBn: "প্রি-ট্রেড লিমিট ও এক্সপোজার যাচাই।" },
+      { en: "Risk management (RMS)", bn: "ঝুঁকি ব্যবস্থাপনা (RMS)", href: "risk-management", descEn: "Pre-trade limits and exposure checks.", descBn: "প্রি-ট্রেড লিমিট ও এক্সপোজার যাচাই।" },
       { en: "eKYC", bn: "ই-কেওয়াইসি", href: "platform#ekyc", descEn: "Digital investor verification.", descBn: "ডিজিটাল বিনিয়োগকারী যাচাই।" },
       { en: "BO account opening", bn: "বিও অ্যাকাউন্ট খোলা", href: "platform#bo", descEn: "Open BO accounts online.", descBn: "অনলাইনে বিও অ্যাকাউন্ট খুলুন।" },
       { en: "Document management", bn: "ডকুমেন্ট ম্যানেজমেন্ট", href: "platform#dms", descEn: "Client documents, organised.", descBn: "গ্রাহকের নথি, গোছানো।" },

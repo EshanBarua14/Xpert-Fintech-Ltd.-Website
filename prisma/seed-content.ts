@@ -20,6 +20,7 @@
  */
 import { seedRmsVisible } from "./rms-visible";
 import { seedOmsLogo } from "./oms-logo";
+import { seedRiskPage } from "./risk-page";
 import { PrismaClient, type Locale, type PersonGroup, type OfferingItemKind, type OfferingType } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -1680,6 +1681,7 @@ async function main() {
   await seedRmsInOms();
   await seedRmsVisible(db, EN, BN);
   await seedOmsLogo(db, seedImage);
+  await seedRiskPage(db, EN, BN);
   await seedProductScreens();
   await seedNavAdditions();
   await seedCaseStudyDrafts();

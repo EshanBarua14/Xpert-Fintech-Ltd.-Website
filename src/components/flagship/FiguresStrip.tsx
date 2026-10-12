@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/motion/CountUp";
 import type { Figure } from "@/lib/content/figures";
 import type { Messages } from "@/lib/i18n/messages";
 import { digits } from "@/lib/i18n/digits";
@@ -7,6 +8,21 @@ import { ContentSlot } from "@/components/ui/ContentSlot";
  * "In numbers": the figures entered in Admin → Figures, each with its source
  * and date. Outside the live site, empty slots show what to add until then.
  */
+/** Counts up when the figure is a whole number with an optional prefix or suffix ("45%", "BDT 120+", "1,200"); anything else shows as typed. */
+function FigureValue({ value, locale }: { value: string; locale: "en" | "bn" }) {
+  const bn = locale === "bn";
+  const parts = value.trim().match(/^([^\d]*?)(\d{1,3}(?:,\d{3})+|\d+)([^\d.,]*)$/);
+  const n = parts ? Number(parts[2]!.replace(/,/g, "")) : NaN;
+  if (!parts || !Number.isFinite(n)) return <>{digits(value, bn)}</>;
+  return (
+    <>
+      {digits(parts[1] ?? "", bn)}
+      <CountUp value={n} locale={locale} />
+      {digits(parts[3] ?? "", bn)}
+    </>
+  );
+}
+
 export function FiguresStrip({ figures, t, locale, slots }: { figures: Figure[]; t: Messages; locale: "en" | "bn"; slots: boolean }) {
   const date = (d: string) =>
     new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${d}T00:00:00Z`));
@@ -26,7 +42,7 @@ export function FiguresStrip({ figures, t, locale, slots }: { figures: Figure[];
     <dl className="grid gap-px overflow-hidden rounded-3xl border border-fg/[0.08] bg-fg/[0.08] sm:grid-cols-2 lg:grid-cols-3">
       {figures.map((f) => (
         <div key={`${f.value}-${f.labelEn}`} data-reveal className="flex flex-col gap-2 bg-ink-950 p-6 md:p-8">
-          <dd className="order-2 font-display text-[clamp(2.25rem,4vw,3.25rem)] leading-none font-semibold tracking-tight text-text-primary">{digits(f.value, locale === "bn")}</dd>
+          <dd className="order-2 font-display text-[clamp(2.25rem,4vw,3.25rem)] leading-none font-semibold tracking-tight text-text-primary"><FigureValue value={f.value} locale={locale} /></dd>
           <dt className="order-1 text-sm font-semibold text-text-secondary">{(locale === "bn" && f.labelBn) || f.labelEn}</dt>
           <span className="order-3 text-xs text-text-secondary">
             {t.marketSource}: {f.source}

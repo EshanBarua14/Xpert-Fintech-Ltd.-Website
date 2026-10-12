@@ -1,3 +1,4 @@
+import { SplitWords } from "@/components/ui/SplitWords";
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
@@ -251,7 +252,7 @@ export function FlagshipHero({
             style={{ ...delay(1) }}
             className="font-display text-[clamp(2.4rem,min(4.4vw,7svh),4.6rem)] leading-[1.03] text-balance text-text-primary"
           >
-            {t.heroTitleA} {t.heroTitleB}
+            <SplitWords text={`${t.heroTitleA} ${t.heroTitleB}`} />
           </h1>
           <p data-reveal style={delay(2)} className="max-w-[38rem] text-lg leading-relaxed text-text-secondary md:text-xl lg:text-[clamp(1rem,2.2svh,1.25rem)]">
             {body || t.heroBody}

@@ -1375,3 +1375,81 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .page-loading, .skeleton { animation: none; }
 }
+
+/* ── Motion layer ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  /* Cards: lift, glow, border highlight. translate/scale leave the reveal transform alone. */
+  main [data-reveal][class*="rounded-"][class*="border"] {
+    transition: translate .35s ease, box-shadow .35s ease, border-color .35s ease, opacity .6s ease, transform .6s ease;
+  }
+  main [data-reveal][class*="rounded-"][class*="border"]:hover {
+    translate: 0 -6px;
+    border-color: rgb(56 189 248 / .45);
+    box-shadow: 0 20px 44px -22px rgb(56 189 248 / .5);
+  }
+  /* Photos and logos: slow zoom inside clipped frames */
+  main [class*="overflow-hidden"] img { transition: scale .7s cubic-bezier(.2, .7, .2, 1); }
+  main [class*="overflow-hidden"]:hover img { scale: 1.06; }
+  /* Buttons */
+  main :is(a, button)[class*="bg-brand"] { transition: translate .25s ease, box-shadow .25s ease, filter .25s ease; }
+  main :is(a, button)[class*="bg-brand"]:hover { translate: 0 -2px; filter: brightness(1.08); box-shadow: 0 10px 26px -12px rgb(56 189 248 / .6); }
+  /* Text links: underline sweep */
+  main p a:not([class]) { text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .3s ease; }
+  main p a:not([class]):hover { background-size: 100% 1px; }
+  /* Hero title: soft glow pulse, brighter on hover */
+  .hero-seq h1 { animation: title-glow 7s ease-in-out infinite; }
+  .hero-seq h1:hover { animation-play-state: paused; text-shadow: 0 0 34px rgb(56 189 248 / .5); }
+  @keyframes title-glow {
+    0%, 100% { text-shadow: 0 0 0 rgb(56 189 248 / 0); }
+    50% { text-shadow: 0 0 28px rgb(56 189 248 / .35); }
+  }
+  /* Scroll progress bar (Chromium and Safari; other browsers skip it) */
+  @supports (animation-timeline: scroll()) {
+    html::before {
+      content: ""; position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 90; pointer-events: none;
+      transform-origin: 0 50%;
+      background: linear-gradient(90deg, #22d3ee, #3b82f6, #a78bfa);
+      animation: scroll-progress linear both; animation-timeline: scroll(root);
+    }
+    @keyframes scroll-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  }
+}
+
+/* ── Motion layer ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  /* Cards: lift, glow, border highlight. translate/scale leave the reveal transform alone. */
+  main [data-reveal][class*="rounded-"][class*="border"] {
+    transition: translate .35s ease, box-shadow .35s ease, border-color .35s ease, opacity .6s ease, transform .6s ease;
+  }
+  main [data-reveal][class*="rounded-"][class*="border"]:hover {
+    translate: 0 -6px;
+    border-color: rgb(56 189 248 / .45);
+    box-shadow: 0 20px 44px -22px rgb(56 189 248 / .5);
+  }
+  /* Photos and logos: slow zoom inside clipped frames */
+  main [class*="overflow-hidden"] img { transition: scale .7s cubic-bezier(.2, .7, .2, 1); }
+  main [class*="overflow-hidden"]:hover img { scale: 1.06; }
+  /* Buttons */
+  main :is(a, button)[class*="bg-brand"] { transition: translate .25s ease, box-shadow .25s ease, filter .25s ease; }
+  main :is(a, button)[class*="bg-brand"]:hover { translate: 0 -2px; filter: brightness(1.08); box-shadow: 0 10px 26px -12px rgb(56 189 248 / .6); }
+  /* Text links: underline sweep */
+  main p a:not([class]) { text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .3s ease; }
+  main p a:not([class]):hover { background-size: 100% 1px; }
+  /* Hero title: soft glow pulse, brighter on hover */
+  .hero-seq h1 { animation: title-glow 7s ease-in-out infinite; }
+  .hero-seq h1:hover { animation-play-state: paused; text-shadow: 0 0 34px rgb(56 189 248 / .5); }
+  @keyframes title-glow {
+    0%, 100% { text-shadow: 0 0 0 rgb(56 189 248 / 0); }
+    50% { text-shadow: 0 0 28px rgb(56 189 248 / .35); }
+  }
+  /* Scroll progress bar (Chromium and Safari; other browsers skip it) */
+  @supports (animation-timeline: scroll()) {
+    html::before {
+      content: ""; position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 90; pointer-events: none;
+      transform-origin: 0 50%;
+      background: linear-gradient(90deg, #22d3ee, #3b82f6, #a78bfa);
+      animation: scroll-progress linear both; animation-timeline: scroll(root);
+    }
+    @keyframes scroll-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  }
+}

@@ -18,6 +18,7 @@
  * (EcoSoftBD/back-office history, DSE/CSE display licence, DSE FIX certification, CSE API
  * agreement). Remove a key from PUBLISH below to keep it as a draft.
  */
+import { seedRmsVisible } from "./rms-visible";
 import { PrismaClient, type Locale, type PersonGroup, type OfferingItemKind, type OfferingType } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -397,7 +398,6 @@ async function applyProductLineup() {
     await db.offeringTranslation.updateMany({ where: { offeringId: o.id, locale: BN }, data: { name: bn } });
   }
   await db.ecosystemNode.updateMany({ where: { key: { in: ["ost", "ekyc"] } }, data: { status: "PUBLISHED" } });
-  await db.ecosystemNode.updateMany({ where: { key: "rms" }, data: { status: "DRAFT" } });
   // The Products menu: the seven in order, the retired ones hidden, missing ones added.
   const MENU: Record<string, { en: string; bn: string; descEn: string; descBn: string }> = {
     ost: { en: "Online Share Trading (OST)", bn: "অনলাইন শেয়ার ট্রেডিং (ওএসটি)", descEn: "Online share trading.", descBn: "অনলাইনে শেয়ার লেনদেন।" },
@@ -1677,6 +1677,7 @@ async function main() {
   await seedMarketsLinks();
   await seedEcosystem();
   await seedRmsInOms();
+  await seedRmsVisible(db, EN, BN);
   await seedProductScreens();
   await seedNavAdditions();
   await seedCaseStudyDrafts();

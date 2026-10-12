@@ -25,7 +25,7 @@ export function RoleGuide({ t, products }: { t: Messages; products: ShowcaseProd
   return (
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-[repeat(3,auto)]">
       {roles.map((r, i) => (
-        <li key={r.key} data-reveal style={{ "--d": i } as CSSProperties} className="flex flex-col gap-5 lg:row-span-3 lg:grid lg:grid-rows-subgrid rounded-3xl border border-fg/[0.08] bg-fg/[0.02] p-6">
+        <li key={r.key} data-reveal style={{ "--d": i } as CSSProperties} className="flex flex-col gap-5 lg:row-span-3 lg:grid lg:[grid-template-rows:subgrid] rounded-3xl border border-fg/[0.08] bg-fg/[0.02] p-6">
           <span className="flex size-11 items-center justify-center rounded-2xl bg-brand-sky/10 text-brand-sky">
             <Icon name={r.icon} className="size-5" />
           </span>

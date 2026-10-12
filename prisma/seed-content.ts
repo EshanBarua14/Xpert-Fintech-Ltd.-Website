@@ -19,6 +19,7 @@
  * agreement). Remove a key from PUBLISH below to keep it as a draft.
  */
 import { seedRmsVisible } from "./rms-visible";
+import { seedOmsLogo } from "./oms-logo";
 import { PrismaClient, type Locale, type PersonGroup, type OfferingItemKind, type OfferingType } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -1678,6 +1679,7 @@ async function main() {
   await seedEcosystem();
   await seedRmsInOms();
   await seedRmsVisible(db, EN, BN);
+  await seedOmsLogo(db, seedImage);
   await seedProductScreens();
   await seedNavAdditions();
   await seedCaseStudyDrafts();

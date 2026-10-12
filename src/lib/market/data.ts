@@ -47,6 +47,30 @@ let refreshSeconds: number = DEFAULT_REFRESH;
 const marketActive = () => activeAt(sessions);
 const TTL = () => (marketActive() ? refreshSeconds : QUIET_SECONDS) * 1000;
 
+type BoardExchange = MarketSnapshot["exchanges"][number];
+const exchangeSeen = new Map<string, number>();
+const MAX_STALE_MS = 10 * 60 * 1000;
+
+/**
+ * A failed read of one exchange must not wipe the figures it had a moment ago:
+ * the last good quotes and indices are carried over for up to 10 minutes.
+ */
+function mergeBoards(next: MarketSnapshot, prev: MarketSnapshot | null): MarketSnapshot {
+  const now = Date.now();
+  const exchanges: BoardExchange[] = next.exchanges.map((e) => {
+    const old = prev?.exchanges.find((p) => p.exchange === e.exchange);
+    if (e.quotes?.length) exchangeSeen.set(e.exchange, now);
+    const fresh = now - (exchangeSeen.get(e.exchange) ?? 0) < MAX_STALE_MS;
+    if (!old || !fresh) return e;
+    return { ...e, quotes: e.quotes?.length ? e.quotes : old.quotes, indices: e.indices?.length ? e.indices : old.indices };
+  });
+  for (const old of prev?.exchanges ?? []) {
+    if (exchanges.some((e) => e.exchange === old.exchange)) continue;
+    if (now - (exchangeSeen.get(old.exchange) ?? 0) < MAX_STALE_MS) exchanges.push(old);
+  }
+  return { ...next, exchanges };
+}
+
 let boardRefresh: Promise<MarketSnapshot | null> | null = null;
 
 /** Reads both exchanges once (concurrent callers share the same request). */
@@ -61,7 +85,8 @@ function refreshBoard(): Promise<MarketSnapshot | null> {
       .then((snapshot) => {
         if (snapshot) void recordTurnover(snapshot);
         // Keep the last good board if both exchanges fail this time.
-        store.board = { at: Date.now(), value: snapshot ?? store.board?.value ?? null };
+        const merged = snapshot ? mergeBoards(snapshot, store.board?.value ?? null) : (store.board?.value ?? null);
+        store.board = { at: Date.now(), value: merged };
         return store.board.value;
       })
       .finally(() => {

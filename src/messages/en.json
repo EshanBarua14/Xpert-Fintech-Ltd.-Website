@@ -114,7 +114,7 @@
   "capTradingTitle": "Trading (OMS)",
   "capTradingBody": "Order entry and order management for DSE and CSE, on web and mobile.",
   "capRiskTitle": "Risk management (RMS)",
-  "capRiskBody": "Limits and exposure checks on every order before it reaches the exchange.",
+  "capRiskBody": "Every order is checked before it reaches the exchange: short-sell prevention, buying power and margin limit, order limits, price bands, exposure caps and blocked BO accounts.",
   "capEkycTitle": "eKYC",
   "capEkycBody": "Verify investors digitally and take paperwork out of onboarding.",
   "capBoTitle": "BO account opening",

@@ -15,6 +15,60 @@ export function SiteEffects() {
   const pathname = usePathname();
   const firstPage = useRef(true);
 
+  // Primary buttons lean toward the pointer (mouse and trackpad only, never with reduced motion).
+  useEffect(() => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let active: HTMLElement | null = null;
+    const reset = () => {
+      if (!active) return;
+      active.style.setProperty("--mx", "0px");
+      active.style.setProperty("--my", "0px");
+      active = null;
+    };
+    const onMove = (e: PointerEvent) => {
+      const btn = (e.target as Element | null)?.closest<HTMLElement>(".btn-glow") ?? null;
+      if (btn !== active) reset();
+      if (!btn) return;
+      active = btn;
+      const r = btn.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+      const dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+      btn.style.setProperty("--mx", (dx * 5).toFixed(1) + "px");
+      btn.style.setProperty("--my", (dy * 4).toFixed(1) + "px");
+    };
+    document.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("blur", reset);
+    return () => {
+      document.removeEventListener("pointermove", onMove);
+      window.removeEventListener("blur", reset);
+      reset();
+    };
+  }, []);
+
+  // Back-to-top button, shown after a long scroll.
+  useEffect(() => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "back-to-top";
+    const bn = document.documentElement.lang.startsWith("bn");
+    btn.setAttribute("aria-label", bn ? "\u0989\u09AA\u09B0\u09C7 \u09AF\u09BE\u09A8" : "Back to top");
+    btn.innerHTML =
+      '<svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/></svg>';
+    btn.addEventListener("click", () => {
+      const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: calm ? "auto" : "smooth" });
+    });
+    document.body.appendChild(btn);
+    const onScroll = () => btn.toggleAttribute("data-show", window.scrollY > 900);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      btn.remove();
+    };
+  }, []);
+
   // Section personality: sections below the hero enter in turn from below, left, scaled and right (see [data-anim] in globals.css).
   useEffect(() => {
     const kinds = ["rise", "left", "scale", "right"];

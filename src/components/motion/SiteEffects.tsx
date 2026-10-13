@@ -15,6 +15,16 @@ export function SiteEffects() {
   const pathname = usePathname();
   const firstPage = useRef(true);
 
+  // Section personality: sections below the hero enter in turn from below, left, scaled and right (see [data-anim] in globals.css).
+  useEffect(() => {
+    const kinds = ["rise", "left", "scale", "right"];
+    let n = 0;
+    for (const sec of Array.from(document.querySelectorAll<HTMLElement>("main section"))) {
+      if (sec.classList.contains("hero-seq") || sec.dataset.anim) continue;
+      sec.dataset.anim = kinds[n++ % kinds.length]!;
+    }
+  }, [pathname]);
+
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const pending = () => Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]:not(.is-in)"));

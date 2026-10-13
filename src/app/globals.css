@@ -1380,7 +1380,14 @@ html {
 @media (prefers-reduced-motion: no-preference) {
   /* Cards: lift, glow, border highlight. translate/scale leave the reveal transform alone. */
   main [data-reveal][class*="rounded-"][class*="border"] {
-    transition: translate .35s ease, box-shadow .35s ease, border-color .35s ease, opacity .6s ease, transform .6s ease;
+    transition-property: opacity, transform, filter, clip-path, translate, box-shadow, border-color;
+    transition-duration: 550ms, 700ms, 700ms, 800ms, 350ms, 350ms, 350ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), cubic-bezier(0.16, 1, 0.3, 1), ease, ease, ease;
+    transition-delay: calc(var(--d, 0) * 70ms), calc(var(--d, 0) * 70ms), calc(var(--d, 0) * 70ms), calc(var(--d, 0) * 70ms), 0s, 0s, 0s;
+  }
+  html[data-nav="soft"] main [data-reveal][class*="rounded-"][class*="border"] {
+    transition-duration: 260ms, 320ms, 320ms, 360ms, 350ms, 350ms, 350ms;
+    transition-delay: calc(var(--d, 0) * 25ms), calc(var(--d, 0) * 25ms), calc(var(--d, 0) * 25ms), calc(var(--d, 0) * 25ms), 0s, 0s, 0s;
   }
   main [data-reveal][class*="rounded-"][class*="border"]:hover {
     translate: 0 -6px;
@@ -1390,9 +1397,6 @@ html {
   /* Photos and logos: slow zoom inside clipped frames */
   main [class*="overflow-hidden"] img { transition: scale .7s cubic-bezier(.2, .7, .2, 1); }
   main [class*="overflow-hidden"]:hover img { scale: 1.06; }
-  /* Buttons */
-  main :is(a, button)[class*="bg-brand"] { transition: translate .25s ease, box-shadow .25s ease, filter .25s ease; }
-  main :is(a, button)[class*="bg-brand"]:hover { translate: 0 -2px; filter: brightness(1.08); box-shadow: 0 10px 26px -12px rgb(56 189 248 / .6); }
   /* Text links: underline sweep */
   main p a:not([class]) { text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .3s ease; }
   main p a:not([class]):hover { background-size: 100% 1px; }
@@ -1447,17 +1451,14 @@ html {
   main [class*="overflow-hidden"]:hover img { scale: none; }
 }
 
+
+/* Section personality: SiteEffects tags each section below the hero with data-anim (rise, left, scale, right) */
 @media (prefers-reduced-motion: no-preference) {
-  /* Section headings wipe in as their section scrolls into view (Chromium and Safari; others show them as usual) */
-  @supports (animation-timeline: view()) {
-    main section:not(.hero-seq) h2 {
-      animation: heading-wipe linear both;
-      animation-timeline: view();
-      animation-range: entry 5% entry 60%;
-    }
-    @keyframes heading-wipe {
-      from { clip-path: inset(0 0 100% 0); translate: 0 .35em; }
-      to { clip-path: inset(-.3em -.1em -.3em -.1em); translate: 0 0; }
-    }
-  }
+  /* Items waiting off to the side must never create a horizontal scrollbar */
+  main section[data-anim] { overflow-x: clip; }
+  .js main [data-anim="left"] [data-reveal]:not(.is-in):not(.font-display) { transform: translateX(-40px); }
+  .js main [data-anim="right"] [data-reveal]:not(.is-in):not(.font-display) { transform: translateX(40px); }
+  .js main [data-anim="scale"] [data-reveal]:not(.is-in):not(.font-display) { transform: translateY(14px) scale(.94); filter: blur(5px); }
+  /* Moving between pages stays quick and calm */
+  html[data-nav="soft"] main [data-anim] [data-reveal]:not(.is-in):not(.font-display) { transform: translateY(8px); filter: none; }
 }

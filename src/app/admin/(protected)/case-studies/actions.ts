@@ -70,7 +70,7 @@ export async function saveCaseStudy(_prev: CaseStudyState, formData: FormData): 
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return { errors: { enSlug: "Another case study already uses this URL slug." }, message: "That URL is taken." };
+      return { errors: { enSlug: "Another success story already uses this URL slug." }, message: "That URL is taken." };
     }
     console.error("[admin] saveCaseStudy failed", error);
     return { message: "Could not save. Please try again." };

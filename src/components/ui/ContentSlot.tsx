@@ -7,7 +7,7 @@ const TEXT: Record<SlotKind, { en: [string, string]; bn: [string, string] }> = {
   feature: { en: ["Key feature", "Add a feature with a short line on what it does."], bn: ["মূল বৈশিষ্ট্য", "বৈশিষ্ট্য ও এক লাইনে এর কাজ যোগ করুন।"] },
   screen: { en: ["Screenshot", "Upload a web, tablet or phone screen of the live product."], bn: ["স্ক্রিনশট", "চালু পণ্যের ওয়েব, ট্যাবলেট বা ফোনের স্ক্রিন আপলোড করুন।"] },
   phone: { en: ["Phone screenshot", "A tall screen of the mobile app."], bn: ["ফোনের স্ক্রিনশট", "মোবাইল অ্যাপের লম্বা স্ক্রিন।"] },
-  caseStudy: { en: ["Case study", "Client name, the challenge, what changed and one real figure, with the client's approval."], bn: ["কেস স্টাডি", "গ্রাহকের নাম, চ্যালেঞ্জ, কী বদলেছে ও একটি প্রকৃত সংখ্যা — গ্রাহকের অনুমোদনসহ।"] },
+  caseStudy: { en: ["Success story", "Client name, the challenge, what changed and one real figure, with the client's approval."], bn: ["সাফল্যের গল্প", "গ্রাহকের নাম, চ্যালেঞ্জ, কী বদলেছে ও একটি প্রকৃত সংখ্যা — গ্রাহকের অনুমোদনসহ।"] },
   review: { en: ["Client review", "A quote from a member chief, with their approval and rating."], bn: ["গ্রাহকের মতামত", "সদস্য প্রতিষ্ঠানের প্রধানের উক্তি, অনুমোদন ও রেটিংসহ।"] },
   figure: { en: ["Figure", "A number you can show the source for, e.g. daily orders."], bn: ["সংখ্যা", "যে সংখ্যার উৎস দেখানো যায়, যেমন দৈনিক অর্ডার।"] },
 };

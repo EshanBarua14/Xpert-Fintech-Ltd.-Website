@@ -56,6 +56,13 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  // "Case studies" are now "Success stories": old links keep working.
+  async redirects() {
+    return [
+      { source: "/:locale(en|bn)/case-studies", destination: "/:locale/success-stories", permanent: true },
+      { source: "/:locale(en|bn)/case-studies/:slug*", destination: "/:locale/success-stories/:slug*", permanent: true },
+    ];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

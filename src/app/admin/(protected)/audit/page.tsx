@@ -9,7 +9,7 @@ const PAGE_SIZE = 50;
 const VERB: Record<string, string> = { create: "Created", createMany: "Created", update: "Updated", updateMany: "Updated", upsert: "Saved", delete: "Deleted", deleteMany: "Deleted" };
 const NAME: Record<string, string> = {
   Offering: "product", Page: "page", PageSection: "page section", ContentBlock: "content block", Organization: "organisation", Deployment: "app deployment",
-  CaseStudy: "case study", Person: "person", PersonRole: "person's role", Career: "job", CareerApplication: "job application", Article: "news story",
+  CaseStudy: "success story", Person: "person", PersonRole: "person's role", Career: "job", CareerApplication: "job application", Article: "news story",
   ArticleCategory: "news category", Event: "event", Resource: "resource", Album: "photo album", Video: "video", Testimonial: "testimonial", Tag: "news tag", Lead: "lead", Media: "media file",
   NavItem: "menu link", NavMenu: "menu", SiteSetting: "setting", Office: "office", AdminUser: "admin", MarketShare: "market-share figure",
   MarketDataSource: "market data source", EcosystemNode: "ecosystem node", EcosystemEdge: "ecosystem link", EcosystemFlow: "ecosystem flow",

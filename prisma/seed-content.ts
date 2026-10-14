@@ -1046,7 +1046,7 @@ const INSIGHTS: NavChild[] = [
   { href: "events", en: "Events", bn: "ইভেন্ট", descEn: "Milestones, agreements and events.", descBn: "মাইলফলক, চুক্তি ও ইভেন্ট।" },
   { href: "gallery", en: "Gallery", bn: "গ্যালারি", descEn: "Photo albums and videos.", descBn: "ছবির অ্যালবাম ও ভিডিও।" },
   { href: "resources", en: "Resources", bn: "রিসোর্স", descEn: "Brochures and product documents.", descBn: "ব্রোশিওর ও পণ্যের নথি।" },
-  { href: "case-studies", en: "Case studies", bn: "কেস স্টাডি", descEn: "How brokerages use Xpert.", descBn: "ব্রোকারেজগুলো কীভাবে এক্সপার্ট ব্যবহার করে।" },
+  { href: "success-stories", en: "Success stories", bn: "সাফল্যের গল্প", descEn: "How brokerages use Xpert.", descBn: "ব্রোকারেজগুলো কীভাবে এক্সপার্ট ব্যবহার করে।" },
 ];
 const CAREERS: NavChild = { href: "careers", en: "Careers", bn: "ক্যারিয়ার", descEn: "Join the team.", descBn: "আমাদের টিমে যোগ দিন।" };
 
@@ -1497,7 +1497,7 @@ async function seedNavAdditions() {
     console.log(`• Menu: added “${label}” (shows once its page is published)`);
   };
   await add("footer-legal", null, null, "security", "Security and compliance");
-  await add("header", "events", null, "case-studies", "Case studies");
+  await add("header", "events", null, "success-stories", "Success stories");
 }
 
 /**
@@ -1531,7 +1531,7 @@ async function seedCaseStudyDrafts() {
     added++;
   }
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
-  if (added) console.log(`• ${added} draft case studies added: fill in the [bracketed] results with each client and publish in Admin → Case studies`);
+  if (added) console.log(`• ${added} draft case studies added: fill in the [bracketed] results with each client and publish in Admin → Success stories`);
 }
 
 /**
@@ -1720,6 +1720,21 @@ async function seedRmsWording() {
   if (n) console.log(`• OMS workflow and architecture name RMS as the built-in risk check (${n} text(s))`);
 }
 
+/**
+ * Once: "Case studies" are now "Success stories". Menu links to the old
+ * address move to the new one, and labels still reading as seeded are renamed
+ * (labels changed in Admin → Navigation are kept). The old address redirects.
+ */
+async function renameCaseStudies() {
+  const MARK = "seed.success-stories-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const moved = await db.navItem.updateMany({ where: { href: "case-studies" }, data: { href: "success-stories" } });
+  const en = await db.navItemTranslation.updateMany({ where: { locale: EN, label: "Case studies" }, data: { label: "Success stories" } });
+  const bn = await db.navItemTranslation.updateMany({ where: { locale: BN, label: "কেস স্টাডি" }, data: { label: "সাফল্যের গল্প" } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  if (moved.count || en.count || bn.count) console.log(`• Case studies renamed Success stories (${moved.count} menu link(s) moved, ${en.count + bn.count} label(s) renamed)`);
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -1776,6 +1791,7 @@ async function main() {
   await seedConsultantLinks();
   await seedMilestones();
   await syncPendingProductLinks();
+  await renameCaseStudies(); // before the menu additions, so no duplicate link is added
   await seedInsightsLinks();
   await seedMarketsLinks();
   await seedEcosystem();

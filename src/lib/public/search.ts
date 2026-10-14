@@ -106,7 +106,7 @@ export async function searchSite(locale: AppLocale, raw: string): Promise<Search
   }
   for (const c of cases) {
     const tr = prefer(c.translations);
-    if (tr) hits.push({ kind: "caseStudy", title: tr.title, subtitle: tr.summary, href: href(`case-studies/${tr.slug}`, tr.locale === locale) });
+    if (tr) hits.push({ kind: "caseStudy", title: tr.title, subtitle: tr.summary, href: href(`success-stories/${tr.slug}`, tr.locale === locale) });
   }
   for (const r of resources) {
     const tr = prefer(r.translations);

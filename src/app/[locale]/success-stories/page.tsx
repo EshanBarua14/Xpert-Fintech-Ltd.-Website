@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.caseStudiesTitle, description: t.caseStudiesBody, paths: { en: "case-studies", bn: "case-studies" } });
+  return buildMetadata({ locale, title: t.caseStudiesTitle, description: t.caseStudiesBody, paths: { en: "success-stories", bn: "success-stories" } });
 }
 
 export default async function CaseStudiesPage({ params }: Props) {

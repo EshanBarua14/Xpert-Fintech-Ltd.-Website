@@ -78,8 +78,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...entries([fixed("markets", now), fixed("markets/dse", now), fixed("markets/cse", now)], 0.6),
       ...entries(under("gallery", albums), 0.4),
       ...entries(under("news", articles), 0.6),
-      ...(cases.length ? entries([fixed("case-studies", now)], 0.5) : []),
-      ...entries(under("case-studies", cases), 0.5),
+      ...(cases.length ? entries([fixed("success-stories", now)], 0.5) : []),
+      ...entries(under("success-stories", cases), 0.5),
       ...entries([fixed("contact", now), fixed("request-demo", now)], 0.6),
     ];
     const seen = new Set<string>();

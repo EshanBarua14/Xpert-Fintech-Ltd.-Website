@@ -21,10 +21,10 @@ export default async function ListPage({ searchParams }: { searchParams: Promise
   ]);
   return (
     <AdminList
-      title="Case studies"
+      title="Success stories"
       intro="Client stories: challenge, what we did and the outcome. Publish only with the client's agreement."
       basePath="/admin/case-studies"
-      newLabel="New case study"
+      newLabel="New success story"
       inTrash={inTrash}
       trashCount={trashCount}
       q={q}

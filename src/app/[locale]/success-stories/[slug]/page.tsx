@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const found = await load(locale, slug);
   if (!found) return {};
   const paths: Partial<Record<AppLocale, string>> = {};
-  for (const t of found.caseStudy.translations) if (t.locale === "en" || t.locale === "bn") paths[t.locale] = `case-studies/${t.slug}`;
+  for (const t of found.caseStudy.translations) if (t.locale === "en" || t.locale === "bn") paths[t.locale] = `success-stories/${t.slug}`;
   return buildMetadata({ locale: found.locale, title: found.tr.title, description: found.tr.summary, paths, ogImageId: found.caseStudy.coverMediaId });
 }
 
@@ -34,7 +34,7 @@ export default async function CaseStudyPage({ params }: Props) {
   const { tr, cover } = found;
   const loc = found.locale;
   const t = getMessages(loc);
-  const url = `${SITE_URL}/${loc}/case-studies/${tr.slug}`;
+  const url = `${SITE_URL}/${loc}/success-stories/${tr.slug}`;
   const parts = [
     { n: "01", title: t.csChallenge, text: tr.challenge },
     { n: "02", title: t.csSolution, text: tr.solution },
@@ -43,10 +43,10 @@ export default async function CaseStudyPage({ params }: Props) {
 
   return (
     <article>
-      <JsonLd data={breadcrumbLd([{ name: t.home, url: `${SITE_URL}/${loc}` }, { name: t.caseStudiesTitle, url: `${SITE_URL}/${loc}/case-studies` }, { name: tr.title, url }])} />
+      <JsonLd data={breadcrumbLd([{ name: t.home, url: `${SITE_URL}/${loc}` }, { name: t.caseStudiesTitle, url: `${SITE_URL}/${loc}/success-stories` }, { name: tr.title, url }])} />
       <header className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
         <div className="relative mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 pt-10 pb-8 md:px-8 md:pt-14">
-          <Link href={`/${loc}/case-studies`} data-reveal className="text-sm text-text-secondary hover:text-fg">
+          <Link href={`/${loc}/success-stories`} data-reveal className="text-sm text-text-secondary hover:text-fg">
             ← {t.caseStudiesTitle}
           </Link>
           <h1 data-reveal className="font-display text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance md:text-6xl">{tr.title}</h1>

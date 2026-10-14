@@ -23,7 +23,7 @@ const NAV = [
   { href: "/admin/careers", label: "Careers" },
   { href: "/admin/applications", label: "Applications" },
   { href: "/admin/resources", label: "Resources" },
-  { href: "/admin/case-studies", label: "Case studies" },
+  { href: "/admin/case-studies", label: "Success stories" },
   { href: "/admin/people", label: "People" },
   { href: "/admin/organizations", label: "Organizations" },
   { href: "/admin/testimonials", label: "Testimonials" },

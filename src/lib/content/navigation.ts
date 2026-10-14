@@ -71,8 +71,8 @@ const livePaths = cache(async (locale: AppLocale): Promise<Set<string>> => {
   ]);
   // Listing pages appear in menus only once they have something to show.
   const listings = [
-    // Case studies: once one is published (always outside production, to show where they go).
-    (cases.length > 0 || process.env.APP_ENV !== "production") && "case-studies",
+    // Success stories: once one is published (always outside production, to show where they go).
+    (cases.length > 0 || process.env.APP_ENV !== "production") && "success-stories",
     resourceCount > 0 && "resources",
     // Company → Consultants: once a consultant is published (always outside production, to preview it).
     (consultants > 0 || process.env.APP_ENV !== "production") && "company/consultants",
@@ -85,7 +85,7 @@ const livePaths = cache(async (locale: AppLocale): Promise<Set<string>> => {
     ...events.map((e) => `events/${e.slug}`),
     ...articles.map((a) => `news/${a.slug}`),
     ...careers.map((c) => `careers/${c.slug}`),
-    ...cases.map((c) => `case-studies/${c.slug}`),
+    ...cases.map((c) => `success-stories/${c.slug}`),
     ...albums.map((a) => `gallery/${a.slug}`),
   ]);
 });

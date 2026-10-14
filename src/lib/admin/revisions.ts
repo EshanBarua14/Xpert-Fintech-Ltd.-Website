@@ -18,7 +18,7 @@ export const SECTION: Record<string, { label: string; edit?: (id: string) => str
   Solution: { label: "Solution" },
   Organization: { label: "Organization", edit: (id) => `/admin/organizations/${id}` },
   Deployment: { label: "App deployment", edit: (id) => `/admin/deployments/${id}` },
-  CaseStudy: { label: "Case study", edit: (id) => `/admin/case-studies/${id}` },
+  CaseStudy: { label: "Success story", edit: (id) => `/admin/case-studies/${id}` },
   Testimonial: { label: "Testimonial", edit: (id) => `/admin/testimonials/${id}` },
   Certification: { label: "Credential", edit: () => "/admin/credentials" },
   Metric: { label: "Figure" },

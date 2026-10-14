@@ -13,7 +13,7 @@ export type CaseStudyFormValues = { id?: string; status: "DRAFT" | "PUBLISHED"; 
 
 const FIELDS: FieldSpec[] = [
   { name: "Title", label: "Title" },
-  { name: "Summary", label: "Summary", kind: "textarea", rows: 3, hint: "Shown on the case studies list." },
+  { name: "Summary", label: "Summary", kind: "textarea", rows: 3, hint: "Shown on the success stories list." },
   { name: "Challenge", label: "The challenge", kind: "textarea", rows: 6 },
   { name: "Solution", label: "What we did", kind: "textarea", rows: 6 },
   { name: "Outcome", label: "The outcome", kind: "textarea", rows: 6, hint: "Only results the client has agreed to share, with sources for any figures." },
@@ -27,8 +27,8 @@ export function CaseStudyForm({ values, images }: { values: CaseStudyFormValues;
       {values.id && <input type="hidden" name="id" value={values.id} />}
       <div className="flex flex-col gap-6">
         <FormMessage message={state.message} isError={Boolean(state.errors)} />
-        <TranslatedFieldset l="en" values={values.en} errors={e} fields={FIELDS} slugBase="case-studies" />
-        <TranslatedFieldset l="bn" values={values.bn} errors={e} fields={FIELDS} slugBase="case-studies" />
+        <TranslatedFieldset l="en" values={values.en} errors={e} fields={FIELDS} slugBase="success-stories" />
+        <TranslatedFieldset l="bn" values={values.bn} errors={e} fields={FIELDS} slugBase="success-stories" />
       </div>
       <aside className="flex flex-col gap-6">
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">

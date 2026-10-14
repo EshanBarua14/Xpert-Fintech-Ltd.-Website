@@ -17,7 +17,7 @@ export function sceneFor(pathname: string): SceneName | "market" {
   const path = pathname.replace(/^\/(en|bn)(?=\/|$)/, "") || "/";
   if (/^\/(consortium|company\/about|platform)(\/|$)/.test(path)) return "network";
   if (/^\/(company\/(board|management|team|consultants)|careers)(\/|$)/.test(path)) return "people";
-  if (/^\/(news|events|resources|case-studies)(\/|$)/.test(path)) return "wire";
+  if (/^\/(news|events|resources|case-studies|success-stories)(\/|$)/.test(path)) return "wire";
   if (/^\/gallery(\/|$)/.test(path)) return "bokeh";
   if (/^\/(contact|request-demo)(\/|$)/.test(path)) return "signal";
   return "market";

@@ -17,7 +17,7 @@ export function iconFor(href: string | null): string {
   if (/events/.test(h)) return "calendar";
   if (/careers/.test(h)) return "briefcase";
   if (/resources/.test(h)) return "book";
-  if (/case-studies/.test(h)) return "document";
+  if (/case-studies|success-stories/.test(h)) return "document";
   if (/about|company/.test(h)) return "globe";
   return "network";
 }

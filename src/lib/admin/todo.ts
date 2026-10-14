@@ -38,7 +38,7 @@ export async function contentTodos(): Promise<Todo[]> {
     ].filter(Boolean) as string[];
     todos.push({ label: name, detail: missing.length ? `Add ${missing.join(", ")}.` : "Key features, screenshots and demo video in place.", href: `/admin/products/${p.id}#items`, done: !missing.length });
   }
-  todos.push({ label: "Case studies", detail: cases >= 2 ? `${cases} published.` : `${cases} published — add two or three, with each client's approval and real figures.`, href: "/admin/case-studies", done: cases >= 2 });
+  todos.push({ label: "Success stories", detail: cases >= 2 ? `${cases} published.` : `${cases} published — add two or three, with each client's approval and real figures.`, href: "/admin/case-studies", done: cases >= 2 });
   todos.push({ label: "Client reviews", detail: reviews >= 3 ? `${reviews} published with approval.` : `${reviews} published with approval — add reviews from member chiefs.`, href: "/admin/testimonials", done: reviews >= 3 });
   todos.push({ label: "Figures", detail: figures.length >= 3 ? `${figures.length} figures with sources.` : `${figures.length} of at least 3 — e.g. orders a day, years live, members on the platform.`, href: "/admin/figures", done: figures.length >= 3 });
   for (const key of ["security", "privacy", "terms", "accessibility"]) {

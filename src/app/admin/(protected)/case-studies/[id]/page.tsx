@@ -20,7 +20,7 @@ export default async function CaseStudyPage({ params, searchParams }: { params: 
   const images = await imageOptions();
   const back = (
     <Link href="/admin/case-studies" className="text-sm text-text-secondary hover:text-brand-sky">
-      ← Case studies
+      ← Success stories
     </Link>
   );
   if (id === "new") {
@@ -28,7 +28,7 @@ export default async function CaseStudyPage({ params, searchParams }: { params: 
     return (
       <div className="flex flex-col gap-6">
         {back}
-        <h1 className="font-display text-3xl font-semibold">New case study</h1>
+        <h1 className="font-display text-3xl font-semibold">New success story</h1>
         <CaseStudyForm values={values} images={images} />
       </div>
     );
@@ -47,7 +47,7 @@ export default async function CaseStudyPage({ params, searchParams }: { params: 
       <div>
         {back}
         <h1 className="mt-2 flex flex-wrap items-center gap-3 font-display text-3xl font-semibold">
-          {text("en").title || "Untitled case study"}
+          {text("en").title || "Untitled success story"}
           <StatusBadge status={c.status} publishAt={c.publishAt} deletedAt={c.deletedAt} />
         </h1>
         <p className="mt-1 text-xs text-text-secondary">Last edited {formatDhaka(c.updatedAt)}</p>
@@ -60,7 +60,7 @@ export default async function CaseStudyPage({ params, searchParams }: { params: 
           values={{ id: c.id, status: c.status, publishAt: toLocalInput(c.publishAt), sortOrder: c.sortOrder, coverMediaId: c.coverMediaId ?? "", en: text("en"), bn: text("bn") }}
         />
       )}
-      <TrashControls id={c.id} inTrash={Boolean(c.deletedAt)} noun="case study" onTrash={trashCaseStudy} onRestore={restoreCaseStudy} onDelete={deleteCaseStudyForever} />
+      <TrashControls id={c.id} inTrash={Boolean(c.deletedAt)} noun="success story" onTrash={trashCaseStudy} onRestore={restoreCaseStudy} onDelete={deleteCaseStudyForever} />
     </div>
   );
 }

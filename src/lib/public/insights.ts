@@ -438,7 +438,7 @@ export const getCaseStudies = cache(async (locale: AppLocale) => {
       const tr = pick(c.translations, locale);
       if (!tr) return null;
       const own = c.translations.find((x) => x.locale === locale);
-      return { id: c.id, title: tr.title, summary: tr.summary, href: `/${own ? locale : "en"}/case-studies/${(own ?? tr).slug}`, cover: covers.get(c.coverMediaId ?? "") ?? null, draft: c.status !== "PUBLISHED" };
+      return { id: c.id, title: tr.title, summary: tr.summary, href: `/${own ? locale : "en"}/success-stories/${(own ?? tr).slug}`, cover: covers.get(c.coverMediaId ?? "") ?? null, draft: c.status !== "PUBLISHED" };
     })
     .filter((c): c is NonNullable<typeof c> => c !== null);
 });

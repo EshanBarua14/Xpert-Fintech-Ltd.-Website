@@ -19,7 +19,8 @@ export const NAV_BN: Record<string, string> = {
   "Online Share Trading (OST)": "অনলাইন শেয়ার ট্রেডিং (ওএসটি)",
   Consultants: "পরামর্শক",
   "Platform overview": "প্ল্যাটফর্মের সংক্ষিপ্ত পরিচিতি",
-  "Case studies": "কেস স্টাডি",
+  "Case studies": "সাফল্যের গল্প",
+  "Success stories": "সাফল্যের গল্প",
   "Security and compliance": "নিরাপত্তা ও কমপ্লায়েন্স",
 };
 

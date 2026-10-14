@@ -214,6 +214,12 @@ export const BLOCKS = {
     text: { title: "Headline", subtitle: "Supporting line", cta: true },
     settings: [],
   },
+  RISK_CHECKS: {
+    label: "Risk checks (RMS)",
+    description: "Sample orders passing the RMS checks built into the Trading OMS, playing by themselves.",
+    text: { title: "Heading (empty: the standard one)", subtitle: "Intro (empty: the standard one)" },
+    settings: [{ key: "link", label: "Link to the risk checks page", type: "boolean", default: true }],
+  },
   LEAD_FORM: {
     label: "Enquiry form",
     description: "A demo-request or contact form. Submissions arrive in Admin → Leads.",

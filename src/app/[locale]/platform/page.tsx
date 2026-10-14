@@ -16,7 +16,9 @@ import {
 } from "@/components/flagship/Sections";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
-import { getFlagshipData, getFlowProducts } from "@/lib/public/flagship";
+import { getFlagshipData, getFlowProducts, getRiskPageHref } from "@/lib/public/flagship";
+import { RmsPipeline } from "@/components/products/RmsPipeline";
+import { rmsLabels } from "@/lib/public/labels";
 import { exchangeLogos } from "@/components/market/ExchangeMark";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { buildMetadata } from "@/lib/public/seo";
@@ -35,7 +37,7 @@ export default async function PlatformPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);
-  const [data, eco, ecoInDb, flowProducts] = await Promise.all([getFlagshipData(locale), getEcosystem(locale), ecosystemInDatabase(), getFlowProducts(locale)]);
+  const [data, eco, ecoInDb, flowProducts, riskHref] = await Promise.all([getFlagshipData(locale), getEcosystem(locale), ecosystemInDatabase(), getFlowProducts(locale), getRiskPageHref(locale)]);
 
   return (
     <>
@@ -45,8 +47,18 @@ export default async function PlatformPage({ params }: Props) {
         </div>
       </PageHero>
       <Shell className="pb-12 md:pb-14">
-        <CapabilityBento items={capabilities(t, locale, data.publishedSlugs)} anchors />
+        <CapabilityBento items={capabilities(t, locale, data.publishedSlugs, riskHref)} anchors />
       </Shell>
+      {data.publishedSlugs.has("trading-platform") && (
+        <Shell id="rms" className="scroll-mt-32 py-10 md:py-12">
+          <div className="flex flex-col gap-10">
+            <SectionHeader title={t.rmsTitle} body={t.rmsBody} />
+            <div data-reveal>
+              <RmsPipeline labels={rmsLabels(t, riskHref)} locale={locale} />
+            </div>
+          </div>
+        </Shell>
+      )}
       <Shell className="py-10 md:py-12">
         <div className="grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           <SectionHeader eyebrow={t.ecosystemEyebrow} title={t.ecosystemTitle} body={t.ecosystemBody} />
@@ -58,7 +70,7 @@ export default async function PlatformPage({ params }: Props) {
       <Shell className="py-10 md:py-12">
         <div className="flex flex-col gap-16">
           <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} align="center" />
-          <FlowStory t={t} products={flowProducts} exchanges={exchangeLogos(data.logos.parties)} />
+          <FlowStory t={t} products={flowProducts} exchanges={exchangeLogos(data.logos.parties)} riskHref={riskHref} />
         </div>
       </Shell>
       <Shell className="py-10 md:py-12">

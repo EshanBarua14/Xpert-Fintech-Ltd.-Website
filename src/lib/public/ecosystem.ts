@@ -5,6 +5,7 @@ import { publishedWhere } from "@/lib/db/publishing";
 import type { AppLocale } from "@/lib/i18n/config";
 import type { EcosystemModuleInfo, EcosystemModuleKey } from "@/components/flagship/EcosystemMap";
 import { pick } from "./text";
+import { getRiskPageHref } from "./flagship";
 
 /** A node visitors may see, in their language. */
 export type EcoNode = {
@@ -65,6 +66,8 @@ export const getEcosystem = cache(async (locale: AppLocale): Promise<EcoGraph> =
       const own = o.translations.find((x) => x.locale === locale);
       if (tr) hrefById.set(o.id, `/${own ? locale : "en"}/products/${(own ?? tr).slug}`);
     }
+    // RMS is built into the OMS, not a product with its own page: its node leads to the risk checks page.
+    const riskHref = rows.some((r) => r.key === "rms" && !r.offeringId) ? await getRiskPageHref(locale) : null;
     const nodes: EcoNode[] = [];
     for (const r of rows) {
       const tr = pick(r.translations, locale);
@@ -75,7 +78,7 @@ export const getEcosystem = cache(async (locale: AppLocale): Promise<EcoGraph> =
         label: tr.label,
         description: tr.description,
         cta: tr.ctaLabel,
-        href: r.offeringId ? (hrefById.get(r.offeringId) ?? null) : null,
+        href: r.offeringId ? (hrefById.get(r.offeringId) ?? null) : r.key === "rms" ? riskHref : null,
         mobileOrder: r.mobileOrder,
         product: r.offeringId ? (keyById.get(r.offeringId) ?? null) : null,
       });

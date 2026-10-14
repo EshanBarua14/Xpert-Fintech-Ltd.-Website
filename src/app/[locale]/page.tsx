@@ -29,13 +29,14 @@ import { FiguresStrip } from "@/components/flagship/FiguresStrip";
 import { ContentSlot } from "@/components/ui/ContentSlot";
 import { digits } from "@/lib/i18n/digits";
 import { getFigures } from "@/lib/content/figures";
-import { showcaseLabels } from "@/lib/public/labels";
+import { rmsLabels, showcaseLabels } from "@/lib/public/labels";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { mediaIdsOf, toSections } from "@/lib/public/blocks";
 import { getEvents, getPageByKey, getSeo, getTestimonials } from "@/lib/public/content";
 import { TestimonialSlider } from "@/components/organizations/TestimonialSlider";
-import { getFlagshipData, getFlowProducts } from "@/lib/public/flagship";
+import { getFlagshipData, getFlowProducts, getRiskPageHref } from "@/lib/public/flagship";
+import { RmsPipeline } from "@/components/products/RmsPipeline";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
 import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
@@ -88,9 +89,9 @@ export default async function HomePage({ params }: Props) {
 
   const t = getMessages(locale);
   // Everything the page needs, read at the same time (not one batch after another).
-  const [[data, events, market, showcase, credentials], [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline, design, reviewSeconds, figures]] = await Promise.all([
+  const [[data, events, market, showcase, credentials], [apps, eco, ecoInDb, testimonials, goal, flowProducts, headline, design, reviewSeconds, figures, riskHref]] = await Promise.all([
     Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]),
-    Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds(), getFigures()]),
+    Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds(), getFigures(), getRiskPageHref(locale)]),
   ]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
@@ -273,7 +274,19 @@ export default async function HomePage({ params }: Props) {
       <Shell className="py-12 md:py-16">
         <div className="flex flex-col gap-16">
           <SectionHeader eyebrow={t.flowEyebrow} title={t.flowTitle} align="center" />
-          <FlowStory t={t} products={flowProducts} exchanges={exchangeLogos(data.logos.parties)} />
+          <FlowStory t={t} products={flowProducts} exchanges={exchangeLogos(data.logos.parties)} riskHref={riskHref} />
+        </div>
+      </Shell>
+      )}
+
+      {/* RMS, built into the OMS: sample orders checked live (Admin → Design can hide it). */}
+      {show("rms") && data.publishedSlugs.has("trading-platform") && (
+      <Shell id="rms" className="py-12 md:py-16">
+        <div className="flex flex-col gap-10">
+          <SectionHeader title={t.rmsTitle} body={t.rmsBody} />
+          <div data-reveal>
+            <RmsPipeline labels={rmsLabels(t, riskHref)} locale={locale} />
+          </div>
         </div>
       </Shell>
       )}

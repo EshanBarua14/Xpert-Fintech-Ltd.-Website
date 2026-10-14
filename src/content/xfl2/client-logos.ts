@@ -24,13 +24,15 @@ export const CLIENT_LOGOS: ClientLogo[] = [
   // Other clients (XFL's list, October 2026); those without a logo file show their name
   { key: "skyline", name: "Skyline" },
   { key: "first-capital-securities", name: "First Capital Securities Limited" },
+  // Confirmed by XFL as a client (15 Oct 2026)
+  { key: "idlc-securities", name: "IDLC Securities Limited" },
 ];
 
 /**
  * Added as clients earlier from a logo set, but not on XFL's confirmed client
  * list: the seed moves them to drafts (logos stay in the media library).
  */
-export const NOT_CLIENTS = ["innova-securities", "monarch-holdings", "royal-capital", "wifang-securities", "idlc-securities", "thia-securities"];
+export const NOT_CLIENTS = ["innova-securities", "monarch-holdings", "royal-capital", "wifang-securities", "thia-securities"];
 
 /** "Bank Asia Securities Limited" and "Bank Asia Securities Ltd." are the same organization. */
 export function orgNameKey(name: string): string {

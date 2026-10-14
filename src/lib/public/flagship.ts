@@ -142,3 +142,19 @@ export function orgForText(orgs: OrgLogoEntry[], text: string | null | undefined
   for (const o of orgs) for (const n of o.names) if (n && t.includes(n) && n.length > len) { best = o; len = n.length; }
   return best ? { name: best.name, logo: best.logo } : null;
 }
+
+/**
+ * The "Risk checks before every order" page (RMS, built into the OMS), when it
+ * is published: its address in this language (English as fallback), else null.
+ */
+export const getRiskPageHref = cache(async (locale: AppLocale): Promise<string | null> => {
+  try {
+    const page = await db.page.findFirst({ where: { ...publishedWhere(), key: "risk-management" }, include: { translations: true } });
+    if (!page) return null;
+    const own = page.translations.find((t) => t.locale === locale);
+    const tr = own ?? page.translations.find((t) => t.locale === "en");
+    return tr ? `/${own ? locale : "en"}/${tr.path}` : null;
+  } catch {
+    return null;
+  }
+});

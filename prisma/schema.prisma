@@ -108,6 +108,7 @@ enum BlockType {
   RESOURCE_LIST
   PEOPLE_LIST
   VALUES
+  RISK_CHECKS
 }
 
 enum NavLinkType {

@@ -10,6 +10,11 @@
  *  - websites: each house's own site (and CSE member pages: EBL, GDSL, Remons)
  *  - DSE TREC: stockchartbd.com/brokers.php (licensed brokers list) and the DSE TREC holders list
  *  - CSE TREC: cse.com.bd/stockbroker/memberDetails/<no.> (and the GDSL logo, "CSE TREC # 130")
+ *  - IDLC Securities (a client, not a consortium member): DSE TREC 058 from the
+ *    licensed brokers list; CSE TREC 119 from cse.com.bd/stockbroker/memberDetails/119
+ *    and BSEC's registration notice; wholly owned by IDLC Finance PLC; its page
+ *    on the IDLC group site is idlc.com/securities. No app of its own is on
+ *    Xpert Fintech's Google Play developer page, so none is listed.
  */
 type L = { en: string; bn: string };
 export type MemberProfile = { key: string; website?: string; dseTrec?: string; cseTrec?: string; description: L };
@@ -127,6 +132,16 @@ export const MEMBER_PROFILES: MemberProfile[] = [
     description: {
       en: "Brokerage house trading on DSE and CSE.",
       bn: "ডিএসই ও সিএসইতে লেনদেনকারী ব্রোকারেজ হাউস।",
+    },
+  },
+  {
+    key: "idlc-securities",
+    website: "https://idlc.com/securities",
+    dseTrec: "058",
+    cseTrec: "119",
+    description: {
+      en: "Stock brokerage arm of IDLC Finance PLC, which owns it fully. Trades on DSE and CSE for resident, non-resident and institutional investors.",
+      bn: "আইডিএলসি ফাইন্যান্স পিএলসির সম্পূর্ণ মালিকানাধীন স্টক ব্রোকারেজ প্রতিষ্ঠান। দেশি, প্রবাসী ও প্রাতিষ্ঠানিক বিনিয়োগকারীদের জন্য ডিএসই ও সিএসইতে লেনদেন করে।",
     },
   },
 ];

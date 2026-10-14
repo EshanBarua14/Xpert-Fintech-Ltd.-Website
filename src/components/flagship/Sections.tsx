@@ -328,7 +328,7 @@ export function MemberMarquee({ names, label }: { names: string[]; label: string
 
 // ── Capabilities bento ───────────────────────────────────────────────────────
 
-export type Capability = { key: VisualKind; icon: string; title: string; body: string; href: string };
+export type Capability = { key: VisualKind; icon: string; title: string; body: string; href: string; tag?: string };
 
 const CAPABILITY_KEYS: { key: VisualKind; icon: string; title: keyof Messages; body: keyof Messages; slug: string }[] = [
   { key: "trading", icon: "exchange", title: "capTradingTitle", body: "capTradingBody", slug: "trading-platform" },
@@ -340,17 +340,30 @@ const CAPABILITY_KEYS: { key: VisualKind; icon: string; title: keyof Messages; b
   { key: "data", icon: "globe", title: "capDataTitle", body: "capDataBody", slug: "market-data" },
 ];
 
-/** The seven capabilities; each links to its product page once published, else to the platform page. */
 /** Capabilities shown only once their product is published (pending products stay off the site). */
-const HIDE_UNTIL_PUBLISHED = new Set(["ekyc", "rms", "market-data"]);
+const HIDE_UNTIL_PUBLISHED = new Set(["ekyc", "market-data"]);
 
-export function capabilities(t: Messages, locale: AppLocale, publishedSlugs: Set<string>): Capability[] {
-  return CAPABILITY_KEYS.filter((c) => !HIDE_UNTIL_PUBLISHED.has(c.slug) || publishedSlugs.has(c.slug)).map((c) => ({
+/**
+ * The capabilities; each links to its product page once published, else to the
+ * platform page. Risk management (RMS) is built into the OMS rather than sold
+ * on its own: it shows whenever the OMS does, tagged as built in, and links to
+ * the risk checks page (or the RMS section of the OMS page).
+ */
+export function capabilities(t: Messages, locale: AppLocale, publishedSlugs: Set<string>, riskHref?: string | null): Capability[] {
+  return CAPABILITY_KEYS.filter((c) =>
+    c.slug === "rms" ? publishedSlugs.has("rms") || publishedSlugs.has("trading-platform") : !HIDE_UNTIL_PUBLISHED.has(c.slug) || publishedSlugs.has(c.slug),
+  ).map((c) => ({
     key: c.key,
     icon: c.icon,
     title: t[c.title],
     body: t[c.body],
-    href: publishedSlugs.has(c.slug) ? `/${locale}/products/${c.slug}` : `/${locale}/platform#${c.key}`,
+    tag: c.slug === "rms" ? t.capRiskTag : undefined,
+    href:
+      c.slug === "rms" && !publishedSlugs.has("rms")
+        ? (riskHref ?? (publishedSlugs.has("trading-platform") ? `/${locale}/products/trading-platform#rms` : `/${locale}/platform#risk`))
+        : publishedSlugs.has(c.slug)
+          ? `/${locale}/products/${c.slug}`
+          : `/${locale}/platform#${c.key}`,
   }));
 }
 
@@ -365,8 +378,10 @@ const SPAN: Record<VisualKind, string> = {
 };
 
 export function CapabilityBento({ items, anchors = false }: { items: Capability[]; anchors?: boolean }) {
-  // With six cards (eKYC hidden), widen the back-office card so the last row has no gap.
-  const span = (k: VisualKind) => (k === "back" && items.length === 6 ? "lg:col-span-2" : SPAN[k]);
+  // Six cards (eKYC published): Back office fills the last row beside DMS.
+  // Five cards: two wide ones on top (trading, risk), then two small ones and a wide one.
+  const span = (k: VisualKind) =>
+    items.length === 5 ? (k === "trading" || k === "risk" || k === "back" ? "lg:col-span-2" : "") : k === "back" && items.length === 6 ? "lg:col-span-3" : SPAN[k];
   return (
     <ul className="bento grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((c, i) => (
@@ -386,6 +401,7 @@ export function CapabilityBento({ items, anchors = false }: { items: Capability[
                 </span>
                 <h3 className="font-display text-lg font-semibold tracking-tight">{c.title}</h3>
               </div>
+              {c.tag && <span className="self-start rounded-full border border-brand-sky/30 bg-brand-sky/10 px-2.5 py-0.5 text-xs font-semibold text-brand-sky">{c.tag}</span>}
               <p className="text-sm leading-relaxed text-text-secondary">{c.body}</p>
             </div>
           </Link>
@@ -401,11 +417,12 @@ type FlowLogo = { url: string; width: number | null; height: number | null };
 type FlowProductInfo = { name: string; href: string; logo: FlowLogo | null };
 
 /** The journey, in order, and which products do each step (by product key). */
-const FLOW: { keys: string[]; icon: string; text: keyof Messages; exchanges?: boolean }[] = [
+const FLOW: { keys: string[]; icon: string; text: keyof Messages; exchanges?: boolean; rms?: boolean }[] = [
   { keys: ["bo-account-opening", "ekyc"], icon: "users", text: "flowStepOpen" },
   { keys: ["dms"], icon: "document", text: "flowStepDocs" },
   { keys: ["ost", "smart-stock"], icon: "globe", text: "flowStepTrade" },
-  { keys: ["trading-platform"], icon: "exchange", text: "flowStep2" },
+  // RMS runs inside the OMS: the OMS step carries an "RMS built in" chip.
+  { keys: ["trading-platform"], icon: "exchange", text: "flowStep2", rms: true },
   // The exchanges are not an Xpert product: this step always shows, with the DSE and CSE logos.
   { keys: [], icon: "network", text: "flowStep4", exchanges: true },
   { keys: ["back-office"], icon: "chart", text: "flowStep5" },
@@ -422,10 +439,13 @@ export function FlowStory({
   t,
   products,
   exchanges,
+  riskHref,
 }: {
   t: Messages;
   products?: Record<string, FlowProductInfo>;
   exchanges?: { DSE?: FlowLogo; CSE?: FlowLogo };
+  /** Where the "RMS built in" chip on the OMS step leads. */
+  riskHref?: string | null;
 }) {
   const steps = products && Object.keys(products).length
     ? FLOW.map((f) => ({ ...f, items: f.keys.map((k) => products[k]).filter((p): p is FlowProductInfo => Boolean(p)) })).filter((f) => f.items.length || f.exchanges)
@@ -469,6 +489,15 @@ export function FlowStory({
                     {p.name}
                   </Link>
                 ))}
+                {s.rms && s.items[0] && (
+                  <Link
+                    href={riskHref ?? `${s.items[0].href}#rms`}
+                    className="mt-1 inline-flex items-center gap-1 rounded-full border border-brand-sky/30 bg-brand-sky/10 px-2 py-0.5 text-xs font-semibold text-brand-sky transition-colors hover:border-brand-sky/60"
+                  >
+                    <Icon name="shield" className="size-3" />
+                    {t.rmsChip}
+                  </Link>
+                )}
               </span>
               <p className="max-w-[13rem] text-sm leading-relaxed text-text-primary">{t[s.text]}</p>
             </li>

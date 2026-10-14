@@ -20,7 +20,7 @@
  */
 import { seedRmsVisible } from "./rms-visible";
 import { seedOmsLogo } from "./oms-logo";
-import { seedRiskPage } from "./risk-page";
+import { seedRiskChecksBlock, seedRiskChecksGrid, seedRiskPage } from "./risk-page";
 import { seedRiskLinks } from "./risk-links";
 import { PrismaClient, type Locale, type PersonGroup, type OfferingItemKind, type OfferingType } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
@@ -99,7 +99,7 @@ const CONTENT: OfferingContent[] = [
     items: {
       WORKFLOW_STEP: [
         { title: t("Order entry", "অর্ডার প্রদান"), body: t("A dealer or investor enters an order on web, desktop or mobile.", "ডিলার বা বিনিয়োগকারী ওয়েব, ডেস্কটপ বা মোবাইল থেকে অর্ডার দেন।") },
-        { title: t("Pre-trade risk check", "প্রি-ট্রেড ঝুঁকি যাচাই"), body: t("The OMS checks the order against the brokerage's limits and exposure before it leaves.", "অর্ডার বের হওয়ার আগে ওএমএস ব্রোকারেজের নির্ধারিত সীমা ও এক্সপোজারের সঙ্গে তা যাচাই করে।") },
+        { title: t("RMS pre-trade check", "আরএমএস প্রি-ট্রেড যাচাই"), body: t("RMS, built into the OMS, checks the order before it leaves: blocked BO account, short sell, buying power and margin, order limits, price band and exposure.", "ওএমএস-এর ভেতরে যুক্ত আরএমএস অর্ডার বের হওয়ার আগে যাচাই করে: ব্লকড বিও অ্যাকাউন্ট, শর্ট সেল, ক্রয়ক্ষমতা ও মার্জিন, অর্ডারের সীমা, প্রাইস ব্যান্ড ও এক্সপোজার।") },
         { title: t("Exchange", "এক্সচেঞ্জ"), body: t("The order is routed to DSE or CSE.", "অর্ডারটি ডিএসই বা সিএসই-তে পাঠানো হয়।") },
         { title: t("Execution", "সম্পাদন"), body: t("Executions are reported back to the platform.", "সম্পাদিত লেনদেনের তথ্য প্ল্যাটফর্মে ফিরে আসে।") },
         { title: t("Portfolio update", "পোর্টফোলিও হালনাগাদ"), body: t("Holdings and balances update for the investor.", "বিনিয়োগকারীর হোল্ডিং ও ব্যালান্স হালনাগাদ হয়।") },
@@ -108,7 +108,7 @@ const CONTENT: OfferingContent[] = [
       ARCHITECTURE_LAYER: [
         { title: t("Channels", "চ্যানেল"), body: t("Web, desktop and branded mobile apps for investors and dealers.", "বিনিয়োগকারী ও ডিলারদের জন্য ওয়েব, ডেস্কটপ ও নিজস্ব ব্র্যান্ডের মোবাইল অ্যাপ।") },
         { title: t("Order management", "অর্ডার ব্যবস্থাপনা"), body: t("Order entry, amendment, cancellation and order book.", "অর্ডার দেওয়া, সংশোধন, বাতিল এবং অর্ডার বুক।") },
-        { title: t("Risk controls", "ঝুঁকি নিয়ন্ত্রণ"), body: t("Pre-trade limit and exposure checks built into the OMS.", "ওএমএস-এর ভেতরেই লেনদেনের আগে সীমা ও এক্সপোজার যাচাই।") },
+        { title: t("Risk controls (RMS)", "ঝুঁকি নিয়ন্ত্রণ (আরএমএস)"), body: t("RMS, built into the OMS: pre-trade limit and exposure checks on every order.", "ওএমএস-এর ভেতরেই যুক্ত আরএমএস: প্রতিটি অর্ডারে লেনদেনের আগে সীমা ও এক্সপোজার যাচাই।") },
         { title: t("Market connectivity", "বাজার সংযোগ"), body: t("Connections to Dhaka Stock Exchange and Chittagong Stock Exchange.", "ঢাকা স্টক এক্সচেঞ্জ ও চট্টগ্রাম স্টক এক্সচেঞ্জের সঙ্গে সংযোগ।") },
         { title: t("Back office", "ব্যাক অফিস"), body: t("Settlement, accounts and reporting downstream.", "পরবর্তী ধাপে সেটেলমেন্ট, হিসাব ও রিপোর্টিং।") },
       ],
@@ -777,6 +777,7 @@ async function seedClientLogos() {
   let added = 0;
   for (const [i, c] of CLIENT_LOGOS.entries()) {
     let org = orgs.find((o) => o.key === c.key) ?? orgs.find((o) => o.translations.some((t) => orgNameKey(t.name) === orgNameKey(c.name)));
+    if (!org && (await db.organization.findUnique({ where: { key: c.key }, select: { id: true } }))) continue; // deleted in the admin: left alone
     if (!org) {
       const created = await db.organization.create({
         data: { key: c.key, kind: "CLIENT", status: "PUBLISHED", sortOrder: 100 + i, translations: { create: { locale: EN, name: c.name } } },
@@ -1649,6 +1650,76 @@ async function seedStoreLinks() {
  * brokerage house (src/content/xfl2/member-profiles.ts), added once and only
  * where the field is still empty.
  */
+/**
+ * Once: IDLC Securities is a client again (XFL, 15 Oct 2026). Brings it back
+ * on the site as a published client with its verified facts, unless an editor
+ * has changed it since. A new client is added if it is not in the database.
+ */
+async function seedIdlcClient() {
+  const MARK = "seed.idlc-client-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const p = MEMBER_PROFILES.find((m) => m.key === "idlc-securities")!;
+  const names = { en: "IDLC Securities Limited", bn: "আইডিএলসি সিকিউরিটিজ লিমিটেড" };
+  let org = await db.organization.findUnique({ where: { key: p.key }, include: { translations: true } });
+  if (!org) {
+    org = await db.organization.create({
+      data: {
+        key: p.key,
+        kind: "CLIENT",
+        status: "PUBLISHED",
+        sortOrder: 120,
+        websiteUrl: p.website,
+        dseTrec: p.dseTrec,
+        cseTrec: p.cseTrec,
+        translations: {
+          create: [
+            { locale: EN, name: names.en, shortName: "IDLC Securities", description: p.description.en },
+            { locale: BN, name: names.bn, shortName: "আইডিএলসি সিকিউরিটিজ", description: p.description.bn },
+          ],
+        },
+      },
+      include: { translations: true },
+    });
+    console.log("• IDLC Securities added as a client");
+  } else if (!org.updatedById) {
+    await db.organization.update({
+      where: { id: org.id },
+      data: {
+        status: "PUBLISHED",
+        deletedAt: null,
+        ...(org.kind !== "CONSORTIUM_MEMBER" && { kind: "CLIENT" }),
+        ...(!org.websiteUrl && { websiteUrl: p.website }),
+        ...(!org.dseTrec && { dseTrec: p.dseTrec }),
+        ...(!org.cseTrec && { cseTrec: p.cseTrec }),
+      },
+    });
+    for (const l of ["en", "bn"] as const) {
+      const tr = org.translations.find((t) => t.locale === (l === "en" ? EN : BN));
+      if (!tr) await db.organizationTranslation.create({ data: { organizationId: org.id, locale: l === "en" ? EN : BN, name: names[l], description: p.description[l] } });
+      else if (!tr.description) await db.organizationTranslation.update({ where: { id: tr.id }, data: { description: p.description[l] } });
+    }
+    console.log("• IDLC Securities shown again as a client");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
+/**
+ * Once: the OMS's workflow and architecture name RMS as the built-in risk
+ * check, where they still have the seeded wording (admin edits are kept).
+ */
+async function seedRmsWording() {
+  const MARK = "seed.rms-wording-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const BODY: [string, string][] = [["The OMS checks the order against the brokerage's limits and exposure before it leaves.", "RMS, built into the OMS, checks the order before it leaves: blocked BO account, short sell, buying power and margin, order limits, price band and exposure."], ["অর্ডার বের হওয়ার আগে ওএমএস ব্রোকারেজের নির্ধারিত সীমা ও এক্সপোজারের সঙ্গে তা যাচাই করে।", "ওএমএস-এর ভেতরে যুক্ত আরএমএস অর্ডার বের হওয়ার আগে যাচাই করে: ব্লকড বিও অ্যাকাউন্ট, শর্ট সেল, ক্রয়ক্ষমতা ও মার্জিন, অর্ডারের সীমা, প্রাইস ব্যান্ড ও এক্সপোজার।"], ["Pre-trade limit and exposure checks built into the OMS.", "RMS, built into the OMS: pre-trade limit and exposure checks on every order."], ["ওএমএস-এর ভেতরেই লেনদেনের আগে সীমা ও এক্সপোজার যাচাই।", "ওএমএস-এর ভেতরেই যুক্ত আরএমএস: প্রতিটি অর্ডারে লেনদেনের আগে সীমা ও এক্সপোজার যাচাই।"]];
+  const TITLE: [string, string][] = [["Pre-trade risk check", "RMS pre-trade check"], ["প্রি-ট্রেড ঝুঁকি যাচাই", "আরএমএস প্রি-ট্রেড যাচাই"], ["Risk controls", "Risk controls (RMS)"], ["ঝুঁকি নিয়ন্ত্রণ", "ঝুঁকি নিয়ন্ত্রণ (আরএমএস)"]];
+  let n = 0;
+  const oms = { item: { offering: { key: "trading-platform" } } };
+  for (const [from, to] of BODY) n += (await db.offeringItemTranslation.updateMany({ where: { body: from, ...oms }, data: { body: to } })).count;
+  for (const [from, to] of TITLE) n += (await db.offeringItemTranslation.updateMany({ where: { title: from, ...oms }, data: { title: to } })).count;
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  if (n) console.log(`• OMS workflow and architecture name RMS as the built-in risk check (${n} text(s))`);
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -1712,12 +1783,16 @@ async function main() {
   await seedRmsVisible(db, EN, BN);
   await seedOmsLogo(db, seedImage);
   await seedRiskPage(db, EN, BN);
+  await seedRiskChecksBlock(db, EN, BN);
+  await seedRiskChecksGrid(db, EN, BN);
+  await seedRmsWording();
   await seedRiskLinks(db, EN, BN);
   await seedProductScreens();
   await seedNavAdditions();
   await seedCaseStudyDrafts();
   await seedCareers();
   await seedMemberProfiles();
+  await seedIdlcClient();
   await seedBanglaGaps();
   console.log("Content seed complete.");
 }

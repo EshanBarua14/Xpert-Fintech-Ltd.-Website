@@ -11,10 +11,11 @@ import { notFound } from "next/navigation";
 import { ecosystemLabels, ecosystemModules, GhostButton, moduleForSlug, PrimaryButton, SectionHeader } from "@/components/flagship/Sections";
 import { EcosystemMap } from "@/components/flagship/EcosystemMap";
 import OmsPreview from "@/components/products/oms-preview/OmsPreview";
-import { getFlagshipData, getPartyLogos } from "@/lib/public/flagship";
+import { getFlagshipData, getPartyLogos, getRiskPageHref } from "@/lib/public/flagship";
 import { getCredentials } from "@/lib/content/credentials";
 import { ecosystemInDatabase, getEcosystem, withEcosystem } from "@/lib/public/ecosystem";
-import { omsLabels } from "@/lib/public/labels";
+import { omsLabels, rmsLabels } from "@/lib/public/labels";
+import { RmsPipeline } from "@/components/products/RmsPipeline";
 import type { VisualKind } from "@/components/flagship/Visuals";
 import { Icon } from "@/components/ui/Icon";
 import { ProductCard } from "@/components/products/ProductCard";
@@ -133,6 +134,8 @@ export default async function ProductPage({ params }: Props) {
   // This product's node in Admin → Ecosystem (what it receives and passes on).
   const ecoNode = eco.nodes.find((n) => n.product === offering.key)?.key ?? null;
   const showOmsPreview = offering.key === "trading-platform";
+  // RMS is built into the OMS: its checks are shown on the OMS page.
+  const riskHref = showOmsPreview ? await getRiskPageHref(found.locale) : null;
   const look = (offering.key && (await getDesign()).products[offering.key]) || null;
   // At a glance: who it is for, what it connects to in the market, where it is live.
   const marketLinks = ecoNode
@@ -149,6 +152,7 @@ export default async function ProductPage({ params }: Props) {
   // In-page links to the sections this product has.
   const jump = [
     (capabilities.length > 0 || slots) && { id: "features", label: t.keyFeatures },
+    showOmsPreview && { id: "rms", label: t.rmsChip },
     (shots.length > 0 || slots) && { id: "screens", label: t.screensTitle },
     (demo || slots) && { id: "demo", label: t.demoTitle },
     steps.length > 1 && { id: "how", label: t.howItWorks },
@@ -276,6 +280,14 @@ export default async function ProductPage({ params }: Props) {
                 : []
             }
           />
+        </Band>
+      )}
+
+      {showOmsPreview && (
+        <Band id="rms" title={t.rmsTitle} body={t.rmsBody} alt>
+          <div data-reveal>
+            <RmsPipeline labels={rmsLabels(t, riskHref)} locale={found.locale} />
+          </div>
         </Band>
       )}
 

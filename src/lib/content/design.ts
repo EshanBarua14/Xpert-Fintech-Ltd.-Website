@@ -33,6 +33,7 @@ export const HOME_SECTIONS = [
   { key: "market", label: "Today on DSE and CSE" },
   { key: "apps", label: "Live branded apps" },
   { key: "flow", label: "Order flow" },
+  { key: "rms", label: "Risk checks (RMS, built into the OMS)" },
   { key: "consortium", label: "Consortium logos" },
   { key: "principles", label: "Principles" },
   { key: "events", label: "Events" },

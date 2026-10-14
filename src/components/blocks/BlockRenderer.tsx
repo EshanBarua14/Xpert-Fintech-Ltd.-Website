@@ -14,7 +14,7 @@ import {
   VideoBlock,
   WorkflowBlock,
 } from "./ContentBlocks";
-import { EventListBlock, LogoCloudBlock, PeopleListBlock, ProductGridBlock } from "./DataBlocks";
+import { EventListBlock, LogoCloudBlock, PeopleListBlock, ProductGridBlock, RiskChecksBlock } from "./DataBlocks";
 import type { BlockContext, BlockData } from "./types";
 
 /**
@@ -53,6 +53,8 @@ function Block({ block, ctx, isFirst }: { block: BlockData; ctx: BlockContext; i
       return <VideoBlock block={block} ctx={ctx} />;
     case "CTA":
       return <CtaBlock block={block} ctx={ctx} />;
+    case "RISK_CHECKS":
+      return <RiskChecksBlock block={block} ctx={ctx} />;
     case "LEAD_FORM":
       return <LeadFormBlock block={block} ctx={ctx} />;
     default:

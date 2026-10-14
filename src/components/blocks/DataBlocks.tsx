@@ -1,5 +1,7 @@
 import Image from "next/image";
-import { getOrgLogos, orgForText } from "@/lib/public/flagship";
+import { getOrgLogos, getRiskPageHref, orgForText } from "@/lib/public/flagship";
+import { RmsPipeline } from "@/components/products/RmsPipeline";
+import { rmsLabels } from "@/lib/public/labels";
 import { editorHints } from "@/lib/env/hints";
 import Link from "next/link";
 import type { OrganizationKind, PersonGroup } from "@prisma/client";
@@ -10,7 +12,7 @@ import { cn } from "@/lib/utils/cn";
 import { getMessages } from "@/lib/i18n/messages";
 import { PeopleGallery, type GalleryPerson } from "@/components/people/PeopleGallery";
 import { BlockHeading, CARD, gridCols, revealDelay } from "./Shared";
-import { num, str, type BlockContext, type BlockData } from "./types";
+import { bool, num, str, type BlockContext, type BlockData } from "./types";
 
 export async function ProductGridBlock({ block, ctx }: { block: BlockData; ctx: BlockContext }) {
   const offerings = await getOfferings({ featuredOnly: str(block.props.source) === "featured", limit: num(block.props.limit, 8) });
@@ -188,5 +190,18 @@ export async function EventCards({ events, locale }: { events: EventRow[]; local
         );
       })}
     </ul>
+  );
+}
+
+/** RMS, built into the Trading OMS: sample orders checked one rule at a time. */
+export async function RiskChecksBlock({ block, ctx }: { block: BlockData; ctx: BlockContext }) {
+  const href = bool(block.props.link, true) ? await getRiskPageHref(ctx.locale) : null;
+  return (
+    <div className="flex flex-col gap-10">
+      <BlockHeading text={{ ...block.text, title: block.text.title ?? ctx.t.rmsTitle, subtitle: block.text.subtitle ?? ctx.t.rmsBody }} />
+      <div data-reveal>
+        <RmsPipeline labels={rmsLabels(ctx.t, href)} locale={ctx.locale} />
+      </div>
+    </div>
   );
 }

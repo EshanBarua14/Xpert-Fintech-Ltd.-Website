@@ -80,3 +80,103 @@ export async function seedRiskPage(db: PrismaClient, EN: any, BN: any) {
   }
   console.log("- Risk checks page added at /risk-management (English and Bengali)");
 }
+
+/**
+ * Once: the risk checks page opens with the "Risk checks (RMS)" block (sample
+ * orders checked one rule at a time) above its text. Skipped when the page
+ * has been edited in Admin -> Pages or already has the block.
+ */
+export async function seedRiskChecksBlock(db: PrismaClient, EN: any, BN: any) {
+  const MARK = "seed.risk-checks-block-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const page = await db.page.findUnique({ where: { key: PATH }, include: { sections: { include: { blocks: true } } } });
+  if (page && !page.updatedById && !page.sections.some((s) => s.blocks.some((b) => (b.type as string) === "RISK_CHECKS"))) {
+    const first = Math.min(0, ...page.sections.map((s) => s.sortOrder));
+    const section = await db.pageSection.create({ data: { pageId: page.id, sortOrder: first - 1 } });
+    await db.contentBlock.create({
+      data: {
+        sectionId: section.id,
+        type: "RISK_CHECKS" as any,
+        status: "PUBLISHED",
+        sortOrder: 0,
+        props: { link: false },
+        translations: {
+          create: [
+            { locale: EN, title: "See the checks at work", subtitle: "Sample orders go through RMS one check at a time. Pick an order, or a check to read what it does." },
+            { locale: BN, title: "যাচাই কীভাবে চলে দেখুন", subtitle: "নমুনা অর্ডারগুলো একটির পর একটি যাচাইয়ের মধ্য দিয়ে যায়। একটি অর্ডার বা যাচাই বেছে নিয়ে বিস্তারিত দেখুন।" },
+          ],
+        },
+      },
+    });
+    console.log("- Risk checks page: the RMS sample-orders block added at the top");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
+/** Icons for the six checks on the risk checks page, by English title. */
+const CHECK_ICONS: Record<string, string> = {
+  "Short-sell prevention": "exchange",
+  "Buying power and margin limit": "chart",
+  "Order value and quantity limits": "bolt",
+  "Price band checks": "network",
+  "Exposure caps": "shield",
+  "Blocked BO accounts": "lock",
+};
+
+/**
+ * Once: on the risk checks page, the six one-paragraph check blocks become
+ * one grid of six cards with icons (same text, both languages). Skipped when
+ * the page has been edited in Admin -> Pages.
+ */
+export async function seedRiskChecksGrid(db: PrismaClient, EN: any, BN: any) {
+  const MARK = "seed.risk-checks-grid-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const page = await db.page.findUnique({
+    where: { key: PATH },
+    include: { sections: { include: { blocks: { include: { translations: true } } } } },
+  });
+  if (page && !page.updatedById) {
+    const checks = page.sections.flatMap((sec) =>
+      sec.blocks
+        .filter((b) => b.type === "RICH_TEXT" && !b.updatedById)
+        .map((b) => ({ b, en: b.translations.find((t) => t.locale === EN), bn: b.translations.find((t) => t.locale === BN) }))
+        .filter((x) => x.en && CHECK_ICONS[x.en.title ?? ""] !== undefined),
+    );
+    if (checks.length) {
+      const first = checks[0]!.b;
+      const grid = await db.contentBlock.create({
+        data: {
+          sectionId: first.sectionId,
+          type: "FEATURE_GRID",
+          status: "PUBLISHED",
+          sortOrder: first.sortOrder,
+          props: { columns: "3" },
+          translations: {
+            create: [
+              { locale: EN, title: "The six checks" },
+              { locale: BN, title: "ছয়টি যাচাই" },
+            ],
+          },
+        },
+      });
+      for (const [i, c] of checks.entries()) {
+        await db.blockItem.create({
+          data: {
+            blockId: grid.id,
+            iconName: CHECK_ICONS[c.en!.title ?? ""] ?? "check",
+            sortOrder: i,
+            translations: {
+              create: [
+                { locale: EN, title: c.en!.title, body: c.en!.body },
+                ...(c.bn ? [{ locale: BN, title: c.bn.title, body: c.bn.body }] : []),
+              ],
+            },
+          },
+        });
+        await db.contentBlock.delete({ where: { id: c.b.id } });
+      }
+      console.log(`- Risk checks page: the ${checks.length} checks shown as cards`);
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}

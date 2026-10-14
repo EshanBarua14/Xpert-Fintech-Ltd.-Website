@@ -121,10 +121,20 @@ function linkPath(m: ModuleKey, to: NodeKey) {
   return `M${p.x.toFixed(1)} ${p.y.toFixed(1)} C ${c1.x.toFixed(1)} ${c1.y.toFixed(1)}, ${c2.x.toFixed(1)} ${c2.y.toFixed(1)}, ${t.x.toFixed(1)} ${t.y.toFixed(1)}`;
 }
 
+/** A short arc outside the ring between two module pills (RMS inside the OMS). */
+function moduleArc(a: ModuleKey, b: ModuleKey) {
+  const p = pillPos(a);
+  const q = pillPos(b);
+  const mid = (((MODULES.find((x) => x.key === a)!.angle + MODULES.find((x) => x.key === b)!.angle) / 2) * Math.PI) / 180;
+  const c = { x: HUB.x + Math.cos(mid) * (RING + 70), y: HUB.y + Math.sin(mid) * (RING + 70) };
+  return `M${p.x.toFixed(1)} ${p.y.toFixed(1)} Q ${c.x.toFixed(1)} ${c.y.toFixed(1)}, ${q.x.toFixed(1)} ${q.y.toFixed(1)}`;
+}
+
 type Flow = {
   id: string;
   d: string;
-  to: NodeKey;
+  /** The party the flow lights (none for a link between two modules). */
+  to?: NodeKey;
   from?: NodeKey;
   both?: boolean;
   dotted?: boolean;
@@ -162,8 +172,8 @@ const SCENES: Step[][] = [
   // Trade
   [
     { modules: [], flows: [{ id: "inv-hub", d: INV_HUB, from: "investors", to: "investors" }] },
-    // Limit and exposure checks run inside the OMS (RMS is no longer a separate product).
-    { modules: ["OMS"], flows: [] },
+    // RMS, built into the OMS, checks limits and exposure before the order leaves.
+    { modules: ["OMS", "RMS"], flows: [{ id: "oms-rms", d: moduleArc("OMS", "RMS"), both: true, requires: "RMS" }] },
     {
       modules: ["OMS"],
       flows: [
@@ -209,6 +219,7 @@ const SCENES: Step[][] = [
 
 /* Always-visible, faint base network, tagged by module so hidden modules drop out. */
 const BASE: { module: ModuleKey; d: string }[] = [
+  { module: "RMS", d: moduleArc("OMS", "RMS") },
   { module: "eKYC", d: linkPath("eKYC", "investors") },
   { module: "OMS", d: linkPath("OMS", "dse") },
   { module: "OMS", d: linkPath("OMS", "cse") },
@@ -218,7 +229,7 @@ const BASE: { module: ModuleKey; d: string }[] = [
 
 /** Parties each module works with (used for hover/focus highlighting). */
 const MODULE_PARTIES: Record<ModuleKey, NodeKey[]> = {
-  RMS: ["bsec"],
+  RMS: ["bsec", "dse", "cse"],
   OMS: ["dse", "cse"],
   BO: ["cdbl"],
   "Back office": ["bank", "bsec"],
@@ -375,7 +386,7 @@ export function EcosystemMap({
   const liveFlows = new Set(live.flows.map((f) => f.id));
   const activeModules = new Set<ModuleKey>(focusModule ? [focusModule] : shown.flatMap((s) => s.modules));
   const pulsing = new Set<ModuleKey>(focusModule ? [focusModule] : live.modules);
-  const activeNodes = new Set<string>(focusModule ? MODULE_PARTIES[focusModule] : flows.flatMap((f) => [f.to, f.from ?? ""]));
+  const activeNodes = new Set<string>(focusModule ? MODULE_PARTIES[focusModule] : flows.flatMap((f) => [f.to ?? "", f.from ?? ""]));
   const focusInfo = focusModule ? modules?.[focusModule] : undefined;
 
   const openModule = (m: ModuleKey) => {

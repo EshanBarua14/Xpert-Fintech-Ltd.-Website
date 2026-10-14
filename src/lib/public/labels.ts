@@ -1,6 +1,7 @@
 import type { Messages } from "@/lib/i18n/messages";
 import type { ShowcaseLabels } from "@/components/products/ProductShowcase";
 import type { OmsPreviewLabels } from "@/components/products/oms-preview/OmsPreview";
+import type { RmsLabels } from "@/components/products/RmsPipeline";
 
 /** Interface strings for the product showcase, from the message catalogue. */
 export function showcaseLabels(t: Messages): ShowcaseLabels {
@@ -98,5 +99,38 @@ export function searchLabels(t: Messages) {
       video: t.searchKindVideo,
       symbol: t.searchKindSymbol,
     },
+  };
+}
+
+/** Labels for the RMS checks illustration (RmsPipeline). */
+export function rmsLabels(t: Messages, learnHref?: string | null): RmsLabels {
+  return {
+    tryOrder: t.rmsTryOrder,
+    sample: t.rmsSample,
+    buy: t.rmsBuy,
+    sell: t.rmsSell,
+    shares: t.rmsShares,
+    value: t.rmsValue,
+    routeTo: t.rmsRouteTo,
+    oms: t.rmsOms,
+    rms: t.rmsName,
+    rmsNote: t.rmsBuiltIn,
+    checking: t.rmsChecking,
+    passed: t.rmsPassed,
+    stopped: t.rmsStopped,
+    waiting: t.rmsWaiting,
+    sentTo: t.rmsSentTo,
+    returned: t.rmsReturned,
+    exchanges: t.rmsExchanges,
+    trader: t.rmsTrader,
+    play: t.rmsPlay,
+    pause: t.rmsPause,
+    next: t.rmsNext,
+    prev: t.rmsPrev,
+    illustration: t.rmsIllustration,
+    learnMore: learnHref ? t.rmsLearnMore : undefined,
+    learnHref: learnHref ?? undefined,
+    checks: ([1, 2, 3, 4, 5, 6] as const).map((n) => ({ title: t[`rmsCheck${n}Title`], body: t[`rmsCheck${n}Body`] })),
+    notes: [t.rmsNote1, t.rmsNote2, t.rmsNote3, t.rmsNote4, t.rmsNote5, t.rmsNote6],
   };
 }

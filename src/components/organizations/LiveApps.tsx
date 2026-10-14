@@ -22,7 +22,8 @@ export type LiveApp = {
 export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android: string; ios: string; web: string } }) {
   if (!apps.length) return null;
   return (
-    <ul className={cn("grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-4", apps.length % 5 === 0 && apps.length % 4 !== 0 && "xl:grid-cols-5")}>
+    // Rows of equal cards; a short last row sits in the middle instead of hanging to the left.
+    <ul className="flex flex-wrap justify-center gap-3">
       {apps.map((a, i) => {
         // Every public link the app has: Google Play, App Store and the web app.
         const links = [
@@ -31,7 +32,15 @@ export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android:
           a.webUrl && { href: a.webUrl, label: labels.web, kind: "web" as const },
         ].filter((l): l is { href: string; label: string; kind: "play" | "ios" | "web" } => Boolean(l));
         return (
-          <li key={a.id} data-reveal style={{ "--d": i % 5 } as CSSProperties}>
+          <li
+            key={a.id}
+            data-reveal
+            style={{ "--d": i % 5 } as CSSProperties}
+            className={cn(
+              "w-full min-[420px]:w-[calc((100%-0.75rem)/2)] lg:w-[calc((100%-2.25rem)/4)]",
+              apps.length % 5 === 0 && apps.length % 4 !== 0 && "xl:w-[calc((100%-3rem)/5)]",
+            )}
+          >
             <div className="spotlight glass group relative flex h-full flex-col overflow-hidden rounded-3xl p-4 sm:p-5">
               <span aria-hidden="true" className="live-app-pulse absolute inset-0 rounded-3xl" style={{ "--i": i } as CSSProperties} />
               <span className="relative flex flex-col items-start gap-3">

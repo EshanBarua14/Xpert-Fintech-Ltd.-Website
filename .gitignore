@@ -43,3 +43,5 @@ market-debug/
 .vercel
 .env*
 data.sql
+
+/audit-out/

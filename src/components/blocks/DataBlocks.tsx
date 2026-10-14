@@ -97,7 +97,8 @@ export async function PeopleGrid({
       name: tr?.name ?? "",
       title: pick(p.roles[0]?.translations ?? [], locale)?.title ?? null,
       affiliation: tr?.affiliation ?? null,
-      org: orgForText(orgs, tr?.affiliation ?? pick(p.translations, "en")?.affiliation),
+      // The Bangla affiliation may spell the company differently from its Bangla name: the English one decides then.
+      org: orgForText(orgs, tr?.affiliation) ?? orgForText(orgs, p.translations.find((x) => x.locale === "en")?.affiliation),
       bio: tr?.bio ?? null,
       photo: photo ? { url: photo.url, width: photo.width, height: photo.height } : null,
       linkedinUrl: p.linkedinUrl,

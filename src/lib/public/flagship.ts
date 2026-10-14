@@ -108,7 +108,15 @@ export const getFlowProducts = cache(async (locale: AppLocale): Promise<Record<s
 export type OrgLogoEntry = { names: string[]; name: string; logo: MemberLogo };
 
 const normOrg = (v: string) =>
-  v.toLowerCase().replace(/&/g, " and ").replace(/[.,()'’]/g, " ").replace(/\b(limited|ltd|plc)\b/g, " ").replace(/\s+/g, " ").trim();
+  v
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[.,()'’]/g, " ")
+    .replace(/\b(limited|ltd|plc)\b/g, " ")
+    // Bangla: "লিমিটেড", "লিঃ", "পিএলসি" are not part of the name either.
+    .replace(/(লিমিটেড|লিঃ|লি\s|পিএলসি)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 /** Published organizations whose logo may be shown, with every name they go by (EN, BN, short names). */
 export const getOrgLogos = cache(async (locale: AppLocale): Promise<OrgLogoEntry[]> => {

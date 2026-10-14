@@ -1487,3 +1487,10 @@ html {
 .back-to-top[data-show] { opacity: 1; translate: 0 0; pointer-events: auto; }
 .back-to-top:hover { background: var(--color-brand-royal-hover); }
 @media print { .back-to-top { display: none; } }
+
+/* Consortium map: the chosen house's details slide in. */
+.cx-panel { animation: cx-panel-in 380ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes cx-panel-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) {
+  .cx-panel { animation: none; }
+}

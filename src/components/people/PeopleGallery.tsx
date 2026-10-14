@@ -328,7 +328,7 @@ export function PeopleGallery({
         {open && (
           // One screen, no scrolling: the photo fills the left column on wide screens and becomes a portrait beside the name on phones;
           // a long biography is read in pages (see pagesOf) and its type scales with the window height.
-          <div className="relative grid max-h-[calc(100dvh-1.5rem)] md:grid-cols-[minmax(15rem,21rem)_1fr]">
+          <div className="relative grid max-h-[calc(100dvh-1.5rem)] md:grid-cols-[19rem_1fr]">
             <button
               type="button"
               onClick={close}
@@ -337,14 +337,16 @@ export function PeopleGallery({
             >
               <span aria-hidden="true">×</span>
             </button>
-            <div className="relative hidden overflow-hidden bg-navy-800 md:block">
-              <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt={open.name} fill sizes="21rem" className="object-cover object-top" unoptimized={!open.photo} />
-              <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#06111f]/60 via-transparent to-transparent" />
-              {open.org && <OrgLogo org={open.org} className="absolute bottom-4 left-4 h-10" />}
+            {/* The portrait in the same 4:5 frame as on the card, whatever the window's height: every profile shows its photo the same way. */}
+            <div className="relative hidden flex-col gap-4 bg-navy-800/50 p-5 md:flex">
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-[color-mix(in_srgb,var(--tone)_35%,transparent)]">
+                <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt={open.name} fill sizes="20rem" className="object-cover object-top" unoptimized={!open.photo} />
+              </div>
+              {open.org && <OrgLogo org={open.org} className="h-10 self-start" />}
             </div>
             <div className="person-dialog-body flex min-h-0 flex-col gap-[clamp(0.75rem,2svh,1.5rem)] p-5 sm:p-7 md:p-9">
               <div className="flex items-center gap-4 pr-10">
-                <span className="relative size-20 shrink-0 overflow-hidden rounded-2xl bg-navy-800 md:hidden">
+                <span className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-2xl bg-navy-800 md:hidden">
                   <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt="" fill sizes="5rem" className="object-cover object-top" unoptimized={!open.photo} />
                 </span>
                 <div className="flex min-w-0 flex-col gap-1.5">

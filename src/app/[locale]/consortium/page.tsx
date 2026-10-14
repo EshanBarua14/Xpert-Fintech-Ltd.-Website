@@ -2,8 +2,11 @@ import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CtaBand, PageHero, SectionHeader, Shell } from "@/components/flagship/Sections";
-import { MarketGlobe } from "@/components/flagship/MarketGlobe";
-import { LogoWall, monogram } from "@/components/organizations/LogoWall";
+import { monogram } from "@/components/organizations/LogoWall";
+import { ConsortiumExplorer } from "@/components/organizations/ConsortiumExplorer";
+import { CountUp } from "@/components/motion/CountUp";
+import { Icon } from "@/components/ui/Icon";
+import { getConsortium } from "@/lib/public/consortium";
 import Image from "next/image";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
@@ -19,30 +22,112 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return buildMetadata({ locale, title: t.consortiumPageTitle, description: t.consortiumPageBody, paths: { en: "consortium", bn: "consortium" } });
 }
 
-/** The member brokerage houses and exchanges, from Admin → Organizations. */
+/**
+ * The consortium and how it hangs together: the member brokerage houses own
+ * Xpert, sit on its board, and run their own branded apps on its platform.
+ * An interactive map shows each house's links; everything comes from Admin →
+ * Organizations, People and Deployments.
+ */
 export default async function ConsortiumPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);
-  const data = await getFlagshipData(locale);
+  const [data, members] = await Promise.all([getFlagshipData(locale), getConsortium(locale)]);
+  const nf = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US");
+  const seats = members.filter((m) => m.reps.some((r) => r.group === "BOARD")).length;
+  const apps = members.reduce((n, m) => n + m.apps.length, 0);
+  const steps = [
+    { icon: "users", title: t.consStep1Title, body: t.consStep1Body.replace("{n}", nf.format(members.length)) },
+    { icon: "shield", title: t.consStep2Title, body: t.consStep2Body },
+    { icon: "network", title: t.consStep3Title, body: t.consStep3Body },
+    { icon: "exchange", title: t.consStep4Title, body: t.consStep4Body },
+  ];
 
   return (
     <>
       <PageHero eyebrow={t.consortiumEyebrow} title={t.consortiumPageTitle} body={t.consortiumPageBody} />
 
 
-      {data.members.length > 0 && (
-        <Shell className="py-10 md:py-12">
-          <div className="grid gap-14 lg:grid-cols-[1fr_1.2fr] lg:items-start">
-            <div className="flex flex-col gap-8 lg:sticky lg:top-[calc(8rem+var(--ticker-h))]">
-              <SectionHeader title={t.members} />
-              <div data-reveal className="relative mx-auto aspect-square w-full max-w-md">
-                <MarketGlobe routes={data.members.length} />
-              </div>
+      {members.length > 0 && (
+        <>
+          {/* The figures behind the relationships */}
+          <Shell className="pb-4">
+            <dl className="grid max-w-3xl grid-cols-3 border-t border-fg/10 pt-6">
+              {[
+                [members.length, t.consAllMembers],
+                [seats, t.consStatSeats],
+                [apps, t.consStatApps],
+              ].map(([v, l], i) => (
+                <div key={String(l)} data-reveal style={{ "--d": i } as CSSProperties} className={i ? "flex flex-col gap-1 border-l border-fg/10 pl-4 sm:pl-6" : "flex flex-col gap-1"}>
+                  <dt className="order-2 text-sm text-text-secondary">{l}</dt>
+                  <dd className="order-1 font-display text-4xl leading-none text-text-primary md:text-5xl">
+                    <CountUp value={Number(v)} locale={locale} />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </Shell>
+
+          {/* How it fits together: a chain of four links */}
+          <Shell className="py-12 md:py-16">
+            <div className="flex flex-col gap-10">
+              <SectionHeader title={t.consHowTitle} body={t.consHowBody} />
+              <ol className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {steps.map((s, i) => (
+                  <li key={s.title} data-reveal style={{ "--d": i } as CSSProperties} className="cons-step relative flex flex-col gap-4 rounded-3xl border border-fg/[0.08] bg-fg/[0.02] p-6">
+                    <span className="flex items-center gap-3">
+                      <span className="flex size-11 items-center justify-center rounded-2xl bg-brand-sky/10 text-brand-sky">
+                        <Icon name={s.icon} className="size-5" />
+                      </span>
+                      {i < steps.length - 1 && (
+                        <span aria-hidden="true" className="cons-arrow hidden h-px flex-1 bg-gradient-to-r from-brand-sky/50 to-transparent lg:block" />
+                      )}
+                    </span>
+                    <span className="font-display text-xl leading-snug font-semibold text-text-primary">{s.title}</span>
+                    <span className="text-sm leading-relaxed text-text-secondary">{s.body}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
-            <LogoWall members={data.members} columns={2} />
-          </div>
-        </Shell>
+          </Shell>
+
+          {/* Interactive map of the relationships */}
+          <Shell className="py-12 md:py-16">
+            <div className="flex flex-col gap-10">
+              <SectionHeader title={t.consExplorerTitle} body={t.consExplorerBody} />
+              <ConsortiumExplorer
+                members={members}
+                locale={locale}
+                labels={{
+                  title: t.consExplorerTitle,
+                  body: t.consExplorerBody,
+                  hub: t.consHub,
+                  pick: t.consPick,
+                  pickBody: t.consPickBody,
+                  shareholder: t.consShareholder,
+                  boardSeat: t.consBoardSeat,
+                  consultant: t.consConsultant,
+                  appLive: t.consAppLive,
+                  representedBy: t.consRepresentedBy,
+                  apps: t.consApps,
+                  noApp: t.consNoApp,
+                  noRep: t.consNoRep,
+                  website: t.consWebsite,
+                  android: t.getAndroidApp,
+                  ios: t.getIosApp,
+                  web: t.openWebApp,
+                  legendSeat: t.consLegendSeat,
+                  legendApp: t.consLegendApp,
+                  legendOwns: t.consLegendOwns,
+                  allMembers: t.consAllMembers,
+                  boardHref: `/${locale}/company/board`,
+                  consultantsHref: `/${locale}/company/consultants`,
+                  viewProfile: t.viewProfile,
+                }}
+              />
+            </div>
+          </Shell>
+        </>
       )}
 
       {data.exchanges.length > 0 && (

@@ -10,6 +10,9 @@ export function showcaseLabels(t: Messages): ShowcaseLabels {
     workflow: t.howItWorks,
     capabilities: t.capabilities,
     conceptual: t.conceptualView,
+    play: t.consPlay,
+    pause: t.consPause,
+    rmsBuiltIn: t.rmsChip,
     typeLabels: {
       PLATFORM: t.typePlatform,
       PRODUCT: t.typeProduct,

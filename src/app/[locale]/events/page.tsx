@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EventCards } from "@/components/blocks/DataBlocks";
+import { EventTimeline } from "@/components/insights/EventTimeline";
 import { CtaBand, PageHero, Shell } from "@/components/flagship/Sections";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
-import { getEvents } from "@/lib/public/content";
+import { getEventTimeline } from "@/lib/public/insights";
 import { buildMetadata } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -19,12 +19,12 @@ export default async function EventsPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);
-  const events = await getEvents();
+  const events = await getEventTimeline(locale);
   return (
     <>
       <PageHero eyebrow={t.latestEyebrow} title={t.events} />
       <Shell className="pb-12">
-        {events.length ? <EventCards events={events} locale={locale} /> : <p className="text-text-secondary">{t.noItems}</p>}
+        {events.length ? <EventTimeline events={events} locale={locale} labels={{ photos: t.eventsPhotos, with: t.eventsWith, open: t.eventsOpen }} /> : <p className="text-text-secondary">{t.noItems}</p>}
       </Shell>
       <CtaBand t={t} locale={locale} />
     </>

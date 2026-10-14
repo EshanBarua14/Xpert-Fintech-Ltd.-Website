@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { CtaBand, PageHero, Shell } from "@/components/flagship/Sections";
 import { MarketPulse } from "@/components/market/MarketPulse";
 import { ExchangeMark, exchangeLogos } from "@/components/market/ExchangeMark";
-import { getPartyLogos } from "@/lib/public/flagship";
+import { getPartyLogos, getRiskPageHref } from "@/lib/public/flagship";
+import { RmsStrip } from "@/components/products/RmsStrip";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getMarketPayload } from "@/lib/market/data";
@@ -28,7 +29,7 @@ export default async function MarketsPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);
-  const [market, parties] = await Promise.all([getMarketPayload(), getPartyLogos(locale)]);
+  const [market, parties, riskHref] = await Promise.all([getMarketPayload(), getPartyLogos(locale), getRiskPageHref(locale)]);
   const logos = exchangeLogos(parties);
   const exchanges = market.snapshot?.exchanges ?? [];
 
@@ -79,6 +80,7 @@ export default async function MarketsPage({ params }: Props) {
             })}
           </div>
           <MarketPulse initial={market} t={t} locale={locale} logos={logos} />
+          {riskHref && <RmsStrip body={t.rmsStripBody} link={t.rmsStripLink} href={riskHref} />}
         </div>
       </Shell>
       <CtaBand t={t} locale={locale} />

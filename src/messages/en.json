@@ -739,5 +739,13 @@
   "rmsNote5": "This client's BO account is blocked.",
   "rmsNote6": "The client holds 1,200 of these shares.",
   "rmsChip": "RMS built in",
-  "capRiskTag": "Built into the OMS"
+  "capRiskTag": "Built into the OMS",
+  "jobsAll": "All roles",
+  "jobsFilter": "Filter roles by team",
+  "jobsShowing": "Showing {n} of {total} roles",
+  "eventsPhotos": "{n} photos",
+  "eventsWith": "With",
+  "eventsOpen": "See the event",
+  "rmsStripBody": "Every order placed through Xpert's platform passes RMS, the risk checks built into the OMS, before it reaches DSE or CSE.",
+  "rmsStripLink": "See the checks"
 }

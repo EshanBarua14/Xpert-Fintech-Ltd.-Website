@@ -189,3 +189,14 @@ Admin → Market data → Refresh interval: 15, 30 or 60 seconds. The server rea
 ## History and undo
 
 Before an admin changes or deletes anything (pages, blocks, products and their items, people and their roles, news, events and their photos, jobs, organizations, apps, menu links, redirects, ecosystem boxes and flows, settings, design, site text…), the version from just before is kept. **Admin → History & undo** lists them, newest first: *Restore this version* puts a changed item back, *Bring back* restores one deleted for good, in both languages. The version a restore replaces is kept too, so a restore can be undone the same way. After a save, the "Saved." message links straight to that item's earlier versions. Items in the trash are restored from their own list (View trash → Restore). Versions are kept for 180 days.
+
+## RMS (risk checks built into the OMS)
+
+RMS is not a separate product: it is the risk check inside the Trading OMS.
+The "Risk checks built into the OMS" panel (sample orders checked one rule at
+a time, with a fictional stock and prices) appears on the OMS product page, the
+platform page, the home page (hide it in Admin → Design → Home sections:
+"Risk checks") and at the top of the Risk checks page. To put it on any other
+page, add the **Risk checks (RMS)** block in Admin → Pages. The panel's words
+are in Admin → Site text (keys starting `rms`). The ecosystem map's RMS box
+links to the Risk checks page.

@@ -11,8 +11,10 @@ import { cn } from "@/lib/utils/cn";
  * Interactive product showcase: a product rail on one side, a large product
  * stage on the other with the product's interface (screenshot) or animated
  * illustration, its workflow drawn as a live lane and its key capabilities.
- * Cycles through products while on screen; stops when the visitor interacts,
- * hovers, focuses, or prefers reduced motion.
+ * Cycles through products while on screen. Hovering or focusing holds it; a
+ * product the visitor picks stays for a while before the tour carries on;
+ * the pause button stops it; reduced motion keeps it still. RMS, built into
+ * the OMS, is marked on the OMS and on its step in the workflow.
  */
 
 export type ShowcaseLabels = {
@@ -21,13 +23,21 @@ export type ShowcaseLabels = {
   capabilities: string;
   conceptual: string;
   typeLabels: Record<string, string>;
+  play?: string;
+  pause?: string;
+  /** "RMS built in", shown on the Trading OMS. */
+  rmsBuiltIn?: string;
 };
 
 const CYCLE_MS = 7000;
+/** After a visitor picks a product, the tour waits this long before carrying on. */
+const RESUME_MS = 15000;
 
 export function ProductShowcase({ products, labels }: { products: ShowcaseProduct[]; labels: ShowcaseLabels }) {
   const [active, setActive] = useState(0);
-  const [auto, setAuto] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const [picked, setPicked] = useState(false);
+  const resumeAt = useRef(0);
   const [hold, setHold] = useState(false);
   const [visible, setVisible] = useState(false);
   const [reduce, setReduce] = useState(false);
@@ -45,12 +55,14 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
   }, []);
 
   useEffect(() => {
-    if (!auto || hold || !visible || reduce || products.length < 2) return;
+    if (paused || hold || !visible || reduce || products.length < 2) return;
     const id = window.setTimeout(() => {
-      if (!document.hidden) setActive((a) => (a + 1) % products.length);
-    }, CYCLE_MS);
+      if (document.hidden) return;
+      setPicked(false);
+      setActive((a) => (a + 1) % products.length);
+    }, Math.max(CYCLE_MS, resumeAt.current - Date.now()));
     return () => window.clearTimeout(id);
-  }, [active, auto, hold, visible, reduce, products.length]);
+  }, [active, paused, hold, visible, reduce, picked, products.length]);
 
   if (!products.length) return null;
   const p = products[active] ?? products[0]!;
@@ -58,7 +70,8 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
   const choose = (i: number, focus = false) => {
     const next = (i + products.length) % products.length;
     setActive(next);
-    setAuto(false);
+    setPicked(true);
+    resumeAt.current = Date.now() + RESUME_MS;
     if (focus) tabRefs.current[next]?.focus();
   };
   const onKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
@@ -79,6 +92,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
       onBlurCapture={() => setHold(false)}
     >
       {/* Product rail */}
+      <div className="flex min-w-0 flex-col gap-3">
       <div role="tablist" aria-orientation="vertical" aria-label={labels.capabilities} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">
         {products.map((item, i) => {
           const on = i === active;
@@ -109,7 +123,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
                   </span>
                 </span>
               </span>
-              {on && auto && !reduce && products.length > 1 && (
+              {on && !paused && !picked && !reduce && products.length > 1 && (
                 <span
                   key={`bar-${active}`}
                   aria-hidden="true"
@@ -120,6 +134,26 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
             </button>
           );
         })}
+      </div>
+      {!reduce && products.length > 1 && labels.play && labels.pause && (
+        <button
+          type="button"
+          onClick={() => {
+            setPaused((v) => !v);
+            resumeAt.current = 0;
+            setPicked(false);
+          }}
+          aria-pressed={paused}
+          className="inline-flex items-center gap-2 self-start rounded-full border border-fg/15 px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-brand-sky/60 hover:text-fg"
+        >
+          {paused ? (
+            <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3 fill-current"><path d="M4 2.5v11l9-5.5z" /></svg>
+          ) : (
+            <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3 fill-current"><path d="M4 3h3v10H4zM9 3h3v10H9z" /></svg>
+          )}
+          {paused ? labels.play : labels.pause}
+        </button>
+      )}
       </div>
 
       {/* Product stage */}
@@ -142,7 +176,16 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
                 <ol className="showcase-lane relative flex flex-wrap items-center gap-x-1.5 gap-y-2">
                   {p.steps.map((s, i) => (
                     <li key={s} className="showcase-step flex items-center gap-1.5" style={{ animationDelay: `${150 + i * 120}ms` }}>
-                      <span className="rounded-full border border-[color-mix(in_srgb,var(--p-to)_40%,transparent)] bg-[color-mix(in_srgb,var(--p-to)_12%,transparent)] px-2.5 py-1 font-mono text-[max(11px,0.6875rem)] text-text-primary">{s}</span>
+                      <span
+                        className={cn(
+                          "rounded-full border px-2.5 py-1 font-mono text-[max(11px,0.6875rem)] text-text-primary",
+                          /\bRMS\b|আরএমএস/.test(s)
+                            ? "border-brand-sky/60 bg-brand-sky/15 shadow-[0_0_18px_-6px_rgb(34_188_235/0.8)]"
+                            : "border-[color-mix(in_srgb,var(--p-to)_40%,transparent)] bg-[color-mix(in_srgb,var(--p-to)_12%,transparent)]",
+                        )}
+                      >
+                        {s}
+                      </span>
                       {i < p.steps.length - 1 && <span aria-hidden="true" className="showcase-arrow text-text-secondary">→</span>}
                     </li>
                   ))}
@@ -156,6 +199,12 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
             <div className="flex flex-col gap-3">
               <ProductMark productKey={p.key} logo={p.logo} look={p.look} name={p.name} size="lg" className="showcase-rise" />
               <h3 className="showcase-rise font-display text-3xl leading-[1.05] font-semibold tracking-[-0.025em] text-balance md:text-4xl">{p.name}</h3>
+              {p.key === "trading-platform" && labels.rmsBuiltIn && (
+                <span className="showcase-rise inline-flex items-center gap-1.5 self-start rounded-full border border-brand-sky/30 bg-brand-sky/10 px-2.5 py-0.5 text-xs font-semibold text-brand-sky">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="size-3.5 fill-none stroke-current stroke-2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" /></svg>
+                  {labels.rmsBuiltIn}
+                </span>
+              )}
               {p.tagline && <p className="showcase-rise text-gradient-brand text-lg font-medium" style={{ animationDelay: "80ms" }}>{p.tagline}</p>}
               {p.summary && (
                 <p className="showcase-rise line-clamp-5 leading-relaxed text-text-secondary" style={{ animationDelay: "140ms" }}>

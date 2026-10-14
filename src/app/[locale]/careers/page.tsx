@@ -5,11 +5,12 @@ import { notFound } from "next/navigation";
 import { CtaBand, PageHero, SectionHeader, Shell } from "@/components/flagship/Sections";
 import { Icon } from "@/components/ui/Icon";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
-import { getMessages, type Messages } from "@/lib/i18n/messages";
-import { getJobs, type JobCard } from "@/lib/public/insights";
+import { getMessages } from "@/lib/i18n/messages";
+import { getJobs } from "@/lib/public/insights";
 import { buildMetadata } from "@/lib/public/seo";
 import { employmentLabel, jobTag } from "@/lib/public/labels";
-import { cn } from "@/lib/utils/cn";
+import { JobBoard, type JobRowData } from "@/components/careers/JobBoard";
+import { getSiteInfo } from "@/lib/content/settings";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -21,36 +22,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 
-function JobRow({ j, t, i, loc }: { j: JobCard; t: Messages; i: number; loc: AppLocale }) {
-  return (
-    <li data-reveal style={{ "--d": i % 4 } as CSSProperties}>
-      <Link href={j.href} className={cn("spotlight glass group grid gap-4 rounded-3xl p-6 transition-transform duration-500 hover:-translate-y-0.5 md:grid-cols-[1fr_auto] md:items-center md:p-7")}>
-        <span className="flex flex-col gap-2">
-          <span className="flex flex-wrap items-center gap-2 text-xs">
-            {j.department && <span className="rounded-full bg-brand-sky/10 px-2.5 py-1 font-semibold text-cyan-300">{jobTag(j.department, loc)}</span>}
-            <span className="rounded-full border border-fg/10 px-2.5 py-1 text-text-secondary">{employmentLabel(t, j.employmentType)}</span>
-            {j.location && <span className="rounded-full border border-fg/10 px-2.5 py-1 text-text-secondary">{jobTag(j.location, loc)}</span>}
-            {!j.open && <span className="rounded-full border border-gold/40 px-2.5 py-1 text-gold">{t.jobClosed}</span>}
-          </span>
-          <span className="font-display text-xl font-semibold tracking-tight text-text-primary md:text-2xl">{j.title}</span>
-          {j.summary && <span className="line-clamp-2 text-sm text-text-secondary">{j.summary}</span>}
-        </span>
-        <span className="inline-flex items-center gap-2 text-sm font-semibold text-brand-sky">
-          {j.open ? t.viewAndApply : t.viewJob}
-         
-        </span>
-      </Link>
-    </li>
-  );
-}
-
 /** Jobs from Admin → Careers, grouped by department; open roles first. */
 export default async function CareersPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const loc = locale as AppLocale;
   const t = getMessages(loc);
-  const jobs = await getJobs(loc);
+  const [jobs, info] = await Promise.all([getJobs(loc), getSiteInfo(loc)]);
+  const companyLinkedIn = info.socialLinks.find((l) => /linkedin\.com\/company\//i.test(l.url))?.url ?? null;
+  const dateFmt = new Intl.DateTimeFormat(loc === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const rows: JobRowData[] = jobs.map((j) => ({
+    id: j.id,
+    href: j.href,
+    title: j.title,
+    summary: j.summary,
+    dept: j.department ? jobTag(j.department, loc) : null,
+    type: employmentLabel(t, j.employmentType),
+    location: j.location ? jobTag(j.location, loc) : null,
+    open: j.open,
+    deadline: j.deadline ? t.applyBy.replace("{date}", dateFmt.format(j.deadline)) : null,
+    apply: [
+      j.linkedinUrl ? { kind: "linkedin" as const, href: j.linkedinUrl, label: t.applyLinkedIn } : companyLinkedIn ? { kind: "linkedin" as const, href: `${companyLinkedIn.replace(/\/+$/, "")}/jobs/`, label: t.applyLinkedInCompany } : null,
+      j.bdjobsUrl ? { kind: "bdjobs" as const, href: j.bdjobsUrl, label: t.applyBdjobs } : null,
+      j.applyEmail ? { kind: "email" as const, href: `mailto:${j.applyEmail}?subject=${encodeURIComponent(j.title)}`, label: t.applyByEmail } : null,
+    ].filter((x): x is NonNullable<typeof x> => x !== null),
+  }));
   const why = [
     { icon: "exchange", title: t.whyCareer1Title, body: t.whyCareer1Body },
     { icon: "users", title: t.whyCareer2Title, body: t.whyCareer2Body },
@@ -85,11 +81,11 @@ export default async function CareersPage({ params }: Props) {
               </Link>
             </div>
           ) : (
-            <ul className="flex flex-col gap-3">
-              {jobs.map((j, i) => (
-                <JobRow key={j.id} j={j} t={t} i={i} loc={loc} />
-              ))}
-            </ul>
+            <JobBoard
+              jobs={rows}
+              locale={loc}
+              labels={{ all: t.jobsAll, closed: t.jobClosed, view: t.viewJob, viewAndApply: t.viewAndApply, filter: t.jobsFilter, showing: t.jobsShowing }}
+            />
           )}
         </div>
       </Shell>

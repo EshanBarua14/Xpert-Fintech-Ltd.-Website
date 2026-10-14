@@ -125,6 +125,9 @@ export type JobCard = {
   experience: string | null;
   deadline: Date | null;
   open: boolean;
+  linkedinUrl: string | null;
+  bdjobsUrl: string | null;
+  applyEmail: string | null;
 };
 
 /** Open today if not marked closed and the deadline (end of that day) has not passed. */
@@ -155,6 +158,9 @@ export const getJobs = cache(async (locale: AppLocale): Promise<JobCard[]> => {
         experience: c.experience,
         deadline: c.deadline,
         open: isOpen(c, now),
+        linkedinUrl: c.linkedinUrl,
+        bdjobsUrl: c.bdjobsUrl,
+        applyEmail: c.applyEmail,
       };
     })
     .filter((j): j is JobCard => j !== null)
@@ -442,4 +448,65 @@ export const getCaseStudyBySlug = cache(async (locale: AppLocale, slug: string) 
   if (!c) return null;
   const covers = await mediaMap([c.coverMediaId], locale);
   return { caseStudy: c, tr: pick(c.translations, locale)!, cover: covers.get(c.coverMediaId ?? "") ?? null };
+});
+
+export type TimelineEvent = {
+  id: string;
+  href: string;
+  title: string;
+  summary: string | null;
+  location: string | null;
+  /** Full date, or month and year when the day is not confirmed. */
+  date: string | null;
+  year: number | null;
+  day: string | null;
+  month: string | null;
+  cover: MediaInfo | null;
+  photos: number;
+  /** Organizations that took part (Admin → Events), each with its website when known. */
+  orgs: { name: string; url: string | null }[];
+};
+
+/** Published events, newest first, with what the events page timeline shows. */
+export const getEventTimeline = cache(async (locale: AppLocale): Promise<TimelineEvent[]> => {
+  const rows = await db.event.findMany({
+    where: publishedWhere(),
+    orderBy: [{ startsAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
+    include: {
+      translations: true,
+      gallery: { select: { id: true } },
+      organizations: { orderBy: { sortOrder: "asc" }, include: { organization: { include: { translations: true } } } },
+    },
+  });
+  const covers = await mediaMap(rows.map((e) => e.coverMediaId), locale);
+  const tag = locale === "bn" ? "bn-BD" : "en-GB";
+  const dayF = new Intl.DateTimeFormat(tag, { day: "numeric", timeZone: "Asia/Dhaka" });
+  const monF = new Intl.DateTimeFormat(tag, { month: "short", timeZone: "Asia/Dhaka" });
+  const fullF = new Intl.DateTimeFormat(tag, { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" });
+  const monthYearF = new Intl.DateTimeFormat(tag, { month: "long", year: "numeric", timeZone: "Asia/Dhaka" });
+  const out: TimelineEvent[] = [];
+  for (const e of rows) {
+    const tr = pick(e.translations, locale);
+    if (!tr) continue;
+    const own = e.translations.find((x) => x.locale === locale);
+    const d = e.startsAt;
+    out.push({
+      id: e.id,
+      href: `/${own ? locale : "en"}/events/${(own ?? tr).slug}`,
+      title: tr.title,
+      summary: tr.summary,
+      location: tr.location ?? null,
+      date: d ? (e.dateIsApprox ? monthYearF : fullF).format(d) : null,
+      year: d ? Number(new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "Asia/Dhaka" }).format(d)) : null,
+      day: d && !e.dateIsApprox ? dayF.format(d) : null,
+      month: d ? monF.format(d) : null,
+      cover: e.coverMediaId ? (covers.get(e.coverMediaId) ?? null) : null,
+      photos: e.gallery.length,
+      orgs: e.organizations
+        .filter((x) => x.organization.status === "PUBLISHED" && !x.organization.deletedAt)
+        .map((x) => ({ name: pick(x.organization.translations, locale)?.name ?? "", url: x.organization.websiteUrl }))
+        .filter((o) => o.name),
+    });
+  }
+  return out;
 });

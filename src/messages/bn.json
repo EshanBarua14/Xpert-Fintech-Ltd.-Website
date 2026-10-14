@@ -684,6 +684,14 @@
   "consLegendApp": "ব্র্যান্ডেড অ্যাপ চালু",
   "consLegendOwns": "বেছে নেওয়া হাউস: মালিকানা ভেতরে, প্ল্যাটফর্ম বাইরে",
   "consAllMembers": "সদস্য হাউস",
+  "consPlay": "ট্যুর চালু করুন",
+  "consPause": "ট্যুর থামান",
+  "consNext": "পরের সদস্য",
+  "consPrev": "আগের সদস্য",
+  "consAutoHint": "নিজে থেকেই চলে। থামাতে মাউস রাখুন বা একটি হাউস বেছে নিন।",
+  "consDseTrec": "ডিএসই ট্রেক",
+  "consCseTrec": "সিএসই ট্রেক",
+  "consVisitWebsite": "ওয়েবসাইট",
   "consStatSeats": "সদস্যদের পর্ষদ-আসন",
   "consStatApps": "চালু ব্র্যান্ডেড অ্যাপ"
 }

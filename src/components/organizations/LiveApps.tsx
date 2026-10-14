@@ -7,6 +7,8 @@ export type LiveApp = {
   id: string;
   appName: string;
   brokerage: string | null;
+  /** The brokerage's own website, when known. */
+  brokerageUrl?: string | null;
   /** The brokerage's logo (with permission), shown instead of the app's initials. */
   logo?: { url: string; width: number | null; height: number | null } | null;
   playStoreUrl: string | null;
@@ -55,7 +57,14 @@ export function LiveApps({ apps, labels }: { apps: LiveApp[]; labels: { android:
                 )}
                 <span className="flex w-full min-w-0 flex-col">
                   <span className="font-display text-sm leading-snug font-semibold text-text-primary sm:text-base">{a.appName}</span>
-                  {a.brokerage && <span className="line-clamp-2 text-xs leading-snug text-text-secondary">{a.brokerage}</span>}
+                  {a.brokerage &&
+                    (a.brokerageUrl ? (
+                      <a href={a.brokerageUrl} target="_blank" rel="noopener noreferrer" className="line-clamp-2 self-start text-xs leading-snug text-text-secondary underline decoration-fg/20 underline-offset-2 transition-colors hover:text-brand-sky hover:decoration-brand-sky/60">
+                        {a.brokerage}
+                      </a>
+                    ) : (
+                      <span className="line-clamp-2 text-xs leading-snug text-text-secondary">{a.brokerage}</span>
+                    ))}
                 </span>
               </span>
               {links.length > 0 && (

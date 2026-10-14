@@ -37,6 +37,7 @@ import { DIRECTOR_PROFILES } from "../src/content/xfl2/director-profiles";
 import { sniff } from "../src/lib/media/inspect";
 import { CASE_STUDY_DRAFTS } from "../src/content/xfl2/case-study-drafts";
 import { CAREER_SEED } from "../src/content/xfl2/careers";
+import { MEMBER_PROFILES } from "../src/content/xfl2/member-profiles";
 import { BLOCK_BN, EVENT_BN, ITEM_BN, LEGAL_BN, NAV_BN, NODE_BN, OFFERING_BN, OFFICE_BN, ORG_BN, PAGE_BN, PERSON_BN } from "../src/content/xfl2/bangla";
 
 const db = new PrismaClient();
@@ -1643,6 +1644,34 @@ async function seedStoreLinks() {
   if (added || updated) console.log(`• Branded apps: ${added} added, ${updated} updated from Google Play and the App Store`);
 }
 
+/**
+ * Website, DSE/CSE TREC numbers and a one-line description for each member
+ * brokerage house (src/content/xfl2/member-profiles.ts), added once and only
+ * where the field is still empty.
+ */
+async function seedMemberProfiles() {
+  const MARK = "seed.member-profiles-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  let filled = 0;
+  for (const m of MEMBER_PROFILES) {
+    const org = await db.organization.findUnique({ where: { key: m.key }, include: { translations: true } });
+    if (!org) continue;
+    const data = {
+      ...(!org.websiteUrl && m.website && { websiteUrl: m.website }),
+      ...(!org.dseTrec && m.dseTrec && { dseTrec: m.dseTrec }),
+      ...(!org.cseTrec && m.cseTrec && { cseTrec: m.cseTrec }),
+    };
+    if (Object.keys(data).length) await db.organization.update({ where: { id: org.id }, data });
+    for (const l of ["en", "bn"] as const) {
+      const tr = org.translations.find((t) => t.locale === (l === "en" ? EN : BN));
+      if (tr && !tr.description) await db.organizationTranslation.update({ where: { id: tr.id }, data: { description: m.description[l] } });
+    }
+    filled++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  if (filled) console.log(`• Member houses: website, TREC numbers and description added where empty (${filled})`);
+}
+
 /** Older databases: mark seeded stand-in profiles as placeholders (until an editor changes that). */
 async function markPlaceholders() {
   const res = await db.person.updateMany({ where: { key: { startsWith: "placeholder-" }, isPlaceholder: false, translations: { some: { name: "Name to be confirmed" } } }, data: { isPlaceholder: true } });
@@ -1688,6 +1717,7 @@ async function main() {
   await seedNavAdditions();
   await seedCaseStudyDrafts();
   await seedCareers();
+  await seedMemberProfiles();
   await seedBanglaGaps();
   console.log("Content seed complete.");
 }

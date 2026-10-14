@@ -684,6 +684,14 @@
   "consLegendApp": "Branded app live",
   "consLegendOwns": "Chosen house: ownership in, platform out",
   "consAllMembers": "Member houses",
+  "consPlay": "Play the tour",
+  "consPause": "Pause the tour",
+  "consNext": "Next member",
+  "consPrev": "Previous member",
+  "consAutoHint": "Plays by itself. Hover or pick a house to stay.",
+  "consDseTrec": "DSE TREC",
+  "consCseTrec": "CSE TREC",
+  "consVisitWebsite": "Website",
   "consStatSeats": "Board seats held by members",
   "consStatApps": "Branded apps live"
 }

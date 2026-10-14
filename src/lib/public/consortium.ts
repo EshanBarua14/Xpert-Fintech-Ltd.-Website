@@ -19,7 +19,10 @@ export type ConsortiumMember = {
   id: string;
   name: string;
   shortName: string | null;
+  description: string | null;
   websiteUrl: string | null;
+  dseTrec: string | null;
+  cseTrec: string | null;
   logo: { url: string; width: number | null; height: number | null } | null;
   apps: ConsortiumApp[];
   reps: ConsortiumRep[];
@@ -89,7 +92,10 @@ export const getConsortium = cache(async (locale: AppLocale): Promise<Consortium
         id: o.id,
         name: tr?.name ?? "",
         shortName: tr?.shortName ?? null,
+        description: tr?.description ?? null,
         websiteUrl: o.websiteUrl,
+        dseTrec: o.dseTrec ?? null,
+        cseTrec: o.cseTrec ?? null,
         logo: logo ? { url: logo.url, width: logo.width, height: logo.height } : null,
         apps: deployments
           .filter((d) => d.organizationId === o.id)

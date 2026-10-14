@@ -779,6 +779,9 @@ model Organization {
   key            String?          @unique
   kind           OrganizationKind
   websiteUrl     String?
+  /// Stock exchange membership numbers of a brokerage house (TREC = Trading Right Entitlement Certificate).
+  dseTrec        String?
+  cseTrec        String?
   logoMediaId    String?          @db.Uuid
   /// Logo shown publicly only when written permission is on file.
   logoPermission Boolean          @default(false)

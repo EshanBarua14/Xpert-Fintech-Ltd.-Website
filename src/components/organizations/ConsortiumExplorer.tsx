@@ -32,7 +32,20 @@ export type ConsortiumLabels = {
   boardHref: string;
   consultantsHref: string;
   viewProfile: string;
+  play: string;
+  pause: string;
+  next: string;
+  prev: string;
+  autoHint: string;
+  dseTrec: string;
+  cseTrec: string;
+  visitWebsite: string;
 };
+
+/** How long each house stays on screen while the map plays by itself. */
+const DWELL_MS = 6500;
+/** After a visitor picks a house, the tour waits this long before carrying on. */
+const RESUME_MS = 14000;
 
 /* Geometry of the map (SVG user units). */
 const SIZE = 640;
@@ -67,32 +80,53 @@ function plateEdge(px: number, py: number) {
  * through the houses slowly; reduced motion keeps it still.
  */
 export function ConsortiumExplorer({ members, labels, locale }: { members: ConsortiumMember[]; labels: ConsortiumLabels; locale: "en" | "bn" }) {
-  const [active, setActive] = useState<number | null>(null);
-  const [auto, setAuto] = useState(true);
-  const [reduce, setReduce] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
   const n = members.length;
+  const [active, setActive] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [hold, setHold] = useState(false);
+  const [reduce, setReduce] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLSpanElement>(null);
+  const elapsed = useRef(0);
+  const waitUntil = useRef(0);
   const nf = (v: number) => new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(v);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReduce(mq.matches);
-    const io = new IntersectionObserver(([e]) => setVisible(!!e?.isIntersecting), { threshold: 0.25 });
+    // With reduced motion the map does not move by itself; the visitor steps through it.
+    if (mq.matches) setPlaying(false);
+    const io = new IntersectionObserver(([e]) => setVisible(!!e?.isIntersecting), { threshold: 0.2 });
     if (rootRef.current) io.observe(rootRef.current);
     return () => io.disconnect();
   }, []);
 
-  // A slow tour through the houses until the visitor picks one.
+  // The tour: each house for a few seconds, then the next. It waits while the pointer
+  // or keyboard focus is on the map, while it is off screen, and for a while after a choice.
   useEffect(() => {
-    if (!auto || reduce || !visible || n < 2) return;
-    const id = setInterval(() => setActive((a) => (a === null ? 0 : (a + 1) % n)), 3200);
+    if (!playing || n < 2) return;
+    let last = performance.now();
+    const id = setInterval(() => {
+      const now = performance.now();
+      const dt = now - last;
+      last = now;
+      const waiting = hold || !visible || document.hidden || Date.now() < waitUntil.current;
+      if (!waiting) elapsed.current += dt;
+      if (barRef.current) barRef.current.style.transform = `scaleX(${Math.min(1, elapsed.current / DWELL_MS)})`;
+      if (elapsed.current >= DWELL_MS) {
+        elapsed.current = 0;
+        setActive((a) => (a + 1) % n);
+      }
+    }, 80);
     return () => clearInterval(id);
-  }, [auto, reduce, visible, n]);
+  }, [playing, hold, visible, n]);
 
-  const choose = (i: number | null) => {
-    setAuto(false);
-    setActive(i);
+  const choose = (i: number) => {
+    setActive(((i % n) + n) % n);
+    elapsed.current = 0;
+    waitUntil.current = Date.now() + RESUME_MS;
+    if (barRef.current) barRef.current.style.transform = "scaleX(0)";
   };
   const onKey = (e: KeyboardEvent, i: number) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -100,23 +134,26 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
       choose(i);
     } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       e.preventDefault();
-      const j = (i + 1) % n;
-      choose(j);
-      document.getElementById(`cx-node-${j}`)?.focus();
+      choose(i + 1);
+      document.getElementById(`cx-node-${(i + 1) % n}`)?.focus();
     } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
       e.preventDefault();
-      const j = (i - 1 + n) % n;
-      choose(j);
-      document.getElementById(`cx-node-${j}`)?.focus();
-    } else if (e.key === "Escape") choose(null);
+      choose(i - 1);
+      document.getElementById(`cx-node-${(i - 1 + n) % n}`)?.focus();
+    }
   };
 
-  const m = active !== null ? members[active] : null;
-  const seats = members.filter((x) => x.reps.some((r) => r.group === "BOARD")).length;
-  const appsLive = members.reduce((s, x) => s + x.apps.length, 0);
+  const m = members[active] ?? null;
 
   return (
-    <div ref={rootRef} className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start">
+    <div
+      ref={rootRef}
+      onPointerEnter={(e) => e.pointerType === "mouse" && setHold(true)}
+      onPointerLeave={() => setHold(false)}
+      onFocusCapture={(e) => (e.target as Element).matches?.(":focus-visible") && setHold(true)}
+      onBlurCapture={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setHold(false)}
+      className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start"
+    >
       {/* The map */}
       <div className="flex flex-col gap-4">
         <div className="relative mx-auto w-full max-w-[40rem]">
@@ -186,9 +223,9 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                   tabIndex={0}
                   aria-pressed={on}
                   aria-label={`${x.name}${seat ? ` — ${labels.boardSeat}` : ""}${x.apps.length ? ` — ${labels.appLive}` : ""}`}
-                  onClick={() => choose(on ? null : i)}
+                  onClick={() => choose(i)}
                   onKeyDown={(e) => onKey(e, i)}
-                  onMouseEnter={() => !auto && setActive(i)}
+                  style={{ transform: on ? "scale(1.12)" : "scale(1)", transformOrigin: `${p.x}px ${p.y}px`, transition: reduce ? undefined : "transform 450ms cubic-bezier(0.16, 1, 0.3, 1)" }}
                   className="cursor-pointer outline-none [&:focus-visible>rect.cx-plate]:stroke-brand-sky [&:focus-visible>rect.cx-plate]:stroke-[3]"
                 >
                   {(seat || consult) && <circle cx={mark.x - side.x} cy={mark.y - side.y} r={6} className={consult ? "fill-gold/50" : "fill-gold"} />}
@@ -235,7 +272,41 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
 
       {/* What the chosen house is connected to */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-[calc(7rem+var(--ticker-h,0px))]">
-        <div aria-live="polite" className="glass min-h-[22rem] rounded-[1.75rem] border border-fg/10 p-6 sm:p-7">
+        <div className="glass relative min-h-[22rem] overflow-hidden rounded-[1.75rem] border border-fg/10 p-6 sm:p-7">
+          {/* Time left on this house while the map plays by itself */}
+          <span aria-hidden="true" className="absolute inset-x-0 top-0 h-[3px] bg-fg/[0.06]">
+            <span ref={barRef} className="block h-full origin-left bg-gradient-to-r from-brand-sky to-gold" style={{ transform: "scaleX(0)" }} />
+          </span>
+          {/* Controls: previous, play or pause, next, and where we are */}
+          <div className="mb-5 flex items-center gap-2">
+            <button type="button" onClick={() => choose(active - 1)} aria-label={labels.prev} className="flex size-9 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-brand-sky/60 hover:text-fg">
+              <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 fill-none stroke-current stroke-[1.8]"><path d="M10 3 5 8l5 5" /></svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPlaying((p) => !p);
+                waitUntil.current = 0;
+              }}
+              aria-label={playing ? labels.pause : labels.play}
+              aria-pressed={!playing}
+              className="flex size-9 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-brand-sky/60 hover:text-fg"
+            >
+              {playing ? (
+                <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 fill-current"><path d="M4 3h3v10H4zM9 3h3v10H9z" /></svg>
+              ) : (
+                <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 fill-current"><path d="M4 2.5v11l9-5.5z" /></svg>
+              )}
+            </button>
+            <button type="button" onClick={() => choose(active + 1)} aria-label={labels.next} className="flex size-9 items-center justify-center rounded-full border border-fg/15 text-text-secondary transition-colors hover:border-brand-sky/60 hover:text-fg">
+              <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 fill-none stroke-current stroke-[1.8]"><path d="m6 3 5 5-5 5" /></svg>
+            </button>
+            <span className="ml-1 whitespace-nowrap font-mono text-xs text-text-secondary tabular-nums">
+              {nf(active + 1)} / {nf(n)}
+            </span>
+            {playing && !reduce && <span className="ml-auto hidden text-right text-xs text-text-secondary sm:inline">{labels.autoHint}</span>}
+          </div>
+          <div aria-live={playing ? "off" : "polite"}>
           {m ? (
             <div key={m.id} className="cx-panel flex flex-col gap-6">
               <div className="flex items-center gap-4">
@@ -255,6 +326,34 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                   </p>
                 </div>
               </div>
+
+              {(m.description || m.dseTrec || m.cseTrec || m.websiteUrl) && (
+                <div className="flex flex-col gap-3">
+                  {m.description && <p className="text-sm leading-relaxed text-text-primary/90">{m.description}</p>}
+                  <p className="flex flex-wrap items-center gap-2 text-xs">
+                    {m.dseTrec && (
+                      <span className="rounded-lg border border-fg/10 px-2.5 py-1 font-mono text-text-secondary">
+                        {labels.dseTrec} <span className="font-semibold text-text-primary">{nf(Number(m.dseTrec)).padStart(m.dseTrec.length, locale === "bn" ? "০" : "0")}</span>
+                      </span>
+                    )}
+                    {m.cseTrec && (
+                      <span className="rounded-lg border border-fg/10 px-2.5 py-1 font-mono text-text-secondary">
+                        {labels.cseTrec} <span className="font-semibold text-text-primary">{nf(Number(m.cseTrec)).padStart(m.cseTrec.length, locale === "bn" ? "০" : "0")}</span>
+                      </span>
+                    )}
+                    {m.websiteUrl && (
+                      <a
+                        href={m.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-lg border border-brand-sky/40 px-2.5 py-1 font-semibold text-brand-sky transition-colors hover:bg-brand-sky/10"
+                      >
+                        {labels.visitWebsite}: {m.websiteUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")} <span aria-hidden="true">↗</span>
+                      </a>
+                    )}
+                  </p>
+                </div>
+              )}
 
               <section className="flex flex-col gap-3">
                 <h4 className="text-sm font-semibold text-text-secondary">{labels.representedBy}</h4>
@@ -319,32 +418,11 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                 )}
               </section>
 
-              {m.websiteUrl && (
-                <a href={m.websiteUrl} target="_blank" rel="noopener noreferrer" className="self-start text-sm font-semibold text-brand-sky hover:underline">
-                  {labels.website}: {m.websiteUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")} <span aria-hidden="true">↗</span>
-                </a>
-              )}
             </div>
           ) : (
-            <div className="flex h-full flex-col justify-center gap-5">
-              <div className="flex flex-col gap-2">
-                <h3 className="font-display text-2xl font-semibold text-text-primary">{labels.pick}</h3>
-                <p className="text-text-secondary">{labels.pickBody}</p>
-              </div>
-              <dl className="grid grid-cols-3 gap-3 border-t border-fg/10 pt-5">
-                {[
-                  [nf(n), labels.allMembers],
-                  [nf(seats), labels.boardSeat],
-                  [nf(appsLive), labels.appLive],
-                ].map(([v, l]) => (
-                  <div key={l} className="flex flex-col gap-1">
-                    <dd className="font-display text-3xl text-text-primary">{v}</dd>
-                    <dt className="text-xs text-text-secondary">{l}</dt>
-                  </div>
-                ))}
-              </dl>
-            </div>
+            <p className="text-text-secondary">{labels.pickBody}</p>
           )}
+          </div>
         </div>
         {/* Every house as a button too: quick on phones, and a plain list for screen readers. */}
         <div className="flex flex-col gap-2">
@@ -355,7 +433,7 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                 <button
                   type="button"
                   aria-pressed={active === i}
-                  onClick={() => choose(active === i ? null : i)}
+                  onClick={() => choose(i)}
                   className={cn(
                     "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
                     active === i ? "border-brand-sky bg-brand-sky/15 text-text-primary" : "border-fg/10 text-text-secondary hover:border-brand-sky/50 hover:text-text-primary",

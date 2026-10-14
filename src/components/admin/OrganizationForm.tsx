@@ -15,6 +15,8 @@ export type OrgFormValues = {
   publishAt: string;
   sortOrder: number;
   websiteUrl: string;
+  dseTrec: string;
+  cseTrec: string;
   logoMediaId: string;
   logoPermission: boolean;
   en: { name: string; shortName: string; description: string };
@@ -69,6 +71,10 @@ export function OrganizationForm({ values, images }: { values: OrgFormValues; im
             error={e.kind}
           />
           <TextInput id="websiteUrl" type="url" label="Website" placeholder="https://" defaultValue={values.websiteUrl} error={e.websiteUrl} />
+          <div className="grid grid-cols-2 gap-3">
+            <TextInput id="dseTrec" label="DSE TREC no." placeholder="026" hint="Brokerages only." defaultValue={values.dseTrec} error={e.dseTrec} />
+            <TextInput id="cseTrec" label="CSE TREC no." placeholder="021" defaultValue={values.cseTrec} error={e.cseTrec} />
+          </div>
           <ImagePicker name="logoMediaId" label="Logo" options={images} defaultValue={values.logoMediaId} error={e.logoMediaId} />
           <label className="flex items-start gap-3 text-sm">
             <input type="checkbox" name="logoPermission" defaultChecked={values.logoPermission} className="mt-0.5 h-4 w-4 accent-brand-royal" />

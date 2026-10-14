@@ -77,6 +77,7 @@ export const getLiveApps = cache(async (locale: AppLocale) => {
       id: d.id,
       appName: d.appName!,
       brokerage: org?.name ?? null,
+      brokerageUrl: o?.websiteUrl ?? null,
       logo: logo ? { url: logo.url, width: logo.width, height: logo.height } : null,
       playStoreUrl: d.playStoreUrl,
       appStoreUrl: d.appStoreUrl,

@@ -123,6 +123,14 @@ export default async function ConsortiumPage({ params }: Props) {
                   boardHref: `/${locale}/company/board`,
                   consultantsHref: `/${locale}/company/consultants`,
                   viewProfile: t.viewProfile,
+                  play: t.consPlay,
+                  pause: t.consPause,
+                  next: t.consNext,
+                  prev: t.consPrev,
+                  autoHint: t.consAutoHint,
+                  dseTrec: t.consDseTrec,
+                  cseTrec: t.consCseTrec,
+                  visitWebsite: t.consVisitWebsite,
                 }}
               />
             </div>

@@ -29,10 +29,10 @@ export const BOARD: RosterPerson[] = [
   { key: "dilip-kajuri", name: "Dilip Kajuri", title: "Director", rank: 3 },
   { key: "aminul-islam", name: "Aminul Islam", title: "Director", rank: 4 },
   { key: "mohd-shaahed-imran", name: "Mohd. Shaahed Imran", formerName: "Mohd Shaahed Imran", title: "Director", rank: 5 },
-  { key: "md-refat-hossen", name: "Md. Refat Hossen", title: "Director", rank: 6 },
-  { key: "fakruddin-ali-ahmed-rajib", name: "Fakruddin Ali Ahmed Rajib", title: "Director", rank: 7 },
-  { key: "m-shahryar-faiz", name: "M Shahryar Faiz", title: "Director", rank: 8 },
-  { key: "bishnu-pada-kunda", name: "Bishnu Pada Kunda", title: "Director", rank: 9 },
+  { key: "md-refat-hossen", name: "Md. Refat Hossen", title: "Director", rank: 9 },
+  { key: "fakruddin-ali-ahmed-rajib", name: "Fakruddin Ali Ahmed Rajib", title: "Director", rank: 6 },
+  { key: "m-shahryar-faiz", name: "M Shahryar Faiz", title: "Director", rank: 7 },
+  { key: "bishnu-pada-kunda", name: "Bishnu Pada Kunda", title: "Director", rank: 8 },
 ];
 
 /** Management Committee (ManCom). */
@@ -41,6 +41,8 @@ export const MANAGEMENT: RosterPerson[] = [
   { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony, FCS", formerName: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 2 },
   { key: "md-abul-moshad-chowdhury", name: "Md. Abul Moshad Chowdhury", title: "Head of Application Support and Development", department: "Engineering", rank: 3 },
   { key: "muhammad-shamsul-maruf", name: "Mohammad Shamsul Maruf", formerName: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 4 },
+  { key: "saikat-biswas", name: "Saikat Biswas", title: "Senior Principal Software Engineer", department: "Engineering", rank: 5 },
+  { key: "mohammad-mehrabul-ferdous", name: "Mohammad Mehrabul Ferdous", title: "Principal Software Engineer", department: "Engineering", rank: 6 },
 ];
 
 /** Everyone at Xpert, by position (XFL's staff list, with titles confirmed by XFL). */

@@ -747,5 +747,9 @@
   "eventsWith": "With",
   "eventsOpen": "See the event",
   "rmsStripBody": "Every order placed through Xpert's platform passes RMS, the risk checks built into the OMS, before it reaches DSE or CSE.",
-  "rmsStripLink": "See the checks"
+  "rmsStripLink": "See the checks",
+  "demoNextTitle": "What happens next",
+  "demoNext1": "Our team reads your request and gets back to you by your preferred way of contact.",
+  "demoNext2": "We arrange a walkthrough of the products you picked.",
+  "demoNext3": "You see an order go from entry, through the RMS checks inside the OMS, to DSE or CSE."
 }

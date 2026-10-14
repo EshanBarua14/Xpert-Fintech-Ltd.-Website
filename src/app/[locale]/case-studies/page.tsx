@@ -7,6 +7,7 @@ import { CtaBand, PageHero, Shell } from "@/components/flagship/Sections";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getCaseStudies } from "@/lib/public/insights";
+import { getOrgLogos, orgForText } from "@/lib/public/flagship";
 import { buildMetadata } from "@/lib/public/seo";
 import { contentSlots } from "@/lib/env/hints";
 import { ContentSlot } from "@/components/ui/ContentSlot";
@@ -25,7 +26,7 @@ export default async function CaseStudiesPage({ params }: Props) {
   if (!isLocale(locale)) notFound();
   const loc = locale as AppLocale;
   const t = getMessages(loc);
-  const items = await getCaseStudies(loc);
+  const [items, orgLogos] = await Promise.all([getCaseStudies(loc), getOrgLogos(loc)]);
   return (
     <>
       <PageHero eyebrow={t.insightsEyebrow} title={t.caseStudiesTitle} body={t.caseStudiesBody} />
@@ -55,7 +56,19 @@ export default async function CaseStudiesPage({ params }: Props) {
                     {c.cover ? (
                       <Image src={c.cover.url} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
                     ) : (
-                      <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-brand-royal/40 via-navy-800 to-ink-950">
+                      // No cover yet: the client's logo (named in the title) on a lit panel.
+                      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-brand-royal/40 via-navy-800 to-ink-950">
+                        <span className="grid-fade pointer-events-none absolute inset-0 opacity-40" />
+                        {(() => {
+                          const org = orgForText(orgLogos, c.title);
+                          return org ? (
+                            <span className="relative flex h-24 w-56 items-center justify-center rounded-2xl bg-white p-4 shadow-[0_20px_60px_-20px_rgb(34_188_235/0.6)] ring-1 ring-black/5 transition-transform duration-700 group-hover:scale-105">
+                              <Image src={org.logo.url} alt="" width={org.logo.width ?? 200} height={org.logo.height ?? 80} className="h-full w-full object-contain" />
+                            </span>
+                          ) : (
+                            <span className="relative max-w-[80%] text-center font-display text-3xl font-semibold text-text-primary/80">{c.title.split(":")[0]}</span>
+                          );
+                        })()}
                       </span>
                     )}
                   </span>

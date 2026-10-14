@@ -40,6 +40,19 @@ export default async function RequestDemoPage({ params, searchParams }: Props) {
             {t.orReachUs}
           </h2>
           <ContactDetails info={info} t={t} stacked />
+          <div className="glass mt-2 flex flex-col gap-4 rounded-2xl p-5">
+            <h2 className="font-display text-lg font-semibold">{t.demoNextTitle}</h2>
+            <ol className="relative flex flex-col gap-4 border-l border-fg/10 pl-5">
+              {[t.demoNext1, t.demoNext2, t.demoNext3].map((s, i) => (
+                <li key={i} className="relative text-sm leading-relaxed text-text-secondary">
+                  <span aria-hidden="true" className="absolute top-0 -left-[1.95rem] flex size-6 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">
+                    {new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(i + 1)}
+                  </span>
+                  {s}
+                </li>
+              ))}
+            </ol>
+          </div>
         </aside>
       </div>
       </Shell>

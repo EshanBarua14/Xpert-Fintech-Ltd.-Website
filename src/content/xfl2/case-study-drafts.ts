@@ -70,3 +70,67 @@ export const CASE_STUDY_DRAFTS: CaseStudyDraft[] = [
     outcome: outcome({ en: "[Name, title], Green Delta Securities Ltd.", bn: "[নাম, পদবি], গ্রিন ডেল্টা সিকিউরিটিজ লিমিটেড" }),
   },
 ];
+
+/*
+ * One draft success story for every other client (XFL's client list, October
+ * 2026), built only from what is on record: the client's name, whether it is a
+ * consortium member, its branded app on Xpert's Google Play page (if any) and
+ * the exchanges it holds a TREC on. The story itself — challenge, products in
+ * use, results, figures and the quote — is left in [square brackets] for the
+ * client to confirm. Seeded once as DRAFT: never on the live site as is.
+ */
+type ClientRow = { key: string; slug: string; short: T; name: T; member: boolean; app: string | null; cse: boolean | null };
+
+const CLIENTS: ClientRow[] = [
+  { key: "apex-investments", slug: "apex-investments-ail-trade", short: { en: "Apex Investments", bn: "এপেক্স ইনভেস্টমেন্টস" }, name: { en: "Apex Investments Ltd.", bn: "এপেক্স ইনভেস্টমেন্টস লিমিটেড" }, member: true, app: "AIL Trade", cse: false },
+  { key: "ebl-securities", slug: "ebl-securities-ebl-fast-trade", short: { en: "EBL Securities", bn: "ইবিএল সিকিউরিটিজ" }, name: { en: "EBL Securities PLC", bn: "ইবিএল সিকিউরিটিজ পিএলসি" }, member: true, app: "EBL Fast Trade", cse: true },
+  { key: "islami-bank-securities", slug: "islami-bank-securities-tradeibs", short: { en: "Islami Bank Securities", bn: "ইসলামী ব্যাংক সিকিউরিটিজ" }, name: { en: "Islami Bank Securities Ltd.", bn: "ইসলামী ব্যাংক সিকিউরিটিজ লিমিটেড" }, member: true, app: "TradeiBS", cse: true },
+  { key: "nli-securities", slug: "nli-securities-nls-smarttrade", short: { en: "NLI Securities", bn: "এনএলআই সিকিউরিটিজ" }, name: { en: "NLI Securities Ltd.", bn: "এনএলআই সিকিউরিটিজ লিমিটেড" }, member: true, app: "NLS SmartTrade", cse: false },
+  { key: "sjibl-securities", slug: "shahjalal-islami-bank-securities-shahjalal-trade", short: { en: "Shahjalal Islami Bank Securities", bn: "শাহজালাল ইসলামী ব্যাংক সিকিউরিটিজ" }, name: { en: "Shahjalal Islami Bank Securities Ltd.", bn: "শাহজালাল ইসলামী ব্যাংক সিকিউরিটিজ লিমিটেড" }, member: true, app: "Shahjalal Trade", cse: true },
+  { key: "ucb-stock-brokerage", slug: "ucb-stock-brokerage-utrade", short: { en: "UCB Stock Brokerage", bn: "ইউসিবি স্টক ব্রোকারেজ" }, name: { en: "UCB Stock Brokerage Ltd.", bn: "ইউসিবি স্টক ব্রোকারেজ লিমিটেড" }, member: true, app: "UTrade by UCB STOCK", cse: true },
+  { key: "mika-securities", slug: "mika-securities-on-xpert", short: { en: "Mika Securities", bn: "মিকা সিকিউরিটিজ" }, name: { en: "Mika Securities Ltd.", bn: "মিকা সিকিউরিটিজ লিমিটেড" }, member: true, app: null, cse: false },
+  { key: "ab-securities", slug: "ab-securities-on-xpert", short: { en: "AB Securities", bn: "এবি সিকিউরিটিজ" }, name: { en: "AB Securities Limited", bn: "এবি সিকিউরিটিজ লিমিটেড" }, member: true, app: null, cse: true },
+  { key: "remons-investment", slug: "remons-investment-remx", short: { en: "Remons Investment & Securities", bn: "রেমন্স ইনভেস্টমেন্ট অ্যান্ড সিকিউরিটিজ" }, name: { en: "Remons Investment & Securities Ltd", bn: "রেমন্স ইনভেস্টমেন্ট অ্যান্ড সিকিউরিটিজ লিমিটেড" }, member: true, app: "RemX", cse: true },
+  { key: "skyline", slug: "skyline-skytrade", short: { en: "Skyline", bn: "স্কাইলাইন" }, name: { en: "Skyline", bn: "স্কাইলাইন" }, member: false, app: "SkyTrade", cse: null },
+  { key: "first-capital-securities", slug: "first-capital-securities-on-xpert", short: { en: "First Capital Securities", bn: "ফার্স্ট ক্যাপিটাল সিকিউরিটিজ" }, name: { en: "First Capital Securities Limited", bn: "ফার্স্ট ক্যাপিটাল সিকিউরিটিজ লিমিটেড" }, member: false, app: null, cse: null },
+  { key: "idlc-securities", slug: "idlc-securities-on-xpert", short: { en: "IDLC Securities", bn: "আইডিএলসি সিকিউরিটিজ" }, name: { en: "IDLC Securities Limited", bn: "আইডিএলসি সিকিউরিটিজ লিমিটেড" }, member: false, app: null, cse: true },
+];
+
+function clientDraft(c: ClientRow): CaseStudyDraft {
+  const exch: T = c.cse === true ? { en: "DSE and CSE", bn: "ডিএসই ও সিএসই" } : c.cse === false ? { en: "DSE", bn: "ডিএসই" } : { en: "DSE or CSE", bn: "ডিএসই বা সিএসই" };
+  const who: T = c.member
+    ? { en: `${c.name.en}, a member of the consortium that owns Xpert Fintech`, bn: `${c.name.bn}, এক্সপার্ট ফিনটেকের মালিক কনসোর্টিয়ামের সদস্য` }
+    : { en: `${c.name.en}, an Xpert client`, bn: `${c.name.bn}, এক্সপার্টের গ্রাহক` };
+  return {
+    key: c.key,
+    slug: c.slug,
+    title: c.app
+      ? { en: `${c.short.en}: ${c.app} on the Xpert platform`, bn: `${c.short.bn}: এক্সপার্ট প্ল্যাটফর্মে ${c.app}` }
+      : { en: `${c.short.en} on Xpert: [headline result in a few words]`, bn: `এক্সপার্টে ${c.short.bn}: [কয়েক শব্দে মূল ফলাফল]` },
+    summary: c.app
+      ? {
+          en: `${who.en}, serves its investors through ${c.app}, a branded trading app built on the Xpert platform. [One line on the result, approved by the client.]`,
+          bn: `${who.bn}, এক্সপার্ট প্ল্যাটফর্মে তৈরি নিজস্ব ব্র্যান্ডের ট্রেডিং অ্যাপ ${c.app}-এর মাধ্যমে বিনিয়োগকারীদের সেবা দেয়। [ফলাফল নিয়ে এক লাইন, গ্রাহকের অনুমোদিত।]`,
+        }
+      : {
+          en: `${who.en}, trades on ${exch.en}. [Which Xpert products the house uses, and one line on the result, approved by the client.]`,
+          bn: `${who.bn}, ${exch.bn}-তে লেনদেন করে। [প্রতিষ্ঠানটি কোন এক্সপার্ট পণ্য ব্যবহার করে, এবং ফলাফল নিয়ে এক লাইন, গ্রাহকের অনুমোদিত।]`,
+        },
+    challenge: {
+      en: "[In the client's words: what trading and operations looked like before — channels, manual steps, what investors and dealers asked for — and what stood in the way.]",
+      bn: "[গ্রাহকের ভাষায়: আগে লেনদেন ও অপারেশন কেমন ছিল — চ্যানেল, হাতে করা ধাপ, বিনিয়োগকারী ও ডিলাররা কী চাইতেন — এবং বাধা কী ছিল।]",
+    },
+    solution: c.app
+      ? {
+          en: `${c.app} runs on the consortium's shared platform: investors trade through ${c.short.en}'s own app, and every order passes the RMS checks built into the Xpert Trading OMS on its way to ${exch.en}. [Add when it went live and which other Xpert products the house uses.]`,
+          bn: `${c.app} কনসোর্টিয়ামের শেয়ার করা প্ল্যাটফর্মে চলে: বিনিয়োগকারীরা ${c.short.bn}-এর নিজস্ব অ্যাপে লেনদেন করেন, আর প্রতিটি অর্ডার এক্সপার্ট ট্রেডিং ওএমএস-এর ভেতরের আরএমএস যাচাই পার হয়ে ${exch.bn}-তে যায়। [কবে চালু হয়েছে এবং আর কোন এক্সপার্ট পণ্য ব্যবহার করে, যোগ করুন।]`,
+        }
+      : {
+          en: `[Which Xpert products ${c.short.en} uses — for example the Trading OMS with its built-in RMS checks, BO Account Opening or Back Office — since when, and how they fit the house's work on ${exch.en}.]`,
+          bn: `[${c.short.bn} কোন এক্সপার্ট পণ্য ব্যবহার করে — যেমন ভেতরে আরএমএস যাচাইসহ ট্রেডিং ওএমএস, বিও অ্যাকাউন্ট খোলা বা ব্যাক অফিস — কবে থেকে, এবং ${exch.bn}-তে প্রতিষ্ঠানের কাজে কীভাবে যুক্ত।]`,
+        },
+    outcome: outcome({ en: `[Name, title], ${c.name.en}`, bn: `[নাম, পদবি], ${c.name.bn}` }),
+  };
+}
+
+export const CLIENT_STORY_DRAFTS: CaseStudyDraft[] = CLIENTS.map(clientDraft);

@@ -35,7 +35,7 @@ import { CLIENT_LOGOS, NOT_CLIENTS, orgNameKey } from "../src/content/xfl2/clien
 import { CREDENTIALS } from "../src/content/xfl2/credentials";
 import { DIRECTOR_PROFILES } from "../src/content/xfl2/director-profiles";
 import { sniff } from "../src/lib/media/inspect";
-import { CASE_STUDY_DRAFTS } from "../src/content/xfl2/case-study-drafts";
+import { CASE_STUDY_DRAFTS, CLIENT_STORY_DRAFTS } from "../src/content/xfl2/case-study-drafts";
 import { CAREER_SEED } from "../src/content/xfl2/careers";
 import { MEMBER_PROFILES } from "../src/content/xfl2/member-profiles";
 import { BLOCK_BN, EVENT_BN, ITEM_BN, LEGAL_BN, NAV_BN, NODE_BN, OFFERING_BN, OFFICE_BN, ORG_BN, PAGE_BN, PERSON_BN } from "../src/content/xfl2/bangla";
@@ -1531,7 +1531,7 @@ async function seedCaseStudyDrafts() {
     added++;
   }
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
-  if (added) console.log(`• ${added} draft case studies added: fill in the [bracketed] results with each client and publish in Admin → Success stories`);
+  if (added) console.log(`• ${added} draft success stories added: fill in the [bracketed] results with each client and publish in Admin → Success stories`);
 }
 
 /**
@@ -1735,6 +1735,43 @@ async function renameCaseStudies() {
   if (moved.count || en.count || bn.count) console.log(`• Case studies renamed Success stories (${moved.count} menu link(s) moved, ${en.count + bn.count} label(s) renamed)`);
 }
 
+/**
+ * Once: a draft success story for every client that has none yet (each with
+ * only what is on record; results, figures and the quote in [brackets]).
+ * Drafts never show on the live site; fill them in with each client and
+ * publish in Admin → Success stories.
+ */
+async function seedClientStoryDrafts() {
+  const MARK = "seed.client-story-drafts-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const last = await db.caseStudy.findFirst({ orderBy: { sortOrder: "desc" }, select: { sortOrder: true } });
+  let order = (last?.sortOrder ?? 0) + 1;
+  let added = 0;
+  for (const c of CLIENT_STORY_DRAFTS) {
+    if (await db.caseStudyTranslation.findFirst({ where: { slug: c.slug } })) continue;
+    await db.caseStudy.create({
+      data: {
+        status: "DRAFT",
+        sortOrder: order++,
+        translations: {
+          create: (["en", "bn"] as const).map((l) => ({
+            locale: l === "en" ? EN : BN,
+            slug: c.slug,
+            title: c.title[l],
+            summary: c.summary[l],
+            challenge: c.challenge[l],
+            solution: c.solution[l],
+            outcome: c.outcome[l],
+          })),
+        },
+      },
+    });
+    added++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  if (added) console.log(`• ${added} draft success stories added, one per client: fill in the [bracketed] parts with each client and publish in Admin → Success stories`);
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -1806,6 +1843,7 @@ async function main() {
   await seedProductScreens();
   await seedNavAdditions();
   await seedCaseStudyDrafts();
+  await seedClientStoryDrafts();
   await seedCareers();
   await seedMemberProfiles();
   await seedIdlcClient();

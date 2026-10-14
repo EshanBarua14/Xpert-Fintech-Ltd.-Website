@@ -14,7 +14,7 @@ function text(value: unknown, locale?: "en" | "bn"): string {
 export default async function SettingsPage() {
   await requireAdmin();
   const [rows, office] = await Promise.all([
-    db.siteSetting.findMany(),
+    db.siteSetting.findMany({ where: { key: { not: "market.board" } } }),
     db.office.findUnique({ where: { key: "hq" }, include: { translations: true } }),
   ]);
   const get = (key: string) => rows.find((r) => r.key === key)?.value;

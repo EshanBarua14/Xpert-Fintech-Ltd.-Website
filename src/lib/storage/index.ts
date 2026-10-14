@@ -3,9 +3,10 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 /**
- * Where uploaded files live. The rest of the app only talks to this interface,
- * so moving to S3-compatible storage (AWS S3, Cloudflare R2…) for production
- * means adding one driver, not changing pages.
+ * Where uploaded files live. The rest of the app only talks to this interface:
+ *  - local: files in ./storage/media (your own server or computer)
+ *  - database: files in the database (the default on Vercel, whose disk is not kept)
+ * Another store (S3, Cloudflare R2, Vercel Blob) means adding one driver, not changing pages.
  */
 export interface StorageDriver {
   put(key: string, data: Buffer, contentType: string): Promise<void>;
@@ -44,11 +45,50 @@ class LocalDriver implements StorageDriver {
   }
 }
 
+/**
+ * Files kept in the database (table StoredFile). For hosts whose disk is not
+ * kept between requests, such as Vercel: uploads survive every redeploy, with
+ * no extra account to set up. Files are served once from here and then from
+ * the browser's and the CDN's cache (they never change at the same address).
+ * Files that came with the code in storage/media (committed before this
+ * driver) are still found there when they are not in the database.
+ */
+class DatabaseDriver implements StorageDriver {
+  private bundled = new LocalDriver();
+
+  private async db() {
+    return (await import("@/lib/db/client")).db;
+  }
+  async put(key: string, data: Buffer) {
+    assertKey(key);
+    const db = await this.db();
+    await db.storedFile.create({ data: { key, data: new Uint8Array(data), size: data.length } });
+  }
+  async get(key: string) {
+    assertKey(key);
+    const db = await this.db();
+    const row = await db.storedFile.findUnique({ where: { key }, select: { data: true } }).catch(() => null);
+    if (row) return Buffer.from(row.data);
+    return this.bundled.get(key);
+  }
+  async remove(key: string) {
+    assertKey(key);
+    const db = await this.db();
+    await db.storedFile.deleteMany({ where: { key } });
+  }
+}
+
 let driver: StorageDriver | null = null;
 
 export function storage(): StorageDriver {
   if (driver) return driver;
-  const kind = process.env.STORAGE_DRIVER ?? "local";
+  // Vercel does not keep files written to the server's disk, so "local" means the database there.
+  const set = process.env.STORAGE_DRIVER || "local";
+  const kind = process.env.VERCEL && set === "local" ? "database" : set;
+  if (kind === "database") {
+    driver = new DatabaseDriver();
+    return driver;
+  }
   if (kind === "local") {
     if (process.env.APP_ENV === "production") {
       console.warn("[storage] Using local disk storage in production. Configure S3-compatible storage before launch.");
@@ -56,6 +96,5 @@ export function storage(): StorageDriver {
     driver = new LocalDriver();
     return driver;
   }
-  // The S3 driver is added in the deployment phase (Phase 14).
-  throw new Error(`STORAGE_DRIVER="${kind}" is not available yet. Use "local" for now.`);
+  throw new Error(`STORAGE_DRIVER="${kind}" is not available. Use "local" (files in storage/media) or "database".`);
 }

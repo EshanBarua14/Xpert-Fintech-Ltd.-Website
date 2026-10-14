@@ -177,3 +177,11 @@ Admin → Design sets the site colours (buttons, accents, highlights, separately
 ## Price refresh
 
 Admin → Market data → Refresh interval: 15, 30 or 60 seconds. The server reads DSE and CSE (or the licensed feed) at most once per interval for all visitors, and browsers ask for new prices at the same pace while a page is open.
+
+## Running on Vercel
+
+- **Uploads** are kept in the database (table `StoredFile`) because Vercel does not keep files written to the server's disk. This happens automatically on Vercel (`STORAGE_DRIVER=local` is treated as `database` there). Files committed in `storage/media` are still served. After importing or seeding on your own computer against the live database, run `npm run media:to-db` so the files those scripts wrote to `storage/media` are copied into the database too.
+- **Upload size**: Vercel accepts about 4.5 MB per request, so Admin → Media sends one file at a time and makes larger photos smaller in the browser. PDFs and videos must be under 4 MB there; put videos on YouTube, Vimeo or Facebook and add the link in Admin → Videos.
+- **Pages** are made on their first visit and kept for 5 minutes (saving in the admin refreshes them at once); the build never needs the database. Only the markets pages are made per visit.
+- **DSE/CSE** readings are shared through the database (setting `market.board`), so each new Vercel server picks up the latest reading at once instead of reading the exchanges itself.
+- **Database changes**: run `npx prisma migrate deploy` with the live `DATABASE_URL` after pulling a change that adds a migration.

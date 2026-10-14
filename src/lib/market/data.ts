@@ -1,4 +1,5 @@
 import "server-only";
+import { after } from "next/server";
 import { db } from "@/lib/db/client";
 import { demoSnapshot } from "./demo";
 import { exchangeSnapshot } from "./exchange";
@@ -48,8 +49,9 @@ const marketActive = () => activeAt(sessions);
 const TTL = () => (marketActive() ? refreshSeconds : QUIET_SECONDS) * 1000;
 
 type BoardExchange = MarketSnapshot["exchanges"][number];
-const exchangeSeen = new Map<string, number>();
 const MAX_STALE_MS = 10 * 60 * 1000;
+/** When each exchange last gave prices (kept with the shared board, so every server knows). */
+let exchangeSeen: Record<string, number> = {};
 
 /**
  * A failed read of one exchange must not wipe the figures it had a moment ago:
@@ -59,16 +61,61 @@ function mergeBoards(next: MarketSnapshot, prev: MarketSnapshot | null): MarketS
   const now = Date.now();
   const exchanges: BoardExchange[] = next.exchanges.map((e) => {
     const old = prev?.exchanges.find((p) => p.exchange === e.exchange);
-    if (e.quotes?.length) exchangeSeen.set(e.exchange, now);
-    const fresh = now - (exchangeSeen.get(e.exchange) ?? 0) < MAX_STALE_MS;
+    if (e.quotes?.length) exchangeSeen[e.exchange] = now;
+    const fresh = now - (exchangeSeen[e.exchange] ?? 0) < MAX_STALE_MS;
     if (!old || !fresh) return e;
     return { ...e, quotes: e.quotes?.length ? e.quotes : old.quotes, indices: e.indices?.length ? e.indices : old.indices };
   });
   for (const old of prev?.exchanges ?? []) {
     if (exchanges.some((e) => e.exchange === old.exchange)) continue;
-    if (now - (exchangeSeen.get(old.exchange) ?? 0) < MAX_STALE_MS) exchanges.push(old);
+    if (now - (exchangeSeen[old.exchange] ?? 0) < MAX_STALE_MS) exchanges.push(old);
   }
   return { ...next, exchanges };
+}
+
+/*
+ * The board is shared through the database. On a host that runs many short-lived
+ * servers (Vercel), each one starts empty: instead of every server reading DSE and
+ * CSE itself (6 pages, up to half a minute), the last reading is stored once and
+ * any server picks it up with one quick query. Only when that copy is out of date
+ * does a server read the exchanges again, and the new copy is stored for the rest.
+ */
+const BOARD_KEY = "market.board";
+type SharedBoard = { at: number; seen: Record<string, number>; value: MarketSnapshot | null };
+let sharedCheckedAt = 0;
+
+async function loadSharedBoard() {
+  // At most one look every few seconds per server.
+  if (Date.now() - sharedCheckedAt < 3000) return;
+  sharedCheckedAt = Date.now();
+  try {
+    const row = await db.siteSetting.findUnique({ where: { key: BOARD_KEY } });
+    const s = row?.value as SharedBoard | undefined;
+    if (s && typeof s.at === "number" && (!store.board || s.at > store.board.at)) {
+      store.board = { at: s.at, value: s.value ?? null };
+      exchangeSeen = { ...s.seen, ...exchangeSeen };
+    }
+  } catch (error) {
+    console.error("[market] could not read the shared board", (error as Error)?.message ?? error);
+  }
+}
+
+async function saveSharedBoard(board: NonNullable<Cached>) {
+  const value = { at: board.at, seen: exchangeSeen, value: board.value } as unknown as object;
+  try {
+    await db.siteSetting.upsert({ where: { key: BOARD_KEY }, update: { value }, create: { key: BOARD_KEY, value } });
+  } catch (error) {
+    console.error("[market] could not store the shared board", (error as Error)?.message ?? error);
+  }
+}
+
+/** Lets a read that outlives the request finish (on Vercel the server would otherwise be frozen). */
+function keepAlive(work: Promise<unknown>) {
+  try {
+    after(() => work);
+  } catch {
+    /* outside a request (start-up): nothing to keep alive */
+  }
 }
 
 let boardRefresh: Promise<MarketSnapshot | null> | null = null;
@@ -82,11 +129,12 @@ function refreshBoard(): Promise<MarketSnapshot | null> {
         console.error("[market] exchange read failed", error);
         return null;
       })
-      .then((snapshot) => {
+      .then(async (snapshot) => {
         if (snapshot) void recordTurnover(snapshot);
         // Keep the last good board if both exchanges fail this time.
         const merged = snapshot ? mergeBoards(snapshot, store.board?.value ?? null) : (store.board?.value ?? null);
         store.board = { at: Date.now(), value: merged };
+        if (snapshot) await saveSharedBoard(store.board);
         return store.board.value;
       })
       .finally(() => {
@@ -98,13 +146,17 @@ function refreshBoard(): Promise<MarketSnapshot | null> {
 
 /**
  * The exchanges' boards without making pages wait for DSE or CSE: a fresh copy
- * is returned at once; a stale one is returned at once while a new read runs in
- * the background; with nothing cached yet, the caller waits at most `waitMs`
- * (pages render without prices and the browser fills them in a moment later).
+ * (this server's, or the one shared through the database) is returned at once; a
+ * stale one is returned at once while a new read runs in the background; with
+ * nothing at all yet, the caller waits at most `waitMs` (pages render without
+ * prices and the browser fills them in a moment later).
  */
 async function boardSnapshot(waitMs = 1500): Promise<MarketSnapshot | null> {
   if (store.board && Date.now() - store.board.at < TTL()) return store.board.value;
+  await loadSharedBoard();
+  if (store.board && Date.now() - store.board.at < TTL()) return store.board.value;
   const pending = refreshBoard();
+  keepAlive(pending);
   if (store.board) return store.board.value;
   return Promise.race([pending, new Promise<null>((r) => setTimeout(() => r(null), waitMs))]);
 }

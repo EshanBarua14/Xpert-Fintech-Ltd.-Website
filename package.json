@@ -31,7 +31,8 @@
     "setup": "tsx scripts/setup.ts",
     "market:check": "tsx --conditions=react-server scripts/market-check.ts",
     "db:permissions": "tsx scripts/db-permissions.ts",
-    "import:live-site": "tsx scripts/import-live-site.ts"
+    "import:live-site": "tsx scripts/import-live-site.ts",
+    "media:to-db": "tsx scripts/media-to-db.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

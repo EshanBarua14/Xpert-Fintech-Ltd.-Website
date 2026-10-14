@@ -273,6 +273,15 @@ model PasswordReset {
 
 /// Key/value settings edited in Admin → Settings. Values are JSON so a single
 /// key can hold localized text, e.g. { "en": "...", "bn": "..." }.
+/// Uploaded files kept in the database (STORAGE_DRIVER=database, the default on Vercel,
+/// where the server's own disk is not kept). Keyed like the files in storage/media.
+model StoredFile {
+  key       String   @id
+  data      Bytes
+  size      Int
+  createdAt DateTime @default(now())
+}
+
 model SiteSetting {
   key         String   @id
   value       Json

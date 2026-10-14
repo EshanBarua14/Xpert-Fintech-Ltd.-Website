@@ -45,7 +45,8 @@ export default async function MediaPage({ searchParams }: { searchParams: Promis
       {params.trashed && <p role="status" className="text-sm text-brand-sky">Moved to trash.</p>}
       {params.deleted && <p role="status" className="text-sm text-brand-sky">Deleted permanently.</p>}
 
-      {!inTrash && <MediaUpload />}
+      {/* Vercel accepts about 4.5 MB per request; other hosts the 45 MB set in next.config.ts. */}
+      {!inTrash && <MediaUpload maxRequestBytes={process.env.VERCEL ? 4 * 1024 * 1024 : 45 * 1024 * 1024} />}
 
       <div className="flex flex-wrap items-center gap-3">
         {!inTrash && (

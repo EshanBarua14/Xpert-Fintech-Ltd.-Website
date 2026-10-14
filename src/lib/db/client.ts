@@ -11,7 +11,7 @@ import { PrismaClient, type Prisma } from "@prisma/client";
  * never blocks or breaks the change itself.
  */
 
-const SKIP = new Set(["AuditLog", "Session", "PasswordReset", "MediaUsage", "EventMedia", "AlbumMedia", "ArticleTag", "EventOrganization", "EcosystemFlowStep"]);
+const SKIP = new Set(["AuditLog", "StoredFile", "Session", "PasswordReset", "MediaUsage", "EventMedia", "AlbumMedia", "ArticleTag", "EventOrganization", "EcosystemFlowStep"]);
 const WRITES = new Set(["create", "createMany", "update", "updateMany", "upsert", "delete", "deleteMany"]);
 /** Values worth keeping in the log; other fields are recorded by name only. */
 const KEEP_VALUES = new Set(["status", "deletedAt", "isActive", "isFeatured", "isClosed", "isPlayback", "publishAt", "kind", "key", "role", "logoPermission"]);
@@ -53,6 +53,8 @@ function createClient() {
         async $allOperations({ model, operation, args, query }) {
           const result = await query(args);
           if (!WRITES.has(operation) || SKIP.has(model) || model.endsWith("Translation") || model === "LeadActivity") return result;
+          // The site's own bookkeeping (shared market board, recorded turnover) is not an admin change.
+          if (model === "SiteSetting" && /^market\.(board|turnover\.)/.test(String((args as { where?: { key?: unknown } }).where?.key ?? ""))) return result;
           try {
             // Only inside a signed-in admin's request (scripts and visitors have no session).
             const { getCurrentAdmin, requestMeta } = await import("@/lib/auth/session");

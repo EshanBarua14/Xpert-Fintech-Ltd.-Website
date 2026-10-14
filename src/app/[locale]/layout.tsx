@@ -14,7 +14,7 @@ import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
 import { SiteEffects } from "@/components/motion/SiteEffects";
 import { AmbientBackground } from "@/components/motion/AmbientBackground";
-import { isLocale, locales } from "@/lib/i18n/config";
+import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import "../globals.css";
 
@@ -37,13 +37,17 @@ export const metadata: Metadata = {
   icons: { icon: [{ url: "/favicon.ico", sizes: "48x48" }, { url: "/brand/icon-192.png", sizes: "192x192", type: "image/png" }], apple: "/brand/apple-touch-icon.png" },
 };
 
-// Header and footer read from the CMS; refresh them at most every 5 minutes.
-// Publishing from the admin portal will also trigger an immediate refresh (Phase 3).
+/*
+ * Caching. Each page is made on its first visit (not during the build, so the
+ * build never needs the database) and then served from the cache, made again
+ * at most every 5 minutes. Saving in the admin refreshes the pages at once
+ * (revalidatePath). Pages with live market data stay made per visit (markets/*).
+ */
 export const revalidate = 300;
-
+export const dynamicParams = true;
 
 export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return [];
 }
 
 export default async function LocaleLayout({
@@ -86,4 +90,3 @@ export default async function LocaleLayout({
   );
 }
 
-export const dynamic = "force-dynamic";

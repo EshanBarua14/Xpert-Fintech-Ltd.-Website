@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { uploadPhotos } from "@/app/admin/(protected)/media/actions";
+import { DEFAULT_REQUEST_BYTES, fitForUpload, mbText } from "@/lib/media/client-upload";
 import type { ImageOption } from "@/lib/admin/media";
 
-// Each request must stay within serverActions.bodySizeLimit (50 MB) and 10 files.
-const MAX_GROUP_BYTES = 45 * 1024 * 1024;
+// Each request stays under the host's limit (about 4.5 MB on Vercel) and 10 files;
+// photos larger than that are made smaller in the browser first.
+const MAX_GROUP_BYTES = DEFAULT_REQUEST_BYTES;
 const MAX_GROUP_FILES = 10;
 
 /**
@@ -27,7 +29,14 @@ export function GalleryPicker({ name, options: initialOptions, defaultValue }: {
   const fileRef = useRef<HTMLInputElement>(null);
 
   /** Uploads in small groups so large selections never exceed the request limit. */
-  async function upload(files: File[]) {
+  async function upload(chosen: File[]) {
+    const problems: string[] = [];
+    const files: File[] = [];
+    for (const f of chosen) {
+      const fit = await fitForUpload(f, MAX_GROUP_BYTES);
+      if (fit) files.push(fit);
+      else problems.push(`${f.name}: ${mbText(f.size)} is too large to upload here and could not be made smaller.`);
+    }
     const groups: File[][] = [];
     let group: File[] = [];
     let size = 0;
@@ -41,7 +50,6 @@ export function GalleryPicker({ name, options: initialOptions, defaultValue }: {
       size += f.size;
     }
     if (group.length) groups.push(group);
-    const problems: string[] = [];
     let done = 0;
     for (const g of groups) {
       setUploading(`Uploading ${done + 1}–${done + g.length} of ${files.length}…`);

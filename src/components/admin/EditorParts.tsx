@@ -1,5 +1,6 @@
 "use client";
 
+import { UndoHint } from "./UndoHint";
 import { ConfirmButton } from "@/components/admin/AdminUi";
 import { buttonClasses } from "@/components/ui/Button";
 
@@ -108,6 +109,7 @@ export function FormMessage({ message, isError }: { message?: string; isError: b
       }
     >
       {message}
+      {!isError && <UndoHint />}
     </p>
   );
 }

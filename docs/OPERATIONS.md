@@ -185,3 +185,7 @@ Admin → Market data → Refresh interval: 15, 30 or 60 seconds. The server rea
 - **Pages** are made on their first visit and kept for 5 minutes (saving in the admin refreshes them at once); the build never needs the database. Only the markets pages are made per visit.
 - **DSE/CSE** readings are shared through the database (setting `market.board`), so each new Vercel server picks up the latest reading at once instead of reading the exchanges itself.
 - **Database changes**: run `npx prisma migrate deploy` with the live `DATABASE_URL` after pulling a change that adds a migration.
+
+## History and undo
+
+Before an admin changes or deletes anything (pages, blocks, products and their items, people and their roles, news, events and their photos, jobs, organizations, apps, menu links, redirects, ecosystem boxes and flows, settings, design, site text…), the version from just before is kept. **Admin → History & undo** lists them, newest first: *Restore this version* puts a changed item back, *Bring back* restores one deleted for good, in both languages. The version a restore replaces is kept too, so a restore can be undone the same way. After a save, the "Saved." message links straight to that item's earlier versions. Items in the trash are restored from their own list (View trash → Restore). Versions are kept for 180 days.

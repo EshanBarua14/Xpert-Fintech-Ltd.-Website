@@ -282,6 +282,24 @@ model StoredFile {
   createdAt DateTime @default(now())
 }
 
+/// A copy of a record taken just before an admin changed or deleted it, so the
+/// change can be undone in Admin → History. Holds the record, its translations
+/// and the small lists that belong only to it.
+model Revision {
+  id        String   @id @default(uuid()) @db.Uuid
+  model     String
+  entityId  String
+  /// "update" (changed), "delete" (deleted for good) or "restore" (state before an undo)
+  action    String
+  label     String?
+  snapshot  Json
+  actorId   String?  @db.Uuid
+  createdAt DateTime @default(now())
+
+  @@index([model, entityId, createdAt])
+  @@index([createdAt])
+}
+
 model SiteSetting {
   key         String   @id
   value       Json

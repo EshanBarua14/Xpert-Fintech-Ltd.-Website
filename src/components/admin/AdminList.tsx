@@ -2,8 +2,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { buttonClasses } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
+import { UndoHint } from "./UndoHint";
 
-export function Notice({ tone = "info", children }: { tone?: "info" | "success"; children: ReactNode }) {
+/** A message at the top of an admin page. After a save it also offers the way back (Admin → History). */
+export function Notice({ tone = "info", children, undo }: { tone?: "info" | "success"; children: ReactNode; undo?: boolean }) {
   return (
     <p
       role="status"
@@ -13,6 +15,7 @@ export function Notice({ tone = "info", children }: { tone?: "info" | "success";
       )}
     >
       {children}
+      {(undo ?? (tone === "success" && /^(Saved|Deleted|Moved to the trash|Removed)/.test(String(children)))) && <UndoHint />}
     </p>
   );
 }

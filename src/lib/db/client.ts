@@ -1,4 +1,5 @@
 import { PrismaClient, type Prisma } from "@prisma/client";
+import { idField, isTracked, readSnapshot, recordRevision, translationOwner } from "./revision-capture";
 
 /*
  * One PrismaClient per server process. In development, Next.js hot reload
@@ -11,7 +12,7 @@ import { PrismaClient, type Prisma } from "@prisma/client";
  * never blocks or breaks the change itself.
  */
 
-const SKIP = new Set(["AuditLog", "StoredFile", "Session", "PasswordReset", "MediaUsage", "EventMedia", "AlbumMedia", "ArticleTag", "EventOrganization", "EcosystemFlowStep"]);
+const SKIP = new Set(["AuditLog", "Revision", "StoredFile", "Session", "PasswordReset", "MediaUsage", "EventMedia", "AlbumMedia", "ArticleTag", "EventOrganization", "EcosystemFlowStep"]);
 const WRITES = new Set(["create", "createMany", "update", "updateMany", "upsert", "delete", "deleteMany"]);
 /** Values worth keeping in the log; other fields are recorded by name only. */
 const KEEP_VALUES = new Set(["status", "deletedAt", "isActive", "isFeatured", "isClosed", "isPlayback", "publishAt", "kind", "key", "role", "logoPermission"]);
@@ -43,6 +44,48 @@ function summarize(data: unknown): Record<string, unknown> | undefined {
   return { fields, ...(Object.keys(values).length && { values }) };
 }
 
+const REVISION_OPS = new Set(["update", "upsert", "delete", "updateMany", "deleteMany"]);
+
+/** Copies the current state of what an admin is about to change into Revision. Never blocks the change. */
+async function keepRevision(base: PrismaClient, model: string, operation: string, args: unknown) {
+  try {
+    const translation = translationOwner(model);
+    const target = translation?.model ?? model;
+    if (!isTracked(target)) return;
+    const where = (args as { where?: Record<string, unknown> } | undefined)?.where;
+    // The site's own bookkeeping (shared market board, recorded turnover) is not an admin change.
+    if (target === "SiteSetting" && /^market\.(board|turnover\.)/.test(String(where?.key ?? ""))) return;
+    const { getCurrentAdmin } = await import("@/lib/auth/session");
+    const admin = await getCurrentAdmin().catch(() => null);
+    if (!admin) return;
+    const a = (args ?? {}) as { where?: Record<string, unknown>; create?: Record<string, unknown>; data?: Record<string, unknown> };
+    const action = operation.startsWith("delete") && !translation ? "delete" : "update";
+    const delegate = (m: string) => (base as unknown as Record<string, { findMany: (x: unknown) => Promise<Record<string, unknown>[]> }>)[m.charAt(0).toLowerCase() + m.slice(1)]!;
+    // The records concerned: by the where of the change (a translation: the record it translates).
+    let ids: unknown[] = [];
+    if (translation) {
+      const rows = await delegate(model).findMany({ where: a.where ?? {}, select: { [translation.fk]: true }, take: 50 }).catch(() => []);
+      ids = rows.map((r) => r[translation.fk]);
+      const fromCreate = a.create?.[translation.fk] ?? a.data?.[translation.fk];
+      if (fromCreate) ids.push(fromCreate);
+    } else if (operation === "updateMany" || operation === "deleteMany") {
+      const rows = await delegate(model).findMany({ where: a.where ?? {}, take: 50 }).catch(() => []);
+      const idName = idField(target) ?? "id";
+      ids = rows.map((r) => r[idName]);
+    } else {
+      const snap = await readSnapshot(base, target, a.where);
+      if (snap) await recordRevision(base, target, snap, action, admin.id);
+      return;
+    }
+    for (const id of new Set(ids.filter(Boolean).map(String))) {
+      const snap = await readSnapshot(base, target, { [idField(target) ?? "id"]: id });
+      if (snap) await recordRevision(base, target, snap, action, admin.id);
+    }
+  } catch (error) {
+    console.error("[revisions] could not keep a copy", model, operation, (error as Error)?.message ?? error);
+  }
+}
+
 function createClient() {
   const base = new PrismaClient({
     log: process.env.APP_ENV === "development" ? ["warn", "error"] : ["error"],
@@ -51,6 +94,8 @@ function createClient() {
     query: {
       $allModels: {
         async $allOperations({ model, operation, args, query }) {
+          // Before an admin changes or deletes something, keep a copy so it can be undone (Admin → History).
+          if (model && REVISION_OPS.has(operation)) await keepRevision(base, model, operation, args);
           const result = await query(args);
           if (!WRITES.has(operation) || SKIP.has(model) || model.endsWith("Translation") || model === "LeadActivity") return result;
           // The site's own bookkeeping (shared market board, recorded turnover) is not an admin change.

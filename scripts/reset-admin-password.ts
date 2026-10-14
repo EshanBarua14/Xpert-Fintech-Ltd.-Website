@@ -3,6 +3,8 @@
  * account. Creates the admin if the email does not exist yet.
  *
  *   npm run admin:password -- you@example.com
+ *   ADMIN_NEW_PASSWORD='…' npm run admin:password -- you@example.com            (no questions)
+ *   ADMIN_NEW_PASSWORD='…' npm run admin:password -- you@example.com --allow-short  (8–11 characters)
  *
  * The password is asked for interactively, so it never lands in shell history
  * or in .env. All existing sessions for that admin are signed out.
@@ -52,7 +54,9 @@ async function main() {
     await db.$disconnect();
     return;
   }
-  const email = (process.argv[2] ?? process.env.SEED_ADMIN_EMAIL ?? "").trim().toLowerCase();
+  const email = (process.argv.slice(2).find((a) => !a.startsWith("--")) ?? process.env.SEED_ADMIN_EMAIL ?? "").trim().toLowerCase();
+  // --allow-short: accept a password of 8–11 characters (the owner's choice; 12+ is safer).
+  const MIN = process.argv.includes("--allow-short") ? 8 : 12;
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     console.error("Usage: npm run admin:password -- you@example.com");
     process.exit(1);
@@ -61,17 +65,18 @@ async function main() {
   // Non-interactive (any terminal): ADMIN_NEW_PASSWORD='…' npm run admin:password -- you@example.com
   let password = (process.env.ADMIN_NEW_PASSWORD ?? "").trim();
   if (password) {
-    if (password.length < 12) {
-      console.error("✖ ADMIN_NEW_PASSWORD must be at least 12 characters. Nothing changed.");
+    if (password.length < MIN) {
+      console.error(`✖ ADMIN_NEW_PASSWORD must be at least ${MIN} characters${MIN === 12 ? " (add --allow-short to accept 8–11)" : ""}. Nothing changed.`);
       process.exit(1);
     }
+    if (password.length < 12) console.warn("! This password is shorter than 12 characters. Turn on two-step sign-in in Admin → Admins, or choose a longer one.");
   } else {
     if (!process.stdin.isTTY) console.log("(Typing is not hidden in this terminal. Paste or type the password and press Enter.)");
     for (let attempt = 1; ; attempt++) {
-      const first = await ask("New password (12+ characters): ");
+      const first = await ask(`New password (${MIN}+ characters): `);
       process.stdout.write("\n");
-      if (first.length < 12) {
-        console.error(`✖ That was ${first.length} characters; it needs at least 12.`);
+      if (first.length < MIN) {
+        console.error(`✖ That was ${first.length} characters; it needs at least ${MIN}.`);
       } else {
         const again = await ask("Type it again: ");
         process.stdout.write("\n");

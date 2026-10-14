@@ -186,6 +186,8 @@ export async function purgeOldTrash(force = false): Promise<number> {
   };
 
   try {
+    // Undo history (Admin → History) is kept for 180 days.
+    await db.revision.deleteMany({ where: { createdAt: { lt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000) } } }).catch(() => undefined);
     // Records first, so the media files they used become free to delete.
     await run(await db.lead.findMany({ where: old, select: { id: true } }), purgeLead);
     await run(await db.deployment.findMany({ where: old, select: { id: true } }), purgeDeployment);

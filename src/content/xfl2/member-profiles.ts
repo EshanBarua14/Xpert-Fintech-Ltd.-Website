@@ -31,6 +31,8 @@ export const MEMBER_PROFILES: MemberProfile[] = [
   },
   {
     key: "bank-asia-securities",
+    // Its own site: company name, Dilkusha head office and info@basl-bd.com (checked 15 Oct 2026).
+    website: "https://www.basl-bd.com",
     dseTrec: "237",
     cseTrec: "149",
     description: {

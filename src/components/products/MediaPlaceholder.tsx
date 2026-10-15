@@ -1,3 +1,4 @@
+import { contentSlots } from "@/lib/env/hints";
 /**
  * Where a product's demo video and screens will go, shown only outside
  * production until they are added in Admin → Products → "Screens and demo
@@ -5,6 +6,8 @@
  * reviewed before the media arrives.
  */
 export function DemoPlaceholder({ adminHref, name, locale = "en" }: { adminHref: string; name: string; locale?: "en" | "bn" }) {
+  // Never on a deployed site: these link into the admin.
+  if (!contentSlots()) return null;
   const bn = locale === "bn";
   return (
     <figure className="flex flex-col gap-4">

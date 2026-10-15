@@ -946,7 +946,8 @@ async function seedReviewDrafts() {
 
 async function seedDeployments() {
   if (!WITH_DEPLOYMENTS) {
-    console.log("• Branded apps left as drafts (add --with-deployments to publish them)");
+    const drafts = await db.deployment.count({ where: { status: "DRAFT", deletedAt: null } });
+    if (drafts) console.log(`• Branded apps: ${drafts} left as drafts (add --with-deployments to publish them)`);
     return;
   }
   const res = await db.deployment.updateMany({ where: { status: "DRAFT", deletedAt: null }, data: { status: "PUBLISHED" } });
@@ -1879,16 +1880,28 @@ async function upgradePortraits() {
   const dir = path.join(process.cwd(), "prisma", "seed-media", "people");
   const store = path.join(process.cwd(), "storage", "media");
   let swapped = 0;
+  let current = 0;
   for (const file of await readdir(dir).catch(() => [] as string[])) {
     const key = file.replace(/\.[a-z]+$/i, "");
     const previous = PREVIOUS_PORTRAITS[key];
     if (!previous) continue;
-    const rows = await db.media.findMany({ where: { checksum: previous }, select: { id: true } });
-    if (!rows.length) continue;
     const data = await readFile(path.join(dir, file));
     const type = sniff(data);
     if (!type || type.kind !== "IMAGE") continue;
     const checksum = createHash("sha256").update(data).digest("hex");
+    current += await db.media.count({ where: { checksum } });
+    // The old file, by its checksum or (if it was saved again somewhere along the way) by its file name and smaller size.
+    const rows = await db.media.findMany({
+      where: {
+        checksum: { not: checksum },
+        OR: [
+          { checksum: { in: ([] as string[]).concat(previous) } },
+          { originalName: { in: [`${key}.png`, `${key}.jpg`, `${key}.jpeg`, `${key}.webp`] }, OR: [{ height: null }, { height: { lt: type.height ?? 2160 } }] },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!rows.length) continue;
     for (const row of rows) {
       const storageKey = `${randomUUID()}.${type.ext}`;
       await mkdir(store, { recursive: true });
@@ -1896,12 +1909,77 @@ async function upgradePortraits() {
       await db.storedFile.upsert({ where: { key: storageKey }, update: {}, create: { key: storageKey, data, size: data.length } });
       await db.media.update({
         where: { id: row.id },
-        data: { storageKey, originalName: file, mimeType: type.mimeType, sizeBytes: data.length, width: type.width ?? null, height: type.height ?? null, checksum },
+        data: {
+          storageKey,
+          originalName: file,
+          mimeType: type.mimeType,
+          sizeBytes: data.length,
+          width: type.width ?? null,
+          height: type.height ?? null,
+          checksum,
+          // The face point measured on the new file (a re-framed photo moves it).
+          ...(PORTRAIT_FOCUS[key] && { focalX: PORTRAIT_FOCUS[key].x, focalY: PORTRAIT_FOCUS[key].y, focalZoom: PORTRAIT_FOCUS[key].zoom ?? null }),
+        },
       });
       swapped++;
     }
   }
-  if (swapped) console.log(`• Portraits: ${swapped} photo(s) replaced with the 2160-pixel versions (same people, same framing)`);
+  console.log(
+    swapped
+      ? `• Portraits: ${swapped} photo(s) replaced with the latest 2160-pixel versions`
+      : `• Portraits: ${current} already at 2160 pixels; nothing to replace`,
+  );
+}
+
+/**
+ * Once (XFL, 15 Oct 2026): the member houses' trading apps are shown on the
+ * site, with their Google Play and App Store links. Publishes the apps still
+ * in draft; an app an editor has trashed stays trashed.
+ */
+async function showMemberApps() {
+  const MARK = "seed.apps-shown-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const res = await db.deployment.updateMany({ where: { status: "DRAFT", deletedAt: null }, data: { status: "PUBLISHED" } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), published: res.count } } });
+  console.log(`• Branded apps: ${res.count} published with their Google Play / App Store links`);
+}
+
+/** Once: websites added to member profiles after the first fill (e.g. Bank Asia Securities), where still empty. */
+async function fillMemberWebsites() {
+  const MARK = "seed.member-websites-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  let filled = 0;
+  for (const m of MEMBER_PROFILES) {
+    if (!m.website) continue;
+    const res = await db.organization.updateMany({ where: { key: m.key, OR: [{ websiteUrl: null }, { websiteUrl: "" }] }, data: { websiteUrl: m.website } });
+    filled += res.count;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), filled } } });
+  if (filled) console.log(`• Member websites: ${filled} added (e.g. Bank Asia Securities)`);
+}
+
+/**
+ * Once (XFL, 15 Oct 2026): UCB, Bank Asia and ONE Bank's brokerages come
+ * first, in that order, wherever members, clients and apps are listed; UCB's
+ * app is featured (shown large above the others) while it leads. Everything
+ * else keeps its order after them. Change both in Admin → Organizations and
+ * Admin → Deployments (Order, Featured).
+ */
+const PRIORITY_ORGS = ["ucb-stock-brokerage", "bank-asia-securities", "one-securities"];
+const PRIORITY_APPS = ["utrade-ucb-stock", "ba-secure-trade", "one-trade"];
+async function prioritiseLeadClients() {
+  const MARK = "seed.priority-ucb-bank-asia-one-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const reorder = <T extends { id: string; key: string | null }>(rows: T[], first: string[]): T[] => [
+    ...first.map((k) => rows.find((r) => r.key === k)).filter((r): r is T => Boolean(r)),
+    ...rows.filter((r) => !r.key || !first.includes(r.key)),
+  ];
+  const orgs = await db.organization.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], select: { id: true, key: true } });
+  for (const [i, o] of reorder(orgs, PRIORITY_ORGS).entries()) await db.organization.update({ where: { id: o.id }, data: { sortOrder: i } });
+  const apps = await db.deployment.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], select: { id: true, key: true } });
+  for (const [i, d] of reorder(apps, PRIORITY_APPS).entries()) await db.deployment.update({ where: { id: d.id }, data: { sortOrder: i, featured: d.key === PRIORITY_APPS[0] } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log("• Order: UCB, Bank Asia, ONE first (members, clients, apps); UCB's app featured");
 }
 
 async function seedMemberProfiles() {
@@ -1957,6 +2035,8 @@ async function main() {
   await seedStoryBangla();
   await seedReviewDrafts();
   await seedStoreLinks();
+  await showMemberApps();
+  await prioritiseLeadClients();
   await seedDeployments();
   await seedTeamLinks();
   await seedConsultantLinks();
@@ -1981,6 +2061,7 @@ async function main() {
   await seedClientStoryDrafts();
   await seedCareers();
   await seedMemberProfiles();
+  await fillMemberWebsites();
   await seedIdlcClient();
   await seedBanglaGaps();
   console.log("Content seed complete.");

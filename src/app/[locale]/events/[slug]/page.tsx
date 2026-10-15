@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CtaBand } from "@/components/flagship/Sections";
 import { MediaImage, Paragraphs } from "@/components/blocks/Shared";
+import { DateStamp, GeneratedCover, stampFor } from "@/components/media/GeneratedCover";
 import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getEventBySlug, getSeo, mediaMap } from "@/lib/public/content";
@@ -47,6 +48,7 @@ export default async function EventPage({ params }: Props) {
   const media = await mediaMap([event.coverMediaId], found.locale);
   const cover = media.get(event.coverMediaId ?? "");
   const date = formatEventDate(event.startsAt, event.dateIsApprox, found.locale);
+  const stamp = stampFor(event.startsAt, found.locale, { approx: event.dateIsApprox });
   const video = videoEmbedUrl(event.videoUrl);
   const participants = event.organizations
     .filter((eo) => eo.organization.status === "PUBLISHED" && !eo.organization.deletedAt)
@@ -104,11 +106,19 @@ export default async function EventPage({ params }: Props) {
         </header>
       </section>
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 pb-16 md:px-8">
-        {cover && (
-          <div data-reveal className="glass overflow-hidden rounded-3xl p-2">
-            <MediaImage media={cover} priority className="rounded-2xl" sizes="(min-width: 1024px) 896px, 100vw" />
+        {/* The event's cover photo, or one drawn for it; the date stamp on both. */}
+        <div data-reveal className="glass overflow-hidden rounded-3xl p-2">
+          <div className="relative overflow-hidden rounded-2xl">
+            {cover ? (
+              <MediaImage media={cover} priority className="rounded-2xl" sizes="(min-width: 1024px) 896px, 100vw" />
+            ) : (
+              <div className="relative aspect-[16/9]">
+                <GeneratedCover seed={event.id} size="lg" />
+              </div>
+            )}
+            {stamp && <DateStamp stamp={stamp} size="lg" className="bottom-4 left-4" />}
           </div>
-        )}
+        </div>
         <Paragraphs text={tr.body} className="text-lg" />
         {video && (
           <div data-reveal className="glass aspect-video overflow-hidden rounded-3xl p-2 [&>iframe]:rounded-2xl">

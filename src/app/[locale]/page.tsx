@@ -165,6 +165,7 @@ export default async function HomePage({ params }: Props) {
                 clients: t.reachClients,
                 progress: t.reachProgressLabel,
                 overall: t.reachOverall,
+                exchange: t.reachExchangeShare,
               }}
             />
           </div>
@@ -261,7 +262,7 @@ export default async function HomePage({ params }: Props) {
             {apps.length > 0 && (
               <div className="flex flex-col gap-5">
                 <p className="text-xs font-semibold text-text-secondary">{t.liveAppsTitle}</p>
-                <LiveApps apps={apps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp }} />
+                <LiveApps apps={apps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp, featured: t.featuredApp }} />
               </div>
             )}
           </div>

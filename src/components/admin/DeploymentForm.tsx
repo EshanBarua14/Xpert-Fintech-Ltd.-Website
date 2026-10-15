@@ -10,6 +10,7 @@ export type DeploymentFormValues = {
   status: "DRAFT" | "PUBLISHED";
   publishAt: string;
   sortOrder: number;
+  featured: boolean;
   appName: string;
   organizationId: string;
   offeringId: string;
@@ -94,7 +95,14 @@ export function DeploymentForm({
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Details</legend>
           <TextInput id="launchedAt" type="date" label="Launched" defaultValue={values.launchedAt} error={e.launchedAt} />
-          <TextInput id="sortOrder" type="number" min={0} label="Order" defaultValue={String(values.sortOrder)} error={e.sortOrder} />
+          <TextInput id="sortOrder" type="number" min={0} label="Order" defaultValue={String(values.sortOrder)} error={e.sortOrder} hint="0 comes first." />
+          <label className="flex items-start gap-3 text-sm">
+            <input type="checkbox" name="featured" defaultChecked={values.featured} className="mt-1 size-4 accent-[var(--color-brand-sky)]" />
+            <span>
+              <span className="font-semibold">Featured</span>
+              <span className="block text-xs text-text-secondary">Shown large, above the other apps, on the home and consortium pages.</span>
+            </span>
+          </label>
         </fieldset>
       </aside>
     </form>

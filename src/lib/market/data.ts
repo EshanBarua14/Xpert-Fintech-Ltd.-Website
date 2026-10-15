@@ -237,7 +237,8 @@ function settingsAndShares() {
         sessions = readSessions(sessionsRow?.value);
         const h = (headline?.value ?? {}) as Record<string, unknown>;
         const avg = (x: unknown) => (Number(x) > 0 && Number(x) <= 100 ? Number(x) : undefined);
-        const averages = { DSE: avg(h.dse) ?? avg(h.pct), CSE: avg(h.cse) };
+        // Each exchange's own figure only: the combined share is not either exchange's.
+        const averages = { DSE: avg(h.dse), CSE: avg(h.cse) };
         return { source, shares, averages };
       }),
     };

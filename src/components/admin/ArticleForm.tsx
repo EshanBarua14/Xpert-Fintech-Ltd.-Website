@@ -18,6 +18,7 @@ export type ArticleFormValues = {
   displayDate: string;
   authorName: string;
   coverMediaId: string;
+  videoUrl: string;
   categoryId: string;
   tags: string;
   en: Text;
@@ -67,7 +68,16 @@ export function ArticleForm({
         </fieldset>
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Media</legend>
-          <ImagePicker name="coverMediaId" label="Cover image" hint="Wide images (16:9) work best." options={images} defaultValue={values.coverMediaId} error={e.coverMediaId} />
+          <ImagePicker name="coverMediaId" label="Cover image" hint="Wide images (16:9) work best. Without one, the story shows its video's picture, or a cover drawn for it." options={images} defaultValue={values.coverMediaId} error={e.coverMediaId} />
+          <TextInput
+            id="videoUrl"
+            type="url"
+            label="Video (YouTube, Vimeo or Facebook)"
+            placeholder="https://www.youtube.com/watch?v=…"
+            hint="Played at the top of the story when there is no cover image, and below it when there is."
+            defaultValue={values.videoUrl}
+            error={e.videoUrl}
+          />
           <TextInput id="sortOrder" type="number" min={0} label="Order" hint="Higher numbers appear first among articles with the same date." defaultValue={String(values.sortOrder)} error={e.sortOrder} />
         </fieldset>
       </aside>

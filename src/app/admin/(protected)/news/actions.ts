@@ -9,7 +9,8 @@ import { requireAdmin } from "@/lib/auth/session";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { formInput, splitList } from "@/lib/admin/forms";
 import { purgeArticle } from "@/lib/admin/purge";
-import { optionalId, optionalText, parseLocalDateTime, slugField, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
+import { parseVideoUrl } from "@/lib/public/text";
+import { optionalHttpsUrl, optionalId, optionalText, parseLocalDateTime, slugField, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { parseDateOnly } from "@/lib/validation/organizations";
 
 export type ArticleState = { errors?: FieldErrors; message?: string };
@@ -22,6 +23,7 @@ const schema = z.object({
   displayDate: z.string().optional(),
   authorName: optionalText(120),
   coverMediaId: optionalId,
+  videoUrl: optionalHttpsUrl,
   categoryId: z.string().uuid().or(z.literal("")).transform((v) => v || null),
   newCategoryEn: optionalText(60),
   newCategoryBn: optionalText(60),
@@ -58,6 +60,7 @@ export async function saveArticle(_prev: ArticleState, formData: FormData): Prom
   const parsed = schema.safeParse(formInput(schema.shape, formData, ["displayDate"]));
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), message: "Please fix the highlighted fields." };
   const v = parsed.data;
+  if (v.videoUrl && !parseVideoUrl(v.videoUrl)) return { errors: { videoUrl: "Paste a YouTube, Vimeo or Facebook video address." }, message: "Please fix the highlighted fields." };
   if (!(await isUsableImage(v.coverMediaId))) return { errors: { coverMediaId: "That image is no longer in the media library." } };
 
   const enSlug = v.enSlug || slugify(v.enTitle);
@@ -72,6 +75,7 @@ export async function saveArticle(_prev: ArticleState, formData: FormData): Prom
     displayDate: parseDateOnly(v.displayDate),
     authorName: v.authorName ?? null,
     coverMediaId: v.coverMediaId,
+    videoUrl: v.videoUrl,
     updatedById: admin.id,
   };
 

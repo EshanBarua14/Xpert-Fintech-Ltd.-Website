@@ -63,8 +63,8 @@ export const getPeopleCounts = cache(async () => {
 export const getLiveApps = cache(async (locale: AppLocale) => {
   const rows = await db.deployment.findMany({
     where: { ...publishedWhere(), appName: { not: null } },
-    orderBy: { sortOrder: "asc" },
-    include: { organization: { include: { translations: true } } },
+    orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+    include: { organization: { include: { translations: true } }, translations: true },
   });
   const live = (d: (typeof rows)[number]) => (d.organization && d.organization.status === "PUBLISHED" && !d.organization.deletedAt ? d.organization : null);
   // The brokerage's logo, when uploaded with permission (Admin → Organizations).
@@ -82,6 +82,8 @@ export const getLiveApps = cache(async (locale: AppLocale) => {
       playStoreUrl: d.playStoreUrl,
       appStoreUrl: d.appStoreUrl,
       webUrl: d.webUrl,
+      featured: d.featured,
+      summary: pick(d.translations, locale)?.summary ?? null,
     };
   });
 });

@@ -262,7 +262,7 @@ export default async function HomePage({ params }: Props) {
             {apps.length > 0 && (
               <div className="flex flex-col gap-5">
                 <p className="text-xs font-semibold text-text-secondary">{t.liveAppsTitle}</p>
-                <LiveApps apps={apps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp, featured: t.featuredApp }} />
+                <LiveApps apps={apps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp, featured: t.featuredApp, rank: { broker: t.rankBroker, asOf: t.rankAsOf, source: t.rankSourceLabel }, locale }} />
               </div>
             )}
           </div>

@@ -2,6 +2,8 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils/cn";
 import { monogram } from "./LogoWall";
+import { RankBadge, type RankLabels } from "./RankBadge";
+import type { BrokerRank } from "@/lib/public/rank";
 
 export type LiveApp = {
   id: string;
@@ -18,9 +20,11 @@ export type LiveApp = {
   featured?: boolean;
   /** One or two lines about the app (Admin → Deployments). */
   summary?: string | null;
+  /** The brokerage's ranking among brokers (Admin → Organizations). */
+  rank?: BrokerRank | null;
 };
 
-type Labels = { android: string; ios: string; web: string; featured?: string };
+type Labels = { android: string; ios: string; web: string; featured?: string; rank?: RankLabels; locale?: "en" | "bn" };
 type StoreLink = { href: string; label: string; kind: "play" | "ios" | "web" };
 
 /** Every public link the app has: Google Play, App Store and the web app. */
@@ -63,6 +67,7 @@ function FeaturedApp({ a, labels }: { a: LiveApp; labels: Labels }) {
           ) : (
             <span className="text-base text-text-secondary">{a.brokerage}</span>
           ))}
+        {a.rank && labels.rank && <RankBadge rank={a.rank} labels={labels.rank} locale={labels.locale ?? "en"} detailed className="relative z-10 mt-1" />}
         {a.summary && <span className="max-w-2xl text-sm leading-relaxed text-text-secondary">{a.summary}</span>}
       </span>
       {links.length > 0 && (
@@ -136,6 +141,7 @@ export function LiveApps({ apps: all, labels }: { apps: LiveApp[]; labels: Label
                     ) : (
                       <span className="line-clamp-2 text-xs leading-snug text-text-secondary">{a.brokerage}</span>
                     ))}
+                  {a.rank && labels.rank && <RankBadge rank={a.rank} labels={labels.rank} locale={labels.locale ?? "en"} className="mt-2" />}
                 </span>
               </span>
               {links.length > 0 && (

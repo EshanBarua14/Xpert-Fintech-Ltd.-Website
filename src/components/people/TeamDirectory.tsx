@@ -92,30 +92,37 @@ function Chip({ pressed, onClick, label, count, color }: { pressed: boolean; onC
   );
 }
 
+/** One person: a standard 4:5 portrait across the top of the card (initials on the department colour without one), then name, title, department and contacts. */
 function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labels: TeamLabels }) {
   const color = departmentColor(p.department);
   return (
     <article
       style={{ "--dept": color } as CSSProperties}
-      className="team-card relative flex h-full flex-col gap-5 overflow-hidden rounded-2xl border border-fg/[0.09] bg-navy-900 p-5 pt-6 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--dept)_55%,transparent)]"
+      className="team-card group relative flex h-full flex-col overflow-hidden rounded-2xl border border-fg/[0.09] bg-navy-900 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--dept)_55%,transparent)]"
     >
-      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[var(--dept)]" />
-      <div className="flex items-center gap-4">
-        <div className="relative size-16 shrink-0 overflow-hidden rounded-full bg-[var(--dept)] ring-2 ring-[color-mix(in_srgb,var(--dept)_35%,transparent)] ring-offset-2 ring-offset-navy-900">
-          {p.photo ? (
-            <Image src={p.photo.url} alt="" fill sizes="4rem" quality={90} className="object-cover" style={focusStyle(p.photo, 1)} />
-          ) : (
-            <span aria-hidden="true" className="flex h-full items-center justify-center font-display text-xl text-white">
-              {initials(p.name)}
-            </span>
-          )}
-        </div>
-        <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="font-display text-lg leading-tight text-balance text-text-primary">{p.name}</h3>
-          {p.title && <p className="text-sm leading-snug text-text-secondary">{p.title}</p>}
-        </div>
+      <span aria-hidden="true" className="absolute inset-x-0 top-0 z-10 h-1 bg-[var(--dept)]" />
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-[color-mix(in_srgb,var(--dept)_22%,var(--color-navy-800))]">
+        {p.photo ? (
+          <Image
+            src={p.photo.url}
+            alt={p.name}
+            fill
+            sizes="(min-width: 1280px) 18rem, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw"
+            quality={90}
+            className="person-photo object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            style={focusStyle(p.photo, 0.8)}
+          />
+        ) : (
+          <span aria-hidden="true" className="flex h-full items-center justify-center">
+            <span className="flex size-28 items-center justify-center rounded-full bg-[var(--dept)] font-display text-4xl text-white ring-4 ring-white/10">{initials(p.name)}</span>
+          </span>
+        )}
       </div>
-      <div className="mt-auto flex min-h-9 items-center gap-3 border-t border-fg/[0.08] pt-4">
+      <div className="flex flex-1 flex-col gap-1.5 p-5">
+        <h3 className="font-display text-lg leading-tight text-balance text-text-primary">{p.name}</h3>
+        {p.title && <p className="text-sm leading-snug text-text-secondary">{p.title}</p>}
+      </div>
+      <div className="mx-5 mt-auto flex min-h-9 items-center gap-3 border-t border-fg/[0.08] py-4">
         {p.department && (
           <span className="flex min-w-0 items-center gap-2 text-xs font-medium text-text-secondary">
             <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-[var(--dept)]" />

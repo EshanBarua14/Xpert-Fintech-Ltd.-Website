@@ -124,6 +124,36 @@ export const PRESS_STORIES: PressStory[] = [
       ].join("\n\n"),
     },
   },
+  {
+    slug: { en: "xpert-fintech-acquires-ecosoftbd-new-nation", bn: "ecosoftbd-odhigrohon-expert-fintech-songbad" },
+    date: "2025-05-11",
+    source: "The New Nation",
+    sourceUrl: "https://dailynewnation.com/news/726794",
+    title: {
+      en: "Xpert Fintech acquires EcoSoftBD IT, an order management system vendor",
+      bn: "অর্ডার ম্যানেজমেন্ট সিস্টেম নির্মাতা ইকোসফটবিডি আইটি অধিগ্রহণ করল এক্সপার্ট ফিনটেক",
+    },
+    excerpt: {
+      en: "The deal was formalised with a memorandum of understanding signed on 22 April 2025 at Xpert Fintech's office in Bijoynagar, Dhaka.",
+      bn: "২০২৫ সালের ২২ এপ্রিল ঢাকার বিজয়নগরে এক্সপার্ট ফিনটেকের কার্যালয়ে সমঝোতা স্মারক সইয়ের মাধ্যমে চুক্তিটি আনুষ্ঠানিক রূপ পায়।",
+    },
+    body: {
+      en: [
+        "Xpert Fintech Ltd. has acquired EcoSoftBD IT Ltd., a Bangladeshi vendor of order management systems (OMS) for brokerages, The New Nation reported on 11 May 2025.",
+        "According to the report, the two companies formalised the acquisition by signing a memorandum of understanding on 22 April 2025 at Xpert Fintech's office in Bijoynagar, Dhaka. The financial terms were not disclosed.",
+        "EcoSoftBD had already been supplying brokerages: in April 2022 The Business Standard reported that First Capital Securities had agreed with the company to provide its trading technology.",
+        "The acquisition was also reported in Bangla by Banglanews24 (\"ইকোসফটবিডি আইটি'কে অধিগ্রহণ করেছে এক্সপার্ট ফিনটেক\").",
+        "Sources: The New Nation, 11 May 2025; The Business Standard, 21 April 2022; Banglanews24.",
+      ].join("\n\n"),
+      bn: [
+        "ব্রোকারেজ হাউসের জন্য অর্ডার ম্যানেজমেন্ট সিস্টেম (ওএমএস) তৈরিকারী বাংলাদেশি প্রতিষ্ঠান ইকোসফটবিডি আইটি লিমিটেড অধিগ্রহণ করেছে এক্সপার্ট ফিনটেক লিমিটেড—২০২৫ সালের ১১ মে এ খবর দেয় দ্য নিউ নেশন।",
+        "প্রতিবেদন অনুযায়ী, ২০২৫ সালের ২২ এপ্রিল ঢাকার বিজয়নগরে এক্সপার্ট ফিনটেকের কার্যালয়ে দুই প্রতিষ্ঠান সমঝোতা স্মারক সই করে অধিগ্রহণটি আনুষ্ঠানিক করে। আর্থিক শর্ত প্রকাশ করা হয়নি।",
+        "ইকোসফটবিডি আগে থেকেই ব্রোকারেজ হাউসে সেবা দিচ্ছিল: ২০২২ সালের এপ্রিলে দ্য বিজনেস স্ট্যান্ডার্ড জানায়, ফার্স্ট ক্যাপিটাল সিকিউরিটিজ প্রতিষ্ঠানটির কাছ থেকে ট্রেডিং প্রযুক্তি নিতে চুক্তি করেছে।",
+        "বাংলানিউজ২৪-ও অধিগ্রহণের খবরটি প্রকাশ করে (\"ইকোসফটবিডি আইটি'কে অধিগ্রহণ করেছে এক্সপার্ট ফিনটেক\")।",
+        "সূত্র: দ্য নিউ নেশন, ১১ মে ২০২৫; দ্য বিজনেস স্ট্যান্ডার্ড, ২১ এপ্রিল ২০২২; বাংলানিউজ২৪।",
+      ].join("\n\n"),
+    },
+  },
 ];
 
 export const PRESS_EVENTS: PressEvent[] = [
@@ -160,5 +190,20 @@ export const PRESS_EVENTS: PressEvent[] = [
       bn: "এক্সপার্ট ফিনটেক তাদের প্রবৃদ্ধি ও ভবিষ্যৎ রূপরেখা তুলে ধরে, যার মধ্যে নিজস্ব উচ্চক্ষমতার ম্যাচিং ইঞ্জিন তৈরির পরিকল্পনা রয়েছে। চেয়ারম্যান সুমন দাস রেমন্স ইনভেস্টমেন্ট অ্যান্ড সিকিউরিটিজের মো. মফিজ উদ্দিনের হাতে প্রতীকী শেয়ার সনদ তুলে দেন। (অর্থসূচক, ২১ সেপ্টেম্বর ২০২৬)",
     },
     location: { en: "A resort near Dhaka", bn: "ঢাকার কাছের একটি রিসোর্ট" },
+  },
+  {
+    key: "ecosoftbd-mou-signing",
+    slug: { en: "ecosoftbd-mou-signing", bn: "ecosoftbd-somjhota-sharok" },
+    startsAt: "2025-04-22",
+    title: { en: "MoU signed to acquire EcoSoftBD IT Ltd.", bn: "ইকোসফটবিডি আইটি অধিগ্রহণে সমঝোতা স্মারক সই" },
+    summary: {
+      en: "Xpert Fintech and EcoSoftBD IT, an order management system vendor, signed a memorandum of understanding for the acquisition at Xpert's Bijoynagar office.",
+      bn: "ওএমএস নির্মাতা ইকোসফটবিডি আইটির সঙ্গে অধিগ্রহণের সমঝোতা স্মারক সই করে এক্সপার্ট ফিনটেক, বিজয়নগর কার্যালয়ে।",
+    },
+    body: {
+      en: "On 22 April 2025 Xpert Fintech Ltd. and EcoSoftBD IT Ltd. signed a memorandum of understanding for Xpert Fintech to acquire EcoSoftBD, at Xpert Fintech's office in Bijoynagar, Dhaka. The acquisition was announced in May 2025.\n\nSource: The New Nation, 11 May 2025.",
+      bn: "২০২৫ সালের ২২ এপ্রিল ঢাকার বিজয়নগরে এক্সপার্ট ফিনটেকের কার্যালয়ে এক্সপার্ট ফিনটেক লিমিটেড ও ইকোসফটবিডি আইটি লিমিটেড অধিগ্রহণের সমঝোতা স্মারক সই করে। অধিগ্রহণের ঘোষণা আসে ২০২৫ সালের মে মাসে।\n\nসূত্র: দ্য নিউ নেশন, ১১ মে ২০২৫।",
+    },
+    location: { en: "Xpert Fintech office, Bijoynagar, Dhaka", bn: "এক্সপার্ট ফিনটেক কার্যালয়, বিজয়নগর, ঢাকা" },
   },
 ];

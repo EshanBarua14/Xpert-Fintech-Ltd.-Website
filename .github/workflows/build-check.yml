@@ -15,7 +15,13 @@ jobs:
           npx tsc --noEmit -p . | sed -E 's/^([^(]+)\(([0-9]+),([0-9]+)\): error (.*)$/::error file=\1,line=\2::\4/' || true
       - run: |
           npx next lint 2>&1 | grep -E 'Error:' -B1 | sed 's/^/::warning::/' || true
-      - run: npx next build 2>&1 | tail -150
+      - run: |
+          set +e
+          npx tsc --noEmit -p . > tsc.log 2>&1; echo "::notice::tsc exit $? with $(grep -c 'error TS' tsc.log) errors"
+          npx next build > build.log 2>&1; code=$?
+          echo "::notice::next build exit $code; $(grep -E 'Compiled|Generating static|Route \(app\)' build.log | tr '\n' ' ' | cut -c1-200)"
+          grep -nE "rror|Failed|failed" build.log | head -40 | sed 's/^/::error::/'
+          exit 0
         env:
           DATABASE_URL: postgresql://u:p@localhost:5432/x
           NEXT_TELEMETRY_DISABLED: "1"

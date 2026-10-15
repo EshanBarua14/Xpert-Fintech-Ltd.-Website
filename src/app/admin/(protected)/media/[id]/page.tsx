@@ -100,6 +100,10 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ id
                 enCaption: t("en")?.caption ?? "",
                 bnCaption: t("bn")?.caption ?? "",
                 tags: media.tags.join(", "),
+                url: `/media/${media.storageKey}`,
+                width: media.width,
+                height: media.height,
+                focal: media.focalX != null && media.focalY != null ? { x: media.focalX, y: media.focalY, zoom: media.focalZoom } : null,
               }}
             />
           </section>

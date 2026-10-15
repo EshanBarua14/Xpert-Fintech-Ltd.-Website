@@ -369,6 +369,11 @@ model Media {
   width        Int?
   height       Int?
   durationSec  Int?
+  /// Where the face or subject is (0–1 across, 0–1 down); crops keep it in frame.
+  focalX       Float?
+  focalY       Float?
+  /// Zoom towards that point in small frames (1 = none), for photos where the face is small.
+  focalZoom    Float?
   checksum     String? // SHA-256, to detect duplicate uploads
   tags         String[]
   folderId     String?      @db.Uuid

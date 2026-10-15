@@ -25,7 +25,7 @@ import { seedRiskLinks } from "./risk-links";
 import { PrismaClient, type Locale, type PersonGroup, type OfferingItemKind, type OfferingType } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { ecosystemEdges, ecosystemFlows, ecosystemNodes } from "../src/content/xfl2/ecosystem";
 import { BOARD, CONSULTANTS, MANAGEMENT, TEAM, type RosterPerson } from "../src/content/xfl2/people";
@@ -38,6 +38,7 @@ import { sniff } from "../src/lib/media/inspect";
 import { CASE_STUDY_DRAFTS, CLIENT_STORY_DRAFTS } from "../src/content/xfl2/case-study-drafts";
 import { CAREER_SEED } from "../src/content/xfl2/careers";
 import { MEMBER_PROFILES } from "../src/content/xfl2/member-profiles";
+import { PORTRAIT_FOCUS } from "../src/content/xfl2/portrait-focus";
 import { BLOCK_BN, EVENT_BN, ITEM_BN, LEGAL_BN, NAV_BN, NODE_BN, OFFERING_BN, OFFICE_BN, ORG_BN, PAGE_BN, PERSON_BN } from "../src/content/xfl2/bangla";
 
 const db = new PrismaClient();
@@ -1773,6 +1774,27 @@ async function seedClientStoryDrafts() {
   if (added) console.log(`• ${added} draft success stories added, one per client: fill in the [bracketed] parts with each client and publish in Admin → Success stories`);
 }
 
+/**
+ * The face point of each portrait XFL supplied (src/content/xfl2/portrait-focus.ts),
+ * set on those exact files (matched by checksum) where none is set yet, so
+ * every crop centres on the face. Points set in Admin → Media are kept.
+ */
+async function seedPortraitFocus() {
+  const dir = path.join(process.cwd(), "prisma", "seed-media", "people");
+  let set = 0;
+  for (const file of await readdir(dir).catch(() => [] as string[])) {
+    const focus = PORTRAIT_FOCUS[file.replace(/\.[a-z]+$/i, "")];
+    if (!focus) continue;
+    const checksum = createHash("sha256").update(await readFile(path.join(dir, file))).digest("hex");
+    const r = await db.media.updateMany({
+      where: { checksum, focalX: null },
+      data: { focalX: focus.x, focalY: focus.y, focalZoom: focus.zoom ?? null },
+    });
+    set += r.count;
+  }
+  if (set) console.log(`• Portraits: face point set on ${set} photo(s), so every crop centres on the face`);
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -1815,6 +1837,7 @@ async function main() {
   await markPlaceholders();
   await seedPeople();
   await seedRoster();
+  await seedPortraitFocus();
   await seedMessagesAndGoal();
   await seedLegalDrafts();
   await mergePlatformIntoProducts();

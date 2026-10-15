@@ -1,5 +1,6 @@
 "use client";
 
+import { focusStyle } from "@/lib/media/focal";
 import Link from "next/link";
 import Image from "next/image";
 import { useRef, useState, type CSSProperties } from "react";
@@ -24,7 +25,7 @@ export type GalleryPerson = {
   /** Position outside Xpert, e.g. "Managing Director, Apex Investments Ltd.". */
   affiliation: string | null;
   bio: string | null;
-  photo: { url: string; width: number | null; height: number | null } | null;
+  photo: { url: string; width: number | null; height: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
   linkedinUrl: string | null;
   email: string | null;
   /** Seeded stand-in until XFL sends the real profile. */
@@ -199,7 +200,8 @@ function PersonCard({
           width={p.photo?.width ?? 480}
           height={p.photo?.height ?? 600}
           sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="person-photo h-full w-full object-cover object-top"
+          className="person-photo h-full w-full object-cover"
+          style={focusStyle(p.photo, 0.8)}
           unoptimized={!p.photo}
         />
         <span aria-hidden="true" className="person-sheen pointer-events-none absolute inset-0" />
@@ -340,14 +342,14 @@ export function PeopleGallery({
             {/* The portrait in the same 4:5 frame as on the card, whatever the window's height: every profile shows its photo the same way. */}
             <div className="relative hidden flex-col gap-4 bg-navy-800/50 p-5 md:flex">
               <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-[color-mix(in_srgb,var(--tone)_35%,transparent)]">
-                <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt={open.name} fill sizes="20rem" className="object-cover object-top" unoptimized={!open.photo} />
+                <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt={open.name} fill sizes="20rem" className="object-cover" style={focusStyle(open.photo, 0.8)} unoptimized={!open.photo} />
               </div>
               {open.org && <OrgLogo org={open.org} className="h-10 self-start" />}
             </div>
             <div className="person-dialog-body flex min-h-0 flex-col gap-[clamp(0.75rem,2svh,1.5rem)] p-5 sm:p-7 md:p-9">
               <div className="flex items-center gap-4 pr-10">
                 <span className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-2xl bg-navy-800 md:hidden">
-                  <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt="" fill sizes="5rem" className="object-cover object-top" unoptimized={!open.photo} />
+                  <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt="" fill sizes="5rem" className="object-cover" style={focusStyle(open.photo, 0.8)} unoptimized={!open.photo} />
                 </span>
                 <div className="flex min-w-0 flex-col gap-1.5">
                   <p className="flex items-center gap-2 text-sm font-semibold text-[var(--tone-ink)]">

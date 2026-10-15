@@ -1,5 +1,6 @@
 "use client";
 
+import { focusStyle } from "@/lib/media/focal";
 import Image from "next/image";
 import { useMemo, useState, type CSSProperties } from "react";
 import { departmentColor, departmentLabel, departmentRank } from "@/lib/people/departments";
@@ -11,7 +12,7 @@ export type TeamMember = {
   name: string;
   title: string | null;
   department: string | null;
-  photo: { url: string } | null;
+  photo: { url: string; width?: number | null; height?: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
   email: string | null;
   linkedinUrl: string | null;
 };
@@ -102,7 +103,7 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
       <div className="flex items-center gap-4">
         <div className="relative size-16 shrink-0 overflow-hidden rounded-full bg-[var(--dept)] ring-2 ring-[color-mix(in_srgb,var(--dept)_35%,transparent)] ring-offset-2 ring-offset-navy-900">
           {p.photo ? (
-            <Image src={p.photo.url} alt="" fill sizes="4rem" className="object-cover object-top" />
+            <Image src={p.photo.url} alt="" fill sizes="4rem" className="object-cover" style={focusStyle(p.photo, 1)} />
           ) : (
             <span aria-hidden="true" className="flex h-full items-center justify-center font-display text-xl text-white">
               {initials(p.name)}

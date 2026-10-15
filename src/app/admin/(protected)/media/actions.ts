@@ -109,6 +109,9 @@ const detailsSchema = z.object({
   enCaption: optionalText(500),
   bnCaption: optionalText(500),
   tags: z.string().max(300),
+  focalX: z.union([z.literal(""), z.coerce.number().min(0).max(1)]),
+  focalY: z.union([z.literal(""), z.coerce.number().min(0).max(1)]),
+  focalZoom: z.union([z.literal(""), z.coerce.number().min(1).max(2)]),
 });
 
 export async function saveMediaDetails(_prev: MediaState, formData: FormData): Promise<MediaState> {
@@ -119,7 +122,8 @@ export async function saveMediaDetails(_prev: MediaState, formData: FormData): P
   const tags = [...new Set(v.tags.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean))].slice(0, 20);
 
   await db.$transaction(async (tx) => {
-    await tx.media.update({ where: { id: v.id }, data: { tags, updatedById: admin.id } });
+    const focal = v.focalX !== "" && v.focalY !== "" ? { focalX: v.focalX, focalY: v.focalY, focalZoom: v.focalZoom === "" ? null : v.focalZoom } : { focalX: null, focalY: null, focalZoom: null };
+    await tx.media.update({ where: { id: v.id }, data: { tags, ...(formData.has("focalX") && focal), updatedById: admin.id } });
     for (const [locale, altText, caption] of [
       ["en", v.enAlt, v.enCaption],
       ["bn", v.bnAlt, v.bnCaption],

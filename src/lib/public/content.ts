@@ -10,7 +10,7 @@ import { pick } from "./text";
 
 // Everything here returns PUBLISHED, non-deleted, already-due content only.
 
-export type MediaInfo = { url: string; alt: string; width: number | null; height: number | null };
+export type MediaInfo = { url: string; alt: string; width: number | null; height: number | null; focal?: { x: number; y: number; zoom?: number | null } | null };
 
 /** Resolves media ids to URLs + alt text in one query. Trashed files resolve to nothing. */
 export async function mediaMap(ids: (string | null | undefined)[], locale: AppLocale): Promise<Map<string, MediaInfo>> {
@@ -23,7 +23,13 @@ export async function mediaMap(ids: (string | null | undefined)[], locale: AppLo
   return new Map(
     rows.map((m) => [
       m.id,
-      { url: `/media/${m.storageKey}`, alt: pick(m.translations, locale)?.altText ?? "", width: m.width, height: m.height },
+      {
+        url: `/media/${m.storageKey}`,
+        alt: pick(m.translations, locale)?.altText ?? "",
+        width: m.width,
+        height: m.height,
+        focal: m.focalX != null && m.focalY != null ? { x: m.focalX, y: m.focalY, zoom: m.focalZoom } : null,
+      },
     ]),
   );
 }

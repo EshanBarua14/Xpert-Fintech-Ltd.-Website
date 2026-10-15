@@ -1,3 +1,4 @@
+import { focusStyle } from "@/lib/media/focal";
 import "server-only";
 import { cache } from "react";
 import { db } from "@/lib/db/client";
@@ -14,7 +15,7 @@ import { getOrganizations, mediaMap } from "@/lib/public/content";
  *  - the branded trading app(s) it runs on Xpert's platform (Admin → Deployments)
  */
 export type ConsortiumApp = { name: string; playStoreUrl: string | null; appStoreUrl: string | null; webUrl: string | null };
-export type ConsortiumRep = { name: string; title: string | null; position: string | null; group: "BOARD" | "CONSULTANT"; photo: string | null };
+export type ConsortiumRep = { name: string; title: string | null; position: string | null; group: "BOARD" | "CONSULTANT"; photo: string | null; photoStyle?: import("react").CSSProperties };
 export type ConsortiumMember = {
   id: string;
   name: string;
@@ -85,6 +86,7 @@ export const getConsortium = cache(async (locale: AppLocale): Promise<Consortium
               position: ptr.affiliation ?? null,
               group: role.group as "BOARD" | "CONSULTANT",
               photo: photo?.url ?? null,
+              photoStyle: photo ? focusStyle(photo, 1) : undefined,
             },
           ];
         });

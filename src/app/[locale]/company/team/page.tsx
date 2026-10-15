@@ -41,7 +41,7 @@ export default async function TeamPage({ params }: Props) {
         name: pick(p.translations, locale as AppLocale)?.name ?? "",
         title: pick(p.roles[0]?.translations ?? [], locale as AppLocale)?.title ?? null,
         department: p.department?.trim() || null,
-        photo: photo ? { url: photo.url } : null,
+        photo: photo ? { url: photo.url, width: photo.width, height: photo.height, focal: photo.focal ?? null } : null,
         email: p.email,
         linkedinUrl: p.linkedinUrl,
       };

@@ -1,5 +1,6 @@
 "use client";
 
+import { focusStyle } from "@/lib/media/focal";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { TestimonialCard } from "@/lib/public/content";
@@ -125,7 +126,8 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
                     alt={t.name}
                     width={160}
                     height={160}
-                    className="size-20 shrink-0 rounded-2xl object-cover object-top ring-1 ring-fg/10"
+                    className="size-20 shrink-0 rounded-2xl object-cover ring-1 ring-fg/10"
+                    style={focusStyle(t.photo, 1, { zoom: false })}
                   />
                 ) : (
                   <span aria-hidden="true" className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-brand-royal font-display text-2xl text-white">

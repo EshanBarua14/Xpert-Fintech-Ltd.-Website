@@ -102,7 +102,7 @@ export async function PeopleGrid({
       // The Bangla affiliation may spell the company differently from its Bangla name: the English one decides then.
       org: orgForText(orgs, tr?.affiliation) ?? orgForText(orgs, p.translations.find((x) => x.locale === "en")?.affiliation),
       bio: tr?.bio ?? null,
-      photo: photo ? { url: photo.url, width: photo.width, height: photo.height } : null,
+      photo: photo ? { url: photo.url, width: photo.width, height: photo.height, focal: photo.focal ?? null } : null,
       linkedinUrl: p.linkedinUrl,
       email: p.email,
       isPlaceholder: p.isPlaceholder,

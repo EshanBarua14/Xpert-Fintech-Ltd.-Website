@@ -145,6 +145,11 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
             defaultValue={values.photoMediaId}
             error={e.photoMediaId}
           />
+          {values.photoMediaId && (
+            <a href={`/admin/media/${values.photoMediaId}#face`} className="text-sm font-semibold text-brand-sky hover:underline">
+              Adjust how the face is framed
+            </a>
+          )}
           <TextInput
             id="sortOrder"
             type="number"

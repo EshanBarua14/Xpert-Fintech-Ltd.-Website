@@ -1,3 +1,4 @@
+import { focusStyle } from "@/lib/media/focal";
 import Image from "next/image";
 import type { LeaderMessage as Message } from "@/lib/content/leaders";
 import { cn } from "@/lib/utils/cn";
@@ -26,7 +27,7 @@ export function LeaderMessage({ message, heading, compact = false }: { message: 
       <figure data-reveal className="flex flex-row items-center gap-5 md:flex-col md:items-stretch md:gap-5">
         <div className="relative aspect-[4/5] w-28 shrink-0 overflow-hidden rounded-2xl bg-navy-800 md:w-full">
           {message.photo ? (
-            <Image src={message.photo.url} alt={message.name ?? ""} fill sizes="(min-width: 768px) 15rem, 7rem" className="object-cover" />
+            <Image src={message.photo.url} alt={message.name ?? ""} fill sizes="(min-width: 768px) 15rem, 7rem" className="object-cover" style={focusStyle(message.photo, 0.8)} />
           ) : (
             <span aria-hidden="true" className="flex h-full items-center justify-center bg-brand-royal font-display text-4xl text-white">
               {initials(message.name)}

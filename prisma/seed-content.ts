@@ -2000,6 +2000,21 @@ async function seedUcbRank() {
   if (res.count) console.log("• Ranking: UCB Stock Brokerage #1 on DSE (its own statement); add others in Admin → Organizations");
 }
 
+/** Once: Xpert's Facebook page beside LinkedIn and email (footer, contact). Kept if an editor already added one. */
+async function addFacebookLink() {
+  const MARK = "seed.facebook-link-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const URL_FB = "https://www.facebook.com/XpertFintechLtd";
+  const row = await db.siteSetting.findUnique({ where: { key: "social.links" } });
+  const links = Array.isArray(row?.value) ? (row!.value as { label: string; url: string }[]) : [];
+  if (!links.some((l) => /facebook\.com|fb\.com/i.test(l?.url ?? ""))) {
+    const value = [...links, { label: "Facebook", url: URL_FB }];
+    await db.siteSetting.upsert({ where: { key: "social.links" }, update: { value }, create: { key: "social.links", value } });
+    console.log("• Social links: Facebook added beside LinkedIn and email");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -2056,6 +2071,7 @@ async function main() {
   await showMemberApps();
   await prioritiseLeadClients();
   await seedUcbRank();
+  await addFacebookLink();
   await seedDeployments();
   await seedTeamLinks();
   await seedConsultantLinks();

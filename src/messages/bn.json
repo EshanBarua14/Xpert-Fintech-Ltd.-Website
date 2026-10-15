@@ -760,5 +760,8 @@
   "albumsTitle": "অ্যালবাম",
   "videoAlbumsTitle": "ভিডিও অ্যালবাম",
   "videoAlbum": "ভিডিও অ্যালবাম",
-  "mixedAlbum": "ছবি ও ভিডিও"
+  "mixedAlbum": "ছবি ও ভিডিও",
+  "rankBroker": "{exchange}-এ {n} নম্বর ব্রোকার",
+  "rankAsOf": "{date} অনুযায়ী",
+  "rankSourceLabel": "সূত্র"
 }

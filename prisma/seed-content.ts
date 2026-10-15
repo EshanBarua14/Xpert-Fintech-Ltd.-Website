@@ -1982,6 +1982,24 @@ async function prioritiseLeadClients() {
   console.log("• Order: UCB, Bank Asia, ONE first (members, clients, apps); UCB's app featured");
 }
 
+/**
+ * Once: UCB Stock Brokerage's ranking. Its own website (ucbstock.com.bd,
+ * About us, read 15 Oct 2026) says it reached #1 among DSE brokers in
+ * December 2021 and "to date maintains the #1 ranking among all the brokers";
+ * XFL confirms it leads (15 Oct 2026). Other houses' rankings are added in
+ * Admin → Organizations when the current list is to hand.
+ */
+async function seedUcbRank() {
+  const MARK = "seed.ucb-rank-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const res = await db.organization.updateMany({
+    where: { key: "ucb-stock-brokerage", dseRank: null },
+    data: { dseRank: 1, rankAsOf: "October 2026", rankSource: "UCB Stock Brokerage (ucbstock.com.bd)" },
+  });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  if (res.count) console.log("• Ranking: UCB Stock Brokerage #1 on DSE (its own statement); add others in Admin → Organizations");
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -2037,6 +2055,7 @@ async function main() {
   await seedStoreLinks();
   await showMemberApps();
   await prioritiseLeadClients();
+  await seedUcbRank();
   await seedDeployments();
   await seedTeamLinks();
   await seedConsultantLinks();

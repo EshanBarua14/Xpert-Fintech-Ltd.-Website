@@ -1,4 +1,5 @@
 import "server-only";
+import { rankOf } from "./rank";
 import { cache } from "react";
 import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
@@ -83,6 +84,7 @@ export const getLiveApps = cache(async (locale: AppLocale) => {
       appStoreUrl: d.appStoreUrl,
       webUrl: d.webUrl,
       featured: d.featured,
+      rank: rankOf(o),
       summary: pick(d.translations, locale)?.summary ?? null,
     };
   });

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { RankBadge, type RankLabels } from "./RankBadge";
 import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { ConsortiumMember } from "@/lib/public/consortium";
@@ -40,6 +41,7 @@ export type ConsortiumLabels = {
   dseTrec: string;
   cseTrec: string;
   visitWebsite: string;
+  rank?: RankLabels;
 };
 
 /** How long each house stays on screen while the map plays by itself. */
@@ -327,8 +329,9 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                 </div>
               </div>
 
-              {(m.description || m.dseTrec || m.cseTrec || m.websiteUrl) && (
+              {(m.description || m.dseTrec || m.cseTrec || m.websiteUrl || m.rank) && (
                 <div className="flex flex-col gap-3">
+                  {m.rank && labels.rank && <RankBadge rank={m.rank} labels={labels.rank} locale={locale} detailed />}
                   {m.description && <p className="text-sm leading-relaxed text-text-primary/90">{m.description}</p>}
                   <p className="flex flex-wrap items-center gap-2 text-xs">
                     {m.dseTrec && (

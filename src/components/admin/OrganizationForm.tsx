@@ -16,6 +16,10 @@ export type OrgFormValues = {
   sortOrder: number;
   websiteUrl: string;
   dseTrec: string;
+  dseRank: string;
+  cseRank: string;
+  rankAsOf: string;
+  rankSource: string;
   cseTrec: string;
   logoMediaId: string;
   logoPermission: boolean;
@@ -74,6 +78,12 @@ export function OrganizationForm({ values, images }: { values: OrgFormValues; im
           <div className="grid grid-cols-2 gap-3">
             <TextInput id="dseTrec" label="DSE TREC no." placeholder="026" hint="Brokerages only." defaultValue={values.dseTrec} error={e.dseTrec} />
             <TextInput id="cseTrec" label="CSE TREC no." placeholder="021" defaultValue={values.cseTrec} error={e.cseTrec} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <TextInput id="dseRank" inputMode="numeric" label="DSE ranking" placeholder="1" hint="Position among DSE brokers. Empty hides it." defaultValue={values.dseRank} error={e.dseRank} />
+            <TextInput id="cseRank" inputMode="numeric" label="CSE ranking" placeholder="3" defaultValue={values.cseRank} error={e.cseRank} />
+            <TextInput id="rankAsOf" label="Ranking as of" placeholder="September 2026" defaultValue={values.rankAsOf} error={e.rankAsOf} />
+            <TextInput id="rankSource" label="Ranking source" placeholder="DSE monthly top 20 TREC holders" defaultValue={values.rankSource} error={e.rankSource} />
           </div>
           <ImagePicker name="logoMediaId" label="Logo" options={images} defaultValue={values.logoMediaId} error={e.logoMediaId} />
           <label className="flex items-start gap-3 text-sm">

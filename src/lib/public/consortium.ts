@@ -1,4 +1,5 @@
 import { focusStyle } from "@/lib/media/focal";
+import { rankOf, type BrokerRank } from "./rank";
 import "server-only";
 import { cache } from "react";
 import { db } from "@/lib/db/client";
@@ -24,6 +25,7 @@ export type ConsortiumMember = {
   websiteUrl: string | null;
   dseTrec: string | null;
   cseTrec: string | null;
+  rank: BrokerRank | null;
   logo: { url: string; width: number | null; height: number | null } | null;
   apps: ConsortiumApp[];
   reps: ConsortiumRep[];
@@ -98,6 +100,7 @@ export const getConsortium = cache(async (locale: AppLocale): Promise<Consortium
         websiteUrl: o.websiteUrl,
         dseTrec: o.dseTrec ?? null,
         cseTrec: o.cseTrec ?? null,
+        rank: rankOf(o),
         logo: logo ? { url: logo.url, width: logo.width, height: logo.height } : null,
         apps: deployments
           .filter((d) => d.organizationId === o.id)

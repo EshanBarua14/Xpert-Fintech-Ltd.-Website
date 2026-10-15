@@ -39,6 +39,7 @@ import { CASE_STUDY_DRAFTS, CLIENT_STORY_DRAFTS } from "../src/content/xfl2/case
 import { CAREER_SEED } from "../src/content/xfl2/careers";
 import { MEMBER_PROFILES } from "../src/content/xfl2/member-profiles";
 import { PORTRAIT_FOCUS } from "../src/content/xfl2/portrait-focus";
+import { PRESS_CATEGORY, PRESS_EVENTS, PRESS_STORIES } from "../src/content/xfl2/press";
 import { BLOCK_BN, EVENT_BN, ITEM_BN, LEGAL_BN, NAV_BN, NODE_BN, OFFERING_BN, OFFICE_BN, ORG_BN, PAGE_BN, PERSON_BN } from "../src/content/xfl2/bangla";
 
 const db = new PrismaClient();
@@ -1795,6 +1796,77 @@ async function seedPortraitFocus() {
   if (set) console.log(`• Portraits: face point set on ${set} photo(s), so every crop centres on the face`);
 }
 
+/**
+ * Xpert in the press (src/content/xfl2/press.ts): news stories under "In the
+ * press", written from the published reports and credited, and the events
+ * they describe. Each is added once; one whose address already exists (or
+ * that was deleted in the admin) is left alone.
+ */
+async function seedPress() {
+  let cat = await db.articleCategory.findUnique({ where: { key: PRESS_CATEGORY.key } });
+  if (!cat) {
+    cat = await db.articleCategory.create({
+      data: {
+        key: PRESS_CATEGORY.key,
+        sortOrder: 50,
+        translations: {
+          create: [
+            { locale: EN, slug: PRESS_CATEGORY.en.slug, name: PRESS_CATEGORY.en.name },
+            { locale: BN, slug: PRESS_CATEGORY.bn.slug, name: PRESS_CATEGORY.bn.name },
+          ],
+        },
+      },
+    });
+  }
+  let stories = 0;
+  for (const p of PRESS_STORIES) {
+    if (await db.articleTranslation.findFirst({ where: { OR: [{ locale: EN, slug: p.slug.en }, { locale: BN, slug: p.slug.bn }] } })) continue;
+    await db.article.create({
+      data: {
+        categoryId: cat.id,
+        authorName: p.source,
+        displayDate: new Date(`${p.date}T09:00:00+06:00`),
+        status: "PUBLISHED",
+        translations: {
+          create: (["en", "bn"] as const).map((l) => ({
+            locale: l === "en" ? EN : BN,
+            slug: p.slug[l],
+            title: p.title[l],
+            excerpt: p.excerpt[l],
+            body: p.body[l],
+          })),
+        },
+      },
+    });
+    stories++;
+  }
+  let events = 0;
+  for (const e of PRESS_EVENTS) {
+    if (await db.event.findUnique({ where: { key: e.key } })) continue;
+    if (await db.eventTranslation.findFirst({ where: { OR: [{ locale: EN, slug: e.slug.en }, { locale: BN, slug: e.slug.bn }] } })) continue;
+    await db.event.create({
+      data: {
+        key: e.key,
+        startsAt: new Date(e.startsAt),
+        dateIsApprox: e.approx ?? false,
+        status: "PUBLISHED",
+        translations: {
+          create: (["en", "bn"] as const).map((l) => ({
+            locale: l === "en" ? EN : BN,
+            slug: e.slug[l],
+            title: e.title[l],
+            summary: e.summary[l],
+            body: e.body[l],
+            location: e.location[l],
+          })),
+        },
+      },
+    });
+    events++;
+  }
+  if (stories || events) console.log(`• In the press: ${stories} news stor${stories === 1 ? "y" : "ies"} and ${events} event(s) added, each crediting its source`);
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -1851,6 +1923,7 @@ async function main() {
   await seedTeamLinks();
   await seedConsultantLinks();
   await seedMilestones();
+  await seedPress();
   await syncPendingProductLinks();
   await renameCaseStudies(); // before the menu additions, so no duplicate link is added
   await seedInsightsLinks();

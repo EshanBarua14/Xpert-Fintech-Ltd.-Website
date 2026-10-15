@@ -44,8 +44,18 @@ export function EventTimeline({ events, labels, locale }: { events: TimelineEven
                       </span>
                     ) : (
                       <span aria-hidden="true" className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-2xl border border-brand-sky/25 bg-gradient-to-br from-brand-sky/15 to-brand-royal/10">
-                        <span className="font-display text-3xl leading-none font-semibold text-text-primary">{e.day ?? e.month ?? "—"}</span>
-                        {e.day && <span className="mt-1 text-xs font-semibold text-brand-sky">{e.month}</span>}
+                        {e.day ? (
+                          <>
+                            <span className="font-display text-3xl leading-none font-semibold text-text-primary">{e.day}</span>
+                            <span className="mt-1 text-xs font-semibold text-brand-sky">{e.month}</span>
+                          </>
+                        ) : (
+                          // Month only (the day is not confirmed): month and year, smaller.
+                          <>
+                            <span className="px-1 text-center font-display text-sm leading-tight font-semibold text-text-primary">{e.month ?? "—"}</span>
+                            {e.year && <span className="mt-1 text-xs font-semibold text-brand-sky">{nf(e.year)}</span>}
+                          </>
+                        )}
                       </span>
                     )}
                     <div className="flex min-w-0 flex-col gap-2.5">

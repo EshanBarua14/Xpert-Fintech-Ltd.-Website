@@ -1,0 +1,38 @@
+/**
+ * Fingerprints (SHA-256) of the portrait files used before 15 October 2026,
+ * when every portrait was re-made at 2160 pixels tall (same framing, same
+ * face). The content seed swaps those earlier files for the new ones in place,
+ * so every person, card and crop keeps working with no re-upload.
+ */
+export const PREVIOUS_PORTRAITS: Record<string, string> = {
+  "aminul-islam": "46d0aa5730c65fbba9e749371bedd7722d9a7e30349ce6c7f2de198a2464e8e1",
+  "bishnu-pada-kunda": "5e3185c1c06dacef9997e5e1f0e21d704b52d3c481575717f9e3b1f5355a572b",
+  "dilip-kajuri": "00e8925b6282c40615911568d0f9d529b75be9ad7e7528eecb1428fb29f86399",
+  "eshan-barua": "ef8a4de53dfb73cdff3768faede53fe8a49499304ad9a5eeb23a05cc4c247bc9",
+  "fakruddin-ali-ahmed-rajib": "afbeed2fb055b9ec42099f5a7702b6537b22149dc91a3a092d76b47ccda2736a",
+  "m-shahryar-faiz": "ea342932942d2df4cf78bae73c1df35717fe8388aa55c965cb3943a31b094129",
+  "mahmuda-yasmin-farah": "d2d40dafb59a8b942c045c72a7e451743e98d2770bdd6ec087f6b7e76f34b3de",
+  "md-abdur-rahman-rony": "522481ca12d0a2f3e4e4566865118f7f72ad3e115400a370a13aa4a11f943014",
+  "md-abul-moshad-chowdhury": "ccf90da0a0baad51bd85bcb17559d775e32d404160ab42ede9530e094d46d55a",
+  "md-hasan-uddin": "213d2b8fe237f222274e92a300db69df4aeb62735ec633f1f20f2fa3d0e4adb7",
+  "md-hefaj-uddin": "bf5de074508615a0b00a38173e69c5f94998c53189a714c76ee78b557dba12b1",
+  "md-refat-hossen": "9930199f57a309d6263cc50d5519e114045b06fa66777733b4d16456c24b5b18",
+  "md-shahinur-rahman": "ce8165221bbef631a90533e2ce21d9c339f6ecf2861a51c70b1fa1f14d194c88",
+  "md-sirajul-islam": "900db2e75d64718c2fa72c0521e7c9065a58fa663aa47758e0ea57acf3415a87",
+  "md-yeasin-hossain": "b27e9a55acb7f1d2ab71aabb76be1428c3605124f88ac154f01147523c6d58e9",
+  "mohammad-ali": "5ee3b4bc18c7dd32adf3f0ecbc6d1126b2949376841112660125a1cd807b6ed4",
+  "mohammad-ashiqur-rahman-bhuiyan": "f7eb7e5233737a6433c6ff9d93d56b851b900a9f1eba2807424b8b3ed2ba0465",
+  "mohammad-erfanul-islam": "e7d8270412e2f7463be19a40b49d5825e96b658f88f54a6a5f86d5f6f3908989",
+  "mohammad-mehrabul-ferdous": "dbd5bd4e31b3bba485667b071a4fd222f5ab9d2944dca37d4e275f9caeedbb2c",
+  "mohammed-rahmat-pasha": "94f55f06c79a4c4888ab81c2206aef1bec9283325e3ca3d32d39c4910f1fa00a",
+  "mohd-shaahed-imran": "328ce3b6e8bbae8c804d2c0685cfc5d952e3c4f9ccd5caede039f7ef98bdd0a2",
+  "muhammad-shamsul-maruf": "f675c5ad7c278ce296e4c711a71af9bd1009044722085b08f42171fc4d4131c0",
+  "nafis-hasan-khan": "7a3dcdc1a93c250600213a33cfb4dcbc17cff001597e119f4adf12aca1f91a90",
+  "najmul-hasan-rifat": "6d373c6142d32b1ce72d469811df5ba390a190cc389d76359dab978a5aa9f21c",
+  "saikat-biswas": "70cbfc7652e1540fe4df8fafb61c80bf6781209d1e5ce23e66473880529ca12d",
+  "shaleh-akram": "c39aa7072c8ed2e91df8404a4e3c3a0becbaf108a938c373788ac501dd511c93",
+  "shamsher-morshed": "bd3dfe193a6927eb94a0de31363707ba756b13d13f0d57ff0deeaf0b8cdedc24",
+  "sumon-das": "72302ea3945c72f68a2eb2b6c485e9cb1161ddcab6eacdc65417c64902e4a0ab",
+  "talukder-juhaer-hakim": "1632c794d1dfcc2da9463c5105fa34067529e9a17f9ecfcc00ca082d2f588c87",
+  "toha-hossain": "06b8713980cebdad37402941c83a0ce5791764b2e3fc36663a52dafa45244b38",
+};

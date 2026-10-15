@@ -126,6 +126,7 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
                     alt={t.name}
                     width={160}
                     height={160}
+                    quality={90}
                     className="size-20 shrink-0 rounded-2xl object-cover ring-1 ring-fg/10"
                     style={focusStyle(t.photo, 1, { zoom: false })}
                   />

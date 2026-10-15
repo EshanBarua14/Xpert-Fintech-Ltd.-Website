@@ -55,6 +55,8 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
+    // 75 for most images; portraits ask for 90 so faces stay crisp.
+    qualities: [75, 90],
   },
   // "Case studies" are now "Success stories": old links keep working.
   async redirects() {

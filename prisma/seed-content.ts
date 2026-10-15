@@ -39,6 +39,7 @@ import { CASE_STUDY_DRAFTS, CLIENT_STORY_DRAFTS } from "../src/content/xfl2/case
 import { CAREER_SEED } from "../src/content/xfl2/careers";
 import { MEMBER_PROFILES } from "../src/content/xfl2/member-profiles";
 import { PORTRAIT_FOCUS } from "../src/content/xfl2/portrait-focus";
+import { PREVIOUS_PORTRAITS } from "../src/content/xfl2/portrait-previous";
 import { PRESS_CATEGORY, PRESS_EVENTS, PRESS_STORIES } from "../src/content/xfl2/press";
 import { BLOCK_BN, EVENT_BN, ITEM_BN, LEGAL_BN, NAV_BN, NODE_BN, OFFERING_BN, OFFICE_BN, ORG_BN, PAGE_BN, PERSON_BN } from "../src/content/xfl2/bangla";
 
@@ -1867,6 +1868,42 @@ async function seedPress() {
   if (stories || events) console.log(`• In the press: ${stories} news stor${stories === 1 ? "y" : "ies"} and ${events} event(s) added, each crediting its source`);
 }
 
+/**
+ * The portraits were re-made at 2160 pixels tall (15 October 2026). Every
+ * media file that is still an earlier version (matched by its fingerprint)
+ * gets the new file in place: same media record, so people, crops and face
+ * points stay as they are. The file goes to storage/media and into the
+ * database's file store (what the live site on Vercel reads).
+ */
+async function upgradePortraits() {
+  const dir = path.join(process.cwd(), "prisma", "seed-media", "people");
+  const store = path.join(process.cwd(), "storage", "media");
+  let swapped = 0;
+  for (const file of await readdir(dir).catch(() => [] as string[])) {
+    const key = file.replace(/\.[a-z]+$/i, "");
+    const previous = PREVIOUS_PORTRAITS[key];
+    if (!previous) continue;
+    const rows = await db.media.findMany({ where: { checksum: previous }, select: { id: true } });
+    if (!rows.length) continue;
+    const data = await readFile(path.join(dir, file));
+    const type = sniff(data);
+    if (!type || type.kind !== "IMAGE") continue;
+    const checksum = createHash("sha256").update(data).digest("hex");
+    for (const row of rows) {
+      const storageKey = `${randomUUID()}.${type.ext}`;
+      await mkdir(store, { recursive: true });
+      await writeFile(path.join(store, storageKey), data, { flag: "wx" });
+      await db.storedFile.upsert({ where: { key: storageKey }, update: {}, create: { key: storageKey, data, size: data.length } });
+      await db.media.update({
+        where: { id: row.id },
+        data: { storageKey, originalName: file, mimeType: type.mimeType, sizeBytes: data.length, width: type.width ?? null, height: type.height ?? null, checksum },
+      });
+      swapped++;
+    }
+  }
+  if (swapped) console.log(`• Portraits: ${swapped} photo(s) replaced with the 2160-pixel versions (same people, same framing)`);
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -1907,6 +1944,7 @@ async function main() {
   console.log(`• Products: ${[...PUBLISH].join(", ")} published${bnItemsAdded ? `; Bangla added to ${bnItemsAdded} product item(s)` : ""}`);
   await applyProductLineup();
   await markPlaceholders();
+  await upgradePortraits();
   await seedPeople();
   await seedRoster();
   await seedPortraitFocus();

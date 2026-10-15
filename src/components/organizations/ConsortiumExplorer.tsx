@@ -367,7 +367,7 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                         >
                           <span className="relative aspect-[4/5] w-12 shrink-0 overflow-hidden rounded-xl bg-navy-800">
                             {r.photo ? (
-                              <Image src={r.photo} alt="" fill sizes="3rem" className="object-cover object-top" style={r.photoStyle} />
+                              <Image src={r.photo} alt="" fill sizes="3rem" quality={90} className="object-cover object-top" style={r.photoStyle} />
                             ) : (
                               <span className="flex h-full items-center justify-center font-display text-sm text-text-secondary">{monogram(r.name)}</span>
                             )}

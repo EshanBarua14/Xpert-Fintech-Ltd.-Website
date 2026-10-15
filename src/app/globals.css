@@ -1096,15 +1096,13 @@ html {
 }
 
 /* ── XFL 2.0: people profiles ─────────────────────────────────────────────── */
-/* Profile cards: portraits rest slightly muted and come to full colour on hover or focus. */
+/* Profile cards: portraits in full colour; a slow zoom on hover or focus. */
 .person-photo {
-  filter: saturate(0.82) contrast(1.02);
-  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1), filter 600ms ease;
+  transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .person-card:hover .person-photo,
 .person-card:focus-within .person-photo {
   transform: scale(1.045);
-  filter: none;
 }
 .person-sheen {
   background: linear-gradient(180deg, transparent 55%, rgb(6 17 31 / 0.28));

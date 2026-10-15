@@ -45,8 +45,12 @@ export function focusStyle(
   const style: CSSProperties = { objectPosition: `${pct(px)} ${pct(py)}` };
   const z = opts.zoom === false ? 1 : clamp(f.zoom ?? 1, 1, 2);
   if (z > 1.001) {
+    // Zoom so the face moves towards where a portrait's face sits (centre,
+    // a little above the middle), never past the photo's own edges: the
+    // origin o with o + (face - o) × z = target, kept inside the frame.
+    const origin = (face: number, target: number) => clamp((face * z - target) / (z - 1));
     style.scale = String(z);
-    style.transformOrigin = `${pct(clamp(fx))} ${pct(clamp(fy))}`;
+    style.transformOrigin = `${pct(origin(clamp(fx), 0.5))} ${pct(origin(clamp(fy), 0.42))}`;
   }
   return style;
 }

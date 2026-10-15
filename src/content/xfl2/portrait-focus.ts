@@ -11,7 +11,7 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "bishnu-pada-kunda": { x: 0.537, y: 0.35 },
   "dilip-kajuri": { x: 0.484, y: 0.352, zoom: 1.08 },
   "eshan-barua": { x: 0.49, y: 0.37 },
-  "fakruddin-ali-ahmed-rajib": { x: 0.602, y: 0.29, zoom: 1.35 },
+  "fakruddin-ali-ahmed-rajib": { x: 0.53, y: 0.45 }, // re-framed 15 Oct to head and shoulders like the others (plain background extended above)
   "m-shahryar-faiz": { x: 0.524, y: 0.486 },
   "mahmuda-yasmin-farah": { x: 0.496, y: 0.424, zoom: 1.1 },
   "md-abdur-rahman-rony": { x: 0.491, y: 0.491 },

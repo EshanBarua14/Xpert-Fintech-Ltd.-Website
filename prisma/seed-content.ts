@@ -1895,7 +1895,7 @@ async function upgradePortraits() {
       where: {
         checksum: { not: checksum },
         OR: [
-          { checksum: previous },
+          { checksum: { in: ([] as string[]).concat(previous) } },
           { originalName: { in: [`${key}.png`, `${key}.jpg`, `${key}.jpeg`, `${key}.webp`] }, OR: [{ height: null }, { height: { lt: type.height ?? 2160 } }] },
         ],
       },
@@ -1909,14 +1909,24 @@ async function upgradePortraits() {
       await db.storedFile.upsert({ where: { key: storageKey }, update: {}, create: { key: storageKey, data, size: data.length } });
       await db.media.update({
         where: { id: row.id },
-        data: { storageKey, originalName: file, mimeType: type.mimeType, sizeBytes: data.length, width: type.width ?? null, height: type.height ?? null, checksum },
+        data: {
+          storageKey,
+          originalName: file,
+          mimeType: type.mimeType,
+          sizeBytes: data.length,
+          width: type.width ?? null,
+          height: type.height ?? null,
+          checksum,
+          // The face point measured on the new file (a re-framed photo moves it).
+          ...(PORTRAIT_FOCUS[key] && { focalX: PORTRAIT_FOCUS[key].x, focalY: PORTRAIT_FOCUS[key].y, focalZoom: PORTRAIT_FOCUS[key].zoom ?? null }),
+        },
       });
       swapped++;
     }
   }
   console.log(
     swapped
-      ? `• Portraits: ${swapped} photo(s) replaced with the 2160-pixel versions (same people, same framing)`
+      ? `• Portraits: ${swapped} photo(s) replaced with the latest 2160-pixel versions`
       : `• Portraits: ${current} already at 2160 pixels; nothing to replace`,
   );
 }

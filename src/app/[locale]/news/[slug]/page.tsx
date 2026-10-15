@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
+import { GeneratedCover, stampFor } from "@/components/media/GeneratedCover";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Paragraphs } from "@/components/blocks/Shared";
@@ -95,13 +96,25 @@ export default async function ArticlePage({ params }: Props) {
         </div>
       </header>
 
-      {card.cover && (
-        <div className="mx-auto w-full max-w-5xl px-4 md:px-8">
+      {/* Top of the story: its photo; else its video; else a cover drawn for it. A video with a photo plays below the photo. */}
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 md:px-8">
+        {card.cover ? (
           <div data-reveal className="glass relative aspect-[16/9] overflow-hidden rounded-[2rem] p-2">
             <Image src={card.cover.url} alt={card.cover.alt || ""} fill priority sizes="(min-width: 1024px) 1024px, 100vw" className="rounded-[1.6rem] object-cover p-2" />
           </div>
-        </div>
-      )}
+        ) : !card.video ? (
+          <div data-reveal className="glass overflow-hidden rounded-[2rem] p-2">
+            <div className="relative aspect-[16/9] overflow-hidden rounded-[1.6rem]">
+              <GeneratedCover seed={card.id} label={card.category} stamp={stampFor(card.date, loc, { withTime: false })} size="lg" />
+            </div>
+          </div>
+        ) : null}
+        {card.video && (
+          <div data-reveal className="glass aspect-video overflow-hidden rounded-[2rem] p-2 [&>iframe]:rounded-[1.6rem]">
+            <iframe src={card.video.embedUrl} title={`${tr.title} — ${t.video}`} loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" referrerPolicy="strict-origin-when-cross-origin" className="h-full w-full" />
+          </div>
+        )}
+      </div>
 
       <div className="mx-auto grid w-full max-w-5xl gap-12 px-4 py-14 md:px-8 lg:grid-cols-[1fr_12rem]">
         <div className="article-body max-w-3xl">

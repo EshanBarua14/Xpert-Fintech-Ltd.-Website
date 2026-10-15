@@ -32,7 +32,7 @@ export default async function ArticlePage({
 
   if (id === "new") {
     const values: ArticleFormValues = {
-      status: "DRAFT", publishAt: "", sortOrder: 0, displayDate: "", authorName: "", coverMediaId: "", categoryId: "", tags: "",
+      status: "DRAFT", publishAt: "", sortOrder: 0, displayDate: "", authorName: "", coverMediaId: "", videoUrl: "", categoryId: "", tags: "",
       en: { ...emptyText }, bn: { ...emptyText },
     };
     return (
@@ -80,6 +80,7 @@ export default async function ArticlePage({
             displayDate: toDateInput(a.displayDate),
             authorName: a.authorName ?? "",
             coverMediaId: a.coverMediaId ?? "",
+            videoUrl: a.videoUrl ?? "",
             categoryId: a.categoryId ?? "",
             tags,
             en: text("en"),

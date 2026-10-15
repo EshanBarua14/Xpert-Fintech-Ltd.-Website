@@ -5,29 +5,38 @@ import type { ArticleCardData } from "@/lib/public/insights";
 import type { AppLocale } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils/cn";
 import { fill } from "@/lib/i18n/digits";
+import { GeneratedCover, stampFor } from "@/components/media/GeneratedCover";
 
 export function formatNewsDate(date: Date, locale: AppLocale) {
   return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Dhaka" }).format(date);
 }
 
-/** Cover image, or a branded panel with the category when there is none. */
-function Cover({ a, large, locale }: { a: ArticleCardData; large?: boolean; locale: AppLocale }) {
+/** A play mark over a video's picture. */
+function PlayMark() {
   return (
-    <span className={cn("relative block overflow-hidden bg-navy-800", large ? "aspect-[16/9] lg:aspect-auto lg:h-full" : "aspect-[16/9]")}>
+    <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
+      <span className="flex size-14 items-center justify-center rounded-full bg-[#05080f]/65 text-white ring-1 ring-white/30 backdrop-blur transition-transform duration-500 group-hover:scale-110">
+        <svg viewBox="0 0 16 16" className="ml-0.5 size-5" fill="currentColor"><path d="M4 2.6v10.8c0 .5.5.8.9.5l8.4-5.4a.6.6 0 0 0 0-1L4.9 2.1c-.4-.3-.9 0-.9.5Z" /></svg>
+      </span>
+    </span>
+  );
+}
+
+/** The story's photo; else its video's picture with a play mark; else a cover drawn for it, with the category and date. */
+function Cover({ a, large, locale }: { a: ArticleCardData; large?: boolean; locale: AppLocale }) {
+  const sizes = large ? "(min-width: 1024px) 60vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw";
+  return (
+    <span className={cn("relative block overflow-hidden bg-navy-800", large ? "aspect-[16/9] lg:aspect-auto lg:h-full lg:min-h-80" : "aspect-[16/9]")}>
       {a.cover ? (
-        <Image
-          src={a.cover.url}
-          alt={a.cover.alt || ""}
-          fill
-          sizes={large ? "(min-width: 1024px) 60vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"}
-          className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-        />
+        <Image src={a.cover.url} alt={a.cover.alt || ""} fill sizes={sizes} className="object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+      ) : a.video?.thumbnail ? (
+        // The video's own picture (YouTube), allowed by the site's image policy.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={a.video.thumbnail} alt="" loading="lazy" className="absolute inset-0 size-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
       ) : (
-        <span aria-hidden="true" className="absolute inset-0 overflow-hidden bg-gradient-to-br from-brand-royal/35 via-navy-800 to-ink-950">
-          <span className="absolute -right-16 -bottom-20 size-64 rounded-full bg-brand-sky/15 blur-3xl transition-transform duration-700 group-hover:scale-110" />
-          <span className="absolute bottom-5 left-6 font-display text-sm text-cyan-300/70">{locale === "bn" ? "এক্সপার্ট ফিনটেক" : "Xpert Fintech"}</span>
-        </span>
+        <GeneratedCover seed={a.id} label={a.category} stamp={stampFor(a.date, locale, { withTime: false })} size={large ? "lg" : "md"} />
       )}
+      {a.video && <PlayMark />}
     </span>
   );
 }

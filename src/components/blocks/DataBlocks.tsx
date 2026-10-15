@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { DateStamp, GeneratedCover, stampFor } from "@/components/media/GeneratedCover";
 import { getOrgLogos, getRiskPageHref, orgForText } from "@/lib/public/flagship";
 import { RmsPipeline } from "@/components/products/RmsPipeline";
 import { rmsLabels } from "@/lib/public/labels";
@@ -165,23 +166,30 @@ export async function EventCards({ events, locale }: { events: EventRow[]; local
         if (!tr) return null;
         const date = formatEventDate(e.startsAt, e.dateIsApprox, locale);
         const cover = e.coverMediaId ? covers.get(e.coverMediaId) : undefined;
+        const stamp = stampFor(e.startsAt, locale, { approx: e.dateIsApprox });
         return (
           <li key={e.id} data-reveal style={revealDelay(i)}>
             <Link
               href={`/${own ? locale : "en"}/events/${(own ?? tr).slug}`}
               className={cn(CARD, "group flex h-full min-h-56 flex-col gap-3 transition-transform duration-500 hover:-translate-y-1")}
             >
-              {cover && (
-                <span className="relative -mx-1 -mt-1 mb-1 block aspect-[16/9] overflow-hidden rounded-2xl bg-navy-800">
-                  <Image
-                    src={cover.url}
-                    alt={cover.alt ?? ""}
-                    fill
-                    sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                  />
-                </span>
-              )}
+              {/* The event's photo, or a cover drawn for it; both with the date stamp. */}
+              <span className="relative -mx-1 -mt-1 mb-1 block aspect-[16/9] overflow-hidden rounded-2xl bg-navy-800">
+                {cover ? (
+                  <>
+                    <Image
+                      src={cover.url}
+                      alt={cover.alt ?? ""}
+                      fill
+                      sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    />
+                    {stamp && <DateStamp stamp={stamp} />}
+                  </>
+                ) : (
+                  <GeneratedCover seed={e.id} stamp={stamp} />
+                )}
+              </span>
               {date && <time className="font-mono text-xs text-cyan-300">{date}</time>}
               <h3 className="font-display text-xl font-semibold tracking-tight text-balance">{tr.title}</h3>
               {tr.summary && <p className="line-clamp-3 text-sm text-text-secondary">{tr.summary}</p>}

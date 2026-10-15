@@ -755,5 +755,10 @@
   "demoNext2": "We arrange a walkthrough of the products you picked.",
   "demoNext3": "You see an order go from entry, through the RMS checks inside the OMS, to DSE or CSE.",
   "consAppsTitle": "Trading apps of the member houses",
-  "consAppsBody": "Each house offers its investors its own app on Xpert's platform. Download from Google Play, or from the App Store where the house has published one."
+  "consAppsBody": "Each house offers its investors its own app on Xpert's platform. Download from Google Play, or from the App Store where the house has published one.",
+  "galleryAll": "All",
+  "albumsTitle": "Albums",
+  "videoAlbumsTitle": "Video albums",
+  "videoAlbum": "Video album",
+  "mixedAlbum": "Photos and videos"
 }

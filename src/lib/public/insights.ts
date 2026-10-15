@@ -19,6 +19,8 @@ export type ArticleCardData = {
   categorySlug: string | null;
   author: string | null;
   cover: MediaInfo | null;
+  /** The story's video (YouTube, Vimeo or Facebook), when it has one. */
+  video: { embedUrl: string; thumbnail: string | null } | null;
   minutes: number;
 };
 
@@ -59,6 +61,10 @@ function toCard(a: ArticleRow, locale: AppLocale, covers: Map<string, MediaInfo>
     categorySlug: cat?.slug ?? null,
     author: a.authorName,
     cover: covers.get(a.coverMediaId ?? "") ?? null,
+    video: (() => {
+      const v = parseVideoUrl(a.videoUrl);
+      return v ? { embedUrl: v.embedUrl, thumbnail: v.thumbnail } : null;
+    })(),
     minutes: readingMinutes(tr.body),
   };
 }
@@ -215,6 +221,8 @@ export type Album = {
   approx: boolean;
   cover: GalleryPhoto | null;
   photos: GalleryPhoto[];
+  /** Videos in the album (Admin → Videos → Album), or the event's videos. */
+  videos: GalleryVideo[];
 };
 
 const toPhoto = (id: string, m: MediaInfo | undefined, fallbackAlt: string): GalleryPhoto | null =>
@@ -225,15 +233,16 @@ const toPhoto = (id: string, m: MediaInfo | undefined, fallbackAlt: string): Gal
  * albums, and every published event that has photos.
  */
 export const getAlbums = cache(async (locale: AppLocale): Promise<Album[]> => {
-  const [events, albums] = await Promise.all([
+  const [events, albums, videos] = await Promise.all([
     db.event.findMany({
-      where: { ...publishedWhere(), gallery: { some: {} } },
+      where: publishedWhere(),
       include: { translations: true, gallery: { orderBy: { sortOrder: "asc" } } },
     }),
     db.album.findMany({
-      where: { ...publishedWhere(), photos: { some: {} } },
+      where: publishedWhere(),
       include: { translations: true, photos: { orderBy: { sortOrder: "asc" } } },
     }),
+    getVideos(locale),
   ]);
   const media = await mediaMap(
     [...events.flatMap((r) => r.gallery.map((g) => g.mediaId)), ...albums.flatMap((a) => [a.coverMediaId, ...a.photos.map((p) => p.mediaId)])],
@@ -245,7 +254,8 @@ export const getAlbums = cache(async (locale: AppLocale): Promise<Album[]> => {
     if (!tr) continue;
     const own = e.translations.find((x) => x.locale === locale);
     const photos = e.gallery.map((g) => toPhoto(g.id, media.get(g.mediaId), tr.title)).filter((p): p is GalleryPhoto => p !== null);
-    if (!photos.length) continue;
+    const vids = videos.filter((v) => v.eventId === e.id && !v.albumId);
+    if (!photos.length && !vids.length) continue;
     out.push({
       id: e.id,
       kind: "event",
@@ -256,6 +266,7 @@ export const getAlbums = cache(async (locale: AppLocale): Promise<Album[]> => {
       approx: e.dateIsApprox,
       cover: photos[0] ?? null,
       photos,
+      videos: vids,
       sort: (e.startsAt ?? e.createdAt).getTime(),
     });
   }
@@ -264,7 +275,8 @@ export const getAlbums = cache(async (locale: AppLocale): Promise<Album[]> => {
     if (!tr) continue;
     const own = a.translations.find((x) => x.locale === locale);
     const photos = a.photos.map((p) => toPhoto(p.id, media.get(p.mediaId), tr.title)).filter((p): p is GalleryPhoto => p !== null);
-    if (!photos.length) continue;
+    const vids = videos.filter((v) => v.albumId === a.id);
+    if (!photos.length && !vids.length) continue;
     const cover = (a.coverMediaId && toPhoto(a.coverMediaId, media.get(a.coverMediaId), tr.title)) || photos[0] || null;
     out.push({
       id: a.id,
@@ -276,6 +288,7 @@ export const getAlbums = cache(async (locale: AppLocale): Promise<Album[]> => {
       approx: false,
       cover,
       photos,
+      videos: vids,
       sort: (a.takenAt ?? a.createdAt).getTime() - a.sortOrder,
     });
   }
@@ -293,8 +306,9 @@ export const getAlbumBySlug = cache(async (locale: AppLocale, slug: string) => {
   if (!tr) return null;
   const media = await mediaMap(album.photos.map((p) => p.mediaId), locale);
   const photos = album.photos.map((p) => toPhoto(p.id, media.get(p.mediaId), tr.title)).filter((p): p is GalleryPhoto => p !== null);
-  if (!photos.length) return null;
-  return { album, tr, photos };
+  const videos = (await getVideos(locale)).filter((v) => v.albumId === album.id);
+  if (!photos.length && !videos.length) return null;
+  return { album, tr, photos, videos };
 });
 
 // ── Videos ───────────────────────────────────────────────────────────────────
@@ -313,6 +327,9 @@ export type GalleryVideo = {
   durationSec: number | null;
   featured: boolean;
   event: { title: string; href: string } | null;
+  /** The album it is in (Admin → Videos → Album), and the event it is from. */
+  albumId: string | null;
+  eventId: string | null;
 };
 
 /**
@@ -366,6 +383,8 @@ export const getVideos = cache(async (locale: AppLocale): Promise<GalleryVideo[]
       durationSec: r.durationSec,
       featured: r.isFeatured,
       event: r.event && !r.event.deletedAt ? eventLink(r.event) : null,
+      albumId: r.albumId,
+      eventId: r.event && !r.event.deletedAt ? r.eventId : null,
     });
   }
   for (const e of events) {
@@ -385,6 +404,8 @@ export const getVideos = cache(async (locale: AppLocale): Promise<GalleryVideo[]
       durationSec: null,
       featured: false,
       event: ev,
+      albumId: null,
+      eventId: e.id,
     });
   }
   return out;
@@ -462,6 +483,9 @@ export type TimelineEvent = {
   day: string | null;
   month: string | null;
   cover: MediaInfo | null;
+  /** Start (for the date stamp on the cover) and whether only the month is known. */
+  startsAt: Date | null;
+  approx: boolean;
   photos: number;
   /** Organizations that took part (Admin → Events), each with its website when known. */
   orgs: { name: string; url: string | null }[];
@@ -501,6 +525,8 @@ export const getEventTimeline = cache(async (locale: AppLocale): Promise<Timelin
       day: d && !e.dateIsApprox ? dayF.format(d) : null,
       month: d ? monF.format(d) : null,
       cover: e.coverMediaId ? (covers.get(e.coverMediaId) ?? null) : null,
+      startsAt: d,
+      approx: e.dateIsApprox,
       photos: e.gallery.length,
       orgs: e.organizations
         .filter((x) => x.organization.status === "PUBLISHED" && !x.organization.deletedAt)

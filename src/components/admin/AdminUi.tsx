@@ -18,7 +18,7 @@ const NAV = [
   { href: "/admin/ecosystem", label: "Ecosystem" },
   { href: "/admin/news", label: "News" },
   { href: "/admin/events", label: "Events" },
-  { href: "/admin/albums", label: "Photo albums" },
+  { href: "/admin/albums", label: "Albums (photos and videos)" },
   { href: "/admin/videos", label: "Videos" },
   { href: "/admin/careers", label: "Careers" },
   { href: "/admin/applications", label: "Applications" },

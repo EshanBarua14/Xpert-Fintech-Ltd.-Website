@@ -1211,6 +1211,8 @@ model Article {
   category     ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   authorName   String?
   coverMediaId String?          @db.Uuid
+  /// A YouTube, Vimeo or Facebook video for the story: played on the story page, its picture on the card when there is no cover.
+  videoUrl     String?
   /// Date shown to readers; defaults to first publish.
   displayDate  DateTime?
   /// Old WordPress URL, kept so a redirect can be created on migration.
@@ -1330,6 +1332,7 @@ model Album {
 
   translations AlbumTranslation[]
   photos       AlbumMedia[]
+  videos       Video[]
 
   @@index([status, deletedAt, publishAt])
 }
@@ -1368,6 +1371,9 @@ model Video {
   posterMediaId String?       @db.Uuid
   eventId       String?       @db.Uuid
   event         Event?        @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  /// The album it belongs to in the gallery (an album holds photos, videos or both).
+  albumId       String?       @db.Uuid
+  album         Album?        @relation(fields: [albumId], references: [id], onDelete: SetNull)
   recordedAt    DateTime?
   durationSec   Int?
   isFeatured    Boolean       @default(false)
@@ -1384,6 +1390,7 @@ model Video {
 
   @@index([status, deletedAt, publishAt])
   @@index([eventId])
+  @@index([albumId])
 }
 
 model VideoTranslation {

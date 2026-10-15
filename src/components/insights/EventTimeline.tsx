@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { TimelineEvent } from "@/lib/public/insights";
 import { cn } from "@/lib/utils/cn";
+import { DateStamp, GeneratedCover, stampFor } from "@/components/media/GeneratedCover";
 
 export type EventTimelineLabels = { photos: string; with: string; open: string };
 
@@ -30,34 +31,22 @@ export function EventTimeline({ events, labels, locale }: { events: TimelineEven
             {g.items.map((e) => {
               const i = n++;
               const featured = i === 0;
+              const stamp = stampFor(e.startsAt, locale, { approx: e.approx });
               return (
                 <li key={e.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className="relative">
                   <span aria-hidden="true" className={cn("absolute top-7 -left-[1.95rem] size-3 rounded-full ring-4 ring-ink-950 md:-left-[2.45rem]", featured ? "bg-gold" : "bg-brand-sky")} />
-                  <article className={cn("spotlight glass group relative grid gap-5 overflow-hidden rounded-3xl p-5 transition-transform duration-500 hover:-translate-y-0.5 md:p-6", featured && e.cover ? "md:grid-cols-[1.1fr_1fr]" : "sm:grid-cols-[auto_1fr]")}>
-                    {featured && e.cover ? (
-                      <span className="relative block aspect-[16/10] overflow-hidden rounded-2xl bg-navy-800">
-                        <Image src={e.cover.url} alt={e.cover.alt ?? ""} fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
-                      </span>
-                    ) : e.cover ? (
-                      <span className="relative block h-24 w-36 shrink-0 overflow-hidden rounded-2xl bg-navy-800">
-                        <Image src={e.cover.url} alt={e.cover.alt ?? ""} fill sizes="9rem" className="object-cover" />
-                      </span>
-                    ) : (
-                      <span aria-hidden="true" className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-2xl border border-brand-sky/25 bg-gradient-to-br from-brand-sky/15 to-brand-royal/10">
-                        {e.day ? (
-                          <>
-                            <span className="font-display text-3xl leading-none font-semibold text-text-primary">{e.day}</span>
-                            <span className="mt-1 text-xs font-semibold text-brand-sky">{e.month}</span>
-                          </>
-                        ) : (
-                          // Month only (the day is not confirmed): month and year, smaller.
-                          <>
-                            <span className="px-1 text-center font-display text-sm leading-tight font-semibold text-text-primary">{e.month ?? "—"}</span>
-                            {e.year && <span className="mt-1 text-xs font-semibold text-brand-sky">{nf(e.year)}</span>}
-                          </>
-                        )}
-                      </span>
-                    )}
+                  <article className={cn("spotlight glass group relative grid gap-5 overflow-hidden rounded-3xl p-5 transition-transform duration-500 hover:-translate-y-0.5 md:p-6", featured ? "md:grid-cols-[1.1fr_1fr]" : "sm:grid-cols-[auto_1fr]")}>
+                    {/* Every event has a cover: its photo, or one drawn for it; both carry the date stamp. */}
+                    <span className={cn("relative block shrink-0 overflow-hidden rounded-2xl bg-navy-800", featured ? "aspect-[16/10]" : "aspect-[16/10] w-full sm:h-28 sm:w-44")}>
+                      {e.cover ? (
+                        <>
+                          <Image src={e.cover.url} alt={e.cover.alt ?? ""} fill sizes={featured ? "(min-width: 768px) 40vw, 100vw" : "(min-width: 640px) 11rem, 100vw"} className="object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+                          {stamp && <DateStamp stamp={stamp} size={featured ? "md" : "sm"} />}
+                        </>
+                      ) : (
+                        <GeneratedCover seed={e.id} stamp={stamp} size={featured ? "md" : "sm"} />
+                      )}
+                    </span>
                     <div className="flex min-w-0 flex-col gap-2.5">
                       {e.date && <time className="font-mono text-xs text-cyan-300">{e.date}</time>}
                       <h3 className={cn("font-display font-semibold tracking-tight text-balance", featured ? "text-2xl md:text-3xl" : "text-xl")}>

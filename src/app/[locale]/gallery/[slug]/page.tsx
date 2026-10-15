@@ -9,7 +9,8 @@ import { isLocale, type AppLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getAlbumBySlug, getAlbums } from "@/lib/public/insights";
 import { buildMetadata } from "@/lib/public/seo";
-import { formatEventDate } from "@/lib/public/text";
+import { formatDuration, formatEventDate } from "@/lib/public/text";
+import { VideoGrid } from "@/components/gallery/VideoGallery";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -38,7 +39,8 @@ export default async function AlbumPage({ params }: Props) {
   const t = getMessages(loc);
   const data = await getAlbumBySlug(loc, slug);
   if (!data) notFound();
-  const { album, tr, photos } = data;
+  const { album, tr, photos, videos } = data;
+  const videoLabels = { play: t.playVideo, close: t.close, fromEvent: t.fromEvent, featured: t.featuredVideo };
   const nf = new Intl.NumberFormat(loc === "bn" ? "bn-BD" : "en-US");
   const date = formatEventDate(album.takenAt, false, loc);
   const more = (await getAlbums(loc)).filter((a) => a.id !== album.id).slice(0, 3);
@@ -51,12 +53,35 @@ export default async function AlbumPage({ params }: Props) {
             ← {t.backToGallery}
           </Link>
           {date && <time className="text-cyan-300">{date}</time>}
-          <span>{t.photosCount.replace("{n}", nf.format(photos.length))}</span>
+          {photos.length > 0 && <span>{t.photosCount.replace("{n}", nf.format(photos.length))}</span>}
+          {videos.length > 0 && <span>{t.videosCount.replace("{n}", nf.format(videos.length))}</span>}
         </div>
       </PageHero>
-      <Shell className="pb-14 md:pb-16">
-        <Lightbox photos={photos} labels={{ open: t.openPhoto, close: t.close, prev: t.prevPhoto, next: t.nextPhoto, counter: t.photoCounter }} />
-      </Shell>
+      {photos.length > 0 && (
+        <Shell className="pb-14 md:pb-16">
+          <Lightbox photos={photos} labels={{ open: t.openPhoto, close: t.close, prev: t.prevPhoto, next: t.nextPhoto, counter: t.photoCounter }} />
+        </Shell>
+      )}
+      {videos.length > 0 && (
+        <Shell className="pb-14 md:pb-16">
+          <h2 className="mb-6 font-display text-2xl font-semibold tracking-tight">{t.videosTitle}</h2>
+          <VideoGrid
+            videos={videos.map((v) => ({
+              id: v.id,
+              title: v.title,
+              description: v.description,
+              provider: v.provider,
+              embedUrl: v.embedUrl,
+              file: v.file,
+              poster: v.poster,
+              dateLabel: formatEventDate(v.date, false, loc),
+              durationLabel: formatDuration(v.durationSec, loc),
+              event: v.event,
+            }))}
+            labels={videoLabels}
+          />
+        </Shell>
+      )}
       {more.length > 0 && (
         <Shell className="pb-16 md:pb-20">
           <h2 className="mb-6 font-display text-2xl font-semibold tracking-tight">{t.moreAlbums}</h2>
@@ -67,7 +92,7 @@ export default async function AlbumPage({ params }: Props) {
                   <span className="relative block aspect-[16/10] overflow-hidden bg-navy-800">
                     {a.cover && <Image src={a.cover.url} alt="" fill sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.05]" />}
                     <span className="absolute right-3 bottom-3 rounded-full bg-[#05080f]/75 px-3 py-1 font-mono text-xs text-white backdrop-blur">
-                      {t.photosCount.replace("{n}", nf.format(a.photos.length))}
+                      {a.photos.length ? t.photosCount.replace("{n}", nf.format(a.photos.length)) : t.videosCount.replace("{n}", nf.format(a.videos.length))}
                     </span>
                   </span>
                   <span className="p-5 font-display text-lg leading-snug font-semibold tracking-tight text-balance">{a.title}</span>

@@ -33,11 +33,21 @@ async function eventOptions() {
   return rows.map((e) => ({ value: e.id, label: e.translations[0]?.title ?? "(untitled event)" }));
 }
 
+async function albumOptions() {
+  const rows = await db.album.findMany({
+    where: { deletedAt: null },
+    orderBy: [{ takenAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
+    include: { translations: { where: { locale: "en" } } },
+    take: 300,
+  });
+  return rows.map((a) => ({ value: a.id, label: a.translations[0]?.title ?? "(untitled album)" }));
+}
+
 export default async function VideoPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; restored?: string }> }) {
   await requireAdmin();
   const { id } = await params;
   const flags = await searchParams;
-  const [images, files, events] = await Promise.all([imageOptions(), videoFileOptions(), eventOptions()]);
+  const [images, files, events, albums] = await Promise.all([imageOptions(), videoFileOptions(), eventOptions(), albumOptions()]);
   const back = (
     <Link href="/admin/videos" className="text-sm text-text-secondary hover:text-brand-sky">
       ← Videos
@@ -53,6 +63,7 @@ export default async function VideoPage({ params, searchParams }: { params: Prom
       mediaId: "",
       posterMediaId: "",
       eventId: "",
+      albumId: "",
       recordedAt: "",
       duration: "",
       isFeatured: false,
@@ -63,7 +74,7 @@ export default async function VideoPage({ params, searchParams }: { params: Prom
       <div className="flex flex-col gap-6">
         {back}
         <h1 className="font-display text-3xl font-semibold">New video</h1>
-        <VideoForm values={values} images={images} files={files} events={events} />
+        <VideoForm values={values} images={images} files={files} events={events} albums={albums} />
       </div>
     );
   }
@@ -100,7 +111,7 @@ export default async function VideoPage({ params, searchParams }: { params: Prom
         <VideoForm
           images={images}
           files={files}
-          events={events}
+          events={events} albums={albums}
           values={{
             id: video.id,
             status: video.status,
@@ -111,6 +122,7 @@ export default async function VideoPage({ params, searchParams }: { params: Prom
             mediaId: video.mediaId ?? "",
             posterMediaId: video.posterMediaId ?? "",
             eventId: video.eventId ?? "",
+            albumId: video.albumId ?? "",
             recordedAt: toDateInput(video.recordedAt),
             duration: formatDuration(video.durationSec),
             isFeatured: video.isFeatured,

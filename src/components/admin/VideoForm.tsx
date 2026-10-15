@@ -22,6 +22,7 @@ export type VideoFormValues = {
   mediaId: string;
   posterMediaId: string;
   eventId: string;
+  albumId: string;
   recordedAt: string;
   duration: string;
   isFeatured: boolean;
@@ -41,11 +42,13 @@ export function VideoForm({
   images,
   files,
   events,
+  albums = [],
 }: {
   values: VideoFormValues;
   images: ImageOption[];
   files: { value: string; label: string }[];
   events: { value: string; label: string }[];
+  albums?: { value: string; label: string }[];
 }) {
   const { state, pending, onSubmit } = useActionForm<VideoState>(saveVideo, {});
   const e = state.errors ?? {};
@@ -140,6 +143,8 @@ export function VideoForm({
           <ImagePicker name="posterMediaId" label="Thumbnail" options={images} defaultValue={values.posterMediaId} error={e.posterMediaId} />
           <p className="-mt-2 text-xs text-text-secondary">YouTube videos get a thumbnail automatically. Add one for Vimeo, Facebook and uploaded videos.</p>
           <Select id="eventId" label="Event" options={[{ value: "", label: "— Not linked to an event —" }, ...events]} defaultValue={values.eventId} error={e.eventId} />
+          <Select id="albumId" label="Album" options={[{ value: "", label: "— Not in an album —" }, ...albums]} defaultValue={values.albumId} error={e.albumId} />
+          <p className="-mt-2 text-xs text-text-secondary">An album can hold photos and videos. Create albums in Admin → Albums.</p>
           <TextInput id="recordedAt" type="date" label="Date" hint="Optional. When it was recorded." defaultValue={values.recordedAt} error={e.recordedAt} />
           <TextInput id="duration" label="Length" placeholder="3:45" hint="Optional, minutes:seconds." defaultValue={values.duration} error={e.duration} />
           <TextInput id="sortOrder" type="number" min={0} label="Order" defaultValue={String(values.sortOrder)} error={e.sortOrder} />

@@ -24,6 +24,7 @@ const schema = z.object({
   mediaId: optionalId,
   posterMediaId: optionalId,
   eventId: optionalId,
+  albumId: optionalId,
   recordedAt: z.string().optional(),
   duration: z
     .string()
@@ -69,6 +70,9 @@ export async function saveVideo(_prev: VideoState, formData: FormData): Promise<
   if (v.eventId && !(await db.event.findFirst({ where: { id: v.eventId, deletedAt: null }, select: { id: true } }))) {
     return { errors: { eventId: "That event no longer exists." } };
   }
+  if (v.albumId && !(await db.album.findFirst({ where: { id: v.albumId, deletedAt: null }, select: { id: true } }))) {
+    return { errors: { albumId: "That album no longer exists." } };
+  }
 
   const data = {
     status: v.status,
@@ -79,6 +83,7 @@ export async function saveVideo(_prev: VideoState, formData: FormData): Promise<
     mediaId,
     posterMediaId: v.posterMediaId,
     eventId: v.eventId,
+    albumId: v.albumId,
     recordedAt: parseDateOnly(v.recordedAt),
     durationSec: toSeconds(v.duration),
     isFeatured: v.isFeatured,

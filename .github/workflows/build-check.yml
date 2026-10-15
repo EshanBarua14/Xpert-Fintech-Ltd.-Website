@@ -11,8 +11,10 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npx prisma generate
-      - run: npx tsc --noEmit -p . | sed -E 's/^([^(]+)\(([0-9]+),([0-9]+)\): error (.*)$/::error file=\1,line=\2::\4/' || true
-      - run: npx next lint 2>&1 | grep -E 'Error:' -B1 | sed 's/^/::warning::/' || true
+      - run: |
+          npx tsc --noEmit -p . | sed -E 's/^([^(]+)\(([0-9]+),([0-9]+)\): error (.*)$/::error file=\1,line=\2::\4/' || true
+      - run: |
+          npx next lint 2>&1 | grep -E 'Error:' -B1 | sed 's/^/::warning::/' || true
       - run: npx next build 2>&1 | tail -150
         env:
           DATABASE_URL: postgresql://u:p@localhost:5432/x

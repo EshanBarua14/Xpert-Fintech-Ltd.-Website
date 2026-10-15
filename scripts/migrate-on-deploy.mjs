@@ -35,9 +35,31 @@ if (!process.env.DIRECT_URL) {
   }
 }
 
-console.log("[migrate-on-deploy] applying pending migrations…");
-execSync("npx prisma migrate deploy", {
-  stdio: "inherit",
-  env: { ...process.env, DATABASE_URL: url },
-});
-console.log("[migrate-on-deploy] done");
+// Another `migrate deploy` (e.g. one run by hand at the same moment) holds
+// Prisma's advisory lock and makes this one time out (P1002). Migrations are
+// idempotent, so wait and retry a few times before failing the build.
+const waits = [0, 20, 40, 60]; // seconds before each attempt
+for (let i = 0; i < waits.length; i++) {
+  if (waits[i]) {
+    console.log(`[migrate-on-deploy] retrying in ${waits[i]}s (attempt ${i + 1}/${waits.length})…`);
+    await new Promise((r) => setTimeout(r, waits[i] * 1000));
+  } else {
+    console.log("[migrate-on-deploy] applying pending migrations…");
+  }
+  try {
+    execSync("npx prisma migrate deploy", {
+      stdio: "inherit",
+      env: { ...process.env, DATABASE_URL: url },
+    });
+    console.log("[migrate-on-deploy] done");
+    process.exit(0);
+  } catch {
+    /* logged by prisma above */
+  }
+}
+console.error(
+  "[migrate-on-deploy] failed. If the error is P1002 (advisory lock), a stuck session holds the lock: " +
+    "in the Neon SQL editor run SELECT pid, state, query_start FROM pg_stat_activity WHERE pid IN " +
+    "(SELECT pid FROM pg_locks WHERE locktype = 'advisory'); then SELECT pg_terminate_backend(<pid>); and redeploy.",
+);
+process.exit(1);

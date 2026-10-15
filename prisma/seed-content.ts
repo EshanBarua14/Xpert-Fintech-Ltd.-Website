@@ -2015,6 +2015,26 @@ async function addFacebookLink() {
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
 }
 
+/** Once (XFL, 15 Oct 2026): Saikat Biswas before Mohammad Shamsul Maruf, in the Management Committee and the team. */
+async function saikatBeforeMaruf() {
+  const MARK = "seed.saikat-before-maruf-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const [saikat, maruf] = await Promise.all(["saikat-biswas", "muhammad-shamsul-maruf"].map((key) => db.person.findUnique({ where: { key }, include: { roles: true } })));
+  let moved = 0;
+  if (saikat && maruf) {
+    for (const r of maruf.roles) {
+      const s = saikat.roles.find((x) => x.group === r.group);
+      if (!s || s.sortOrder < r.sortOrder) continue;
+      // Swap their positions in this group.
+      await db.personRole.update({ where: { id: s.id }, data: { sortOrder: r.sortOrder } });
+      await db.personRole.update({ where: { id: r.id }, data: { sortOrder: s.sortOrder === r.sortOrder ? r.sortOrder + 1 : s.sortOrder } });
+      moved++;
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), moved } } });
+  if (moved) console.log(`• People: Saikat Biswas placed before Mohammad Shamsul Maruf (${moved} list(s))`);
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -2058,6 +2078,7 @@ async function main() {
   await upgradePortraits();
   await seedPeople();
   await seedRoster();
+  await saikatBeforeMaruf();
   await seedPortraitFocus();
   await seedMessagesAndGoal();
   await seedLegalDrafts();

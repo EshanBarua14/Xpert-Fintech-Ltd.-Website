@@ -466,6 +466,7 @@ const BN_TITLES: Record<string, string> = {
   "Senior Software Engineer": "সিনিয়র সফটওয়্যার ইঞ্জিনিয়ার",
   "Software Engineer": "সফটওয়্যার ইঞ্জিনিয়ার",
   "QA Software Engineer": "কিউএ সফটওয়্যার ইঞ্জিনিয়ার",
+  "Business Analyst": "বিজনেস অ্যানালিস্ট",
   "React Native App Developer": "রিঅ্যাক্ট নেটিভ অ্যাপ ডেভেলপার",
   "Support Manager": "সাপোর্ট ম্যানেজার",
   "Support Engineer": "সাপোর্ট ইঞ্জিনিয়ার",

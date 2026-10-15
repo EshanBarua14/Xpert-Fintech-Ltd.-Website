@@ -102,7 +102,7 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
       <div className="flex items-center gap-4">
         <div className="relative size-16 shrink-0 overflow-hidden rounded-full bg-[var(--dept)] ring-2 ring-[color-mix(in_srgb,var(--dept)_35%,transparent)] ring-offset-2 ring-offset-navy-900">
           {p.photo ? (
-            <Image src={p.photo.url} alt="" fill sizes="4rem" className="object-cover" />
+            <Image src={p.photo.url} alt="" fill sizes="4rem" className="object-cover object-top" />
           ) : (
             <span aria-hidden="true" className="flex h-full items-center justify-center font-display text-xl text-white">
               {initials(p.name)}

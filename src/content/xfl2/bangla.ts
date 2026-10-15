@@ -100,6 +100,7 @@ export const PERSON_BN: Record<string, string> = {
   "najmul-hasan-rifat": "নাজমুল হাসান রিফাত",
   "md-hasan-uddin": "মো. হাসান উদ্দিন",
   "eshan-barua": "ঈশান বড়ুয়া",
+  "mohammad-ashiqur-rahman-bhuiyan": "মোহাম্মদ আশিকুর রহমান ভূঁইয়া",
   "md-anzirul-islam": "মো. আনজিরুল ইসলাম",
   "md-wahidul-alam": "মো. ওয়াহিদুল আলম",
   "toha-hossain": "ত্বহা হোসেন",

@@ -71,11 +71,12 @@ export const TEAM: RosterPerson[] = [
   { key: "mahmuda-yasmin-farah", name: "Mahmuda Yasmin Farah", title: "Software Engineer", formerTitle: "Officer", department: "Engineering", rank: 17 },
   { key: "najmul-hasan-rifat", name: "Najmul Hasan Rifat", title: "React Native App Developer", department: "Engineering", rank: 18 },
   { key: "md-hasan-uddin", name: "Md. Hasan Uddin", title: "QA Software Engineer", department: "Engineering", rank: 19 },
-  { key: "eshan-barua", name: "Eshan Barua", title: "Support Engineer", department: "Support", rank: 20 },
-  { key: "md-anzirul-islam", name: "Md. Anzirul Islam", title: "Support Engineer", department: "Support", rank: 21 },
-  { key: "md-wahidul-alam", name: "Md. Wahidul Alam", title: "Support Engineer", department: "Support", rank: 22 },
-  { key: "ali-hossain-maruf", name: "Ali Hossain Maruf", title: "Senior Executive, HR & Admin", department: "HR & Admin", rank: 23 },
-  { key: "kazi-farzana-hamid", name: "Kazi Farzana Hamid", title: "Receptionist", department: "HR & Admin", rank: 24 },
+  { key: "mohammad-ashiqur-rahman-bhuiyan", name: "Mohammad Ashiqur Rahman Bhuiyan", title: "Business Analyst", department: "Engineering", rank: 20 },
+  { key: "eshan-barua", name: "Eshan Barua", title: "Support Engineer", department: "Support", rank: 21 },
+  { key: "md-anzirul-islam", name: "Md. Anzirul Islam", title: "Support Engineer", department: "Support", rank: 22 },
+  { key: "md-wahidul-alam", name: "Md. Wahidul Alam", title: "Support Engineer", department: "Support", rank: 23 },
+  { key: "ali-hossain-maruf", name: "Ali Hossain Maruf", title: "Senior Executive, HR & Admin", department: "HR & Admin", rank: 24 },
+  { key: "kazi-farzana-hamid", name: "Kazi Farzana Hamid", title: "Receptionist", department: "HR & Admin", rank: 25 },
 ];
 
 /** Departments in display order, as offered in Admin → People. */

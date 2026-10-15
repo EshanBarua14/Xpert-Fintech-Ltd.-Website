@@ -137,10 +137,10 @@ export function HeadlineShareForm({ pct, asOf, dse = "", cse = "" }: { pct: stri
     <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
       <FormMessage message={state.message} isError={!state.ok && Boolean(state.errors)} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <TextInput id="headlinePct" inputMode="decimal" label="Overall market share (%)" placeholder="45" defaultValue={pct} hint="Leave empty to show the share worked out from the daily figures." error={e.headlinePct || undefined} />
-        <TextInput id="headlineAsOf" type="date" label="As of" defaultValue={asOf} hint="Shown next to the figure. Optional." error={e.headlineAsOf || undefined} />
-        <TextInput id="avgDse" inputMode="decimal" label="DSE daily average share (%)" placeholder="45" defaultValue={dse} hint="Shown on the DSE market card next to the day's figure (and alone until one is entered)." error={e.avgDse || undefined} />
-        <TextInput id="avgCse" inputMode="decimal" label="CSE daily average share (%)" defaultValue={cse} hint="The same for CSE. Leave empty if not stated." error={e.avgCse || undefined} />
+        <TextInput id="avgDse" inputMode="decimal" label="DSE market share (%)" defaultValue={dse} hint="Xpert's share of DSE turnover. Shown on the home page and the DSE market card." error={e.avgDse || undefined} />
+        <TextInput id="avgCse" inputMode="decimal" label="CSE market share (%)" defaultValue={cse} hint="Xpert's share of CSE turnover. Shown on the home page and the CSE market card." error={e.avgCse || undefined} />
+        <TextInput id="headlineAsOf" type="date" label="As of" defaultValue={asOf} hint="Shown next to the figures. Optional." error={e.headlineAsOf || undefined} />
+        <TextInput id="headlinePct" inputMode="decimal" label="Both exchanges combined (%), optional" defaultValue={pct} hint="Used only when neither DSE nor CSE is filled in. Leave empty otherwise." error={e.headlinePct || undefined} />
       </div>
       <div>
         <SubmitButton pending={pending}>Save shares</SubmitButton>

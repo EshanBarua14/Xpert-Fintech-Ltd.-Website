@@ -95,16 +95,19 @@ export const getMarketGoal = cache(async (): Promise<MarketGoal | null> => {
  * of the figure worked out from the daily turnover entries.
  */
 /** Overall share (home page), and the daily average share of each exchange shown on the market cards. */
-export type HeadlineShare = { pct: number; asOf: string | null; dse?: number; cse?: number };
+export type HeadlineShare = { pct: number | null; asOf: string | null; dse?: number; cse?: number };
 export const HEADLINE_SHARE_KEY = "market.headlineShare";
 
 export function readHeadlineShare(value: unknown): HeadlineShare | null {
   const o = value && typeof value === "object" ? (value as Record<string, unknown>) : null;
-  const pct = Number(o?.pct);
-  if (!o || !(pct > 0 && pct <= 100)) return null;
+  if (!o) return null;
+  const avg = (v: unknown) => (v !== null && v !== "" && Number(v) > 0 && Number(v) <= 100 ? Number(v) : undefined);
+  const pct = avg(o.pct) ?? null;
+  const dse = avg(o.dse);
+  const cse = avg(o.cse);
+  if (pct === null && dse === undefined && cse === undefined) return null;
   const asOf = typeof o.asOf === "string" && /^\d{4}-\d{2}-\d{2}$/.test(o.asOf) ? o.asOf : null;
-  const avg = (v: unknown) => (Number(v) > 0 && Number(v) <= 100 ? Number(v) : undefined);
-  return { pct, asOf, ...(avg(o.dse) !== undefined && { dse: avg(o.dse) }), ...(avg(o.cse) !== undefined && { cse: avg(o.cse) }) };
+  return { pct, asOf, ...(dse !== undefined && { dse }), ...(cse !== undefined && { cse }) };
 }
 
 export const getHeadlineShare = cache(async (): Promise<HeadlineShare | null> => {

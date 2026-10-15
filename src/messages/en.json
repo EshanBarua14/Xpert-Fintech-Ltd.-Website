@@ -542,6 +542,7 @@
   "reachTitle": "Our share of the market, and where we are taking it",
   "reachBody": "How much of DSE and CSE turnover runs through Xpert's platform today, the clients behind it, and the goal we are working towards.",
   "reachShareLabel": "Share of market turnover traded through Xpert",
+  "reachExchangeShare": "Share of {exchange} turnover traded through Xpert",
   "reachCombined": "DSE and CSE combined, latest published figures",
   "reachGoal": "Goal: {pct}% by {year}",
   "reachGoalLead": "Our goal: {pct}% of DSE and CSE turnover through Xpert by {year}",

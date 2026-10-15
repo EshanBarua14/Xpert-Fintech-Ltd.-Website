@@ -946,7 +946,8 @@ async function seedReviewDrafts() {
 
 async function seedDeployments() {
   if (!WITH_DEPLOYMENTS) {
-    console.log("• Branded apps left as drafts (add --with-deployments to publish them)");
+    const drafts = await db.deployment.count({ where: { status: "DRAFT", deletedAt: null } });
+    if (drafts) console.log(`• Branded apps: ${drafts} left as drafts (add --with-deployments to publish them)`);
     return;
   }
   const res = await db.deployment.updateMany({ where: { status: "DRAFT", deletedAt: null }, data: { status: "PUBLISHED" } });
@@ -1879,16 +1880,28 @@ async function upgradePortraits() {
   const dir = path.join(process.cwd(), "prisma", "seed-media", "people");
   const store = path.join(process.cwd(), "storage", "media");
   let swapped = 0;
+  let current = 0;
   for (const file of await readdir(dir).catch(() => [] as string[])) {
     const key = file.replace(/\.[a-z]+$/i, "");
     const previous = PREVIOUS_PORTRAITS[key];
     if (!previous) continue;
-    const rows = await db.media.findMany({ where: { checksum: previous }, select: { id: true } });
-    if (!rows.length) continue;
     const data = await readFile(path.join(dir, file));
     const type = sniff(data);
     if (!type || type.kind !== "IMAGE") continue;
     const checksum = createHash("sha256").update(data).digest("hex");
+    current += await db.media.count({ where: { checksum } });
+    // The old file, by its checksum or (if it was saved again somewhere along the way) by its file name and smaller size.
+    const rows = await db.media.findMany({
+      where: {
+        checksum: { not: checksum },
+        OR: [
+          { checksum: previous },
+          { originalName: { in: [`${key}.png`, `${key}.jpg`, `${key}.jpeg`, `${key}.webp`] }, OR: [{ height: null }, { height: { lt: type.height ?? 2160 } }] },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!rows.length) continue;
     for (const row of rows) {
       const storageKey = `${randomUUID()}.${type.ext}`;
       await mkdir(store, { recursive: true });
@@ -1901,7 +1914,38 @@ async function upgradePortraits() {
       swapped++;
     }
   }
-  if (swapped) console.log(`• Portraits: ${swapped} photo(s) replaced with the 2160-pixel versions (same people, same framing)`);
+  console.log(
+    swapped
+      ? `• Portraits: ${swapped} photo(s) replaced with the 2160-pixel versions (same people, same framing)`
+      : `• Portraits: ${current} already at 2160 pixels; nothing to replace`,
+  );
+}
+
+/**
+ * Once (XFL, 15 Oct 2026): the member houses' trading apps are shown on the
+ * site, with their Google Play and App Store links. Publishes the apps still
+ * in draft; an app an editor has trashed stays trashed.
+ */
+async function showMemberApps() {
+  const MARK = "seed.apps-shown-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const res = await db.deployment.updateMany({ where: { status: "DRAFT", deletedAt: null }, data: { status: "PUBLISHED" } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), published: res.count } } });
+  console.log(`• Branded apps: ${res.count} published with their Google Play / App Store links`);
+}
+
+/** Once: websites added to member profiles after the first fill (e.g. Bank Asia Securities), where still empty. */
+async function fillMemberWebsites() {
+  const MARK = "seed.member-websites-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  let filled = 0;
+  for (const m of MEMBER_PROFILES) {
+    if (!m.website) continue;
+    const res = await db.organization.updateMany({ where: { key: m.key, OR: [{ websiteUrl: null }, { websiteUrl: "" }] }, data: { websiteUrl: m.website } });
+    filled += res.count;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), filled } } });
+  if (filled) console.log(`• Member websites: ${filled} added (e.g. Bank Asia Securities)`);
 }
 
 async function seedMemberProfiles() {
@@ -1957,6 +2001,7 @@ async function main() {
   await seedStoryBangla();
   await seedReviewDrafts();
   await seedStoreLinks();
+  await showMemberApps();
   await seedDeployments();
   await seedTeamLinks();
   await seedConsultantLinks();
@@ -1981,6 +2026,7 @@ async function main() {
   await seedClientStoryDrafts();
   await seedCareers();
   await seedMemberProfiles();
+  await fillMemberWebsites();
   await seedIdlcClient();
   await seedBanglaGaps();
   console.log("Content seed complete.");

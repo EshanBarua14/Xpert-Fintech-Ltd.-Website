@@ -178,13 +178,13 @@ export async function saveHeadlineShare(_prev: MarketState, formData: FormData):
     refresh();
     return { ok: true, savedAt: Date.now(), message: "Removed. The home page shows the share worked out from the daily figures." };
   }
-  const value = { pct: Number(pct || dse || cse), asOf: asOf || null, ...(dse && { dse: Number(dse) }), ...(cse && { cse: Number(cse) }) };
+  const value = { pct: pct ? Number(pct) : null, asOf: asOf || null, ...(dse && { dse: Number(dse) }), ...(cse && { cse: Number(cse) }) };
   await db.siteSetting.upsert({ where: { key: HEADLINE_SHARE_KEY }, update: { value, updatedById: admin.id }, create: { key: HEADLINE_SHARE_KEY, value, updatedById: admin.id } });
   refresh();
   return {
     ok: true,
     savedAt: Date.now(),
-    message: `Saved: ${value.pct}% overall${dse ? `, DSE daily average ${dse}%` : ""}${cse ? `, CSE daily average ${cse}%` : ""}${value.asOf ? ` (as of ${value.asOf})` : ""}.`,
+    message: `Saved: ${[dse && `DSE ${dse}%`, cse && `CSE ${cse}%`, pct && `combined ${pct}%`].filter(Boolean).join(", ")}${value.asOf ? ` (as of ${value.asOf})` : ""}.`,
   };
 }
 

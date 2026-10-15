@@ -170,12 +170,15 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
       <section id="overall-share" className="flex scroll-mt-24 flex-col gap-4 rounded-card border border-fg/10 p-6">
         <h2 className="font-display text-xl font-semibold">Market share figures</h2>
         <p className="text-sm text-text-secondary">
-          Xpert&rsquo;s share of DSE and CSE turnover combined, as XFL states it. When set, the home page leads with this figure (and its goal bar
-          uses it) instead of the one worked out from the daily entries above. {headline ? `Now: ${headline.pct}%${headline.asOf ? ` as of ${headline.asOf}` : ""}.` : "Not set."}
+          Xpert&rsquo;s share of each exchange&rsquo;s turnover, as XFL states it. The home page shows DSE and CSE side by side, each against the goal,
+          instead of the figures worked out from the daily entries above.{" "}
+          {headline
+            ? `Now: ${[headline.dse !== undefined && `DSE ${headline.dse}%`, headline.cse !== undefined && `CSE ${headline.cse}%`, headline.pct !== null && `combined ${headline.pct}%`].filter(Boolean).join(", ")}${headline.asOf ? ` as of ${headline.asOf}` : ""}.`
+            : "Not set."}
         </p>
         <HeadlineShareForm
           key={headline ? `${headline.pct}-${headline.asOf}-${headline.dse}-${headline.cse}` : "none"}
-          pct={headline ? String(headline.pct) : ""}
+          pct={headline?.pct != null ? String(headline.pct) : ""}
           asOf={headline?.asOf ?? ""}
           dse={headline?.dse !== undefined ? String(headline.dse) : ""}
           cse={headline?.cse !== undefined ? String(headline.cse) : ""}

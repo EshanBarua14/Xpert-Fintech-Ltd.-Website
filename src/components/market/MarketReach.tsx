@@ -18,12 +18,14 @@ export type ReachLabels = {
   progress: string;
   /** "DSE and CSE combined" (+ " · {date}" when dated) for the stated overall share. */
   overall?: string;
+  /** "Share of {exchange} turnover", above each exchange's own figure. */
+  exchange?: string;
 };
 
 type Props = {
   shares: ShareFigure[];
   /** Overall share stated by XFL (Admin → Market data); shown instead of the computed one. */
-  headline?: { pct: number; asOf: string | null } | null;
+  headline?: { pct: number | null; asOf: string | null; dse?: number; cse?: number } | null;
   goal: { targetPct: number; year: number; note: string | null } | null;
   clientBase: { value: number; label: string }[];
   /** Admin → Figures: more numbers with their source, in the same card. */
@@ -73,88 +75,141 @@ function useCountUp(target: number) {
  * figures combined), the progress towards the goal set in Admin → Market
  * data, and the client base. With no figure yet, the goal stands on its own.
  */
+type ExchangeFigure = { exchange: "DSE" | "CSE"; pct: number; date: string | null };
+
+/** One exchange's share, counting up once on screen, with its own bar against the goal. */
+function ExchangeShare({ f, goal, goalPct, locale, labels, year }: { f: ExchangeFigure; goal: Props["goal"]; goalPct: string; locale: "en" | "bn"; labels: ReachLabels; year: string }) {
+  const { ref, shown } = useCountUp(f.pct);
+  const date = f.date ? new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${f.date}T00:00:00Z`)) : null;
+  const fill = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
+  return (
+    <div ref={ref} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-text-secondary">{(labels.exchange ?? "{exchange}").replace("{exchange}", f.exchange)}</p>
+        <p className="font-display text-6xl leading-none tracking-[-0.03em] text-text-primary tabular-nums md:text-7xl">
+          {fmt(locale, shown, Number.isInteger(f.pct) ? 0 : 2)}
+          <span className="ml-1 text-[0.5em] text-text-secondary">%</span>
+        </p>
+        {date && <p className="text-sm text-text-secondary">{date}</p>}
+      </div>
+      {goal && (
+        <div className="flex flex-col gap-2">
+          <div
+            role="img"
+            aria-label={labels.progress.replace("{now}", fmt(locale, f.pct, 2)).replace("{pct}", goalPct).replace("{year}", year)}
+            className="relative h-3 rounded-full bg-fg/[0.08]"
+          >
+            <div className="bar-grow absolute inset-0" data-reveal>
+              <span className="absolute inset-y-0 left-0 block rounded-full bg-gradient-to-r from-brand-royal to-brand-sky" style={{ width: fill(f.pct) }} />
+            </div>
+            <span aria-hidden="true" className="absolute -top-2 -bottom-2 w-0.5 rounded-full bg-gold" style={{ left: fill(goal.targetPct) }} />
+          </div>
+          <p className="text-sm text-text-secondary">
+            {f.pct >= goal.targetPct ? labels.reached : labels.toGo.replace("{pts}", fmt(locale, goal.targetPct - f.pct, 1))}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Xpert's share of DSE and of CSE turnover, each on its own (the two differ),
+ * as stated in Admin → Market data or worked out from the daily figures; each
+ * against the goal set there; and the client base. A combined figure is shown
+ * only when neither exchange has one. With no figure yet, the goal stands on its own.
+ */
 export function MarketReach({ shares, headline, goal, clientBase, figures = [], figureSlot, numbersTitle, locale, labels }: Props) {
-  const xpert = shares.reduce((s, f) => s + f.xpertTurnover, 0);
-  const market = shares.reduce((s, f) => s + f.marketTurnover, 0);
-  const pct = headline ? headline.pct : market > 0 ? (xpert / market) * 100 : null;
+  const stated = headline && (headline.dse !== undefined || headline.cse !== undefined);
+  const perExchange: ExchangeFigure[] = (["DSE", "CSE"] as const)
+    .map((x): ExchangeFigure | null => {
+      const own = x === "DSE" ? headline?.dse : headline?.cse;
+      if (own !== undefined) return { exchange: x, pct: own, date: headline?.asOf ?? null };
+      if (headline?.pct != null && !stated) return null; // only a combined figure is stated
+      const daily = shares.find((f) => f.exchange === x);
+      return daily ? { exchange: x, pct: daily.sharePct, date: daily.tradeDate } : null;
+    })
+    .filter((f): f is ExchangeFigure => f !== null);
+  const pct = perExchange.length ? null : (headline?.pct ?? null);
   const { ref, shown } = useCountUp(pct ?? 0);
   const date = (d: string) =>
     new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${d}T00:00:00Z`));
   const fill = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
   // Years are written without a thousands separator (2028, ২০২৮).
   const year = goal ? String(goal.year).replace(/\d/g, (d) => (locale === "bn" ? "০১২৩৪৫৬৭৮৯"[Number(d)]! : d)) : "";
-  const goalText = goal ? labels.goal.replace("{pct}", fmt(locale, goal.targetPct, 0)).replace("{year}", year) : null;
+  const goalPct = goal ? fmt(locale, goal.targetPct, 0) : "";
+  const goalText = goal ? labels.goal.replace("{pct}", goalPct).replace("{year}", year) : null;
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <div ref={ref} data-reveal className="relative flex flex-col gap-8 overflow-hidden rounded-3xl border border-fg/10 bg-navy-900 p-6 sm:p-8 md:p-10">
-        {pct !== null ? (
+        {perExchange.length > 0 ? (
           <>
-            <div className="flex flex-col gap-3">
-              <p className="text-sm font-medium text-text-secondary">{labels.share}</p>
-              <p className="font-display text-6xl leading-none tracking-[-0.03em] text-text-primary tabular-nums sm:text-7xl md:text-8xl">
-                {fmt(locale, shown, headline && Number.isInteger(headline.pct) ? 0 : 2)}
-                <span className="ml-1 text-[0.5em] text-text-secondary">%</span>
+            {goalText && (
+              <p className="flex items-center gap-2 text-sm font-semibold text-gold">
+                <span aria-hidden="true" className="inline-block h-4 w-0.5 rounded-full bg-gold" />
+                {goalText}
               </p>
-              <p className="text-sm text-text-secondary">
-                {headline ? `${labels.overall ?? labels.combined}${headline.asOf ? ` · ${date(headline.asOf)}` : ""}` : labels.combined}
-              </p>
-            </div>
-            {!headline && (
-            <ul className="flex flex-wrap gap-x-8 gap-y-3">
-              {shares.map((s) => (
-                <li key={s.exchange} className="flex items-baseline gap-2">
-                  <span className="text-sm font-semibold text-text-primary">{s.exchange}</span>
-                  <span className="font-mono text-base text-brand-sky">{fmt(locale, s.sharePct, 2)}%</span>
-                  <span className="text-xs text-text-secondary">{date(s.tradeDate)}</span>
-                </li>
-              ))}
-            </ul>
             )}
+            <div className={cn("grid gap-10", perExchange.length > 1 && "sm:grid-cols-2")}>
+              {perExchange.map((f) => (
+                <ExchangeShare key={f.exchange} f={f} goal={goal} goalPct={goalPct} locale={locale} labels={labels} year={year} />
+              ))}
+            </div>
+            {goal && <p className="text-sm text-text-secondary">{goal.note ?? labels.goalNote.replace("{year}", year)}</p>}
           </>
         ) : (
-          goal && (
-            <p className="max-w-xl font-display text-3xl leading-tight tracking-[-0.015em] text-balance md:text-4xl">
-              {labels.goalLead.replace("{pct}", fmt(locale, goal.targetPct, 0)).replace("{year}", year)}
-            </p>
-          )
-        )}
+          <>
+            {pct !== null ? (
+              <div className="flex flex-col gap-3">
+                <p className="text-sm font-medium text-text-secondary">{labels.share}</p>
+                <p className="font-display text-6xl leading-none tracking-[-0.03em] text-text-primary tabular-nums sm:text-7xl md:text-8xl">
+                  {fmt(locale, shown, Number.isInteger(pct) ? 0 : 2)}
+                  <span className="ml-1 text-[0.5em] text-text-secondary">%</span>
+                </p>
+                <p className="text-sm text-text-secondary">{`${labels.overall ?? labels.combined}${headline?.asOf ? ` · ${date(headline.asOf)}` : ""}`}</p>
+              </div>
+            ) : (
+              goal && (
+                <p className="max-w-xl font-display text-3xl leading-tight tracking-[-0.015em] text-balance md:text-4xl">
+                  {labels.goalLead.replace("{pct}", goalPct).replace("{year}", year)}
+                </p>
+              )
+            )}
 
-        {goal && (
-          <div className="flex flex-col gap-4">
-            <div
-              role={pct !== null ? "img" : undefined}
-              aria-label={
-                pct !== null
-                  ? labels.progress.replace("{now}", fmt(locale, pct, 2)).replace("{pct}", fmt(locale, goal.targetPct, 0)).replace("{year}", year)
-                  : undefined
-              }
-              className="relative pt-9"
-            >
-              {/* Goal marker: label above the line, kept inside the card near the right edge. */}
-              <span
-                aria-hidden={pct !== null}
-                className={cn("absolute top-0 text-sm font-semibold whitespace-nowrap text-gold", goal.targetPct > 60 ? "-translate-x-full pr-2" : "pl-2")}
-                style={{ left: fill(goal.targetPct) }}
-              >
-                {goalText}
-              </span>
-              <div className="relative h-3 rounded-full bg-fg/[0.08]">
-                <div className="bar-grow absolute inset-0" data-reveal>
-                  <span className="absolute inset-y-0 left-0 block rounded-full bg-gradient-to-r from-brand-royal to-brand-sky" style={{ width: fill(pct ?? 0) }} />
+            {goal && (
+              <div className="flex flex-col gap-4">
+                <div
+                  role={pct !== null ? "img" : undefined}
+                  aria-label={pct !== null ? labels.progress.replace("{now}", fmt(locale, pct, 2)).replace("{pct}", goalPct).replace("{year}", year) : undefined}
+                  className="relative pt-9"
+                >
+                  {/* Goal marker: label above the line, kept inside the card near the right edge. */}
+                  <span
+                    aria-hidden={pct !== null}
+                    className={cn("absolute top-0 text-sm font-semibold whitespace-nowrap text-gold", goal.targetPct > 60 ? "-translate-x-full pr-2" : "pl-2")}
+                    style={{ left: fill(goal.targetPct) }}
+                  >
+                    {goalText}
+                  </span>
+                  <div className="relative h-3 rounded-full bg-fg/[0.08]">
+                    <div className="bar-grow absolute inset-0" data-reveal>
+                      <span className="absolute inset-y-0 left-0 block rounded-full bg-gradient-to-r from-brand-royal to-brand-sky" style={{ width: fill(pct ?? 0) }} />
+                    </div>
+                    <span aria-hidden="true" className="absolute -top-2 -bottom-2 w-0.5 rounded-full bg-gold" style={{ left: fill(goal.targetPct) }} />
+                  </div>
+                  <div aria-hidden="true" className="mt-2 flex justify-between font-mono text-xs text-text-secondary">
+                    <span>{fmt(locale, 0, 0)}%</span>
+                    <span>{fmt(locale, 100, 0)}%</span>
+                  </div>
                 </div>
-                <span aria-hidden="true" className="absolute -top-2 -bottom-2 w-0.5 rounded-full bg-gold" style={{ left: fill(goal.targetPct) }} />
+                <p className="text-sm text-text-secondary">
+                  {pct !== null && (pct >= goal.targetPct ? labels.reached : labels.toGo.replace("{pts}", fmt(locale, goal.targetPct - pct, 1))) + ". "}
+                  {goal.note ?? labels.goalNote.replace("{year}", year)}
+                </p>
               </div>
-              <div aria-hidden="true" className="mt-2 flex justify-between font-mono text-xs text-text-secondary">
-                <span>{fmt(locale, 0, 0)}%</span>
-                <span>{fmt(locale, 100, 0)}%</span>
-              </div>
-            </div>
-            <p className="text-sm text-text-secondary">
-              {pct !== null && (pct >= goal.targetPct ? labels.reached : labels.toGo.replace("{pts}", fmt(locale, goal.targetPct - pct, 1))) + ". "}
-              {goal.note ?? labels.goalNote.replace("{year}", year)}
-            </p>
-          </div>
+            )}
+          </>
         )}
       </div>
 

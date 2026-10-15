@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { contentSlots } from "@/lib/env/hints";
 import { cn } from "@/lib/utils/cn";
 
 export type SlotKind = "feature" | "screen" | "caseStudy" | "review" | "figure" | "phone";
@@ -34,6 +35,8 @@ export function ContentSlot({
   /** e.g. "aspect-[16/10]" for a screenshot tile. */
   aspect?: string;
 }) {
+  // Never on a deployed site: these link into the admin.
+  if (!contentSlots()) return null;
   const [head, hint] = TEXT[kind][locale];
   return (
     <Link

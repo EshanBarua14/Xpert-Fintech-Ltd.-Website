@@ -89,7 +89,7 @@ export async function createBackup(kind: Kind, actorId: string | null = null, no
   const file = await snapshotContent();
   const data = pack(file);
   const counts = Object.fromEntries(Object.entries(file.tables).map(([k, v]) => [k, v.length]));
-  const row = await db.backup.create({ data: { kind, sizeBytes: data.length, counts, data, actorId, note }, select: { id: true, createdAt: true, sizeBytes: true } });
+  const row = await db.backup.create({ data: { kind, sizeBytes: data.length, counts, data: new Uint8Array(data), actorId, note }, select: { id: true, createdAt: true, sizeBytes: true } });
   const old = await db.backup.findMany({ where: { kind }, orderBy: { createdAt: "desc" }, skip: KEEP[kind], select: { id: true } });
   if (old.length) await db.backup.deleteMany({ where: { id: { in: old.map((b) => b.id) } } });
   return row;

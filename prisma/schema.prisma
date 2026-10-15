@@ -862,6 +862,8 @@ model Deployment {
   launchedAt     DateTime?
   /// Last time an admin checked the store links still work.
   linksCheckedAt DateTime?
+  /// Shown large, above the other apps (e.g. the leading client of the moment).
+  featured       Boolean       @default(false)
   status         ContentStatus @default(DRAFT)
   publishAt      DateTime?
   sortOrder      Int           @default(0)

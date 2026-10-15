@@ -1948,6 +1948,30 @@ async function fillMemberWebsites() {
   if (filled) console.log(`• Member websites: ${filled} added (e.g. Bank Asia Securities)`);
 }
 
+/**
+ * Once (XFL, 15 Oct 2026): UCB, Bank Asia and ONE Bank's brokerages come
+ * first, in that order, wherever members, clients and apps are listed; UCB's
+ * app is featured (shown large above the others) while it leads. Everything
+ * else keeps its order after them. Change both in Admin → Organizations and
+ * Admin → Deployments (Order, Featured).
+ */
+const PRIORITY_ORGS = ["ucb-stock-brokerage", "bank-asia-securities", "one-securities"];
+const PRIORITY_APPS = ["utrade-ucb-stock", "ba-secure-trade", "one-trade"];
+async function prioritiseLeadClients() {
+  const MARK = "seed.priority-ucb-bank-asia-one-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const reorder = <T extends { id: string; key: string | null }>(rows: T[], first: string[]): T[] => [
+    ...first.map((k) => rows.find((r) => r.key === k)).filter((r): r is T => Boolean(r)),
+    ...rows.filter((r) => !r.key || !first.includes(r.key)),
+  ];
+  const orgs = await db.organization.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], select: { id: true, key: true } });
+  for (const [i, o] of reorder(orgs, PRIORITY_ORGS).entries()) await db.organization.update({ where: { id: o.id }, data: { sortOrder: i } });
+  const apps = await db.deployment.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], select: { id: true, key: true } });
+  for (const [i, d] of reorder(apps, PRIORITY_APPS).entries()) await db.deployment.update({ where: { id: d.id }, data: { sortOrder: i, featured: d.key === PRIORITY_APPS[0] } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log("• Order: UCB, Bank Asia, ONE first (members, clients, apps); UCB's app featured");
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -2002,6 +2026,7 @@ async function main() {
   await seedReviewDrafts();
   await seedStoreLinks();
   await showMemberApps();
+  await prioritiseLeadClients();
   await seedDeployments();
   await seedTeamLinks();
   await seedConsultantLinks();

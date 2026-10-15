@@ -39,6 +39,7 @@ const NAV = [
   { href: "/admin/settings", label: "Settings" },
   { href: "/admin/users", label: "Admins" },
   { href: "/admin/history", label: "History & undo" },
+  { href: "/admin/backups", label: "Backups" },
   { href: "/admin/audit", label: "Activity log" },
 ] as const;
 

@@ -290,14 +290,39 @@ model Revision {
   id        String   @id @default(uuid()) @db.Uuid
   model     String
   entityId  String
-  /// "update" (changed), "delete" (deleted for good) or "restore" (state before an undo)
+  /// "create" (added), "update" (changed), "delete" (deleted for good) or "restore" (state before an undo)
   action    String
   label     String?
   snapshot  Json
   actorId   String?  @db.Uuid
+  /// For "restore": the change this undo reversed (so Redo can put it back).
+  undoOf    String?  @db.Uuid
+  /// When this change was undone (it then waits for Redo).
+  undoneAt  DateTime?
+  /// When this undo was redone, or made stale by a newer change.
+  redoneAt  DateTime?
   createdAt DateTime @default(now())
 
   @@index([model, entityId, createdAt])
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+}
+
+/// A full copy of the site's content (every table except sign-ins, logs and
+/// file bytes), gzip-compressed JSON. Made automatically once a day and on
+/// demand; downloadable and restorable from Admin → Backups.
+model Backup {
+  id        String   @id @default(uuid()) @db.Uuid
+  /// "auto", "manual" or "before-restore"
+  kind      String
+  sizeBytes Int
+  /// Rows per table, for the list.
+  counts    Json
+  data      Bytes
+  actorId   String?  @db.Uuid
+  note      String?
+  createdAt DateTime @default(now())
+
   @@index([createdAt])
 }
 

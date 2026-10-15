@@ -1,5 +1,5 @@
 import { PrismaClient, type Prisma } from "@prisma/client";
-import { idField, isTracked, readSnapshot, recordRevision, translationOwner } from "./revision-capture";
+import { idField, isQuiet, isTracked, readSnapshot, recordRevision, translationOwner } from "./revision-capture";
 
 /*
  * One PrismaClient per server process. In development, Next.js hot reload
@@ -48,6 +48,7 @@ const REVISION_OPS = new Set(["update", "upsert", "delete", "updateMany", "delet
 
 /** Copies the current state of what an admin is about to change into Revision. Never blocks the change. */
 async function keepRevision(base: PrismaClient, model: string, operation: string, args: unknown) {
+  if (isQuiet()) return;
   try {
     const translation = translationOwner(model);
     const target = translation?.model ?? model;
@@ -64,7 +65,8 @@ async function keepRevision(base: PrismaClient, model: string, operation: string
     // The records concerned: by the where of the change (a translation: the record it translates).
     let ids: unknown[] = [];
     if (translation) {
-      const rows = await delegate(model).findMany({ where: a.where ?? {}, select: { [translation.fk]: true }, take: 50 }).catch(() => []);
+      // A new translation names its record in the data; otherwise the where says which.
+      const rows = operation === "create" || !a.where ? [] : await delegate(model).findMany({ where: a.where, select: { [translation.fk]: true }, take: 50 }).catch(() => []);
       ids = rows.map((r) => r[translation.fk]);
       const fromCreate = a.create?.[translation.fk] ?? a.data?.[translation.fk];
       if (fromCreate) ids.push(fromCreate);
@@ -86,6 +88,19 @@ async function keepRevision(base: PrismaClient, model: string, operation: string
   }
 }
 
+/** Records that an admin added an item (Undo removes it again). Never blocks the change. */
+async function keepCreation(base: PrismaClient, model: string, result: unknown) {
+  if (isQuiet() || !isTracked(model)) return;
+  try {
+    const { getCurrentAdmin } = await import("@/lib/auth/session");
+    const admin = await getCurrentAdmin().catch(() => null);
+    if (!admin || !result || typeof result !== "object") return;
+    await recordRevision(base, model, result as Record<string, unknown>, "create", admin.id);
+  } catch (error) {
+    console.error("[revisions] could not note a new item", model, (error as Error)?.message ?? error);
+  }
+}
+
 function createClient() {
   const base = new PrismaClient({
     log: process.env.APP_ENV === "development" ? ["warn", "error"] : ["error"],
@@ -95,8 +110,10 @@ function createClient() {
       $allModels: {
         async $allOperations({ model, operation, args, query }) {
           // Before an admin changes or deletes something, keep a copy so it can be undone (Admin → History).
-          if (model && REVISION_OPS.has(operation)) await keepRevision(base, model, operation, args);
+          if (model && (REVISION_OPS.has(operation) || (operation === "create" && translationOwner(model)))) await keepRevision(base, model, operation, args);
           const result = await query(args);
+          // A new item: noted so Undo can take it away again (and Redo bring it back).
+          if (model && operation === "create" && !translationOwner(model)) await keepCreation(base, model, result);
           if (!WRITES.has(operation) || SKIP.has(model) || model.endsWith("Translation") || model === "LeadActivity") return result;
           // The site's own bookkeeping (shared market board, recorded turnover) is not an admin change.
           if (model === "SiteSetting" && /^market\.(board|turnover\.)/.test(String((args as { where?: { key?: unknown } }).where?.key ?? ""))) return result;

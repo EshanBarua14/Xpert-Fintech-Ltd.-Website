@@ -200,3 +200,15 @@ platform page, the home page (hide it in Admin → Design → Home sections:
 page, add the **Risk checks (RMS)** block in Admin → Pages. The panel's words
 are in Admin → Site text (keys starting `rms`). The ecosystem map's RMS box
 links to the Risk checks page.
+
+## Undo, redo and backups
+
+- **Undo / Redo** are at the top of every admin page (Ctrl+Z / Ctrl+Shift+Z
+  outside text fields). Each admin has their own steps; one step is one save.
+- **Backups** (Admin → Backups): a full content backup is made every day by
+  Vercel's scheduled job (`vercel.json` → `/api/cron/backup`, 01:45 Dhaka
+  time), and as a fallback on the first admin visit after 24 hours. Set a
+  `CRON_SECRET` environment variable on Vercel (any long random text) so only
+  Vercel can call the job. Neon also keeps its own point-in-time history of the
+  whole database (see the Neon console → Branches → Restore).
+- What is covered: see `docs/ADMIN-COVERAGE.md`.

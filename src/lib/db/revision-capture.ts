@@ -1,4 +1,16 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { Prisma, type PrismaClient } from "@prisma/client";
+
+/*
+ * Undo, redo and History restores write to the database themselves; those
+ * writes must not be recorded as new changes (or Undo would just undo the
+ * undo). They run inside `quietly`, which turns the recording off.
+ */
+const scope = new AsyncLocalStorage<{ quiet: boolean }>();
+export const isQuiet = () => scope.getStore()?.quiet === true;
+export function quietly<T>(fn: () => Promise<T>): Promise<T> {
+  return scope.run({ quiet: true }, fn);
+}
 
 /*
  * Revisions: before an admin changes or deletes a record, its current state is
@@ -33,6 +45,7 @@ const UNTRACKED = new Set([
   "StoredFile",
   "AuditLog",
   "Revision",
+  "Backup",
   "MediaUsage",
   "ContentRelation",
 ]);
@@ -126,25 +139,34 @@ export async function readSnapshot(client: PrismaClient, model: string, where: u
 
 /* The same record is copied once per save, not once per table the save touches. */
 const recent = new Map<string, number>();
-const SAME_SAVE_MS = 4000;
+const SAME_SAVE_MS = 1500;
 
 export async function recordRevision(
   client: PrismaClient,
   model: string,
   snapshot: Record<string, unknown>,
-  action: "update" | "delete" | "restore",
+  action: "create" | "update" | "delete" | "restore",
   actorId: string,
-) {
+  opts: { undoOf?: string } = {},
+): Promise<string | null> {
   const idName = idField(model);
   const entityId = idName ? String(snapshot[idName]) : "";
-  if (!entityId) return;
+  if (!entityId) return null;
   const k = `${actorId}:${model}:${entityId}:${action}`;
   const now = Date.now();
-  if (action === "update" && now - (recent.get(k) ?? 0) < SAME_SAVE_MS) return;
+  if (action === "update" && now - (recent.get(k) ?? 0) < SAME_SAVE_MS) return null;
   recent.set(k, now);
   if (recent.size > 500) for (const [key, at] of recent) if (now - at > SAME_SAVE_MS) recent.delete(key);
   const json = JSON.parse(JSON.stringify(snapshot, (_k, v) => (typeof v === "bigint" ? v.toString() : v)));
-  await (client as unknown as { revision: { create: (a: unknown) => Promise<unknown> } }).revision.create({
-    data: { model, entityId, action, label: labelOf(snapshot) || null, snapshot: json, actorId },
+  const rev = client as unknown as {
+    revision: { create: (a: unknown) => Promise<{ id: string }>; updateMany: (a: unknown) => Promise<unknown> };
+  };
+  // A new change makes anything waiting for Redo stale (as in any editor).
+  if (action !== "restore") {
+    await rev.revision.updateMany({ where: { actorId, undoOf: { not: null }, redoneAt: null }, data: { redoneAt: new Date() } }).catch(() => null);
+  }
+  const row = await rev.revision.create({
+    data: { model, entityId, action, label: labelOf(snapshot) || null, snapshot: json, actorId, undoOf: opts.undoOf ?? null },
   });
+  return row.id;
 }

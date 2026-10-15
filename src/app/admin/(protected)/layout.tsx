@@ -6,6 +6,8 @@ import { ThemeToggle } from "@/components/navigation/ThemeToggle";
 import { requireAdmin } from "@/lib/auth/session";
 import { logoutAction } from "@/app/admin/auth-actions";
 import { purgeOldTrash } from "@/lib/admin/purge";
+import { UndoBar } from "@/components/admin/UndoBar";
+import { backupIfDue } from "@/lib/admin/backup";
 
 // Admin pages always read fresh data and are never cached.
 export const dynamic = "force-dynamic";
@@ -14,6 +16,8 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
   const admin = await requireAdmin();
   // Housekeeping after the page is sent: empty 30-day-old trash (at most every 6 hours).
   after(() => purgeOldTrash());
+  // A full content backup once a day, even if the scheduled one did not run.
+  after(() => backupIfDue());
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
@@ -26,7 +30,10 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-end gap-4 border-b border-fg/10 px-4 py-3 text-sm md:px-8">
+        <header className="flex flex-wrap items-center justify-end gap-4 border-b border-fg/10 px-4 py-3 text-sm md:px-8">
+          <div className="mr-auto">
+            <UndoBar />
+          </div>
           <Link href="/en" target="_blank" rel="noopener noreferrer" className="text-brand-sky hover:underline">
             View website ↗
           </Link>

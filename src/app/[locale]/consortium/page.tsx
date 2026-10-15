@@ -11,6 +11,8 @@ import Image from "next/image";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getFlagshipData } from "@/lib/public/flagship";
+import { LiveApps } from "@/components/organizations/LiveApps";
+import { getLiveApps } from "@/lib/public/company";
 import { buildMetadata } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -32,7 +34,7 @@ export default async function ConsortiumPage({ params }: Props) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);
-  const [data, members] = await Promise.all([getFlagshipData(locale), getConsortium(locale)]);
+  const [data, members, liveApps] = await Promise.all([getFlagshipData(locale), getConsortium(locale), getLiveApps(locale)]);
   const nf = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US");
   const seats = members.filter((m) => m.reps.some((r) => r.group === "BOARD")).length;
   const apps = members.reduce((n, m) => n + m.apps.length, 0);
@@ -136,6 +138,16 @@ export default async function ConsortiumPage({ params }: Props) {
             </div>
           </Shell>
         </>
+      )}
+
+      {/* Every branded trading app on the platform, with its Google Play and App Store links. */}
+      {liveApps.length > 0 && (
+        <Shell className="py-12 md:py-16">
+          <div className="flex flex-col gap-10">
+            <SectionHeader title={t.consAppsTitle} body={t.consAppsBody} />
+            <LiveApps apps={liveApps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp }} />
+          </div>
+        </Shell>
       )}
 
       {data.exchanges.length > 0 && (

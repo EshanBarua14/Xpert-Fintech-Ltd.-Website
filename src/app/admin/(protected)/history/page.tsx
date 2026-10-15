@@ -23,7 +23,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
     ...(params.model && { model: params.model }),
   };
   const [rows, total, admins, models] = await Promise.all([
-    db.revision.findMany({ where, orderBy: { createdAt: "desc" }, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE, select: { id: true, model: true, entityId: true, action: true, label: true, actorId: true, createdAt: true } }),
+    db.revision.findMany({ where, orderBy: { createdAt: "desc" }, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE, select: { id: true, model: true, entityId: true, action: true, label: true, actorId: true, createdAt: true, undoneAt: true } }),
     db.revision.count({ where }),
     db.adminUser.findMany({ select: { id: true, name: true } }),
     db.revision.findMany({ distinct: ["model"], select: { model: true } }),
@@ -46,7 +46,8 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
         <p className="mt-1 max-w-3xl text-sm text-text-secondary">
           Each line is the version of an item from just before someone changed or deleted it. Choose <strong>Restore this version</strong> to put it back
           exactly as it was, including its Bangla text. Nothing is lost: the version it replaces is kept here too, so a restore can be undone the same way.
-          Items moved to the trash are brought back from their own list (View trash → Restore).
+          Items moved to the trash are brought back from their own list (View trash → Restore). For your latest change, use <strong>Undo</strong> and{" "}
+          <strong>Redo</strong> at the top of every admin page (or Ctrl+Z and Ctrl+Shift+Z).
         </p>
         {item?.edit && (
           <Link href={item.edit} className="mt-2 inline-block text-sm font-semibold text-brand-sky hover:underline">
@@ -100,7 +101,9 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
                     {r.label ? `: ${r.label}` : r.model === "SiteSetting" ? `: ${r.entityId}` : ""}
                   </span>
                   <span className="text-xs text-text-secondary">
-                    {r.action === "delete" ? "Before it was deleted" : "Before it was changed"} by {who.get(r.actorId ?? "") ?? "an admin"}
+                    {r.undoneAt ? "(undone) " : ""}
+                    {r.action === "create" ? "Added" : r.action === "delete" ? "Before it was deleted" : r.action === "restore" ? "Before an undo" : "Before it was changed"} by{" "}
+                    {who.get(r.actorId ?? "") ?? "an admin"}
                     {" · "}
                     <Link href={qs({ id: r.entityId, model: undefined, page: undefined })} className="text-brand-sky hover:underline">
                       all versions
@@ -119,7 +122,7 @@ export default async function HistoryPage({ searchParams }: { searchParams: Prom
                   <input type="hidden" name="id" value={r.id} />
                   <input type="hidden" name="back" value={back} />
                   <button type="submit" className="h-9 rounded-control border border-brand-sky/50 px-3 text-sm font-semibold text-brand-sky hover:bg-brand-sky/10">
-                    {r.action === "delete" ? "Bring back" : "Restore this version"}
+                    {r.action === "create" ? "Remove it again" : r.action === "delete" ? "Bring back" : "Restore this version"}
                   </button>
                 </form>
               </li>

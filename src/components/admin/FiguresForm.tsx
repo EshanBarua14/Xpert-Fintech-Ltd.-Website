@@ -4,6 +4,7 @@ import { saveFigures, type FiguresState } from "@/app/admin/(protected)/figures/
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
 import { TextInput } from "@/components/ui/Field";
+import { ClearRowButton } from "./ClearRowButton";
 
 export type FigureRow = { value: string; labelEn: string; labelBn: string; source: string; asOf: string };
 
@@ -24,6 +25,7 @@ export function FiguresForm({ rows, max }: { rows: FigureRow[]; max: number }) {
             <TextInput id={`labelBn_${i}`} label="What it counts (বাংলা)" lang="bn" defaultValue={r.labelBn} />
             <TextInput id={`source_${i}`} label="Source" placeholder="OMS order log, Sep 2026" defaultValue={r.source} error={e[`source_${i}`]} />
             <TextInput id={`asOf_${i}`} type="date" label="As of" defaultValue={r.asOf} error={e[`asOf_${i}`]} />
+            <ClearRowButton label="Remove this figure" />
           </li>
         ))}
       </ol>

@@ -1,5 +1,6 @@
 "use client";
 
+import { ClearRowButton } from "./ClearRowButton";
 import { saveCredentials, type CredentialsState } from "@/app/admin/(protected)/credentials/actions";
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
@@ -30,10 +31,11 @@ export function CredentialsForm({ items, published, orgs, max }: { items: Item[]
             />
             <TextInput id={`en-${i}`} name={`en-${i}`} label="What XFL holds (English)" placeholder="FIX & ITCH certified" defaultValue={r.en} error={e[`en-${i}`]} maxLength={80} />
             <TextInput id={`bn-${i}`} name={`bn-${i}`} label="বাংলা" lang="bn" hint="Empty = English is shown." defaultValue={r.bn} error={e[`bn-${i}`]} maxLength={80} />
+            <ClearRowButton label="Remove this credential" />
           </li>
         ))}
       </ol>
-      <p className="text-xs text-text-secondary">To remove one, clear its row. To reorder, retype the rows in the order you want.</p>
+      <p className="text-xs text-text-secondary">To remove one, choose Remove (or clear its row), then save. To reorder, retype the rows in the order you want.</p>
       <label className="flex items-start gap-3 text-sm">
         <input type="checkbox" name="published" defaultChecked={published} className="mt-0.5 h-4 w-4 accent-brand-royal" />
         <span>Show on the website (home page and footer)</span>

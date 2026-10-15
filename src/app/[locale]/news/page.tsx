@@ -97,3 +97,7 @@ export default async function NewsPage({ params, searchParams }: Props) {
     </>
   );
 }
+
+// Reads ?category= / ?q= / ?product= from the address, so it is made on each visit;
+// under the cached locale layout, reading it on a cached page fails in production.
+export const dynamic = "force-dynamic";

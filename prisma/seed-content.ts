@@ -2035,6 +2035,24 @@ async function saikatBeforeMaruf() {
   if (moved) console.log(`• People: Saikat Biswas placed before Mohammad Shamsul Maruf (${moved} list(s))`);
 }
 
+/** Once (XFL, 15 Oct 2026): Sowkot Osman, Executive Director, first in the team, before the Managing Director. */
+async function sowkotFirst() {
+  const MARK = "seed.sowkot-first-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const sowkot = await db.person.findUnique({ where: { key: "sowkot-osman" }, include: { roles: true } });
+  let moved = 0;
+  for (const r of sowkot?.roles ?? []) {
+    const first = await db.personRole.findFirst({ where: { group: r.group, id: { not: r.id } }, orderBy: { sortOrder: "asc" } });
+    if (!first || r.sortOrder < first.sortOrder) continue;
+    // Everyone before him moves down one; he takes the first place.
+    await db.personRole.updateMany({ where: { group: r.group, id: { not: r.id }, sortOrder: { lt: r.sortOrder } }, data: { sortOrder: { increment: 1 } } });
+    await db.personRole.update({ where: { id: r.id }, data: { sortOrder: first.sortOrder } });
+    moved++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), moved } } });
+  if (moved) console.log("• People: Sowkot Osman (Executive Director) placed first, before the Managing Director");
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -2079,6 +2097,7 @@ async function main() {
   await seedPeople();
   await seedRoster();
   await saikatBeforeMaruf();
+  await sowkotFirst();
   await seedPortraitFocus();
   await seedMessagesAndGoal();
   await seedLegalDrafts();

@@ -36,5 +36,5 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "shamsher-morshed": { x: 0.49, y: 0.43 },
   "sumon-das": { x: 0.501, y: 0.409 },
   "talukder-juhaer-hakim": { x: 0.501, y: 0.434 },
-  "toha-hossain": { x: 0.548, y: 0.41 },
+  "toha-hossain": { x: 0.51, y: 0.46 },
 };

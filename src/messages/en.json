@@ -595,6 +595,7 @@
   "flowStepData": "Live prices and research inform the decision",
   "testimonialRatingShort": "{n}/5",
   "flowStepTrade": "The investor trades online or on the app",
+  "reachPending": "Figure to be published",
   "reachOverall": "DSE and CSE combined",
   "automationTitle": "How it works, automated",
   "automationBody": "Each step runs by itself and hands over to the next, with nothing re-keyed in between.",

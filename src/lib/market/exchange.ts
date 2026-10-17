@@ -13,15 +13,15 @@ import { getWithCompletedChain, isChainError } from "./fetch-chain";
  *    its column headings (code, LTP, YCP, change, volume); and the CSE home
  *    page (https://www.cse.com.bd/) for the market status, the five indices
  *    (CASPI, CSE30, CSCX, CSI, CSE50) and the day's trades, volume and value.
- *  - DSE index values (DSEX, DSES, DS30), market status, trades, volume and
- *    turnover come from the text of DSE's long-standing site, which moved to
- *    old.dsebd.org in September 2026 when www.dsebd.org started redirecting to
- *    the new site; its full price table (latest_share_price_scroll_l.php) is
- *    the fallback when the dse.com.bd strip cannot be read. On the new site
- *    the live index figures are filled in by script from /api (not read), so
- *    when the old site is gone the day-end table on
- *    dse.com.bd/recent-market-information gives the latest closed session's
- *    indices and totals, marked as the previous session.
+ *  - DSE index values (DSEX, DSES, DS30) with their change, and the day's
+ *    trades, volume and turnover come from the new DSE site's home page
+ *    (https://www.dse.com.bd/), which prints them in the page itself
+ *    ("DSEX Broad index 5,433.18 ▼ 18.88 · −0.35%" … "Turnover BDT 3,173.80 mn
+ *    Volume 113,367,818 Trades 120,644"). Only if it gives fewer than all three
+ *    indices is DSE's long-standing site (old.dsebd.org) read to fill the gap,
+ *    and failing both, the day-end table on dse.com.bd/recent-market-information
+ *    gives the latest closed session's figures, marked as the previous session.
+ *    The market status shown comes from DSE's trading hours (see ./session).
  *
  * One request per exchange per minute at most, shared by all visitors. If an
  * exchange's page changes shape, that exchange is simply left out (and the
@@ -34,7 +34,14 @@ const DSE_URL = () => process.env.MARKET_DSE_URL || "https://www.dse.com.bd/mark
 /** www.dsebd.org now redirects to the new site's home page: an address copied into .env before the move is read from old.dsebd.org. */
 const legacyDse = (url: string) => url.replace(/^https?:\/\/(www\.)?dsebd\.org\//i, "https://old.dsebd.org/");
 const DSE_TABLE_URL = () => legacyDse(process.env.MARKET_DSE_TABLE_URL || "https://old.dsebd.org/latest_share_price_scroll_l.php");
-const DSE_HOME_URL = () => legacyDse(process.env.MARKET_DSE_HOME_URL || "https://old.dsebd.org/");
+/** The new DSE site's home page: DSEX, DSES, DS30 and the day's trades, volume and turnover. */
+// An address on the old site (dsebd.org, copied from an older .env) does not count: the new site comes first.
+const DSE_HOME_URL = () => {
+  const v = process.env.MARKET_DSE_HOME_URL;
+  return v && !/dsebd\.org/i.test(v) ? v : "https://www.dse.com.bd/";
+};
+/** DSE's long-standing site: used only for what the new home page does not give. */
+const DSE_LEGACY_HOME_URL = () => legacyDse(process.env.MARKET_DSE_LEGACY_HOME_URL || "https://old.dsebd.org/");
 /** The new DSE site's day-end table: date, trades, volume, turnover (mn), DSEX, DSES, DS30 per session. */
 const DSE_RECENT_URL = () => process.env.MARKET_DSE_RECENT_URL || "https://www.dse.com.bd/recent-market-information";
 const DSE_INDEX_NAMES = ["DSEX", "DSES", "DS30"] as const;
@@ -366,6 +373,34 @@ async function dseRecentCached() {
   }
 }
 
+/** Every main DSE index and the day's totals present? */
+const dseComplete = (d: DseSummary | null) => !!d && DSE_INDEX_NAMES.every((n) => d.indices.some((i) => i.name === n)) && d.turnover !== undefined;
+
+/**
+ * DSE's indices and totals: the new site's home page first; old.dsebd.org only
+ * to fill in what it lacks (a missing index or total), never to override it.
+ */
+async function dseHomeSummary(): Promise<DseSummary | null> {
+  const read = (url: string, label: string) =>
+    getHtml(url)
+      .then(parseDseSummary)
+      .catch((error: unknown) => {
+        console.error(`[market] DSE summary unavailable (${label}):`, (error as Error)?.message ?? error);
+        return null;
+      });
+  const fresh = await read(DSE_HOME_URL(), "dse.com.bd");
+  if (dseComplete(fresh)) return fresh;
+  const legacy = await read(DSE_LEGACY_HOME_URL(), "old.dsebd.org");
+  if (!fresh) return legacy;
+  if (!legacy) return fresh;
+  const have = new Set(fresh.indices.map((i) => i.name));
+  return {
+    ...legacy,
+    ...Object.fromEntries(Object.entries(fresh).filter(([, v]) => v !== undefined)),
+    indices: [...fresh.indices, ...legacy.indices.filter((i) => !have.has(i.name))],
+  } as DseSummary;
+}
+
 export type ExchangeReport = { exchange: "DSE" | "CSE"; ok: boolean; count: number; message: string };
 
 /** Reads both boards. Returns what worked, plus a per-exchange report for the admin test. */
@@ -404,12 +439,7 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
         console.error("[market] CSE summary unavailable:", (error as Error)?.message ?? error);
         return null;
       }),
-    getHtml(DSE_HOME_URL())
-      .then(parseDseSummary)
-      .catch((error: unknown) => {
-        console.error("[market] DSE summary unavailable:", (error as Error)?.message ?? error);
-        return null;
-      }),
+    dseHomeSummary(),
     dseRecentCached(),
   ]);
   // DSE indices and totals: the home page first, the prices page for whatever it lacks.

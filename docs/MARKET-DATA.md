@@ -25,7 +25,7 @@ only from figures entered in **Admin → Market data** (or written there by the 
 | --- | --- |
 | `none` (default) | No prices. Market-share figures entered in the admin are still shown. |
 | `demo` | Generated prices on real DSE codes, labelled **"Demo data — not real prices"** everywhere. For development and design review only. Refused when `NODE_ENV`/`APP_ENV` is `production` unless `ALLOW_DEMO_MARKET_DATA=true`. |
-| `exchange` | Reads DSE's and CSE's public pages at most once a minute. **DSE** (`dse.com.bd/markets`, or DSE's full price table `old.dsebd.org/latest_share_price_scroll_l.php` when that gives nothing): last price, change and % change for every listed stock, so the ticker, top gainers/losers and advanced/declined counts are worked out from them. DSE's index values (DSEX, DSES, DS30), market status, trades, volume and turnover are read from the text of `old.dsebd.org`'s home page (DSE's previous site, moved there in September 2026 when `www.dsebd.org` began redirecting to the new site; an old `www.dsebd.org` address in `.env` is read from `old.dsebd.org` automatically). On the new site these figures are filled in by script, so if the old site is switched off the latest closed session's indices and totals come from `dse.com.bd/recent-market-information`, labelled as the previous session. `dse.com.bd/api` is never used. **CSE** (`cse.com.bd/market/current_price` and the home page `cse.com.bd/`): every stock's price, the market status, the five indices (CASPI, CSE30, CSCX, CSI, CSE50) and the session's trades, volume and value. Before the session opens CSE shows the previous session's indices, which are used and the totals left out. If an exchange changes its page layout, that part is left out and *Test connection* in the admin says so. No admin tick is needed. |
+| `exchange` | Reads DSE's and CSE's public pages at most once a minute. **DSE** (`dse.com.bd/markets`, or DSE's full price table `old.dsebd.org/latest_share_price_scroll_l.php` when that gives nothing): last price, change and % change for every listed stock, so the ticker, top gainers/losers and advanced/declined counts are worked out from them. DSE's index values (DSEX, DSES, DS30) with their change, and the day's trades, volume and turnover are read from the text of the new site's home page `www.dse.com.bd/` ("DSEX Broad index 5,433.18 ▼ 18.88 · −0.35%" … "Turnover BDT 3,173.80 mn Volume … Trades …"). Only if it gives fewer than all three indices is `old.dsebd.org` (DSE's previous site) read to fill the gap, and failing both, the latest closed session's indices and totals come from `dse.com.bd/recent-market-information`, labelled as the previous session. The market status shown comes from DSE's trading hours. `dse.com.bd/api` is never used. **CSE** (`cse.com.bd/market/current_price` and the home page `cse.com.bd/`): every stock's price, the market status, the five indices (CASPI, CSE30, CSCX, CSI, CSE50) and the session's trades, volume and value. Before the session opens CSE shows the previous session's indices, which are used and the totals left out. If an exchange changes its page layout, that part is left out and *Test connection* in the admin says so. No admin tick is needed. |
 | `licensed` | The feed at `MARKET_DATA_API_URL`. |
 
 With `licensed`, prices appear only after **Show the licensed feed on the website** is ticked in Admin → Market data (after *Test connection* succeeds).
@@ -109,7 +109,7 @@ feed, so enter it from DSE's daily report unless the licensed feed is on. The
 page shows whether today's figure is saved for each exchange. When only the
 percentage is known (e.g. 45%), leave Xpert turnover empty and type the share
 in *…or Xpert's share (%)*: the turnover is worked out from the market total.
-DSE's total is also read from old.dsebd.org's home page (or the day-end table on dse.com.bd) in exchange mode, so it can
+DSE's total is also read from the new DSE home page www.dse.com.bd (or old.dsebd.org / the day-end table when it is missing) in exchange mode, so it can
 fill in by itself for today.
 
 **Automatically** — Xpert's OMS or back office posts the day's figures after
@@ -143,5 +143,6 @@ Typical answers: `MARKET_DATA_MODE ... not set` → run `npm run setup`;
 certificate, see above); `HTTP 403` → the exchange is blocking the server's
 address; `0 prices` → the exchange changed its page, send the `--save` files.
 The addresses can be changed in `.env` without a code change:
-`MARKET_DSE_URL`, `MARKET_DSE_TABLE_URL`, `MARKET_DSE_HOME_URL`,
+`MARKET_DSE_URL`, `MARKET_DSE_TABLE_URL`, `MARKET_DSE_HOME_URL` (new site, read first),
+`MARKET_DSE_LEGACY_HOME_URL` (old.dsebd.org, only to fill gaps),
 `MARKET_CSE_URL`, `MARKET_CSE_HOME_URL`.

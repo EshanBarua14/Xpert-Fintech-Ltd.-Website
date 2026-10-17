@@ -21,7 +21,7 @@ jobs:
           npx next build > build.log 2>&1; code=$?
           echo "::notice::next build exit $code; $(grep -E 'Compiled|Generating static|Route \(app\)' build.log | tr '\n' ' ' | cut -c1-200)"
           grep -nE "rror|Failed|failed" build.log | head -40 | sed 's/^/::error::/'
-          exit 0
+          exit $code
         env:
           DATABASE_URL: postgresql://u:p@localhost:5432/x
           NEXT_TELEMETRY_DISABLED: "1"

@@ -1,0 +1,19 @@
+name: fetch-dse
+on:
+  push:
+    branches: [ci/build-check]
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir out
+          UA="Mozilla/5.0 (compatible; XpertFintechWebsite/1.0; +https://www.xpertfintech.com)"
+          curl -sSL -m 40 -A "$UA" -o out/dse-home.html https://www.dse.com.bd/ ; echo "home $?"
+          curl -sSL -m 40 -A "$UA" -o out/dse-markets.html https://www.dse.com.bd/markets ; echo "markets $?"
+          curl -sSL -m 40 -A "$UA" -o out/dse-recent.html https://www.dse.com.bd/recent-market-information ; echo "recent $?"
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dse-pages
+          path: out

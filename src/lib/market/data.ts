@@ -171,7 +171,7 @@ async function licensedSnapshot(): Promise<MarketSnapshot | null> {
     const headers: Record<string, string> = { Accept: "application/json" };
     const key = process.env.MARKET_DATA_API_KEY;
     if (key) headers[process.env.MARKET_DATA_API_KEY_HEADER || "Authorization"] = process.env.MARKET_DATA_API_KEY_HEADER ? key : `Bearer ${key}`;
-    const res = await fetch(url, { headers, cache: "no-store", signal: AbortSignal.timeout(6000) });
+    const res = await fetch(url, { headers, next: { revalidate: 60 }, signal: AbortSignal.timeout(6000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const parsed = snapshotSchema.safeParse(await res.json());
     if (!parsed.success) throw new Error(`Unexpected feed format: ${parsed.error.issues[0]?.path.join(".")} ${parsed.error.issues[0]?.message}`);

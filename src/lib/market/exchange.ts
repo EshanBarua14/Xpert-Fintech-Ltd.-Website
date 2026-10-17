@@ -337,7 +337,8 @@ export async function getHtml(url: string): Promise<string> {
   const headers = { "User-Agent": USER_AGENT, Accept: "text/html,application/xhtml+xml" };
   let res: Response;
   try {
-    res = await fetch(url, { headers, cache: "no-store", signal: AbortSignal.timeout(30_000) });
+    // Not "no-store": that makes a cached page (the home page) dynamic mid-refresh and Next.js answers 500.
+    res = await fetch(url, { headers, next: { revalidate: 60 }, signal: AbortSignal.timeout(30_000) });
   } catch (error) {
     // The server left out its intermediate certificate: fetch it, verify it, try again.
     if (!isChainError(error)) throw error;

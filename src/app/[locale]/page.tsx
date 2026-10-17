@@ -166,6 +166,7 @@ export default async function HomePage({ params }: Props) {
                 progress: t.reachProgressLabel,
                 overall: t.reachOverall,
                 exchange: t.reachExchangeShare,
+                pending: t.reachPending,
               }}
             />
           </div>

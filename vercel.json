@@ -1,4 +1,16 @@
 {
-  "regions": ["sin1"],
-  "crons": [{ "path": "/api/cron/backup", "schedule": "45 19 * * *" }]
+  "regions": [
+    "sin1"
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/backup",
+      "schedule": "45 19 * * *"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "ci/build-check": false
+    }
+  }
 }

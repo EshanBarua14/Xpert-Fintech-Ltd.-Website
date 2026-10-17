@@ -1741,6 +1741,46 @@ async function renameCaseStudies() {
 }
 
 /**
+ * Once (XFL, 17 Oct 2026): publish the drafted success stories with only what
+ * is on record. Every [bracketed] part comes out, with the challenge (the
+ * client's own words) and the results and quote, which return once each client
+ * approves them. A story with nothing left beyond its name (no app on record)
+ * stays a draft. Stories already published, edited into another state or in
+ * the trash are left alone.
+ */
+async function publishFactOnlyStories() {
+  const MARK = "seed.publish-fact-only-stories-2026-10-17";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const strip = (v: string | null | undefined) => {
+    const out = (v ?? "").replace(/\s*\[[^\]]*\]/g, "").replace(/[ \t]+\n/g, "\n").replace(/\s+$/g, "").trim();
+    return out.replace(/[:\s]+$/, "") || null;
+  };
+  let published = 0;
+  let kept = 0;
+  for (const d of [...CASE_STUDY_DRAFTS, ...CLIENT_STORY_DRAFTS]) {
+    const tr = await db.caseStudyTranslation.findFirst({ where: { slug: d.slug, locale: EN }, select: { caseStudyId: true } });
+    if (!tr) continue;
+    const story = await db.caseStudy.findUnique({ where: { id: tr.caseStudyId }, include: { translations: true } });
+    if (!story || story.status !== "DRAFT" || story.deletedAt) continue;
+    const solutionEn = strip(story.translations.find((t) => t.locale === EN)?.solution);
+    if (!solutionEn) {
+      kept++;
+      continue;
+    }
+    for (const t of story.translations) {
+      await db.caseStudyTranslation.update({
+        where: { id: t.id },
+        data: { title: strip(t.title) ?? t.title, summary: strip(t.summary), challenge: null, solution: strip(t.solution), outcome: null },
+      });
+    }
+    await db.caseStudy.update({ where: { id: story.id }, data: { status: "PUBLISHED", publishAt: null } });
+    published++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), published, kept } } });
+  console.log(`• Success stories: ${published} published with only what is on record${kept ? `; ${kept} kept as drafts (no app or products on record yet)` : ""}`);
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2134,6 +2174,7 @@ async function main() {
   await seedNavAdditions();
   await seedCaseStudyDrafts();
   await seedClientStoryDrafts();
+  await publishFactOnlyStories();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

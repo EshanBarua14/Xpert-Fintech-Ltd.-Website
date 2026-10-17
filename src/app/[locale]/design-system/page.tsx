@@ -8,10 +8,11 @@ import { OrderFlow } from "@/components/diagrams/OrderFlow";
 import { Logo } from "@/components/brand/Logo";
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
+import { showDrafts } from "@/lib/env/hints";
 
 /**
  * Internal review page for the design system (Phase 2). Not linked anywhere,
- * never indexed, and returns 404 when APP_ENV=production.
+ * never indexed, and returns 404 on any deployed site (only under npm run dev).
  */
 export const metadata: Metadata = { title: "Design system", robots: { index: false, follow: false } };
 
@@ -29,7 +30,7 @@ const swatches = [
 ] as const;
 
 export default async function DesignSystemPage({ params }: { params: Promise<{ locale: string }> }) {
-  if (process.env.APP_ENV === "production") notFound();
+  if (!showDrafts()) notFound();
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   const t = getMessages(locale);

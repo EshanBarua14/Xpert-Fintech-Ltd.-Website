@@ -3,6 +3,7 @@ import { cache } from "react";
 import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
 import type { AppLocale } from "@/lib/i18n/config";
+import { showDrafts } from "@/lib/env/hints";
 
 export type NavLink = {
   id: string;
@@ -72,10 +73,10 @@ const livePaths = cache(async (locale: AppLocale): Promise<Set<string>> => {
   // Listing pages appear in menus only once they have something to show.
   const listings = [
     // Success stories: once one is published (always outside production, to show where they go).
-    (cases.length > 0 || process.env.APP_ENV !== "production") && "success-stories",
+    (cases.length > 0 || showDrafts()) && "success-stories",
     resourceCount > 0 && "resources",
     // Company → Consultants: once a consultant is published (always outside production, to preview it).
-    (consultants > 0 || process.env.APP_ENV !== "production") && "company/consultants",
+    (consultants > 0 || showDrafts()) && "company/consultants",
   ].filter((x): x is string => Boolean(x));
   return new Set([
     ...FIXED_ROUTES,

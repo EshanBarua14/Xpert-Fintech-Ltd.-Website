@@ -1,5 +1,5 @@
 import "server-only";
-import { editorHints } from "@/lib/env/hints";
+import { editorHints, showDrafts } from "@/lib/env/hints";
 import { cache } from "react";
 import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
@@ -44,7 +44,7 @@ export type LeaderMessage = {
 };
 
 /** Outside production, unpublished messages are shown (marked as drafts) so they can be reviewed on the page. */
-const previewDrafts = () => process.env.APP_ENV !== "production";
+const previewDrafts = () => showDrafts();
 
 /**
  * A leader's message with the signatory's name, title and photo from

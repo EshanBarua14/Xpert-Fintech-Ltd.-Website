@@ -17,3 +17,11 @@ const isLiveDeployment = () => process.env.VERCEL_ENV === "production";
  * so no visitor ever sees a link into the admin.
  */
 export const contentSlots = () => editorHints() || (process.env.NODE_ENV === "development" && !isLiveDeployment());
+
+/**
+ * Drafts (reviews, leaders' messages, empty menu entries) mixed into public
+ * pages for a preview: only under `npm run dev`, never on a deployed site.
+ * Earlier this keyed on APP_ENV, which Vercel does not set, so drafts leaked
+ * onto the live site.
+ */
+export const showDrafts = () => process.env.NODE_ENV === "development" && !isLiveDeployment();

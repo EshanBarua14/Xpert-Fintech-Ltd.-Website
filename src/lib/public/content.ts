@@ -1,6 +1,6 @@
 import "server-only";
 import { splitAffiliation } from "@/lib/people/affiliation";
-import { editorHints } from "@/lib/env/hints";
+import { editorHints, showDrafts } from "@/lib/env/hints";
 import { cache } from "react";
 import type { OrganizationKind, PersonGroup } from "@prisma/client";
 import { db } from "@/lib/db/client";
@@ -205,7 +205,7 @@ export type TestimonialCard = {
  */
 export const getTestimonials = cache(async (locale: AppLocale): Promise<TestimonialCard[]> => {
   try {
-    const preview = process.env.APP_ENV !== "production";
+    const preview = showDrafts();
     const rows = await db.testimonial.findMany({
       where: preview ? { deletedAt: null } : { ...publishedWhere(), hasApproval: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],

@@ -1,0 +1,11 @@
+cse-home.html 200 153131 0.948745s
+cse-price.html 200 433899 0.755776s
+verify error:num=20:unable to get local issuer certificate
+verify return:1
+verify error:num=21:unable to verify the first certificate
+verify return:1
+verify return:1
+ 0 s:CN = *.cse.com.bd
+   i:C = BE, O = GlobalSign nv-sa, CN = GlobalSign GCC R3 DV TLS CA 2020
+Verification error: unable to verify the first certificate
+Verify return code: 21 (unable to verify the first certificate)

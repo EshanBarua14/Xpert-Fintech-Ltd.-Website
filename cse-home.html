@@ -1,0 +1,3020 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link rel="stylesheet" href="https://www.cse.com.bd/css/style.css"/>
+	<link rel="stylesheet" href="https://www.cse.com.bd/css/default.css"/>
+	<link rel="stylesheet" href="https://www.cse.com.bd/css/tab.css"/>
+	<link rel="stylesheet" href="https://www.cse.com.bd/css/mover_tab.css"/>
+
+	<link href="https://www.cse.com.bd/css/header-styles.css" media="all" rel="stylesheet">
+	<link href="https://www.cse.com.bd/css/mobile.css" media="all" rel="stylesheet">
+
+	<link rel="stylesheet" href="https://www.cse.com.bd/css/lessframework4.css"/>
+	<script src="https://www.cse.com.bd/js/jquery.min.js"></script>
+
+	<script src="https://www.cse.com.bd/js/jquery.bxslider.min.js"></script>
+	<link href="https://www.cse.com.bd/css/jquery.bxslider.css" rel="stylesheet" />
+	<script src="https://www.cse.com.bd/js/custom.js"></script>
+	<script src="https://www.cse.com.bd/js/functions.js" type="text/javascript"></script>
+	<script src="https://www.cse.com.bd/js/footer.js" type="text/javascript"></script>
+	<script src="https://www.cse.com.bd/js/home.js" type="text/javascript"></script>
+	<script src="https://www.cse.com.bd/js/tinynav.js" type="text/javascript"></script>
+	<script type='text/javascript'>
+		$(window).load(function(){
+			$('#box').focus(function()
+			{
+				var v = $(this).val();
+				if(v == 'Company Name'){
+					$(this).val('');
+				}
+				$(this).attr('data-default', $(this).width());
+				$(this).animate({ width: 135 }, 'slow');
+			}).blur(function()
+			{
+				var v = $(this).val();
+				if(v == ''){
+					$(this).animate({ width: 130 }, 'slow');
+					$(this).val('Company Name');
+				}
+			});
+			$('#box2').focus(function()
+			{
+				var v = $(this).val();
+				if(v == 'Company Name'){
+					$(this).val('');
+				}
+				$(this).attr('data-default', $(this).width());
+				$(this).animate({ width: 135 }, 'slow');
+			}).blur(function()
+			{
+				var v = $(this).val();
+				if(v == ''){
+					$(this).animate({ width: 130 }, 'slow');
+					$(this).val('Company Name');
+				}
+			});
+
+		});
+	</script>
+	<script>
+		$(function () {
+			$("#jsddm").tinyNav({
+				active: 'selected',
+				header: 'Navigation',
+			});
+		});
+	</script>
+
+	<meta name="viewport" content="width=980">
+	<title>CSE</title>
+    
+<style type="text/css">
+
+.flip-clock {
+  text-align: center;
+  -webkit-perspective: 400px;
+          perspective: 400px;
+  margin: 5px 5px 0px 5px;
+  float: left;
+}
+.flip-clock *,
+.flip-clock *:before,
+.flip-clock *:after {
+  box-sizing: border-box;
+}
+.flip-clock__piece {
+  display: inline-block;
+  margin: 0 5px;
+}
+.flip-clock__slot {
+  font-size: 1.2vw;
+  display: block;
+  margin-top: 10px;
+  color: #222;
+  font-weight: bold;
+}
+.card {
+  display: block;
+  position: relative;
+  padding-bottom: 0.72em;
+  font-size: 1.7vw;
+  line-height: 0.95;
+}
+.card__top,
+.card__bottom,
+.card__back::before,
+.card__back::after {
+  display: block;
+  height: 0.72em;
+  color: #daff00;
+  background: #0ba047;
+  padding: 0.25em 0.25em;
+  border-radius: 0.15em 0.15em 0 0;
+  backface-visiblity: hidden;
+  -webkit-transform-style: preserve-3d;
+          transform-style: preserve-3d;
+  width: 1.8em;
+  -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+}
+.card__bottom {
+  color: #daff00;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  border-top: solid 1px #0ba047;
+  background: #0ba047;
+  border-radius: 0 0 0.15em 0.15em;
+  pointer-events: none;
+  overflow: hidden;
+}
+.card__bottom::after {
+  display: block;
+  margin-top: -0.72em;
+}
+.card__back::before,
+.card__bottom::after {
+  content: attr(data-value);
+}
+.card__back {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  left: 0%;
+  pointer-events: none;
+}
+.card__back::before {
+  position: relative;
+  z-index: -1;
+  overflow: hidden;
+}
+.flip .card__back::before {
+  -webkit-animation: flipTop 0.3s cubic-bezier(0.37, 0.01, 0.94, 0.35);
+          animation: flipTop 0.3s cubic-bezier(0.37, 0.01, 0.94, 0.35);
+  -webkit-animation-fill-mode: both;
+          animation-fill-mode: both;
+  -webkit-transform-origin: center bottom;
+          transform-origin: center bottom;
+}
+.flip .card__back .card__bottom {
+  -webkit-transform-origin: center top;
+          transform-origin: center top;
+  -webkit-animation-fill-mode: both;
+          animation-fill-mode: both;
+  -webkit-animation: flipBottom 0.6s cubic-bezier(0.15, 0.45, 0.28, 1);
+          animation: flipBottom 0.6s cubic-bezier(0.15, 0.45, 0.28, 1);
+}
+@-webkit-keyframes flipTop {
+  0% {
+    -webkit-transform: rotateX(0deg);
+            transform: rotateX(0deg);
+    z-index: 2;
+  }
+  0%,
+  99% {
+    opacity: 0.99;
+  }
+  100% {
+    -webkit-transform: rotateX(-90deg);
+            transform: rotateX(-90deg);
+    opacity: 0;
+  }
+}
+@keyframes flipTop {
+  0% {
+    -webkit-transform: rotateX(0deg);
+            transform: rotateX(0deg);
+    z-index: 2;
+  }
+  0%,
+  99% {
+    opacity: 0.99;
+  }
+  100% {
+    -webkit-transform: rotateX(-90deg);
+            transform: rotateX(-90deg);
+    opacity: 0;
+  }
+}
+@-webkit-keyframes flipBottom {
+  0%,
+  50% {
+    z-index: -1;
+    -webkit-transform: rotateX(90deg);
+            transform: rotateX(90deg);
+    opacity: 0;
+  }
+  51% {
+    opacity: 0.99;
+  }
+  100% {
+    opacity: 0.99;
+    -webkit-transform: rotateX(0deg);
+            transform: rotateX(0deg);
+    z-index: 5;
+  }
+}
+@keyframes flipBottom {
+  0%,
+  50% {
+    z-index: -1;
+    -webkit-transform: rotateX(90deg);
+            transform: rotateX(90deg);
+    opacity: 0;
+  }
+  51% {
+    opacity: 0.99;
+  }
+  100% {
+    opacity: 0.99;
+    -webkit-transform: rotateX(0deg);
+            transform: rotateX(0deg);
+    z-index: 5;
+  }
+}
+
+button,input,optgroup,select,textarea {
+  font-size: 11px!important; 
+  line-height: normal!important;
+}
+
+.mojib_countdown > img{
+  height: 80px;
+  margin: 0px 0px 0px 0px;
+}
+.mojib_countdown > a > img {
+	height: 80px;
+	margin: 0px 0px 0px 0px;
+	vertical-align: top;
+	float: left;
+}
+#countdown_block{display: inline-block;}
+.hotjobs {
+ -webkit-animation-duration:1s;
+ -webkit-animation-name:hotjobstextglow;
+ -webkit-animation-direction:alternate;
+ -webkit-animation-iteration-count:infinite;
+ animation-duration:1s;
+ animation-name:hotjobstextglow;
+ animation-direction:alternate;
+ animation-iteration-count:infinite;
+ margin: 0 0px;
+}
+@-webkit-keyframes hotjobstextglow {
+ from {
+  text-shadow:0 0 0 #71bf44
+ }
+ to {
+  text-shadow:0 0 20px  #71bf44
+ }
+  .blinkibng{
+    animation:blinkingText 1.2s infinite;
+}
+}
+.sliderbox{ position:relative}
+.contentbox {
+	position: absolute;
+	left: 15%;
+	width: 70%;
+	height: 50px;
+	background: rgba(2, 2, 2, 0.6);
+	top: 46%;
+}
+.contentbox .textbox{ text-align:center}
+.bbxslider h4 {
+	font-family: 'Source Sans Pro';
+	font-size: 25px;
+	line-height: 42px;
+	text-align: center;
+	letter-spacing: 0px;
+	color: #fff;
+	font-style: italic;
+	display: inline-block;
+	text-align: center;
+	align-content: center;
+	align-items: center;
+}
+.bxslider img.dmobile {
+	margin-top: 56px;
+}
+.bxslider .selected  img.dmobile {
+	margin-top: 56px;
+}
+@media only screen and (min-width: 480px) and (max-width: 767px) {
+.mojib_countdown > a > img {
+	float: none;
+}
+.bbxslider h4 {
+	font-size: 16px;
+}
+
+}
+
+@media(max-width: 480px){
+	.bbxslider h4 {
+	font-family: 'Source Sans Pro';
+	font-size: 16px;
+	
+}
+.contentbox {
+	position: absolute;
+	left: 15%;
+	width: 70%;
+	height: 50px;
+	background: rgba(2, 2, 2, 0.6);
+	top: 20%;
+}
+	.mojib_countdown > a > img {
+	float: none;
+}
+  #countdown_block{
+    width: 100%;
+  }
+  .mojib_countdown {
+    margin-bottom: 10px;
+  }
+  .mojib_countdown > img{
+    height: 80px; float:none
+  }
+  .mojib_countdown > a > img{
+    height: 80px;float:none
+  }
+  .card{
+    font-size: 6vw;
+  }
+  .flip-clock__slot{
+    font-size: 4vw;
+    margin: 10px 0 15px 0;
+  }
+  .flip-clock {
+    margin: 0px 0px 0px 0px; float:left;
+  }
+.flip-clock__piece {
+	display: inline-block;
+	margin: 0 5px;
+}
+#countdown_block{display:block;}
+.bxslider .selected img {
+	margin-top: 58px;
+}
+}
+
+</style>
+</head>
+
+<body lang="en">
+	<div class="content">
+		<div class="wrapper" id="wrapper">
+			<div class="frame-area">
+				<header>
+					<script src="https://www.cse.com.bd/scripts/lazy.js"></script>
+<div class="row" style="margin-top:0px;">
+	<div class="inner-content">
+		<div class="col_m_12 col_10 leftcolm" style="background:#FFF;">
+			<div class="col_m_12 col_12 leftcolm">
+
+				<div class="col_m_100 col_12 leftcolm" style="padding-left: 24px;">
+
+					<div class="ticker_value">
+
+						
+					</div>
+				</div>
+
+			</div>
+			<div id="space5"></div>
+
+			<div class="col_m_12 col_12 leftcolm">
+
+				<div class="cselogo col_m_3 col_3 leftcolm" >
+					<a href="https://www.cse.com.bd/"><img src="https://www.cse.com.bd/images/cse_logo.png" /></a>
+				</div>
+
+				<div class="cse_nav_menu  col_9 leftcolm">
+
+					<div class="market_status_on col_m_12 leftcolm">
+
+						
+<div class="market_status">
+<div  class="rightfloat" >&nbsp;&nbsp;Market Status: 
+
+
+<span style="color:#FF2B2B">Closed</span>
+
+</div>
+
+
+<div  class="rightfloat" >&nbsp;&nbsp;Saturday, 17 Oct '26</div>
+<div  class="rightfloat" ><img src="https://www.cse.com.bd/images/watch.png"  style="float:left;"/> &nbsp;&nbsp; 21:46:50&nbsp;(BST)</p></div>
+<div  id="space5"></div>
+						
+					</div>
+					<div class="search" >
+						<form action="#" method="post">
+							<input type="text" id="box" name="key" autocomplete="off" title="Search here" value="Company Name" style="padding-left:5px; width:130px; height:23px;font-family: arial; font-size: 11px; color: #999999; font-style:italic; border: 1px solid #badaf3; border-right:none;  border-radius: 5px 0 0 5px; margin-top:2px;
+							">
+							<input type="hidden" name="#" value="#" />
+							<input type="image" alt="Go!" value="go" name="Go" src="https://www.cse.com.bd/images/search_button.png" align="absmiddle" width="25"/>
+						</form>
+
+					</div>
+				</div>
+				<style>
+.blinking{
+    animation:blinkingText 1.1s infinite;
+}
+@keyframes blinkingText{
+    0%{     color: #F00;    }
+    49%{    color: #F00; }
+    60%{    color: transparent; }
+	80%{    color: transparent; }
+    99%{    color: #F00;   }
+    100%{   color: #F00;    }
+}
+</style>
+<nav itemtype="http://schema.org/SiteNavigationElement" itemscope="itemscope" role="navigation">
+	<!-- <div id="uniform-tinynav1" class="selector"> -->
+		<ul id="jsddm" class="l_tinynav1">
+
+			<li itemprop="name"><a href="https://www.cse.com.bd/" itemprop="url">Home</a></li>
+
+			<li class="drop-down">
+				<a href="javascript:void(0);">About CSE</a>
+				<div class="sub_menu single_menu">
+					<ul>
+						<li itemprop="name">&nbsp;</li>
+						<li itemprop="name"><a href="https://www.cse.com.bd/about/md_message" itemprop="url">Managing Director's Message</a></li>
+						<li itemprop="name"><a href="https://www.cse.com.bd/about/inside_cse" itemprop="url">Inside CSE</a></li>
+						<li itemprop="name"><a href="https://www.cse.com.bd/about/bod" itemprop="url">Board of Directors</a></li>
+						<li itemprop="name"><a href="https://www.cse.com.bd/about/boc" itemprop="url">Board Committees</a></li>
+						<li itemprop="name"><a href="https://www.cse.com.bd/about/management" itemprop="url">Management Team</a></li>
+						<li itemprop="name"><a href="https://www.cse.com.bd/about/investor_relations" itemprop="url">Investor Relations</a></li>
+						<li itemprop="name"><a href="https://www.cse.com.bd/about/regulatory_structure" itemprop="url">Regulatory Structure</a></li>
+						<li itemprop="name"><a href="https://www.cse.com.bd/about/holidays" itemprop="url">CSE Holidays</a></li>
+
+
+						<!--li itemprop="name"><a href="" itemprop="url">Careers</a></li-->
+						<!--li itemprop="name"><a href="" itemprop="url">Holidays</a></li-->
+								<!--li itemprop="name"><a href="" itemprop="url">Web-ACI</a></li>
+									<li itemprop="name"><a href="" itemprop="url">CSE CASPI</a></li-->
+									</ul>
+								</div>
+							</li>
+
+							<!--<li class="drop-down">
+								<a href="javascript:void(0);">Service</a>
+								<div class="sub_menu">
+									<ul>
+										<li itemprop="name">&nbsp;</li>
+										<li itemprop="name"><a href="https://www.bangladeshstockmarket.com/" itemprop="url" target="_blank">ITS</a></li>
+										<li itemprop="name"><a href="https://www.cse.com.bd/service/investors_complain" itemprop="url">CSE Care</a></li>
+										<li itemprop="name"><a href="https://www.cse.com.bd/service/ipf" itemprop="url">Investor's Protection Fund</a></li>
+										<li itemprop="name"><a href="https://www.cse.com.bd/service/dpservices" itemprop="url">DP</a></li>
+										<li itemprop="name"><a href="https://www.cse.com.bd/service/elibrary" itemprop="url">E-Library</a></li>
+							
+							</ul>
+						</div>
+					</li>-->
+                   
+                    <li class="drop-down">
+								<a href="javascript:void(0);">Listing</a>
+								<div class="sub_menu">
+									<ul>
+										<li itemprop="name">&nbsp;</li>
+										<li itemprop="name"><a href="https://www.cse.com.bd/listing/advantages" itemprop="url">Benefits of Listing</a></li>
+                                        <li itemprop="name"><a href="https://www.cse.com.bd/listing/procedure" itemprop="url">Methods of Listing </a></li>
+                                       <li itemprop="name"><a href="https://www.cse.com.bd/listing/eligibility" itemprop="url">Eligibility Criteria </a></li>
+									<li itemprop="name"><a href="https://www.cse.com.bd/listing/LprocesTimeLine" itemprop="url">Listing Procedure</a></li>
+								    <li itemprop="name"><a href="https://www.cse.com.bd/listing/ListingTimeLine" itemprop="url">Listing Timeline</a></li>
+									<li itemprop="name"><a href="https://www.cse.com.bd/listing/EligibleInvestor" itemprop="url">Eligible investor or EI </a></li>
+									    <li itemprop="name"><a href="https://www.cse.com.bd/listing/CostofListing" itemprop="url">Cost of Listing</a></li>
+
+                                  <!--      <li itemprop="name"><a href="https://www.cse.com.bd/listing/listingfees" itemprop="url">Cost of Listing</a></li>  -->
+                                        <li itemprop="name"><a href="https://www.cse.com.bd/listing/directlisting" itemprop="url">Direct Listing</a></li>
+										<li itemprop="name"><a href="https://www.cse.com.bd/listing/delisting" itemprop="url">De Listing</a></li>
+										<li itemprop="name"><a href="https://www.cse.com.bd/listing/cgg" itemprop="url">Corporate Governance Guideline</a></li>
+                                                                                 <li itemprop="name"><a href="https://www.cse.com.bd/listing/sme" itemprop="url">SME</a></li>
+                                                                                  <li itemprop="name"><a href="https://www.cse.com.bd/listing/atb" itemprop="url">ATB</a></li>
+							
+							</ul>
+						</div>
+					</li>
+					
+					<li class="drop-down">
+						<a href="javascript:void(0);">Market Info</a>
+						<div class="sub_menu single_menu">
+							<ul>
+								<li itemprop="name">&nbsp;</li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/market/current_price" itemprop="url">Current Market Price</a></li>
+                                <li itemprop="name"><a href="https://www.cse.com.bd/market/sme_current_price" itemprop="url">Market Price SME</a></li>
+                               <li itemprop="name"><a href="https://www.cse.com.bd/market/atb_current_price" itemprop="url">Market Price ATB</a></li>
+                                 <li itemprop="name"><a href="https://www.cse.com.bd/market/bond_current_price" itemprop="url">Market Price G.Sec</a></li>
+                                <li itemprop="name"><a href="https://www.cse.com.bd/market/marketprice" itemprop="url">Historical Market Price</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/market/market_depth" itemprop="url">Market Depth</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/market/historical_market" itemprop="url">Market Summary</a></li>
+                                
+								<!--<li itemprop="name"><a href="https://www.cse.com.bd/market/sectorindex" itemprop="url">Sector Wise Index</a></li>-->
+                                <li itemprop="name"><a href="https://www.cse.com.bd/market/sectorindexdata" itemprop="url">CSE Indices</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/market/circuit_breaker" itemprop="url">Circuit Breaker</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/market/historicaldata" itemprop="url">Trade Summary</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/market/close_price" itemprop="url">Close Price</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/market/pe_ratio" itemprop="url">Price Earning Ratio (P/E)</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/market/weekly_report" itemprop="url">Weekly Report</a></li>
+							</ul>
+						</div>
+					</li>
+					
+					<li class="drop-down">
+						<a href="javascript:void(0);">Company Info</a>
+						<div class="sub_menu single_menu">
+							<ul>
+								<li itemprop="name">&nbsp;</li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/company/listedcompanies" itemprop="url">Listed Companies</a></li>
+                                <li itemprop="name"><a href="https://www.cse.com.bd/sme/listedcompanies" itemprop="url">Listed  Companies SME</a></li>
+                                 <li itemprop="name"><a href="https://www.cse.com.bd/atb/listedcompanies" itemprop="url">Listed  Companies ATB</a></li>
+                                <li itemprop="name"><a href="https://www.cse.com.bd/company/bondoffer" itemprop="url">Bond</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/company/fsstatus" itemprop="url">Financial Statements Status</a></li> 
+								<li itemprop="name"><a href="https://www.cse.com.bd/company/recorddates" itemprop="url">AGM/EGM and Record Dates</a></li>
+							<!--	<li itemprop="name"><a href="https://www.cse.com.bd/company/NonOperational" itemprop="url">Closed/Non-operational Companies</a></li> -->
+								<li itemprop="name"><a href="https://www.cse.com.bd/company/NonOperational" target="_blank" rel="noopener noreferrer" itemprop="url">Closed/Non-operational Companies  </a></li>
+								
+								
+<li itemprop="name"><a href="https://www.cse.com.bd/company/goingconcernthreat" target="_blank" rel="noopener noreferrer" itemprop="url">
+        Going Concern Threat
+    </a>
+</li>
+								
+								
+								<li itemprop="name"><a href="https://www.cse.com.bd/company/ipo" itemprop="url">IPO</a></li>
+                                <li itemprop="name"><a href="https://www.cse.com.bd/company/qio" itemprop="url">Qualified Investor Offer</a></li>                                <li itemprop="name"><a  target="_blank" href="https://www.cse.com.bd/upload_downloads/List_of_Margin_Financeable_Securities.pdf" >Margin Financeable Securities</a></li>
+								
+								
+                             						<li itemprop="name"><a href="https://www.cse.com.bd/company/otc" itemprop="url">CSE OTC</a></li> 
+                                
+                                
+                                
+								
+								<li itemprop="name"><a href="https://www.cse.com.bd/company/media_reports" itemprop="url">Media Reports</a></li>
+
+															</ul>
+						</div>
+					</li>
+					
+					<li class="drop-down">
+						<a href="javascript:void(0);">My CSE</a>
+						<div class="sub_menu single_menu">
+							<ul>
+								<li itemprop="name">&nbsp;</li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/mycse/its_account" itemprop="url">Open an ITS Account</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/mycse/myportfolio" itemprop="url">My Portfolio</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/mycse/watchlist" itemprop="url">My Watch List</a></li>
+							</ul>
+						</div>
+					</li>
+					
+					<li class="drop-down">
+						<a href="javascript:void(0);">News</a>
+						<div class="sub_menu single_menu">
+							<ul>
+								<li itemprop="name">&nbsp;</li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/media/news" itemprop="url">Market News</a></li>
+                                <li itemprop="name"><a href="https://www.cse.com.bd/media/notice" itemprop="url" >Notice  <sup class="blinking">new</sup>   </a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/media/press_release" itemprop="url">Press Release</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/media/events" itemprop="url">Events</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/media/publications" itemprop="url">Publications</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/media/training" itemprop="url">Training/Workshop</a></li>
+								<li itemprop="name"><a href="https://www.cse.com.bd/media/seminars" itemprop="url">Seminars</a></li>
+							</ul>
+						</div>
+					</li>
+					
+					<li itemprop="name"><a href="https://www.cse.com.bd/contact" itemprop="url">Contact us</a></li>
+
+				</ul>
+
+				<!-- </div> -->
+			</nav>			</div>
+		</div>
+	</div>
+
+	
+<link rel="stylesheet" href="https://www.cse.com.bd/css/jquery-ui.css">
+<script src="https://www.cse.com.bd/js/jquery-ui.js"></script>
+
+<style>
+.custom-combobox {
+  position: relative;
+  display: inline-block;
+}
+.custom-combobox-toggle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin-left: -1px;
+  padding: 0;
+}
+.custom-combobox-input {
+  width: 130px;
+  margin: 0;
+  padding: 6px 3px;
+  font-size: 11px !important;
+}
+</style>
+
+<script type="text/javascript">
+  (function( $ ) {
+    $.widget( "custom.combobox", {
+      _create: function() {
+        this.wrapper = $( "<span>" )
+        .addClass( "custom-combobox" )
+        .insertAfter( this.element );
+
+        this.element.hide();
+        this._createAutocomplete();
+        //this._createShowAllButton();
+      },
+
+      _createAutocomplete: function() {
+        var selected = this.element.children( ":selected" ),
+        value = selected.val() ? selected.text() : "";
+
+        this.input = $( "<input>" )
+        .appendTo( this.wrapper )
+        .val( value )
+        .attr( "title", "" )
+        .attr( "placeholder", "Company name or code" )
+        .addClass( "custom-combobox-input ui-widget ui-widget-content ui-state-default ui-corner-left" )
+        .autocomplete({
+          delay: 0,
+          minLength: 0,
+          source: $.proxy( this, "_source" )
+        })
+        .tooltip({
+          tooltipClass: "ui-state-highlight"
+        });
+
+        this._on( this.input, {
+          autocompleteselect: function( event, ui ) {
+            ui.item.option.selected = true;
+            this._trigger( "select", event, {
+              item: ui.item.option
+            });
+          },
+
+          autocompletechange: "_removeIfInvalid"
+        });
+      },
+
+      _createShowAllButton: function() {
+        var input = this.input,
+        wasOpen = false;
+
+        $( "<a>" )
+        .attr( "tabIndex", -1 )
+        .attr( "title", "Show All Items" )
+        .tooltip()
+        .appendTo( this.wrapper )
+        .button({
+          icons: {
+            primary: "ui-icon-triangle-1-s"
+          },
+          text: false
+        })
+        .removeClass( "ui-corner-all" )
+        .addClass( "custom-combobox-toggle ui-corner-right" )
+        .mousedown(function() {
+          wasOpen = input.autocomplete( "widget" ).is( ":visible" );
+        })
+        .click(function() {
+          input.focus();
+
+            // Close if already visible
+            if ( wasOpen ) {
+              return;
+            }
+
+            // Pass empty string as value to search for, displaying all results
+            input.autocomplete( "search", "" );
+          });
+      },
+
+      _source: function( request, response ) {
+        var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+        response( this.element.children( "option" ).map(function() {
+          var text = $( this ).text();
+          if ( this.value && ( !request.term || matcher.test(text) ) )
+            return {
+              label: text,
+              value: text,
+              option: this
+            };
+          }) );
+      },
+
+      _removeIfInvalid: function( event, ui ) {
+
+        // Selected an item, nothing to do
+        if ( ui.item ) {
+          return;
+        }
+
+        // Search for a match (case-insensitive)
+        var value = this.input.val(),
+        valueLowerCase = value.toLowerCase(),
+        valid = false;
+        this.element.children( "option" ).each(function() {
+          if ( $( this ).text().toLowerCase() === valueLowerCase ) {
+            this.selected = valid = true;
+            return false;
+          }
+        });
+
+        // Found a match, nothing to do
+        if ( valid ) {
+          return;
+        }
+
+        // Remove invalid value
+        this.input
+        .val( "" )
+        .attr( "title", value + " didn't match any item" )
+        .tooltip( "open" );
+        this.element.val( "" );
+        this._delay(function() {
+          this.input.tooltip( "close" ).attr( "title", "" );
+        }, 2500 );
+        this.input.autocomplete( "instance" ).term = "";
+      },
+
+      _destroy: function() {
+        this.wrapper.remove();
+        this.element.show();
+      }
+    });
+  })( jQuery );
+
+  $(function() {
+    $( "#combobox" ).combobox();
+    $( "#toggle" ).click(function() {
+    	$( "#combobox" ).toggle();
+    });
+  });
+
+	function banner_search_go()
+	{
+	var link = 'https://www.cse.com.bd/market/market_depth/';
+	var trade_code = document.banner_src_frm.banner_src_key.value;
+	var mtrade_code = trade_code.split('|');
+	//alert(mtrade_code);
+	if(mtrade_code == ''){
+	return false;
+	}
+	if(mtrade_code[1]=="Main"){
+	var link = 'https://www.cse.com.bd/market/market_depth/';
+	link += mtrade_code[0]; 
+	//alert(link);
+	}
+	else if(mtrade_code[1]=="SME"){
+	var link = 'https://www.cse.com.bd/market/sme_market_depth/';	 
+	link += mtrade_code[0];
+	//alert(link);
+	}
+	else if(mtrade_code[1]=="ATB"){
+	var link = 'https://www.cse.com.bd/market/atb_market_depth/';	 
+	link += mtrade_code[0];
+	//alert(link);
+	}
+	else{
+	link += mtrade_code[0]; 
+	 }
+	
+	window.location.href = link;
+	}
+
+</script>
+
+<div class="market_status_off col_2 leftcolm" >
+  <!--################....Start Market Status and search Section ....###############################-->
+  <div class="market_status"><div  class="rightfloat" >&nbsp;&nbsp;Market Status: 
+
+
+<span style="color:#FF2B2B">Closed</span>
+
+</div>
+  
+  <div  class="rightfloat" >&nbsp;&nbsp;Saturday, 17 Oct '26</div>
+  <div  class="rightfloat" ><img src="https://www.cse.com.bd/images/watch.png"  style="float:left;"/> &nbsp;&nbsp; 21:46:50&nbsp;(BST)</p></div>
+  <div  id="space5"></div>
+</div>
+
+<div class="search" >
+  <form name="banner_src_frm">
+
+    <div class="ui-widget">
+      <select id="combobox" name="banner_src_key">
+        <option value="">Company Name...</option>
+        <option value='AAMRANET|Main'>AAMRANET | AAMRA NETWORKS LIMITED</option><option value='AAMRATECH|Main'>AAMRATECH | AAMRA TECHNOLOGIES LTD.</option><option value='ABB1STMF|Main'>ABB1STMF | AB BANK 1ST MUTUAL FUND</option><option value='ABBLPBOND|Main'>ABBLPBOND | AB BANK PERPETUAL BOND</option><option value='ABBANK|Main'>ABBANK | AB BANK PLC.</option><option value='ACIFORMULA|Main'>ACIFORMULA | ACI FORMULATIONS PLC</option><option value='ACMEPL|Main'>ACMEPL | ACME PESTICIDES LIMITED</option><option value='ACTIVEFINE|Main'>ACTIVEFINE | ACTIVE FINE CHEMICALS LTD.</option><option value='ADNTEL|Main'>ADNTEL | ADN TELECOM LIMITED</option><option value='ACI|Main'>ACI | ADVANCED CHEMICAL INDUSTRIES PLC.</option><option value='ADVENT|Main'>ADVENT | ADVENT PHARMA LTD.</option><option value='AFCAGRO|Main'>AFCAGRO | AFC AGRO BIOTECH LIMITED</option><option value='AFTABAUTO|Main'>AFTABAUTO | AFTAB AUTOMOBILES LIMITED</option><option value='AGNISYSL|Main'>AGNISYSL | AGNI SYSTEMS PLC.</option><option value='AMCL(PRAN)|Main'>AMCL(PRAN) | AGRICULTURAL MARKETING COMPANY LTD.</option><option value='AIBL1STIMF|Main'>AIBL1STIMF | AIBL 1ST ISLAMIC MUTUAL FUND</option><option value='AIBLPBOND|Main'>AIBLPBOND | AIBL MUDARABA PERPETUAL BOND</option><option value='ALARABANK|Main'>ALARABANK | AL-ARAFAH ISLAMI BANK PLC.</option><option value='AIL|Main'>AIL | ALIF INDUSTRIES LIMITED</option><option value='ALLTEX|Main'>ALLTEX | ALLTEX INDUSTRIES LIMITED</option><option value='ACFL|Main'>ACFL | AMAN COTTON FIBROUS PLC.</option><option value='AMANFEED|Main'>AMANFEED | AMAN FEED PLC.</option><option value='AMBEEPHA|Main'>AMBEEPHA | AMBEE PHARMACEUTICALS PLC</option><option value='ANLIMAYARN|Main'>ANLIMAYARN | ANLIMA YARN DYEING LIMITED</option><option value='ANWARGALV|Main'>ANWARGALV | ANWAR GALVANIZING LIMITED</option><option value='APEXFOOT|Main'>APEXFOOT | APEX  FOOTWEAR LIMITED</option><option value='APEXFOODS|Main'>APEXFOODS | APEX FOODS LIMITED</option><option value='APEXSPINN|Main'>APEXSPINN | APEX SPINNING & KNITTING MILLS LIMITED</option><option value='APEXTANRY|Main'>APEXTANRY | APEX TANNERY LIMITED</option><option value='APOLOISPAT|Main'>APOLOISPAT | APPOLLO ISPAT COMPLEX LTD.</option><option value='APSCLBOND|Main'>APSCLBOND | APSCL NON-CONVERTIBLE AND FULLY REDEEMABLE COUPON BEARING BONDS</option><option value='ARAMITCEM|Main'>ARAMITCEM | ARAMIT CEMENT LIMITED</option><option value='ARAMIT|Main'>ARAMIT | ARAMIT LIMITED</option><option value='ARGONDENIM|Main'>ARGONDENIM | ARGON DENIMS LIMITED</option><option value='ASIAINS|Main'>ASIAINS | ASIA INSURANCE PLC.</option><option value='ASIAPACINS|Main'>ASIAPACINS | ASIA PACIFIC GENERAL INSURANCE PLC</option><option value='ATCSLGF|Main'>ATCSLGF | ASIAN TIGER SANDHANI LIFE GROWTH FUND</option><option value='ASIATICLAB|Main'>ASIATICLAB | ASIATIC LABORATORIES LIMITED</option><option value='AOL|Main'>AOL | ASSOCIATED OXYGEN LIMITED</option><option value='AZIZPIPES|Main'>AZIZPIPES | AZIZ PIPES LIMITED</option><option value='BANGAS|Main'>BANGAS | BANGAS LIMITED</option><option value='BDAUTOCA|Main'>BDAUTOCA | BANGLADESH AUTOCARS LIMITED</option><option value='BBS|Main'>BBS | BANGLADESH BUILDING SYSTEMS PLC.</option><option value='BDFINANCE|Main'>BDFINANCE | BANGLADESH FINANCE PLC.</option><option value='BGIC|Main'>BGIC | BANGLADESH GENERAL INSURANCE COMPANY PLC.</option><option value='BIFC|Main'>BIFC | BANGLADESH INDUSTRIAL FINANCE CO. LIMITED</option><option value='BDLAMPS|Main'>BDLAMPS | BANGLADESH LAMPS PLC.</option><option value='BNIPLC|Main'>BNIPLC | BANGLADESH NATIONAL INSURANCE PLC</option><option value='BSC|Main'>BSC | BANGLADESH SHIPPING CORPORATION</option><option value='BSRMLTD|Main'>BSRMLTD | BANGLADESH STEEL RE-ROLLING MILLS LIMITED</option><option value='BSCPLC|Main'>BSCPLC | BANGLADESH SUBMARINE CABLES PLC</option><option value='BDWELDING|Main'>BDWELDING | BANGLADESH WELDING ELECTRODES LIMITED</option><option value='BANKASI1PB|Main'>BANKASI1PB | BANK ASIA 1ST PERPETUAL BOND</option><option value='BANKASIA|Main'>BANKASIA | BANK ASIA PLC.</option><option value='BPPL|Main'>BPPL | BARAKA PATENGA POWER LTD.</option><option value='BARKAPOWER|Main'>BARKAPOWER | BARAKA POWER LIMITED</option><option value='BPML|Main'>BPML | BASHUNDHARA PAPER MILLS PLC.</option><option value='BATASHOE|Main'>BATASHOE | BATA SHOE COMPANY (BD) LIMITED</option><option value='BAYLEASING|Main'>BAYLEASING | BAY LEASING & INVESTMENT LTD.</option><option value='BBSCABLES|Main'>BBSCABLES | BBS CABLES PLC.</option><option value='BDTHAIFOOD|Main'>BDTHAIFOOD | BD THAI FOOD & BEVERAGE LTD.</option><option value='BDTHAI|Main'>BDTHAI | BD.THAI ALUMINIUM LIMITED</option><option value='BDCOM|Main'>BDCOM | BDCOM ONLINE LIMITED</option><option value='BEACHHATCH|Main'>BEACHHATCH | BEACH HATCHERY  LTD.</option><option value='BEACONPHAR|Main'>BEACONPHAR | BEACON PHARMACEUTICALS PLC.</option><option value='BENGALWTL|Main'>BENGALWTL | BENGAL WINDSOR THERMOPLASTICS PLC.</option><option value='BERGERPBL|Main'>BERGERPBL | BERGER PAINTS BANGLADESH LTD.</option><option value='BESTHLDNG|Main'>BESTHLDNG | BEST HOLDINGS PLC.</option><option value='BEXGSUKUK|Main'>BEXGSUKUK | BEXIMCO GREEN SUKUK AL ISTISNA'A</option><option value='BEXIMCO|Main'>BEXIMCO | BEXIMCO LIMITED</option><option value='BXPHARMA|Main'>BXPHARMA | BEXIMCO PHARMACEUTICALS PLC.</option><option value='BRACBANK|Main'>BRACBANK | BRAC BANK PLC.</option><option value='BATBC|Main'>BATBC | BRITISH AMERICAN TOBACCO BANGLADESH COMPANY LIMITED</option><option value='BSRMSTEEL|Main'>BSRMSTEEL | BSRM STEELS LIMITED</option><option value='CNATEX|Main'>CNATEX | C & A TEXTILES LIMITED</option><option value='CAPITECGBF|Main'>CAPITECGBF | CAPITEC GRAMEEN BANK GROWTH FUND</option><option value='CAPMBDBLMF|Main'>CAPMBDBLMF | CAPM BDBL MUTUAL FUND 01</option><option value='CAPMIBBLMF|Main'>CAPMIBBLMF | CAPM IBBL ISLAMIC MUTUAL FUND</option><option value='CENTRALINS|Main'>CENTRALINS | CENTRAL INSURANCE PLC.</option><option value='CENTRALPHL|Main'>CENTRALPHL | CENTRAL PHARMACEUTICALS LIMITED</option><option value='CLICL|Main'>CLICL | CHARTERED LIFE INSURANCE PLC.</option><option value='CBLPBOND|Main'>CBLPBOND | CITY BANK PERPETUAL BOND</option><option value='CITYBANK|Main'>CITYBANK | CITY BANK PLC.</option><option value='CITYGENINS|Main'>CITYGENINS | CITY INSURANCE PLC.</option><option value='CONFIDCEM|Main'>CONFIDCEM | CONFIDENCE CEMENT PLC.</option><option value='CONTININS|Main'>CONTININS | CONTINENTAL INSURANCE PLC.</option><option value='COPPERTECH|Main'>COPPERTECH | COPPERTECH INDUSTRIES LTD.</option><option value='CROWNCEMNT|Main'>CROWNCEMNT | CROWN CEMENT PLC.</option><option value='CRYSTALINS|Main'>CRYSTALINS | CRYSTAL INSURANCE COMPANY LIMITED</option><option value='CVOPRL|Main'>CVOPRL | CVO PETROCHEMICAL REFINERY PLC.</option><option value='DAFODILCOM|Main'>DAFODILCOM | DAFFODIL COMPUTERS PLC.</option><option value='DBH|Main'>DBH | DBH FINANCE PLC.</option><option value='DBH1STMF|Main'>DBH1STMF | DBH FIRST MUTUAL FUND</option><option value='DELTALIFE|Main'>DELTALIFE | DELTA LIFE INSURANCE COMPANY LTD.</option><option value='DELTASPINN|Main'>DELTASPINN | DELTA SPINNERS LIMITED</option><option value='DGIC|Main'>DGIC | DESH GENERAL INSURANCE COMPANY LTD.</option><option value='DESHBANDHU|Main'>DESHBANDHU | DESHBANDHU POLYMER LIMITED</option><option value='DBLPBOND|Main'>DBLPBOND | DHAKA BANK PERPETUAL BOND</option><option value='DHAKABANK|Main'>DHAKABANK | DHAKA BANK PLC.</option><option value='DESCO|Main'>DESCO | DHAKA ELECTRIC SUPPLY CO. LTD.</option><option value='DHAKAINS|Main'>DHAKAINS | DHAKA INSURANCE LIMITED</option><option value='DOMINAGE|Main'>DOMINAGE | DOMINAGE STEEL BUILDING SYSTEMS LTD.</option><option value='DOREENPWR|Main'>DOREENPWR | DOREEN POWER GENERATIONS AND SYSTEMS LIMITED</option><option value='DSSL|Main'>DSSL | DRAGON SWEATER AND SPINNING LIMITED</option><option value='DULAMIACOT|Main'>DULAMIACOT | DULAMIA COTTON SPINNING MILLS LTD.</option><option value='DUTCHBANGL|Main'>DUTCHBANGL | DUTCH-BANGLA BANK PLC.</option><option value='EBL|Main'>EBL | EASTERN BANK PLC.</option><option value='ECABLES|Main'>ECABLES | EASTERN CABLES LIMITED</option><option value='EHL|Main'>EHL | EASTERN HOUSING LIMITED</option><option value='EASTERNINS|Main'>EASTERNINS | EASTERN INSURANCE PLC.</option><option value='EASTLAND|Main'>EASTLAND | EASTLAND INSURANCE PLC.</option><option value='EBL1STMF|Main'>EBL1STMF | EBL FIRST MUTUAL FUND</option><option value='EBLNRBMF|Main'>EBLNRBMF | EBL NRB MUTUAL FUND</option><option value='EGEN|Main'>EGEN | eGENERATION PLC.</option><option value='EMERALDOIL|Main'>EMERALDOIL | EMERALD OIL INDUSTRIES LIMITED</option><option value='EPGL|Main'>EPGL | ENERGYPAC POWER GENERATION PLC.</option><option value='ENVOYTEX|Main'>ENVOYTEX | ENVOY TEXTILES LIMITED</option><option value='ESQUIRENIT|Main'>ESQUIRENIT | ESQUIRE KNIT COMPOSITE PLC</option><option value='ETL|Main'>ETL | EVINCE TEXTILES LIMITED</option><option value='EXIM1STMF|Main'>EXIM1STMF | EXIM BANK 1ST MUTUAL FUND</option><option value='EXIMBANK|Main'>EXIMBANK | EXPORT IMPORT BANK OF BANGLADESH PLC.</option><option value='EIL|Main'>EIL | EXPRESS INSURANCE LTD.</option><option value='FAMILYTEX|Main'>FAMILYTEX | FAMILYTEX (BD) LIMITED</option><option value='FARCHEM|Main'>FARCHEM | FAR CHEMICAL & TEXTILE INDUSTRIES PLC</option><option value='FEKDIL|Main'>FEKDIL | FAR EAST KNITTING & DYEING INDUSTRIES PLC.</option><option value='FAREASTFIN|Main'>FAREASTFIN | FAREAST FINANCE & INVESTMENT LIMITED</option><option value='FAREASTLIF|Main'>FAREASTLIF | FAREAST ISLAMI LIFE INSURANCE COMPANY LTD.</option><option value='FASFIN|Main'>FASFIN | FAS FINANCE & INVESTMENT LTD.</option><option value='FEDERALINS|Main'>FEDERALINS | FEDERAL INSURANCE PLC</option><option value='FINEFOODS|Main'>FINEFOODS | FINE FOODS LIMITED</option><option value='FBFIF|Main'>FBFIF | FIRST BANGLADESH FIXED INCOME FUND</option><option value='FIRSTFIN|Main'>FIRSTFIN | FIRST FINANCE PLC.</option><option value='1JANATAMF|Main'>1JANATAMF | FIRST JANATA BANK MUTUAL FUND</option><option value='FIRSTSBANK|Main'>FIRSTSBANK | FIRST SECURITY ISLAMI BANK PLC.</option><option value='FORTUNE|Main'>FORTUNE | FORTUNE SHOES LIMITED</option><option value='FUWANGCER|Main'>FUWANGCER | FU-WANG CERAMIC INDUSTRY LIMITED</option><option value='FUWANGFOOD|Main'>FUWANGFOOD | FU-WANG FOODS LIMITED</option><option value='GBBPOWER|Main'>GBBPOWER | GBB POWER LIMITED</option><option value='GENNEXT|Main'>GENNEXT | GENERATION NEXT FASHIONS LIMITED</option><option value='GENEXIL|Main'>GENEXIL | GENEX INFOSYS PLC</option><option value='GHCL|Main'>GHCL | GLOBAL HEAVY CHEMICALS LIMITED</option><option value='GLOBALINS|Main'>GLOBALINS | GLOBAL INSURANCE PLC.</option><option value='GIB|Main'>GIB | GLOBAL ISLAMI BANK PLC</option><option value='GHAIL|Main'>GHAIL | GOLDEN HARVEST AGRO INDUSTRIES LIMITED</option><option value='GOLDENSON|Main'>GOLDENSON | GOLDEN SON LIMITED</option><option value='GPHISPAT|Main'>GPHISPAT | GPH ISPAT LIMITED</option><option value='GQBALLPEN|Main'>GQBALLPEN | GQ BALL PEN INDUSTRIES LIMITED</option><option value='GRAMEENS2|Main'>GRAMEENS2 | GRAMEEN MF ONE : SCHEME TWO</option><option value='GP|Main'>GP | GRAMEENPHONE LIMITED</option><option value='GREENDELT|Main'>GREENDELT | GREEN DELTA INSURANCE PLC.</option><option value='GREENDELMF|Main'>GREENDELMF | GREEN DELTA MUTUAL FUND</option><option value='GSPFINANCE|Main'>GSPFINANCE | GSP FINANCE COMPANY(BANGLADESH) PLC.</option><option value='HRTEX|Main'>HRTEX | H.R.TEXTILE MILLS LIMITED</option><option value='HAKKANIPUL|Main'>HAKKANIPUL | HAKKANI PULP & PAPER MILLS PLC.</option><option value='HAMI|Main'>HAMI | HAMI INDUSTRIES PLC</option><option value='HFL|Main'>HFL | HAMID FABRICS PLC.</option><option value='HEIDELBCEM|Main'>HEIDELBCEM | HEIDELBERG MATERIALS BANGLADESH PLC.</option><option value='HWAWELLTEX|Main'>HWAWELLTEX | HWA WELL TEXTILES (BD) PLC.</option><option value='IBBL2PBOND|Main'>IBBL2PBOND | IBBL 2ND PERPETUAL MUDARABA BOND</option><option value='IBBLPBOND|Main'>IBBLPBOND | IBBL MUDARABA PERPETUAL BOND</option><option value='ICB3RDNRB|Main'>ICB3RDNRB | ICB AMCL 3RD NRB MUTUAL FUND</option><option value='GLDNJMF|Main'>GLDNJMF | ICB AMCL CMSF GOLDEN JUBILEE MUTUAL FUND</option><option value='ICBAGRANI1|Main'>ICBAGRANI1 | ICB AMCL FIRST AGRANI BANK MUTUAL FUND</option><option value='ICBAMCL2ND|Main'>ICBAMCL2ND | ICB AMCL SECOND MUTUAL FUND</option><option value='ICBSONALI1|Main'>ICBSONALI1 | ICB AMCL SONALI BANK LTD 1ST MUTUAL FUND</option><option value='ICBEPMF1S1|Main'>ICBEPMF1S1 | ICB EMPLOYEES PROVIDENT MUTUAL FUND ONE</option><option value='IDLC|Main'>IDLC | IDLC FINANCE PLC.</option><option value='IFADAUTOS|Main'>IFADAUTOS | IFAD AUTOS PLC.</option><option value='IFIC1STMF|Main'>IFIC1STMF | IFIC BANK 1ST MUTUAL FUND</option><option value='IFIC|Main'>IFIC | IFIC BANK PLC</option><option value='IFILISLMF1|Main'>IFILISLMF1 | IFIL ISLAMIC MUTUAL FUND-1</option><option value='INDEXAGRO|Main'>INDEXAGRO | INDEX AGRO INDUSTRIES LTD.</option><option value='IBP|Main'>IBP | INDO-BANGLA PHARMACEUTICALS LTD.</option><option value='ISNLTD|Main'>ISNLTD | INFORMATION SERVICES NETWORK LTD.</option><option value='INTECH|Main'>INTECH | INTECH LIMITED</option><option value='ILFSL|Main'>ILFSL | INTERNATIONAL LEASING AND FINANCIAL SERVICES LTD.</option><option value='INTRACO|Main'>INTRACO | INTRACO REFUELING STATION LTD.</option><option value='ICB|Main'>ICB | INVESTMENT CORPORATION OF BANGLADESH</option><option value='IPDC|Main'>IPDC | IPDC FINANCE PLC.</option><option value='ISLAMIBANK|Main'>ISLAMIBANK | ISLAMI BANK BANGLADESH PLC.</option><option value='ICICL|Main'>ICICL | ISLAMI COMMERCIAL INSURANCE PLC.</option><option value='ISLAMIINS|Main'>ISLAMIINS | ISLAMI INSURANCE BANGLADESH LIMITED</option><option value='ISLAMICFIN|Main'>ISLAMICFIN | ISLAMIC FINANCE & INVESTMENT PLC.</option><option value='ITC|Main'>ITC | IT CONSULTANTS PLC.</option><option value='JAMUNABANK|Main'>JAMUNABANK | JAMUNA BANK PLC.</option><option value='JAMUNAOIL|Main'>JAMUNAOIL | JAMUNA OIL PLC.</option><option value='JANATAINS|Main'>JANATAINS | JANATA INSURANCE PLC</option><option value='JHRML|Main'>JHRML | JMI HOSPITAL REQUISITE MANUFACTURING LTD.</option><option value='JMISMDL|Main'>JMISMDL | JMI SYRINGES & MEDICAL DEVICES LTD.</option><option value='KTL|Main'>KTL | KATTALI TEXTILE LTD.</option><option value='KAY&QUE|Main'>KAY&QUE | KAY & QUE (BANGLADESH) LTD.</option><option value='KDSALTD|Main'>KDSALTD | KDS ACCESSORIES LIMITED</option><option value='KEYACOSMET|Main'>KEYACOSMET | KEYA COSMETICS LIMITED</option><option value='KBPPWBIL|Main'>KBPPWBIL | KHAN BROTHERS PP WOVEN BAG INDUSTRIES LIMITED</option><option value='KPCL|Main'>KPCL | KHULNA POWER COMPANY LIMITED</option><option value='KPPL|Main'>KPPL | KHULNA PRINTING & PACKAGING LIMITED</option><option value='KOHINOOR|Main'>KOHINOOR | KOHINOOR CHEMICAL CO (BANGLADESH) PLC.</option><option value='LHB|Main'>LHB | LAFARGEHOLCIM BANGLADESH PLC.</option><option value='LANKABAFIN|Main'>LANKABAFIN | LANKABANGLA FINANCE PLC.</option><option value='LEGACYFOOT|Main'>LEGACYFOOT | LEGACY FOOTWEAR LIMITED</option><option value='LIBRAINFU|Main'>LIBRAINFU | LIBRA INFUSIONS LIMITED</option><option value='LINDEBD|Main'>LINDEBD | LINDE BANGLADESH LIMITED</option><option value='LRGLOBMF1|Main'>LRGLOBMF1 | LR GLOBAL BANGLADESH MF ONE</option><option value='LRBDL|Main'>LRBDL | LUB-RREF (BANGLADESH) PLC.</option><option value='MLDYEING|Main'>MLDYEING | M.L. DYEING LTD.</option><option value='MAGURAPLEX|Main'>MAGURAPLEX | MAGURA MULTIPLEX PLC.</option><option value='MAKSONSPIN|Main'>MAKSONSPIN | MAKSONS SPINNING MILLS PLC.</option><option value='MALEKSPIN|Main'>MALEKSPIN | MALEK SPINNING MILLS PLC.</option><option value='MARICO|Main'>MARICO | MARICO BANGLADESH LIMITED</option><option value='MATINSPINN|Main'>MATINSPINN | MATIN SPINNING MILLS PLC</option><option value='MBL1STMF|Main'>MBL1STMF | MBL 1ST MUTUAL FUND</option><option value='MEGHNACEM|Main'>MEGHNACEM | MEGHNA CEMENT MILLS PLC.</option><option value='MEGHNAINS|Main'>MEGHNAINS | MEGHNA INSURANCE PLC.</option><option value='MEGHNALIFE|Main'>MEGHNALIFE | MEGHNA LIFE INSURANCE PLC</option><option value='MPETROLEUM|Main'>MPETROLEUM | MEGHNA PETROLEUM PLC.</option><option value='MBPLCPBOND|Main'>MBPLCPBOND | MERCANTILE BANK PERPETUAL BOND</option><option value='MERCANBANK|Main'>MERCANBANK | MERCANTILE BANK PLC.</option><option value='MERCINS|Main'>MERCINS | MERCANTILE ISLAMI INSURANCE PLC</option><option value='METROSPIN|Main'>METROSPIN | METRO SPINNING LIMITED</option><option value='MIDASFIN|Main'>MIDASFIN | MIDAS FINANCING PLC.</option><option value='MIDLANDBNK|Main'>MIDLANDBNK | MIDLAND BANK PLC.</option><option value='MIRAKHTER|Main'>MIRAKHTER | MIR AKHTER HOSSAIN LTD.</option><option value='MIRACLEIND|Main'>MIRACLEIND | MIRACLE INDUSTRIES LIMITED</option><option value='MITHUNKNIT|Main'>MITHUNKNIT | MITHUN KNITTING AND DYEING (CEPZ) LTD.</option><option value='MJLBD|Main'>MJLBD | MJL BANGLADESH PLC</option><option value='MONNOCERA|Main'>MONNOCERA | MONNO CERAMIC INDUSTRIES LTD.</option><option value='MONNOFABR|Main'>MONNOFABR | MONNO FABRICS LIMITED</option><option value='MONOSPOOL|Main'>MONOSPOOL | MONOSPOOL BANGLADESH PLC</option><option value='MHSML|Main'>MHSML | MOZAFFAR HOSSAIN SPINNING MILLS LIMITED</option><option value='MTBPBOND|Main'>MTBPBOND | MUTUAL TRUST BANK PERPETUAL BOND</option><option value='MTB|Main'>MTB | MUTUAL TRUST BANK PLC.</option><option value='NAHEEACP|Main'>NAHEEACP | NAHEE ALUMINUM COMPOSITE PANEL PLC.</option><option value='NBL|Main'>NBL | NATIONAL BANK PLC.</option><option value='NCCBANK|Main'>NCCBANK | NATIONAL CREDIT AND COMMERCE BANK PLC.</option><option value='NFML|Main'>NFML | NATIONAL FEED MILL LIMITED</option><option value='NHFIL|Main'>NHFIL | NATIONAL HOUSING FINANCE PLC.</option><option value='NATLIFEINS|Main'>NATLIFEINS | NATIONAL LIFE INSURANCE PLC</option><option value='NPOLYMER|Main'>NPOLYMER | NATIONAL POLYMER INDUSTRIES PLC</option><option value='NTC|Main'>NTC | NATIONAL TEA COMPANY LIMITED</option><option value='NAVANACNG|Main'>NAVANACNG | NAVANA CNG LIMITED</option><option value='NAVANAPHAR|Main'>NAVANAPHAR | NAVANA PHARMACEUTICALS PLC.</option><option value='NCCBLMF1|Main'>NCCBLMF1 | NCCBL MUTUAL FUND-1</option><option value='NEWLINE|Main'>NEWLINE | NEW LINE CLOTHINGS LIMITED</option><option value='NITOLINS|Main'>NITOLINS | NITOL INSURANCE PLC.</option><option value='NORTHRNINS|Main'>NORTHRNINS | NORTHERN ISLAMI INSURANCE PLC.</option><option value='NRBBANK|Main'>NRBBANK | NRB BANK PLC.</option><option value='NRBCBANK|Main'>NRBCBANK | NRBC BANK PLC.</option><option value='NURANI|Main'>NURANI | NURANI DYEING & SWEATER LIMITED</option><option value='OIMEX|Main'>OIMEX | OIMEX ELECTRODE LIMITED</option><option value='OAL|Main'>OAL | OLYMPIC ACCESSORIES LTD.</option><option value='OLYMPIC|Main'>OLYMPIC | OLYMPIC INDUSTRIES PLC.</option><option value='ONEBANKPLC|Main'>ONEBANKPLC | ONE BANK PLC.</option><option value='ORIONINFU|Main'>ORIONINFU | ORION INFUSION LIMITED</option><option value='ORIONPHARM|Main'>ORIONPHARM | ORION PHARMA LIMITED</option><option value='PDL|Main'>PDL | PACIFIC DENIMS LIMITED</option><option value='PADMALIFE|Main'>PADMALIFE | PADMA ISLAMI LIFE INSURANCE LIMITED</option><option value='PADMAOIL|Main'>PADMAOIL | PADMA OIL PLC.</option><option value='PARAMOUNT|Main'>PARAMOUNT | PARAMOUNT INSURANCE PLC.</option><option value='PTL|Main'>PTL | PARAMOUNT TEXTILE PLC.</option><option value='PLFSL|Main'>PLFSL | PEOPLE'S LEASING AND FINANCIAL SERVICES LTD.</option><option value='PEOPLESINS|Main'>PEOPLESINS | PEOPLES INSURANCE PLC.</option><option value='PF1STMF|Main'>PF1STMF | PHOENIX FIN. 1ST MUTUAL FUND</option><option value='PHOENIXFIN|Main'>PHOENIXFIN | PHOENIX FINANCE & INVESTMENTS LIMITED</option><option value='PHENIXINS|Main'>PHENIXINS | PHOENIX INSURANCE PLC.</option><option value='PHPMF1|Main'>PHPMF1 | PHP FIRST MUTUAL FUND</option><option value='PIONEERINS|Main'>PIONEERINS | PIONEER INSURANCE PLC</option><option value='POPULAR1MF|Main'>POPULAR1MF | POPULAR LIFE FIRST MUTUAL FUND</option><option value='POPULARLIF|Main'>POPULARLIF | POPULAR LIFE INSURANCE PLC</option><option value='POWERGRID|Main'>POWERGRID | POWER GRID COMPANY OF BANGLADESH LTD.</option><option value='PRAGATIINS|Main'>PRAGATIINS | PRAGATI INSURANCE PLC.</option><option value='PRAGATILIF|Main'>PRAGATILIF | PRAGATI LIFE INSURANCE PLC.</option><option value='PREBPBOND|Main'>PREBPBOND | PREMIER BANK PERPETUAL BOND</option><option value='PREMIERCEM|Main'>PREMIERCEM | PREMIER CEMENT MILLS PLC</option><option value='PREMIERLEA|Main'>PREMIERLEA | PREMIER LEASING & FINANCE LIMITED</option><option value='PRIME1ICBA|Main'>PRIME1ICBA | PRIME BANK 1ST ICB AMCL MF</option><option value='PRIMEBANK|Main'>PRIMEBANK | PRIME BANK PLC.</option><option value='PRIMEFIN|Main'>PRIMEFIN | PRIME FINANCE & INVESTMENT LTD.</option><option value='1STPRIMFMF|Main'>1STPRIMFMF | PRIME FINANCE 1ST MUTUAL FUND</option><option value='PRIMEINSUR|Main'>PRIMEINSUR | PRIME ISLAMI  INSURANCE PLC</option><option value='PRIMELIFE|Main'>PRIMELIFE | PRIME ISLAMI LIFE INSURANCE LTD.</option><option value='PRIMETEX|Main'>PRIMETEX | PRIME TEXTILE SPINNING MILLS LIMITED</option><option value='PROGRESLIF|Main'>PROGRESLIF | PROGRESSIVE LIFE INSURANCE COMPANY LIMITED</option><option value='PROVATIINS|Main'>PROVATIINS | PROVATI INSURANCE PLC.</option><option value='PBLPBOND|Main'>PBLPBOND | PUBALI BANK PERPETUAL BOND</option><option value='PUBALIBANK|Main'>PUBALIBANK | PUBALI BANK PLC.</option><option value='QUASEMIND|Main'>QUASEMIND | QUASEM INDUSTRIES PLC.</option><option value='QUEENSOUTH|Main'>QUEENSOUTH | QUEEN SOUTH TEXTILE MILLS LTD.</option><option value='RAHIMAFOOD|Main'>RAHIMAFOOD | RAHIMA FOOD CORPORATION LTD.</option><option value='RAKCERAMIC|Main'>RAKCERAMIC | RAK CERAMICS (BANGLADESH) LIMITED</option><option value='RDFOOD|Main'>RDFOOD | RANGPUR DAIRY & FOOD PRODUCTS LTD.</option><option value='RANFOUNDRY|Main'>RANFOUNDRY | RANGPUR FOUNDRY LTD.</option><option value='RSRMSTEEL|Main'>RSRMSTEEL | RATANPUR STEEL RE-ROLLING MILLS LIMITED</option><option value='RECKITTBEN|Main'>RECKITTBEN | RECKITT BENCKISER (BANGLADESH) PLC</option><option value='REGENTTEX|Main'>REGENTTEX | REGENT TEXTILE MILLS LIMITED</option><option value='RELIANCINS|Main'>RELIANCINS | RELIANCE INSURANCE PLC.</option><option value='RELIANCE1|Main'>RELIANCE1 | RELIANCE ONE THE FIRST SCHEME OF RELIANCE INSURANCE MUTUAL FUND</option><option value='REPUBLIC|Main'>REPUBLIC | REPUBLIC INSURANCE PLC.</option><option value='RINGSHINE|Main'>RINGSHINE | RING SHINE TEXTILES LTD.</option><option value='ROBI|Main'>ROBI | ROBI AXIATA PLC.</option><option value='RUNNERAUTO|Main'>RUNNERAUTO | RUNNER AUTOMOBILES PLC</option><option value='RUPALIBANK|Main'>RUPALIBANK | RUPALI BANK PLC.</option><option value='RUPALIINS|Main'>RUPALIINS | RUPALI INSURANCE COMPANY LTD.</option><option value='RUPALILIFE|Main'>RUPALILIFE | RUPALI LIFE INSURANCE PLC.</option><option value='SALAMCRST|Main'>SALAMCRST | S. ALAM COLD ROLLED STEELS LTD.</option><option value='SSSTEEL|Main'>SSSTEEL | S.S.STEEL LIMITED</option><option value='SAFKOSPINN|Main'>SAFKOSPINN | SAFKO SPINNING MILLS LTD.</option><option value='SAIFPOWER|Main'>SAIFPOWER | SAIF POWERTEC LTD.</option><option value='SAIHAMCOT|Main'>SAIHAMCOT | SAIHAM COTTON MILLS LTD.</option><option value='SAIHAMTEX|Main'>SAIHAMTEX | SAIHAM TEXTILE MILLS LTD.</option><option value='SALVO|Main'>SALVO | SALVO ORGANIC INDUSTRIES PLC.</option><option value='SAMATALETH|Main'>SAMATALETH | SAMATA LEATHER COMPLEX LTD.</option><option value='SAMORITA|Main'>SAMORITA | SAMORITA HOSPITAL LIMITED</option><option value='SANDHANINS|Main'>SANDHANINS | SANDHANI LIFE INSURANCE COMPANY LTD.</option><option value='SBACBANK|Main'>SBACBANK | SBAC BANK PLC.</option><option value='SEAPEARL|Main'>SEAPEARL | SEA PEARL BEACH RESORT & SPA LIMITED</option><option value='SEMLFBSLGF|Main'>SEMLFBSLGF | SEML FBLSL Growth Fund</option><option value='SEMLIBBLSF|Main'>SEMLIBBLSF | SEML IBBL SHARIAH FUND</option><option value='SEMLLECMF|Main'>SEMLLECMF | SEML LECTURE EQUITY MANAGEMENT FUND</option><option value='SIPLC|Main'>SIPLC | SENA INSURANCE PLC</option><option value='SHAHJABANK|Main'>SHAHJABANK | SHAHJALAL ISLAMI BANK PLC.</option><option value='SPCL|Main'>SPCL | SHAHJIBAZAR POWER CO. LTD.</option><option value='SHARPIND|Main'>SHARPIND | SHARP INDUSTRIES PLC</option><option value='SHASHADNIM|Main'>SHASHADNIM | SHASHA DENIMS PLC.</option><option value='SHEPHERD|Main'>SHEPHERD | SHEPHERD INDUSTRIES PLC</option><option value='SPCERAMICS|Main'>SPCERAMICS | SHINEPUKUR CERAMICS PLC.</option><option value='SHURWID|Main'>SHURWID | SHURWID INDUSTRIES LTD.</option><option value='SICL|Main'>SICL | SIKDER INSURANCE PLC.</option><option value='SILCOPHL|Main'>SILCOPHL | SILCO PHARMACEUTICALS LIMITED</option><option value='SILVAPHL|Main'>SILVAPHL | SILVA PHARMACEUTICALS LIMITED</option><option value='SIMTEX|Main'>SIMTEX | SIMTEX INDUSTRIES PLC.</option><option value='SINGERBD|Main'>SINGERBD | SINGER BANGLADESH LIMITED</option><option value='SINOBANGLA|Main'>SINOBANGLA | SINOBANGLA INDUSTRIES LIMITED</option><option value='SJIBLPBOND|Main'>SJIBLPBOND | SJIBL MUDARABA PERPETUAL BOND</option><option value='SKTRIMS|Main'>SKTRIMS | SK TRIMS & INDUSTRIES LTD.</option><option value='SIBL|Main'>SIBL | SOCIAL ISLAMI BANK PLC.</option><option value='SONALILIFE|Main'>SONALILIFE | SONALI LIFE INSURANCE PLC</option><option value='SONALIPAPR|Main'>SONALIPAPR | SONALI PAPER & BOARD MILLS LIMITED</option><option value='SONARBAINS|Main'>SONARBAINS | SONAR BANGLA INSURANCE LTD.</option><option value='SONARGAON|Main'>SONARGAON | SONARGAON TEXTILES LIMITED</option><option value='SEB1PBOND|Main'>SEB1PBOND | SOUTHEAST BANK 1ST PERPETUAL BOND</option><option value='SOUTHEASTB|Main'>SOUTHEASTB | SOUTHEAST BANK PLC.</option><option value='SQURPHARMA|Main'>SQURPHARMA | SQUARE PHARMACEUTICALS PLC.</option><option value='SQUARETEXT|Main'>SQUARETEXT | SQUARE TEXTILES PLC.</option><option value='STANCERAM|Main'>STANCERAM | STANDARD CERAMIC INDUSTRIES LIMITED</option><option value='STANDARINS|Main'>STANDARINS | STANDARD INSURANCE PLC.</option><option value='STANDBANKL|Main'>STANDBANKL | STANDARD ISLAMI BANK PLC.</option><option value='SAPORTL|Main'>SAPORTL | SUMMIT ALLIANCE PORT LIMITED</option><option value='SUMITPOWER|Main'>SUMITPOWER | SUMMIT POWER LIMITED</option><option value='SUNLIFEINS|Main'>SUNLIFEINS | SUNLIFE INSURANCE COMPANY LIMITED</option><option value='TAKAFULINS|Main'>TAKAFULINS | TAKAFUL ISLAMI INSURANCE PLC</option><option value='TALLUSPIN|Main'>TALLUSPIN | TALLU SPINNING MILLS LIMITED</option><option value='TAMIJTEX|Main'>TAMIJTEX | TAMIJUDDIN TEXTILE MILLS PLC</option><option value='LOVELLO|Main'>LOVELLO | TAUFIKA FOODS AND LOVELLO ICE-CREAM PLC</option><option value='TECHNODRUG|Main'>TECHNODRUG | TECHNO DRUGS LIMITED</option><option value='ACMELAB|Main'>ACMELAB | THE ACME LABORATORIES LTD.</option><option value='DACCADYE|Main'>DACCADYE | THE DACCA DYEING & MFC. CO. LTD.</option><option value='IBNSINA|Main'>IBNSINA | THE IBN SINA PHARMACEUTICALS INDUSTRY PLC</option><option value='PENINSULA|Main'>PENINSULA | THE PENINSULA CHITTAGONG PLC.</option><option value='PREMIERBAN|Main'>PREMIERBAN | THE PREMIER BANK PLC.</option><option value='TITASGAS|Main'>TITASGAS | TITAS GAS TRANSMISSION & DISTRIBUTION PLC.</option><option value='TOSRIFA|Main'>TOSRIFA | TOSRIFA INDUSTRIES PLC.</option><option value='TRUSTB1MF|Main'>TRUSTB1MF | TRUST BANK 1ST MUTUAL FUND</option><option value='TRUSTBANK|Main'>TRUSTBANK | TRUST BANK PLC.</option><option value='TILIL|Main'>TILIL | TRUST ISLAMI LIFE INSURANCE PLC.</option><option value='TUNGHAI|Main'>TUNGHAI | TUNG HAI KNITTING AND DYEING LTD.</option><option value='UCB2PBOND|Main'>UCB2PBOND | UCB 2nd PERPETUAL BOND</option><option value='UNIONBANK|Main'>UNIONBANK | UNION BANK PLC.</option><option value='UNIONCAP|Main'>UNIONCAP | UNION CAPITAL LIMITED</option><option value='UNIONINS|Main'>UNIONINS | UNION INSURANCE PL.C.</option><option value='UNIQUEHRL|Main'>UNIQUEHRL | UNIQUE HOTEL & RESORTS PLC</option><option value='UCB|Main'>UCB | UNITED COMMERCIAL BANK PLC</option><option value='UPGDCL|Main'>UPGDCL | UNITED POWER GENERATION & DISTRIBUTION COMPANY LIMITED</option><option value='USMANIAGL|Main'>USMANIAGL | USMANIA GLASS SHEET FACTORY LIMITED</option><option value='UTTARABANK|Main'>UTTARABANK | UTTARA BANK PLC.</option><option value='UTTARAFIN|Main'>UTTARAFIN | UTTARA FINANCE & INVESTMENTS LIMITED</option><option value='VAMLBDMF1|Main'>VAMLBDMF1 | VANGUARD AML BD FINANCE MUTUAL FUND ONE</option><option value='VAMLRBBF|Main'>VAMLRBBF | VANGUARD AML RUPALI BANK BALANCED FUND</option><option value='VFSTDL|Main'>VFSTDL | VFS THREAD DYEING LIMITED</option><option value='WALTONHIL|Main'>WALTONHIL | WALTON HI-TECH INDUSTRIES PLC</option><option value='WATACHEM|Main'>WATACHEM | WATA CHEMICALS LIMITED</option><option value='WMSHIPYARD|Main'>WMSHIPYARD | WESTERN MARINE SHIPYARD LTD.</option><option value='YPL|Main'>YPL | YEAKIN POLYMER LIMITED</option><option value='ZAHEENSPIN|Main'>ZAHEENSPIN | ZAHEEN SPINNING PLC.</option><option value='ZAHINTEX|Main'>ZAHINTEX | ZAHINTEX INDUSTRIES LIMITED</option><option value='ACHIASF|SME'>ACHIASF | ACHIA SEA FOODS LIMITED</option><option value='AOPLC|SME'>AOPLC | AGRO ORGANICA PLC.</option><option value='AMPL|SME'>AMPL | AL-MADINA PHARMACEUTICALS LTD.</option><option value='APEXWEAV|SME'>APEXWEAV | APEX WEAVING & FINISHING MILLS LTD</option><option value='BDPAINTS|SME'>BDPAINTS | BD PAINTS LIMITED</option><option value='BENGALBISC|SME'>BENGALBISC | BENGAL BISCUITS LIMITED</option><option value='CRAFTSMAN|SME'>CRAFTSMAN | CRAFTSMAN FOOTWEAR & ACCESSORIES PLC.</option><option value='HIMADRI|SME'>HIMADRI | HIMADRI LIMITED</option><option value='KFL|SME'>KFL | KRISHIBID FEED LIMITED</option><option value='KBSEED|SME'>KBSEED | KRISHIBID SEED LIMITED</option><option value='MAMUNAGRO|SME'>MAMUNAGRO | MAMUN AGRO PRODUCTS LTD</option><option value='MASTERAGRO|SME'>MASTERAGRO | MASTER FEED AGROTEC LIMITED</option><option value='MKFOOTWEAR|SME'>MKFOOTWEAR | MK FOOTWEAR PLC</option><option value='MOSTFAMETL|SME'>MOSTFAMETL | MOSTAFA METAL INDUSTRIES PLC.</option><option value='NIALCO|SME'>NIALCO | NIALCO ALLOYS LIMITED</option><option value='ORYZAAGRO|SME'>ORYZAAGRO | ORYZA AGRO INDUSTRIES LIMITED</option><option value='SADHESIVE|SME'>SADHESIVE | STAR ADHESIVES LTD.</option><option value='WEBCOATS|SME'>WEBCOATS | WEB COATS PLC.</option><option value='WONDERTOYS|SME'>WONDERTOYS | WONDERLAND TOYS LIMITED</option><option value='IFICSBOND2|ATB'>IFICSBOND2</option><option value='IFICSBOND3|ATB'>IFICSBOND3</option>       
+       
+       
+     </select>
+<input type="hidden" name="csrf_cse_token" value="95f36ca8ec7d4014b21d9454ce33c1d3" />	
+     <input type="image" alt="Go!" value="go" name="Go" onClick="banner_search_go(); return false;" src="https://www.cse.com.bd/images/search_button.png" align="absmiddle" width="25"/>
+
+   </div>
+
+ </form>
+</div>
+</div>				</header>
+			</div>
+		</div>
+
+		<div class="bxsliderWrapper">
+			<ul class="bxslider">
+            
+ <!--           
+<li class="first pmtop">
+    <img src="https://www.cse.com.bd/images/slider_bg.jpg" alt="" class="__left" />
+
+    <a target="_blank" href="https://www.cse.com.bd/upload_notice/TREC.jpg" rel="noopener noreferrer">
+        <div class="__right" style="margin-center: 30%; width: auto;">
+            <p itemprop="description" style="font-size: 40px; font-weight: bold;">
+                <strong>Issuance of New TREC</strong>
+            </p>
+           
+        </div>
+    </a>
+</li>
+-->
+		<li class="pmtop">
+					<a target="_blank" href="https://www.cse.com.bd/upload_notice/TREC.jpg">
+						<img src="https://www.cse.com.bd/images/trec-banner.jpg" alt="Commodity" class="__left" />
+					</a>
+		</li>
+				
+				
+				
+				
+		<li class="pmtop">
+					<a target="_blank" href="https://www.cse.com.bd/commoditydocs/commodity-book.pdf">
+						<img src="https://www.cse.com.bd/images/banner-commodity3.jpg" alt="Commodity" class="__left" />
+					</a>
+		</li>
+				
+				
+					<li class="pmtop">
+					<a target="_blank" href="https://play.google.com/store/apps/details?id=com.cse.chitraapp&pcampaignid=web_share">
+						<img src="https://www.cse.com.bd/images/slider_4.jpg" alt="bangladeshstockmarket" class="__left" />
+					</a>
+				</li>
+				
+        
+        <li class="pmtop">
+					<a target="_blank" href="https://www.cse.com.bd/commoditydocs/Commodity-book.pdf">
+						<img src="https://www.cse.com.bd/commoditydocs/banner_commodity.jpg" alt="Commodity" class="__left" />
+					</a>
+		</li>
+				<!--	
+				<li class="pmtop">
+					<a target="_blank" href="https://www.cse.com.bd/media/training">
+						<img src="https://www.cse.com.bd/images/bannercomoditytrain.jpg" alt="Commodity" class="__left" />
+					</a>
+		</li>
+				
+				
+				 <li class="first pmtop">
+                    <img src="https://www.cse.com.bd/images/slider_bg.jpg" alt="" class="__left" /> 
+						 <a target="_blank" href="https://www.cse.com.bd/upload_notice/TREC.jpg">
+						<div class="__right" style="margin-right: 49%; width: auto;">
+						<p itemprop="description" style=""><strong>Issuance of New TREC</strong></p>
+					</div></a>
+                     </li>
+			-->
+			
+			
+                
+   	            
+                
+			<!--	
+
+				 <li class="first">
+					<img itemprop="primaryImageOfPage" data-original="https://www.cse.com.bd/images/slider_bg.jpg" alt="#" class="__left" />
+					<a target="_blank" href="https://www.cse.com.bd/home/career">
+						<div class="__right" style="margin-right: 49%; width: auto;">
+						<p itemprop="description" style=""><strong>Career Opportunity With CSE</strong></p>
+						<p itemprop="description" class="bottom_title">Managing Director</p> -->
+					</div></a>
+				</li> 
+				
+			</ul>
+		</div>
+
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$('.bxslider').bxSlider({
+					'useCSS' : false,
+					'auto' : true,
+					onSlideBefore : function($slideElement, oldIndex, newIndex) { $('.bxslider li').removeClass('selected'); },
+					onSlideAfter : function($slideElement, oldIndex, newIndex) { $slideElement.addClass('selected'); },
+					onSliderLoad : function(currentIndex) { $('.bxslider .first').addClass('selected'); },
+				});
+			});
+		</script>
+
+	</div>
+
+	<div class="bodycontent">
+
+		<div class="wrapper" id="wrapper">
+
+			<div class="frame-area backg">
+
+				<div class="row">
+					<div class="inner-content">
+
+						<div class="col_top_10 col_6 leftcolm graph-bg">
+                        
+							<div class="grid-item-inner">
+
+								<div  class="graph_header" >
+	<script src="https://www.cse.com.bd/js/highcharts.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$('.box').hide();
+			$('#option1').show();
+			$.post("https://www.cse.com.bd/home/load__index_summary/", { selected_index: $("#selectField :selected").text(), csrf_cse_token: '95f36ca8ec7d4014b21d9454ce33c1d3' } ,function(data)
+			{
+				var result = JSON.parse(data);
+//alert(result['value']);
+if(result['value']==null)
+{
+result['value']=0;
+}
+if(result['change']==null)
+{
+result['change']=0;
+}
+if(result['percentage_change']==null)
+{
+result['percentage_change']=0;
+}
+	
+				var change_direction = (result['percentage_change'] >=0)? '&uarr;&nbsp;' : '&darr;&nbsp;';
+
+				$( "#index_change_1" ).html('<b>'+result['value']+'</b>');
+				$( "#index_change_2" ).html('<b>'+result['change']+'</b>');
+				$( "#index_change_3" ).html('<b>'+change_direction+result['percentage_change']+' %</b>');
+			});
+
+			$('#selectField').change(function () {
+
+				$.post("https://www.cse.com.bd/home/load__index_summary/", { selected_index: $("#selectField :selected").text(), csrf_cse_token: '95f36ca8ec7d4014b21d9454ce33c1d3' } ,function(data)
+				{
+					var result = JSON.parse(data);
+if(result['value']==null)
+{
+result['value']=0;
+}
+if(result['change']==null)
+{
+result['change']=0;
+}
+if(result['percentage_change']==null)
+{
+result['percentage_change']=0;
+}
+					var change_direction = (result['percentage_change'] >=0)? '&uarr;&nbsp;' : '&darr;&nbsp;';
+
+					$( "#index_change_1" ).html('<b>'+result['value']+'</b>');
+					$( "#index_change_2" ).html('<b>'+result['change']+'</b>');
+					$( "#index_change_3" ).html('<b>'+change_direction+result['percentage_change']+' %</b>');
+					graph_call();
+				});
+			});
+
+			graph_call();
+
+		});
+
+		//Jobayer mojumder graph load
+		function graph_call (){
+				$.post("https://www.cse.com.bd/home/graph_load/", { selected_index: $("#selectField :selected").text(), csrf_cse_token: '95f36ca8ec7d4014b21d9454ce33c1d3' } ,function(Result){
+					
+				//var Result =0;
+				var Result = JSON.parse(Result);
+						
+				var data = [];
+				var time = [];
+				for (var i in Result) {
+					var c = parseFloat(Result[i].idx_capital_value);
+					var t = tConvert(Result[i].idx_time);
+					var arr = new Array(t, c);
+					data.push(arr);
+				}
+				for (var i in Result) {
+					t = tConvert(Result[i].idx_time);
+					var arr = new Array(t);
+					time.push(arr);
+				}
+
+				var text = $("#selectField :selected").text();
+				var color = '#AAD88F';
+
+				if( text == 'CSE30'){
+					color = '#AFECED';
+				}else if( text == 'CSCX'){
+					color = '#FBE7AF';
+				}else if( text == 'CASPI'){
+					color = '#B2E2E2';
+				}else if( text == 'CSI'){
+					color = '#DDAFEC';
+				}else{
+					color = '#AAD88F';
+				}
+
+				var length = data.length;
+				var interval = length/10;
+				/*if (interval>1 && interval<2){
+					interval =2;
+				}else if (interval>2 && interval<3){
+					interval =3;
+				}else if (interval>3 && interval<4){
+					interval =4;
+				}else if (interval>4 && interval<5){
+					interval =5;
+				}else if (interval>5 && interval<6){
+					interval =6;
+				}else if (interval>6 && interval<7){
+					interval =7;
+				}else if (interval>7 && interval<8){
+					interval =8;
+				}else if (interval>8 && interval<9){
+					interval =9;
+				}else if (interval>9 && interval<10){
+					interval =10;
+				}else{
+					interval =1;
+				}*/
+				interval = Math.round(interval, 1);
+				draw_graph(data, time, interval, color);
+			});
+		}
+
+		function tConvert (time) {
+			time = time.toString ().match (/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+			if (time.length > 1) {
+				time = time.slice (1);
+				var r = time.slice (3);
+				/*time[5] = +time[0] < 12 ? 'AM' : 'PM';
+				time[0] = +time[0] % 12 || 12;*/
+			}
+			var result = time.join ('');
+			result = result.replace(r, '');
+			return result;
+		}
+
+		function draw_graph(series, time, interval, color) {
+			$(function () {
+				//alert(interval);
+				$('.graph_content').highcharts({
+					chart: {
+						type: 'area',
+						zoomType: 'x',
+						height: 280,
+					},
+					title: {
+						style: {
+							display: 'none'
+						}
+					},
+					xAxis: {
+						tickInterval: interval,
+						categories: time,
+					},
+					credits: {
+						enabled: false
+					},
+					yAxis: {
+						title: {
+							style: {
+								display: 'none'
+							}
+						}
+
+					},
+
+					legend: {
+						enabled: false
+					},
+					plotOptions: {
+						area: {
+							marker: {
+								radius: 3,
+							},
+							lineWidth: 1,
+
+							states: {
+								hover: {
+									lineWidth: 2
+								}
+							},
+							threshold: null
+						}
+					},
+
+					series: [{
+						type: 'area',
+						name: 'Index',
+						data: series,
+						color: color,
+					}]
+				});
+			});
+		}
+	</script>
+
+	<style type="text/css">
+	.box{
+		display:block;
+		text-align:center;
+		margin-bottom:2px;
+	}
+
+	#selectField{
+		border: 1px solid #ddd;
+		width: 200px;
+	}
+</style>
+
+<p>
+	<form  class="index" action="" id="menuForm" name="menuForm"><label style="color:#626262; font-weight:bold;">SELECT </label>
+		<select id="selectField" >
+			<option value="option1">CSE50</option>
+			<option value="option2">CSE30</option>
+			<option value="option3">CSCX</option>
+			<option value="option4">CASPI</option>
+			<option value="option5">CSI</option>
+		</select>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+
+		<span style="color:#244a72; font-size:14px; line-height:18px;" id="index_change_1"></span>
+		&nbsp;|&nbsp;
+		<span style="color:#244a72; font-size:14px; line-height:18px;" id="index_change_2"></span>
+		&nbsp;|&nbsp;
+		<span style="color:#244a72; font-size:14px; line-height:18px;" id="index_change_3"></span>
+
+	</form>
+</p></br>
+
+</div>
+
+
+<div class="graph_content">
+	
+</div>
+
+
+<div class="row">
+	<div class="bodycol_12" style="padding-left:0px; padding-right:0px;">
+
+		<div class="tradesummary1">
+			<div class="col">
+				<div class="tradesummary-left" >
+					<div style="float:left;" class="caption1"><p>Issues Traded</p></div>
+					<div style="float:left;" class="value1"><p><font color=999900>134</font> &nbsp; <font color=green>60 &uarr;</font> &nbsp; <font color=red>59 &darr;</font> &nbsp; <font color=blue>15 &harr;</font></p></div>
+				</div>
+
+				<div class="tradesummary-left" >
+					<div style="float:left;" class="caption1"><p>Volume</p></div>
+					<div style="float:left;" class="value1"><p><font color=999900>2,225,925</font></p></div>
+				</div>
+
+				<div class="tradesummary-left" >
+					<div style="float:left;" class="caption1"><p>Issued Cap.</p></div>
+					<div style="float:left;" class="value1"><p><font color=999900>7,117,164,609,630</font></p></div>
+				</div>
+			</div>
+
+			<div class="col">
+				<div class="tradesummary-right" >
+					<div style="float:left;" class="caption1"><p>Value in Taka</p></div>
+					<div style="float:left;" class="value1"><p><font color=999900>75,790,221</font></p></div>
+				</div>
+
+				<div class="tradesummary-right" >
+					<div style="float:left;" class="caption1"><p>Contract Number</p></div>
+					<div style="float:left;" class="value1"><p><font color=999900>860</font></p></div>
+				</div>
+
+				<div class="tradesummary-right" >
+					<div style="float:left;" class="caption1"><p>Closing Market Cap.</p></div>
+					<div style="float:left;" class="value1"><p><font color=999900>9,498,339,663,945</font></p></div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+							</div>
+						</div>
+						<div class="col_top_10 col_3 leftcolm">
+							<div class="grid-item-inner moverbg">
+
+								<div  style="width:100%; height:40px; background:#0ba047;border-radius:5px 5px 0 0;">
+									<div class="TODAYtitle"><h2>TODAY'S TOP 10 </h2></div>
+								</div>
+
+								<style type="text/css">
+.customHref{
+	color:#56585a;
+	text-decoration: none;
+}
+</style>
+<script>
+// JavaScript Document
+
+function tabSwitch(new_tab, new_content) {
+	
+	document.getElementById('content_1').style.display = 'none';
+	document.getElementById('content_2').style.display = 'none';
+	document.getElementById('content_3').style.display = 'none';
+	document.getElementById('content_4').style.display = 'none';		
+
+	document.getElementById(new_content).style.display = 'block';
+	
+
+	document.getElementById('tab_1').className = '';
+	document.getElementById('tab_2').className = '';
+	document.getElementById('tab_3').className = '';
+	document.getElementById('tab_4').className = '';		
+
+	document.getElementById(new_tab).className = 'active';		
+
+}
+
+// Ties a set of tabs and content id's together, and switches between them
+// <div id='tab_1'> and <div id="content_1"> for example
+// Usage: tabswitch(1, 4, 'tab', 'panel') would switch on tab_1 and panel_1
+
+function tabSwitch_2(active, number, tab_prefix, content_prefix) {
+	
+	for (var i=1; i < number+1; i++) {
+		document.getElementById(content_prefix+i).style.display = 'none';
+		document.getElementById(tab_prefix+i).className = '';
+	}
+	document.getElementById(content_prefix+active).style.display = 'block';
+	document.getElementById(tab_prefix+active).className = 'active';	
+	
+}
+</script>
+
+<div class="tabbed_area">
+
+	<script src="https://www.cse.com.bd/scripts/functions.js" type="text/javascript"></script>	
+	<ul class="tabs">
+		<li><a href="javascript:tabSwitch_2(1, 4, 'tab_', 'content_');" id="tab_1" class="active">Gainers</a></li>
+		<li><a href="javascript:tabSwitch_2(2, 4, 'tab_', 'content_');" id="tab_2">Losers</a></li>
+		<li><a href="javascript:tabSwitch_2(3, 4, 'tab_', 'content_');" id="tab_3">Volume</a></li>
+		<li><a href="javascript:tabSwitch_2(4, 4, 'tab_', 'content_');" id="tab_4">Value</a></li>
+	</ul>
+	
+	<div id="content_1" class="tap_content">
+		
+		<div id="mitabs-1">
+			
+			<div class="MIrow">
+				<div class="Col1"><span>Company</span></div>
+				<div class="Col2"><span>LTP</span></div>
+				<div class="Col3"><span>Change</span></div>
+				<div class="Col4"><span>Change %</span></div>
+			</div>											
+			
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/TUNGHAI">TUNGHAI</a></div>
+					<div class="Col2">5.60</div>
+					<div class="Col3">0.50</div>	
+					<div class="Col4">9.80</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/NITOLINS">NITOLINS</a></div>
+					<div class="Col2">57.20</div>
+					<div class="Col3">5.50</div>	
+					<div class="Col4">9.40</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/MALEKSPIN">MALEKSPIN</a></div>
+					<div class="Col2">50.00</div>
+					<div class="Col3">4.20</div>	
+					<div class="Col4">9.17</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ADNTEL">ADNTEL</a></div>
+					<div class="Col2">59.50</div>
+					<div class="Col3">4.50</div>	
+					<div class="Col4">8.18</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ICICL">ICICL</a></div>
+					<div class="Col2">37.00</div>
+					<div class="Col3">2.70</div>	
+					<div class="Col4">7.87</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/UNIONINS">UNIONINS</a></div>
+					<div class="Col2">43.90</div>
+					<div class="Col3">3.40</div>	
+					<div class="Col4">7.80</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/DAFODILCOM">DAFODILCOM</a></div>
+					<div class="Col2">156.00</div>
+					<div class="Col3">11.00</div>	
+					<div class="Col4">7.59</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/BBS">BBS</a></div>
+					<div class="Col2">10.60</div>
+					<div class="Col3">0.70</div>	
+					<div class="Col4">7.07</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/MERCINS">MERCINS</a></div>
+					<div class="Col2">46.60</div>
+					<div class="Col3">2.70</div>	
+					<div class="Col4">6.14</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/IPDC">IPDC</a></div>
+					<div class="Col2">29.90</div>
+					<div class="Col3">1.80</div>	
+					<div class="Col4">6.04</div>									
+				</div>
+						
+		</div>
+	</div>
+
+
+	<div id="content_2" class="tap_content">
+		<div id="mitabs-1">
+			
+			<div class="MIrow">
+				<div class="Col1"><span>Company</span></div>
+				<div class="Col2"><span>LTP</span></div>
+				<div class="Col3"><span>Change</span></div>
+				<div class="Col4"><span>Change %</span></div>
+			</div>											
+			
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/OAL">OAL</a></div>
+					<div class="Col2">4.80</div>
+					<div class="Col3">-0.50</div>	
+					<div class="Col4">-9.43</div>									
+				</div>
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ADVENT">ADVENT</a></div>
+					<div class="Col2">10.60</div>
+					<div class="Col3">-1.10</div>	
+					<div class="Col4">-9.40</div>									
+				</div>
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/JMISMDL">JMISMDL</a></div>
+					<div class="Col2">120.00</div>
+					<div class="Col3">-10.30</div>	
+					<div class="Col4">-7.90</div>									
+				</div>
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/NCCBLMF1">NCCBLMF1</a></div>
+					<div class="Col2">5.90</div>
+					<div class="Col3">-0.50</div>	
+					<div class="Col4">-7.81</div>									
+				</div>
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/CNATEX">CNATEX</a></div>
+					<div class="Col2">2.60</div>
+					<div class="Col3">-0.20</div>	
+					<div class="Col4">-7.14</div>									
+				</div>
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/FBFIF">FBFIF</a></div>
+					<div class="Col2">3.30</div>
+					<div class="Col3">-0.20</div>	
+					<div class="Col4">-5.71</div>									
+				</div>
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/SAIHAMTEX">SAIHAMTEX</a></div>
+					<div class="Col2">44.20</div>
+					<div class="Col3">-2.50</div>	
+					<div class="Col4">-5.27</div>									
+				</div>
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/PREMIERLEA">PREMIERLEA</a></div>
+					<div class="Col2">1.80</div>
+					<div class="Col3">-0.10</div>	
+					<div class="Col4">-5.26</div>									
+				</div>
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/SONALILIFE">SONALILIFE</a></div>
+					<div class="Col2">101.00</div>
+					<div class="Col3">-5.60</div>	
+					<div class="Col4">-5.10</div>									
+				</div>
+							<div class="MIrow1">								
+					<div  class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/NBL">NBL</a></div>
+					<div class="Col2">3.80</div>
+					<div class="Col3">-0.20</div>	
+					<div class="Col4">-5.00</div>									
+				</div>
+						
+		</div>
+	</div>
+
+
+	<div id="content_3" class="tap_content">
+		<div id="mitabs-1">
+			
+			<div class="MIrow">
+				<div class="Col1"><span>Company</span></div>
+				<div class="Col2"><span>YCP</span></div>
+				<div class="Col3"><span>LTP</span></div>
+				<div class="Col4"><span>Volume</span></div>
+			</div>											
+			
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/MALEKSPIN">MALEKSPIN</a></div>
+					<div class="Col2">45.80</div>
+					<div class="Col3">50.00</div>	
+					<div class="Col4">790422</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ETL">ETL</a></div>
+					<div class="Col2">14.10</div>
+					<div class="Col3">13.40</div>	
+					<div class="Col4">398010</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/TUNGHAI">TUNGHAI</a></div>
+					<div class="Col2">5.10</div>
+					<div class="Col3">5.60</div>	
+					<div class="Col4">159900</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ONEBANKPLC">ONEBANKPLC</a></div>
+					<div class="Col2">6.90</div>
+					<div class="Col3">6.80</div>	
+					<div class="Col4">149326</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/SAIHAMTEX">SAIHAMTEX</a></div>
+					<div class="Col2">47.40</div>
+					<div class="Col3">44.20</div>	
+					<div class="Col4">130010</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/SHARPIND">SHARPIND</a></div>
+					<div class="Col2">13.70</div>
+					<div class="Col3">13.40</div>	
+					<div class="Col4">76010</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/MLDYEING">MLDYEING</a></div>
+					<div class="Col2">11.00</div>
+					<div class="Col3">10.50</div>	
+					<div class="Col4">32352</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/EXIM1STMF">EXIM1STMF</a></div>
+					<div class="Col2">5.50</div>
+					<div class="Col3">5.60</div>	
+					<div class="Col4">26665</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/TECHNODRUG">TECHNODRUG</a></div>
+					<div class="Col2">33.60</div>
+					<div class="Col3">32.70</div>	
+					<div class="Col4">24660</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/DSSL">DSSL</a></div>
+					<div class="Col2">9.40</div>
+					<div class="Col3">9.20</div>	
+					<div class="Col4">24289</div>									
+				</div>
+						
+		</div>
+	</div>
+
+	<div id="content_4" class="tap_content">
+		
+		<div id="mitabs-1">
+			
+			<div class="MIrow">
+				<div class="Col1"><span>Company</span></div>
+				<div class="Col2"><span>YCP</span></div>
+				<div class="Col3"><span>LTP</span></div>
+				<div class="Col4"><span>Value (mn)</span></div>
+			</div>											
+			
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/MALEKSPIN">MALEKSPIN</a></div>
+					<div class="Col2">45.80</div>
+					<div class="Col3">50.00</div>	
+					<div class="Col4">39.5</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/FINEFOODS">FINEFOODS</a></div>
+					<div class="Col2">430.10</div>
+					<div class="Col3">420.40</div>	
+					<div class="Col4">6.77</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/SAIHAMTEX">SAIHAMTEX</a></div>
+					<div class="Col2">47.40</div>
+					<div class="Col3">44.20</div>	
+					<div class="Col4">5.96</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ETL">ETL</a></div>
+					<div class="Col2">14.10</div>
+					<div class="Col3">13.40</div>	
+					<div class="Col4">5.55</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/GQBALLPEN">GQBALLPEN</a></div>
+					<div class="Col2">608.00</div>
+					<div class="Col3">608.00</div>	
+					<div class="Col4">3.5</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/NITOLINS">NITOLINS</a></div>
+					<div class="Col2">58.50</div>
+					<div class="Col3">57.20</div>	
+					<div class="Col4">1.09</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/SHARPIND">SHARPIND</a></div>
+					<div class="Col2">13.70</div>
+					<div class="Col3">13.40</div>	
+					<div class="Col4">1.04</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ONEBANKPLC">ONEBANKPLC</a></div>
+					<div class="Col2">6.90</div>
+					<div class="Col3">6.80</div>	
+					<div class="Col4">1.02</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ISLAMIINS">ISLAMIINS</a></div>
+					<div class="Col2">68.60</div>
+					<div class="Col3">71.50</div>	
+					<div class="Col4">0.94</div>									
+				</div>
+							<div class="MIrow1">								
+					<div class="Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/TUNGHAI">TUNGHAI</a></div>
+					<div class="Col2">5.10</div>
+					<div class="Col3">5.60</div>	
+					<div class="Col4">0.89</div>									
+				</div>
+						
+		</div>		
+	</div>
+</div>
+							</div>
+						</div>
+
+
+						<div class="col_top_10 col_3 leftcolm">
+                        
+							<div class="grid-item-inner">
+
+        
+  <div style="width:100%;background:#0ba047;margin-bottom:10px;">
+   <marquee width="100%" scrollamount="5" onmouseover="this.stop();" onmouseout="this.start();" direction="left" >
+	   
+   <!--<a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://www.cse.com.bd/new.trec_cse_ad"> <div class="TODAYtitle"><h2 >ISSUANCE OF NEW TREC</h2></div></a> &nbsp; | &nbsp; 
+	 
+	   
+	   	   <a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://www.cse.com.bd/upload_career/COO-Recruitment-advertisement05072026.pdf" target="_blank">    <div class="TODAYtitle"><h2 >Career Opportunity with CSE</h2></div></a>&nbsp; &nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;
+	    -->
+	   
+	   	   <a style="text-decoration: none; text-decoration-line: none; display:inline-block" target="_blank" href="https://www.cse.com.bd/home/issuanceofntrec">    <div class="TODAYtitle" ><h2 >Issuance of New TREC</h2></div></a>&nbsp; &nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;
+	   
+	   <a style="text-decoration: none; text-decoration-line: none; display:inline-block" target="_blank" href="https://play.google.com/store/apps/details?id=com.cse.chitraapp&pcampaignid=web_share">    <div class="TODAYtitle" ><h2 >Download CSE Mobile Apps</h2></div></a>&nbsp; &nbsp;&nbsp;| &nbsp;&nbsp;&nbsp; 
+	     
+	   
+<a style="text-decoration: none; text-decoration-line: none; display:inline-block" target="_blank" href="https://www.cse.com.bd/upload_notice/BSEC_Letter_for_Investor16032026.pdf">    <div class="TODAYtitle" ><h2 >বিনিয়োগকারীদের জন্য সতর্কবার্তা </h2></div></a>&nbsp; &nbsp;&nbsp;| &nbsp;&nbsp;&nbsp; 
+
+
+	   <a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://www.cse.com.bd/stockbroker/top_ten_brokers" target="_blank">    <div class="TODAYtitle"><h2>Top 10 Stock Brokers</h2></div></a>&nbsp; &nbsp;|  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;
+ 
+<!--
+
+<a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://www.cse.com.bd/upload_notice/list_of_panel_of_auditors.pdf" target="_blank">    <div class="TODAYtitle"><h2 >List of Panel of Auditors’</h2></div></a>&nbsp; &nbsp;&nbsp;| &nbsp;&nbsp;&nbsp;
+	   
+	   
+
+-->
+<!--   
+<a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://www.cse.com.bd/company/fsstatus" target="_blank">    <div class="TODAYtitle"><h2>Financial Statements Status of Listed Securities</h2></div></a>&nbsp; &nbsp;|  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;	   
+	 --> 
+<!--
+	   <a style="text-decoration: none; text-decoration-line: none; display:inline-block" target="_blank" href="https://www.cse.com.bd/images/Ramadan-time-2026CSE.jpg">    <div class="TODAYtitle" ><h2 >রমজানে লেনদেন ও অফিসের সময়সূচী – ২০২৬ </h2></div></a>&nbsp; | &nbsp;&nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;
+	   
+	  
+  
+	 
+  
+<a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://www.cse.com.bd/commoditydocs/Commodity-book.pdf" target="_blank">    <div class="TODAYtitle"><h2 > CSE Commodity Exchange </h2></div></a>&nbsp; &nbsp;|  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;
+
+	   
+<a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://www.cse.com.bd/market/atb_current_price" target="_blank">    <div class="TODAYtitle"><h2 > ATB Starts at CSE</h2></div></a>&nbsp; &nbsp;|  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;
+
+
+
+
+<a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://www.cse.com.bd/market/bond_current_price" target="_blank">    <div class="TODAYtitle"><h2 >BGTB/G-Sec Announcement and Notice</h2></div></a>&nbsp; &nbsp;|  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;
+
+
+
+
+
+
+-->
+
+<a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://www.cse.com.bd/service/investors_complain" target="_blank">    <div class="TODAYtitle"><h2>Investors’  Complain</h2></div></a>
+
+
+
+
+
+
+ <!--
+  &nbsp; | &nbsp; <a style="text-decoration: none; text-decoration-line: none; display:inline-block" href="https://surokkha.gov.bd/">    <div class="TODAYtitle"><h2 >"টিকা নিন - মাস্ক পরুন - পুঁজিবাজারে বিনিয়োগ করুন" </h2></div></a> 
+ 
+-->
+
+   
+   
+   
+    </marquee>
+    </div></a>
+
+
+								<div style="width:100%; height:40px; background:#0ba047;border-radius:0px 5px 0 0;">
+									<div class="TODAYtitle"><a style="text-decoration: none; text-decoration-line: none;" href="https://www.cse.com.bd/media/news"><h2 >TODAY'S NEWS </h2></a></div>
+								</div>
+
+								<div class="tabbed_area" style="height:99%;">
+									<div class="tap_content">
+										<marquee width="100%" scrollamount="3" onmouseover="this.stop();" onmouseout="this.start();" direction="up" height="330px">
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465460"><b>Board Meeting</b>
+												<br/><span style="color:#56585a;">NIALCO: The Company has informed that a Board Meeting will be held on October 28, 2026 at 4:30 PM to consider, among others, audited financial statements of the Company for the year ended June 30, 2026.</span></a><br/><br/>
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465459"><b>Today's Trade</b>
+												<br/><span style="color:#56585a;">CSE NEWS: Today's (17 October 2026) Total Trades: 860; Volume: 2,225,925 and Turnover: Tk. 75.79 million.</span></a><br/><br/>
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465458"><b>Board Meeting</b>
+												<br/><span style="color:#56585a;">MEGHNAINS: The Company has informed that a Board Meeting will be held on October 28, 2026 at 3:00 pm to consider, among others, Un-Audited Financial Statements of the Company for the Third Quarter (Q3) period ended September 30, 2026.</span></a><br/><br/>
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465457"><b>Cont.- Emphasis of Matter</b>
+												<br/><span style="color:#56585a;">GPHISPAT: (cont.) Confirmations were received from a limited number of parties up to the date of the auditor's report. The remaining balances have been considered based on the books of account and the supporting documents made available to the auditor....</span></a><br/><br/>
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465456"><b>Emphasis of Matter</b>
+												<br/><span style="color:#56585a;">GPHISPAT: The auditor of the GPH Ispat Ltd. has given the Emphasis of Matter paragraph in the Auditor's Report for the year ended on 30 June 2026. Emphasis of Matter: Without qualifying our opinion, we draw attention to the following...</span></a><br/><br/>
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465455"><b>Record date for entitlement of coupon payment</b>
+												<br/><span style="color:#56585a;">TB20Y1034: Record Date for entitlement of coupon payment of 20Y BGTB 29/10/2034 Government Securities is 28.10.2026.</span></a><br/><br/>
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465454"><b>Record date for entitlement of coupon payment</b>
+												<br/><span style="color:#56585a;">TB20Y1028: Record Date for entitlement of coupon payment of 20Y BGTB 29/10/2028 Government Securities is 28.10.2026.</span></a><br/><br/>
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465453"><b>Record date for entitlement of coupon payment</b>
+												<br/><span style="color:#56585a;">TB20Y0429: Record Date for entitlement of coupon payment of 20Y BGTB 29/04/2029 Government Securities is 28.10.2026.</span></a><br/><br/>
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465452"><b>Record date for entitlement of coupon payment</b>
+												<br/><span style="color:#56585a;">TB15Y1029: Record Date for entitlement of coupon payment of 15Y BGTB 29/10/2029 Government Securities is 28.10.2026.</span></a><br/><br/>
+											 <a style="text-decoration:none;" href="https://www.cse.com.bd/media/news/4465451"><b>Suspension for Record Date</b>
+												<br/><span style="color:#56585a;">TB20Y1033: Trading of 20Y BGTB 23/10/2033 Government Securities will remain suspended on record date i.e., 19.10.2026 and day before the record date i.e., 18.10.2026. Trading of the Government Securities will resume on 25.10.2026.</span></a><br/><br/>
+																					</marquee>
+                                         
+                                        
+									</div>
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+					<div class="boxshadow">
+						<img  src="https://www.cse.com.bd/images/box_shadow.png" />
+					</div>
+
+				</div>
+
+				<div class="row ">
+					<div class="inner-content">
+						<div class="col_market col_6 leftcolm">
+							<div class="grid-item-inner moverbg">
+								<div style="width:100%; height:40px; background:#0ba047;border-radius:5px 5px 0 0;">
+									<div class="col_m_100 col_100 leftcolm ">
+										<div style="width:100%; height:40px; background:#0ba047;border-radius:5px 5px 0 0;">
+											<div class="MOVERtitleh2"><h2>MARKET COMPARISON </h2></div>
+
+										</div>
+										
+
+<script>
+	// JavaScript Document
+	
+	function tabSwitch(new_tab, new_content) {
+		
+		document.getElementById('top_content_1').style.display = 'none';
+		document.getElementById('top_content_2').style.display = 'none';
+		document.getElementById('top_content_3').style.display = 'none';
+		document.getElementById('top_content_4').style.display = 'none';
+		document.getElementById('top_content_5').style.display = 'none';
+		
+		document.getElementById(new_content).style.display = 'block';
+		
+		document.getElementById('top_tab_1').className = '';
+		document.getElementById('top_tab_2').className = '';
+		document.getElementById('top_tab_3').className = '';
+		document.getElementById('top_tab_4').className = '';
+		document.getElementById('top_tab_5').className = '';
+		
+		document.getElementById(new_tab).className = 'active';
+	}
+	
+	// Ties a set of tabs and content id's together, and switches between them
+	// <div id='tab_1'> and <div id="content_1"> for example
+	// Usage: tabswitch(1, 4, 'tab', 'panel') would switch on tab_1 and panel_1
+	
+	function top_tabSwitch_2(active, number, top_tab_prefix, top_content_prefix) {
+		
+		for (var i=1; i < number+1; i++) {
+			document.getElementById(top_content_prefix+i).style.display = 'none';
+			document.getElementById(top_tab_prefix+i).className = '';
+		}
+		document.getElementById(top_content_prefix+active).style.display = 'block';
+		document.getElementById(top_tab_prefix+active).className = 'active';	
+		
+	}
+</script>
+
+<div class="tabbed_area" style="width:100%">
+	
+	<ul class="top_tabs">
+		<li><a href="javascript:top_tabSwitch_2(1, 5, 'top_tab_', 'top_content_');" id="top_tab_1" class="active">CSE50</a></li>
+		<li><a href="javascript:top_tabSwitch_2(2, 5, 'top_tab_', 'top_content_');" id="top_tab_2">CSE30</a></li>
+		<li><a href="javascript:top_tabSwitch_2(3, 5, 'top_tab_', 'top_content_');" id="top_tab_3">CSCX</a></li>
+		<li><a href="javascript:top_tabSwitch_2(4, 5, 'top_tab_', 'top_content_');" id="top_tab_4">CASPI</a></li>
+		<li><a href="javascript:top_tabSwitch_2(5, 5, 'top_tab_', 'top_content_');" id="top_tab_5">CSI</a></li>
+	</ul>
+	
+	<div id="top_content_1" class="top_tap_content ">
+		
+		<div id="mitabs-1">
+			<div style="float:left; width:45%">
+				
+				<div class="top_MIrow" style="color:#31342f;" >
+					<div class="top_Col1_title"><span>TODAY</span></div>
+				</div>											
+				
+				<div class="top_MIrow1">								
+					<div style="text-align:center;" class="top_Col1_row">
+						<div style="text-align:center;"class="top_Col1">Index</div>
+						<div class="top_Col2"></div>
+						<div class="top_Col3">1068.2133</div></div>
+					</div>
+					
+					<div class="top_MIrow1">								
+						<div style="text-align:center;" class="top_Col1_row">
+							<div style="text-align:center;"class="top_Col1">%</div>
+							<div class="top_Col2"></div>
+							<div class="top_Col3">-0.0633</div></div>
+						</div>
+						
+						<div class="top_MIrow1">								
+							<div style="text-align:center;" class="top_Col1_row">
+								<div style="text-align:center;"class="top_Col1">Trade</div>
+								<div class="top_Col2"></div>
+								<div class="top_Col3">860</div></div>
+							</div>
+							
+							<div class="top_MIrow1">								
+								<div style="text-align:center;" class="top_Col1_row">
+									<div style="text-align:center;"class="top_Col1">Volume</div>
+									<div class="top_Col2"></div>
+									<div class="top_Col3">2225925</div></div>
+								</div>
+								
+								<div class="top_MIrow1">								
+									<div style="text-align:center;" class="top_Col1_row">
+										<div style="text-align:center;"class="top_Col1">Value</div>
+										<div class="top_Col2"></div>
+										<div class="top_Col3">75,790,221</div></div>
+									</div>
+									
+								</div>
+								
+								<div  style="float:left; width:10%">
+									<div class="top_Col2"></span></div>
+								</div>
+								
+								<div  style="float:left; width:45%">
+									
+									<div class="top_MIrow" style="color:#31342f;" >
+										<div class="top_Col1_title"><span>YESTERDAY</span></div>
+									</div>											
+									
+									<div class="top_MIrow1">								
+										<div style="text-align:center;" class="top_Col1_row">
+											<div style="text-align:center;"class="top_Col1">Index</div>
+											<div class="top_Col2"></div>
+											<div class="top_Col3">1068.8903</div></div>
+										</div>
+										
+										<div class="top_MIrow1">								
+											<div style="text-align:center;" class="top_Col1_row">
+												<div style="text-align:center;"class="top_Col1">%</div>
+												<div class="top_Col2"></div>
+												<div class="top_Col3">0.1778</div></div>
+											</div>
+											
+											<div class="top_MIrow1">								
+												<div style="text-align:center;" class="top_Col1_row">
+													<div style="text-align:center;"class="top_Col1">Trade</div>
+													<div class="top_Col2"></div>
+													<div class="top_Col3">1067</div></div>
+												</div>
+												
+												<div class="top_MIrow1">								
+													<div style="text-align:center;" class="top_Col1_row">
+														<div style="text-align:center;"class="top_Col1">Volume</div>
+														<div class="top_Col2"></div>
+														<div class="top_Col3">3367633</div></div>
+													</div>
+													
+													<div class="top_MIrow1">								
+														<div style="text-align:center;" class="top_Col1_row">
+															<div style="text-align:center;"class="top_Col1">Value</div>
+															<div class="top_Col2"></div>
+															<div class="top_Col3">205,430,873</div></div>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+
+											<div id="top_content_2" class="top_tap_content">
+
+												<div id="mitabs-1">
+													<div style="float:left; width:45%">
+														
+														<div class="top_MIrow" style="color:#31342f;" >
+															<div class="top_Col1_title"><span>TODAY</span></div>
+														</div>											
+														
+														<div class="top_MIrow1">								
+															<div style="text-align:center;" class="top_Col1_row">
+																<div style="text-align:center;"class="top_Col1">Index</div>
+																<div class="top_Col2"></div>
+																<div class="top_Col3">13497.4402</div></div>
+															</div>
+															
+															<div class="top_MIrow1">								
+																<div style="text-align:center;" class="top_Col1_row">
+																	<div style="text-align:center;"class="top_Col1">%</div>
+																	<div class="top_Col2"></div>
+																	<div class="top_Col3">-0.1421</div></div>
+																</div>
+																
+																<div class="top_MIrow1">								
+																	<div style="text-align:center;" class="top_Col1_row">
+																		<div style="text-align:center;"class="top_Col1">Trade</div>
+																		<div class="top_Col2"></div>
+																		<div class="top_Col3">860</div></div>
+																	</div>
+																	
+																	<div class="top_MIrow1">								
+																		<div style="text-align:center;" class="top_Col1_row">
+																			<div style="text-align:center;"class="top_Col1">Volume</div>
+																			<div class="top_Col2"></div>
+																			<div class="top_Col3">2225925</div></div>
+																		</div>
+																		
+																		<div class="top_MIrow1">								
+																			<div style="text-align:center;" class="top_Col1_row">
+																				<div style="text-align:center;"class="top_Col1">Value</div>
+																				<div class="top_Col2"></div>
+																				<div class="top_Col3">75,790,221</div></div>
+																			</div>
+																			
+																		</div>
+																		
+																		<div  style="float:left; width:10%">
+																			<div class="top_Col2"></span></div>
+																		</div>
+																		
+																		<div  style="float:left; width:45%">
+																			
+																			<div class="top_MIrow" style="color:#31342f;" >
+																				<div class="top_Col1_title"><span>YESTERDAY</span></div>
+																			</div>											
+																			
+																			<div class="top_MIrow1">								
+																				<div style="text-align:center;" class="top_Col1_row">
+																					<div style="text-align:center;"class="top_Col1">Index</div>
+																					<div class="top_Col2"></div>
+																					<div class="top_Col3">13516.6420</div></div>
+																				</div>
+																				
+																				<div class="top_MIrow1">								
+																					<div style="text-align:center;" class="top_Col1_row">
+																						<div style="text-align:center;"class="top_Col1">%</div>
+																						<div class="top_Col2"></div>
+																						<div class="top_Col3">0.2680</div></div>
+																					</div>
+																					
+																					<div class="top_MIrow1">								
+																						<div style="text-align:center;" class="top_Col1_row">
+																							<div style="text-align:center;"class="top_Col1">Trade</div>
+																							<div class="top_Col2"></div>
+																							<div class="top_Col3">1067</div></div>
+																						</div>
+																						
+																						<div class="top_MIrow1">								
+																							<div style="text-align:center;" class="top_Col1_row">
+																								<div style="text-align:center;"class="top_Col1">Volume</div>
+																								<div class="top_Col2"></div>
+																								<div class="top_Col3">3367633</div></div>
+																							</div>
+																							
+																							<div class="top_MIrow1">								
+																								<div style="text-align:center;" class="top_Col1_row">
+																									<div style="text-align:center;"class="top_Col1">Value</div>
+																									<div class="top_Col2"></div>
+																									<div class="top_Col3">205,430,873</div></div>
+																								</div>
+																								
+																							</div>
+																						</div>
+																					</div>
+																					
+																					<div id="top_content_3" class="top_tap_content">
+																						
+																						<div id="mitabs-1">
+																							<div style="float:left; width:45%">
+																								
+																								<div class="top_MIrow" style="color:#31342f;" >
+																									<div class="top_Col1_title"><span>TODAY</span></div>
+																								</div>											
+																								
+																								<div class="top_MIrow1">								
+																									<div style="text-align:center;" class="top_Col1_row">
+																										<div style="text-align:center;"class="top_Col1">Index</div>
+																										<div class="top_Col2"></div>
+																										<div class="top_Col3">8954.5039</div></div>
+																									</div>
+																									
+																									<div class="top_MIrow1">								
+																										<div style="text-align:center;" class="top_Col1_row">
+																											<div style="text-align:center;"class="top_Col1">%</div>
+																											<div class="top_Col2"></div>
+																											<div class="top_Col3">0.0693</div></div>
+																										</div>
+																										
+																										<div class="top_MIrow1">								
+																											<div style="text-align:center;" class="top_Col1_row">
+																												<div style="text-align:center;"class="top_Col1">Trade</div>
+																												<div class="top_Col2"></div>
+																												<div class="top_Col3">860</div></div>
+																											</div>
+																											
+																											<div class="top_MIrow1">								
+																												<div style="text-align:center;" class="top_Col1_row">
+																													<div style="text-align:center;"class="top_Col1">Volume</div>
+																													<div class="top_Col2"></div>
+																													<div class="top_Col3">2225925</div></div>
+																												</div>
+																												
+																												<div class="top_MIrow1">								
+																													<div style="text-align:center;" class="top_Col1_row">
+																														<div style="text-align:center;"class="top_Col1">Value</div>
+																														<div class="top_Col2"></div>
+																														<div class="top_Col3">75,790,221</div></div>
+																													</div>
+																													
+																												</div>
+																												
+																												<div  style="float:left; width:10%">
+																													<div class="top_Col2"></span></div>
+																												</div>
+																												
+																												<div  style="float:left; width:45%">
+																													
+																													<div class="top_MIrow" style="color:#31342f;" >
+																														<div class="top_Col1_title"><span>YESTERDAY</span></div>
+																													</div>											
+																													
+																													<div class="top_MIrow1">								
+																														<div style="text-align:center;" class="top_Col1_row">
+																															<div style="text-align:center;"class="top_Col1">Index</div>
+																															<div class="top_Col2"></div>
+																															<div class="top_Col3">8948.3067</div></div>
+																														</div>
+																														
+																														<div class="top_MIrow1">								
+																															<div style="text-align:center;" class="top_Col1_row">
+																																<div style="text-align:center;"class="top_Col1">%</div>
+																																<div class="top_Col2"></div>
+																																<div class="top_Col3">0.4045</div></div>
+																															</div>
+																															
+																															<div class="top_MIrow1">								
+																																<div style="text-align:center;" class="top_Col1_row">
+																																	<div style="text-align:center;"class="top_Col1">Trade</div>
+																																	<div class="top_Col2"></div>
+																																	<div class="top_Col3">1067</div></div>
+																																</div>
+																																
+																																<div class="top_MIrow1">								
+																																	<div style="text-align:center;" class="top_Col1_row">
+																																		<div style="text-align:center;"class="top_Col1">Volume</div>
+																																		<div class="top_Col2"></div>
+																																		<div class="top_Col3">3367633</div></div>
+																																	</div>
+																																	
+																																	<div class="top_MIrow1">								
+																																		<div style="text-align:center;" class="top_Col1_row">
+																																			<div style="text-align:center;"class="top_Col1">Value</div>
+																																			<div class="top_Col2"></div>
+																																			<div class="top_Col3">205,430,873</div></div>
+																																		</div>
+																																		
+																																	</div>
+																																</div>
+																															</div>
+
+																															<div id="top_content_4" class="top_tap_content">
+																																
+																																<div id="mitabs-1">
+																																	<div style="float:left; width:45%">
+																																		
+																																		<div class="top_MIrow" style="color:#31342f;" >
+																																			<div class="top_Col1_title"><span>TODAY</span></div>
+																																		</div>											
+																																		
+																																		<div class="top_MIrow1">								
+																																			<div style="text-align:center;" class="top_Col1_row">
+																																				<div style="text-align:center;"class="top_Col1">Index</div>
+																																				<div class="top_Col2"></div>
+																																				<div class="top_Col3">14573.2503</div></div>
+																																			</div>
+																																			
+																																			<div class="top_MIrow1">								
+																																				<div style="text-align:center;" class="top_Col1_row">
+																																					<div style="text-align:center;"class="top_Col1">%</div>
+																																					<div class="top_Col2"></div>
+																																					<div class="top_Col3">-0.0229</div></div>
+																																				</div>
+																																				
+																																				<div class="top_MIrow1">								
+																																					<div style="text-align:center;" class="top_Col1_row">
+																																						<div style="text-align:center;"class="top_Col1">Trade</div>
+																																						<div class="top_Col2"></div>
+																																						<div class="top_Col3">860</div></div>
+																																					</div>
+																																					
+																																					<div class="top_MIrow1">								
+																																						<div style="text-align:center;" class="top_Col1_row">
+																																							<div style="text-align:center;"class="top_Col1">Volume</div>
+																																							<div class="top_Col2"></div>
+																																							<div class="top_Col3">2225925</div></div>
+																																						</div>
+																																						
+																																						<div class="top_MIrow1">								
+																																							<div style="text-align:center;" class="top_Col1_row">
+																																								<div style="text-align:center;"class="top_Col1">Value</div>
+																																								<div class="top_Col2"></div>
+																																								<div class="top_Col3">75,790,221</div></div>
+																																							</div>
+																																							
+																																						</div>
+																																						
+																																						<div  style="float:left; width:10%">
+																																							<div class="top_Col2"></span></div>
+																																						</div>
+																																						
+																																						<div  style="float:left; width:45%">
+																																							
+																																							<div class="top_MIrow" style="color:#31342f;" >
+																																								<div class="top_Col1_title"><span>YESTERDAY</span></div>
+																																							</div>											
+																																							
+																																							<div class="top_MIrow1">								
+																																								<div style="text-align:center;" class="top_Col1_row">
+																																									<div style="text-align:center;"class="top_Col1">Index</div>
+																																									<div class="top_Col2"></div>
+																																									<div class="top_Col3">14576.5907</div></div>
+																																								</div>
+																																								
+																																								<div class="top_MIrow1">								
+																																									<div style="text-align:center;" class="top_Col1_row">
+																																										<div style="text-align:center;"class="top_Col1">%</div>
+																																										<div class="top_Col2"></div>
+																																										<div class="top_Col3">0.4201</div></div>
+																																									</div>
+																																									
+																																									<div class="top_MIrow1">								
+																																										<div style="text-align:center;" class="top_Col1_row">
+																																											<div style="text-align:center;"class="top_Col1">Trade</div>
+																																											<div class="top_Col2"></div>
+																																											<div class="top_Col3">1067</div></div>
+																																										</div>
+																																										
+																																										<div class="top_MIrow1">								
+																																											<div style="text-align:center;" class="top_Col1_row">
+																																												<div style="text-align:center;"class="top_Col1">Volume</div>
+																																												<div class="top_Col2"></div>
+																																												<div class="top_Col3">3367633</div></div>
+																																											</div>
+																																											
+																																											<div class="top_MIrow1">								
+																																												<div style="text-align:center;" class="top_Col1_row">
+																																													<div style="text-align:center;"class="top_Col1">Value</div>
+																																													<div class="top_Col2"></div>
+																																													<div class="top_Col3">205,430,873</div></div>
+																																												</div>
+																																												
+																																											</div>
+																																										</div>
+																																									</div>
+
+																																									<div id="top_content_5" class="top_tap_content">
+																																										
+																																										<div id="mitabs-1">
+																																											<div style="float:left; width:45%">
+																																												
+																																												<div class="top_MIrow" style="color:#31342f;" >
+																																													<div class="top_Col1_title"><span>TODAY</span></div>
+																																												</div>											
+																																												
+																																												<div class="top_MIrow1">								
+																																													<div style="text-align:center;" class="top_Col1_row">
+																																														<div style="text-align:center;"class="top_Col1">Index</div>
+																																														<div class="top_Col2"></div>
+																																														<div class="top_Col3">793.2753</div></div>
+																																													</div>
+																																													
+																																													<div class="top_MIrow1">								
+																																														<div style="text-align:center;" class="top_Col1_row">
+																																															<div style="text-align:center;"class="top_Col1">%</div>
+																																															<div class="top_Col2"></div>
+																																															<div class="top_Col3">0.1616</div></div>
+																																														</div>
+																																														
+																																														<div class="top_MIrow1">								
+																																															<div style="text-align:center;" class="top_Col1_row">
+																																																<div style="text-align:center;"class="top_Col1">Trade</div>
+																																																<div class="top_Col2"></div>
+																																																<div class="top_Col3">860</div></div>
+																																															</div>
+																																															
+																																															<div class="top_MIrow1">								
+																																																<div style="text-align:center;" class="top_Col1_row">
+																																																	<div style="text-align:center;"class="top_Col1">Volume</div>
+																																																	<div class="top_Col2"></div>
+																																																	<div class="top_Col3">2225925</div></div>
+																																																</div>
+																																																
+																																																<div class="top_MIrow1">								
+																																																	<div style="text-align:center;" class="top_Col1_row">
+																																																		<div style="text-align:center;"class="top_Col1">Value</div>
+																																																		<div class="top_Col2"></div>
+																																																		<div class="top_Col3">75,790,221</div></div>
+																																																	</div>
+																																																	
+																																																</div>
+																																																
+																																																<div  style="float:left; width:10%">
+																																																	<div class="top_Col2"></span></div>
+																																																</div>
+																																																
+																																																<div  style="float:left; width:45%">
+																																																	
+																																																	<div class="top_MIrow" style="color:#31342f;" >
+																																																		<div class="top_Col1_title"><span>YESTERDAY</span></div>
+																																																	</div>											
+																																																	
+																																																	<div class="top_MIrow1">								
+																																																		<div style="text-align:center;" class="top_Col1_row">
+																																																			<div style="text-align:center;"class="top_Col1">Index</div>
+																																																			<div class="top_Col2"></div>
+																																																			<div class="top_Col3">791.9958</div></div>
+																																																		</div>
+																																																		
+																																																		<div class="top_MIrow1">								
+																																																			<div style="text-align:center;" class="top_Col1_row">
+																																																				<div style="text-align:center;"class="top_Col1">%</div>
+																																																				<div class="top_Col2"></div>
+																																																				<div class="top_Col3">0.3974</div></div>
+																																																			</div>
+																																																			
+																																																			<div class="top_MIrow1">								
+																																																				<div style="text-align:center;" class="top_Col1_row">
+																																																					<div style="text-align:center;"class="top_Col1">Trade</div>
+																																																					<div class="top_Col2"></div>
+																																																					<div class="top_Col3">1067</div></div>
+																																																				</div>
+																																																				
+																																																				<div class="top_MIrow1">								
+																																																					<div style="text-align:center;" class="top_Col1_row">
+																																																						<div style="text-align:center;"class="top_Col1">Volume</div>
+																																																						<div class="top_Col2"></div>
+																																																						<div class="top_Col3">3367633</div></div>
+																																																					</div>
+																																																					
+																																																					<div class="top_MIrow1">								
+																																																						<div style="text-align:center;" class="top_Col1_row">
+																																																							<div style="text-align:center;"class="top_Col1">Value</div>
+																																																							<div class="top_Col2"></div>
+																																																							<div class="top_Col3">205,430,873</div></div>
+																																																						</div>
+																																																						
+																																																					</div>
+																																																				</div>
+																																																			</div>
+
+																																																		</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+						<div class="col_market col_6 leftcolm">
+							<div class="grid-item-inner moverbg">
+								<div style="width:100%; height:40px; background:#0ba047;border-radius:5px 5px 0 0;">
+									<div class="col_m_100 col_100 leftcolm ">
+										<div style="width:100%; height:40px; background:#0ba047;border-radius:5px 5px 0 0;">
+											<div class="MOVERtitleh2"><h2>MARKET MOVER</h2></div>
+
+										</div>
+										<script>
+	// JavaScript Document
+	
+	function tabSwitch(new_tab, new_content) {
+		
+		document.getElementById('mover_content_1').style.display = 'none';
+		document.getElementById('mover_content_2').style.display = 'none';
+		document.getElementById('mover_content_3').style.display = 'none';	
+		
+		document.getElementById(new_content).style.display = 'block';	
+		
+		
+		document.getElementById('mover_tab_1').className = '';
+		document.getElementById('mover_tab_2').className = '';
+		document.getElementById('mover_tab_3').className = '';
+		
+		document.getElementById(new_tab).className = 'active';		
+		
+	}
+	
+	// Ties a set of tabs and content id's together, and switches between them
+	// <div id='tab_1'> and <div id="content_1"> for example
+	// Usage: tabswitch(1, 4, 'tab', 'panel') would switch on tab_1 and panel_1
+	
+	function mover_tabSwitch_2(active, number, mover_tab_prefix, mover_content_prefix) {
+		
+		for (var i=1; i < number+1; i++) {
+			document.getElementById(mover_content_prefix+i).style.display = 'none';
+			document.getElementById(mover_tab_prefix+i).className = '';
+		}
+		document.getElementById(mover_content_prefix+active).style.display = 'block';
+		document.getElementById(mover_tab_prefix+active).className = 'active';	
+		
+	}
+</script>
+
+<div class="tabbed_area" style="width:100%">
+    
+	<ul class="mover_tabs">
+		<li><a href="javascript:mover_tabSwitch_2(1, 3, 'mover_tab_', 'mover_content_');" id="mover_tab_1" class="active">By Value</a></li>
+		<li><a href="javascript:mover_tabSwitch_2(2, 3, 'mover_tab_', 'mover_content_');" id="mover_tab_2">By Volume</a></li>
+		<li><a href="javascript:mover_tabSwitch_2(3, 3, 'mover_tab_', 'mover_content_');" id="mover_tab_3">By Trade</a></li>
+	</ul>
+	
+	<div id="mover_content_1" class="mover_tap_content ">
+		<div id="mitabs-1" class="">
+			<div class="col_market col_m_12 col_m_12 leftcolm" style="padding-right:0px;width:100%;">
+				<div id="mitabs-1" class="">
+					<div class="immover_MIrow" >
+						<div class="immover_Col1"><span>Company </span></div>
+						<div class="immover_Col2"><span>LTP</span></div>
+						<div class="immover_Col3"><span>HIGH</span></div>
+						<div class="immover_Col4"><span>LOW</span></div>
+						<div class="immover_Col5"><span>VALUE</span></div>
+					</div>											
+					
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/MALEKSPIN">MALEKSPIN</a></div>
+						<div class="immover_Col2">50.00</div>
+						<div class="immover_Col3">50.00</div>
+						<div class="immover_Col4">46.00</div>
+						<div class="immover_Col5">39502909.20</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/FINEFOODS">FINEFOODS</a></div>
+						<div class="immover_Col2">420.40</div>
+						<div class="immover_Col3">467.50</div>
+						<div class="immover_Col4">420.40</div>
+						<div class="immover_Col5">6773500.00</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/SAIHAMTEX">SAIHAMTEX</a></div>
+						<div class="immover_Col2">44.20</div>
+						<div class="immover_Col3">46.50</div>
+						<div class="immover_Col4">44.20</div>
+						<div class="immover_Col5">5958232.40</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ETL">ETL</a></div>
+						<div class="immover_Col2">13.40</div>
+						<div class="immover_Col3">15.50</div>
+						<div class="immover_Col4">13.20</div>
+						<div class="immover_Col5">5552518.00</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/GQBALLPEN">GQBALLPEN</a></div>
+						<div class="immover_Col2">608.00</div>
+						<div class="immover_Col3">608.00</div>
+						<div class="immover_Col4">608.00</div>
+						<div class="immover_Col5">3496820.00</div>								
+					</div>
+										
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="mover_content_2" class="mover_tap_content">
+		<div id="mitabs-1">
+			<div class="col_market col_m_12 col_m_12 leftcolm" style="padding-right:0px;width:100%;">
+				<div id="mitabs-1">
+					<div class="immover_MIrow" >
+						<div class="immover_Col1"><span>Company </span></div>
+						<div class="immover_Col2"><span>LTP</span></div>
+						<div class="immover_Col3"><span>HIGH</span></div>
+						<div class="immover_Col4"><span>LOW</span></div>
+						<div class="immover_Col5"><span>VOLUME</span></div>
+					</div>											
+					
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/MALEKSPIN">MALEKSPIN</a></div>
+						<div class="immover_Col2">50.00</div>
+						<div class="immover_Col3">50.00</div>
+						<div class="immover_Col4">46.00</div>
+						<div class="immover_Col5">790422</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ETL">ETL</a></div>
+						<div class="immover_Col2">13.40</div>
+						<div class="immover_Col3">15.50</div>
+						<div class="immover_Col4">13.20</div>
+						<div class="immover_Col5">398010</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/TUNGHAI">TUNGHAI</a></div>
+						<div class="immover_Col2">5.60</div>
+						<div class="immover_Col3">5.60</div>
+						<div class="immover_Col4">5.50</div>
+						<div class="immover_Col5">159900</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ONEBANKPLC">ONEBANKPLC</a></div>
+						<div class="immover_Col2">6.80</div>
+						<div class="immover_Col3">7.00</div>
+						<div class="immover_Col4">6.80</div>
+						<div class="immover_Col5">149326</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/SAIHAMTEX">SAIHAMTEX</a></div>
+						<div class="immover_Col2">44.20</div>
+						<div class="immover_Col3">46.50</div>
+						<div class="immover_Col4">44.20</div>
+						<div class="immover_Col5">130010</div>								
+					</div>
+										
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="mover_content_3" class="mover_tap_content">
+        <div id="mitabs-1">
+			<div class="col_market col_m_12 col_m_12 leftcolm" style="padding-right:0px;width:100%;">
+				<div id="mitabs-1">
+					<div class="immover_MIrow" >
+						<div class="immover_Col1"><span>Company </span></div>
+						<div class="immover_Col2"><span>LTP</span></div>
+						<div class="immover_Col3"><span>HIGH</span></div>
+						<div class="immover_Col4"><span>LOW</span></div>
+						<div class="immover_Col5"><span>TRADE</span></div>
+					</div>											
+					
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ETL">ETL</a></div>
+						<div class="immover_Col2">13.40</div>
+						<div class="immover_Col3">15.50</div>
+						<div class="immover_Col4">13.20</div>
+						<div class="immover_Col5">76</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/SHARPIND">SHARPIND</a></div>
+						<div class="immover_Col2">13.40</div>
+						<div class="immover_Col3">14.40</div>
+						<div class="immover_Col4">13.30</div>
+						<div class="immover_Col5">60</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/ONEBANKPLC">ONEBANKPLC</a></div>
+						<div class="immover_Col2">6.80</div>
+						<div class="immover_Col3">7.00</div>
+						<div class="immover_Col4">6.80</div>
+						<div class="immover_Col5">39</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/BEXIMCO">BEXIMCO</a></div>
+						<div class="immover_Col2">21.40</div>
+						<div class="immover_Col3">22.00</div>
+						<div class="immover_Col4">21.40</div>
+						<div class="immover_Col5">34</div>								
+					</div>
+										<div class="immover_MIrow1">
+						<div class="immover_Col1"><a class="customHref" href="https://www.cse.com.bd/company/companydetails/TECHNODRUG">TECHNODRUG</a></div>
+						<div class="immover_Col2">32.70</div>
+						<div class="immover_Col3">35.00</div>
+						<div class="immover_Col4">32.70</div>
+						<div class="immover_Col5">32</div>								
+					</div>
+										
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</div>
+
+
+									</div>
+
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="inner-content">
+						<div  class="col_m_12 col12" >
+
+							<div class="bxsliderWrapper">
+								<ul class="bbxslider">
+  <!--                             
+                             
+         <li class="first">
+		<a  target="_blank"href="https://www.cse.com.bd/media/notice_details/121"><img src="https://www.cse.com.bd/images/bicm.jpg" class="__slideleft" /></a>
+		</li>		
+
+
+
+<li class="first sliderbox">
+<a  target="_blank" href="https://www.cse.com.bd/upload_notice/Admission_Advertisement_MAFCM_11th_Batch.pdf"><img src="https://www.cse.com.bd/images/bicm11th.jpg" class="__slideleft" />
+ <div>
+</a>
+</li>
+
+
+
+									
+<li class="first">
+<a target="_blank" href="https://www.cse.com.bd/media/training/22"><img src="https://www.cse.com.bd/images/bannercomotrain.jpg" class="__slideleft" /></a>
+</li>									
+-->	
+<!--									
+<li class="first sliderbox">
+<a  target="_blank" href="https://youtu.be/3_h-z91OLvA"><img src="https://www.cse.com.bd/images/cse-bottom-bg.jpg" class="__slideleft" />
+<div class="contentbox" >
+<div class="textbox" ><h4 style="color:#d4ff00">Digital Submission & Dissemination Platform of CSE</h4></div>
+<div>
+</a>
+</li>
+-->	
+
+
+
+<li class="first">
+<a target="_blank" href="https://www.cse.com.bd/company/PublicAnnouncementj"><img src="https://www.cse.com.bd/images/publicAnnoucj.jpg" class="__slideleft" /></a>
+</li>
+
+<!--
+<li class="first sliderbox">
+<a  target="_blank" href="https://www.cse.com.bd/media/notice_details/58"><img src="https://www.cse.com.bd/images/cse-bottom-bg.jpg" class="__slideleft" />
+<div class="contentbox" >
+<div class="textbox" ><h4>Space for Rent</h4></div>
+<div>
+</a>
+</li>
+-->	
+
+
+<li class="first sliderbox">
+<a  target="_blank"href="https://www.cse.com.bd/upload_notice/CDBL_NEW_AD.pdf"><img src="https://www.cse.com.bd/images/cse-bottom-bg.jpg" class="__slideleft" />
+<div class="contentbox" >
+<div class="textbox" ><h4 style="color:#d4ff00">Free SMS Alert & E-mail Notification Service from CDBL</h4></div>
+<div>
+</a>
+</li>            
+
+
+
+
+<li class="first">
+<a target="_blank" href="https://www.cse.com.bd/company/PublicAnnouncement"><img src="https://www.cse.com.bd/images/publicAnnouc.jpg" class="__slideleft" /></a>
+</li>
+
+
+
+
+
+									<!--<li>
+<li class="first">
+<a target="_blank" href="https://play.google.com/store/apps/details?id=com.chitra.app1"><img src="https://www.cse.com.bd/images/chitraBanner.jpg" class="__slideleft" /></a>
+</li>
+										<a target="_blank" href="https://play.google.com/store/apps/details?id=com.chitra.app1"><img src="https://www.cse.com.bd/images/chitraBanner.jpg" class="__slideleft" /></a>
+									</li>-->
+								</ul>
+							</div>
+
+							<script type="text/javascript">
+								$(document).ready(function(){
+									$('.bbxslider').bxSlider({
+										'useCSS' : false,
+										'autoStart': true,
+										'auto': true,
+
+										onSlideBefore : function($slideElement, oldIndex, newIndex) { $('.bbxslider li').removeClass('selected'); },
+										onSlideAfter : function($slideElement, oldIndex, newIndex) { $slideElement.addClass('selected'); },
+										onSliderLoad : function(currentIndex) { $('.bbxslider .first').addClass('selected'); },
+									});
+								});
+							</script>
+
+						</div>
+					</div>
+				</div>
+
+				<div id="space10"></div>
+			</div>
+		</div>
+		<!--################....Start Footer section....###############################-->
+
+<div class="footer-area">
+	<div class="footer frame-area">
+		<div  id="space20"></div>
+
+		<div class="row">
+			<div class="inner-content">
+				<div class="col_b_link col_m_3 col_3 leftcolm">
+					<div class="menu_content">
+						<div class="menu_title"><h2>Stock Broker</h2></div>
+						<div class="menu_list">
+							<ul>
+								<li><a class="flink" href="https://www.cse.com.bd/stockbroker/all">All Stock Brokers</a></li>
+                                 <li><a class="flink" href="https://www.cse.com.bd/stockbroker/top_ten_brokers">Top 10 Brokers</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/stockbroker/top_ten_its">Top 10 ITS</a></li>
+                               
+							</ul>
+						</div>
+					</div>
+					<div  id="space10"></div>
+
+					<div class="menu_content">
+						<div class="menu_title"> <h2>IPO</h2></div>
+						<div class="menu_list">
+							<ul>
+								<li><a class="flink" href="https://www.cse.com.bd/company/ipo_fixed">Fixed Price</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/company/ipo">Book Building</a></li>
+
+								<li><a class="flink" href="https://www.cse.com.bd/company/fund_utilization">Fund Utilization</a></li>
+								
+								<li><a class="flink" target="_blank" href="http://ipo.bangladeshstockmarket.com/ipo/">CSE IPO PORTAL</a></li>
+
+							</ul>
+						</div>
+
+					</div>
+
+					<div  id="space10"></div>
+					<div class="menu_content">
+						<div class="menu_title"> <h2>QIO</h2></div>
+						<div class="menu_list">
+							<ul>
+								<li><a class="flink" href="https://www.cse.com.bd/company/qio_fixed">Fixed Price</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/company/qio">Book Building</a></li>
+							</ul>
+						</div>
+
+					</div>
+                 <!--                <div  id="space10"></div>
+					<div class="menu_content">
+						<div class="menu_title"> <h2>CSE Training</h2></div>
+						<div class="menu_list">
+							<ul>
+								<li><a class="flink" href="https://www.cse.com.bd/media/training">CSE Training</a></li>
+							</ul>
+						</div>
+
+					</div>
+
+          -->
+
+				</div>
+
+				<div  class="col_b_link col_m_3 col_3 leftcolm">
+					<div class="menu_content">
+						<div class="menu_title"> <h2>Services</h2></div>
+						<div class="menu_list">
+							<ul>
+
+                            <li><a class="flink" href="https://www.cse.com.bd/citizens-charter">Citizen's Charter</a></li>
+                             <li><a class="flink" href="https://www.cse.com.bd/contact/investors_complain">Investors' Complain</a></li>
+                       <!--     <li><a class="flink" href="https://www.cdbl.com.bd/complaints.sec.gov.bd/index.php">Customer Complaint Address Module</a></li> -->
+                            <!--li><a class="flink" href="https://www.cse.com.bd/contact/investors_complain">24/7 Call Center</a></li-->                           
+                            <li itemprop="name"><a href="https://www.cse.com.bd/service/ipf" >Investors' Protection Fund</a></li>
+                            <li itemprop="name"><a href="https://www.cse.com.bd/service/dpservices">Full Service DP Services</a></li>
+                            <!--<li itemprop="name"><a href="https://www.cse.com.bd/service/elibrary" itemprop="url">E-Library</a></li>-->
+                            
+                            
+                            </ul>
+						</div>
+
+					</div>
+					<div  id="space10"></div>
+
+					<div class="menu_content">
+						<div class="menu_title"> <h2>Rules &amp; Regulations</h2></div>
+						<div class="menu_list">
+							<ul>
+								<!-- <li><a class="flink" href="https://www.cse.com.bd/home/listing">Listing </a></li> -->
+							        <li><a class="flink" href="https://www.cse.com.bd/home/trading">Listing & Trading</a></li> 
+								<li><a class="flink" href="https://www.cse.com.bd/home/csettlement">Clearing &amp; Settlement</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/home/commodity_derivatives">Commodity</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/home/demutualization">Demutualization</a></li>
+								
+								<li><a class="flink" href="https://www.cse.com.bd/home/otherrules">Other Regulations</a></li>
+                                <li><a class="flink" href="https://www.sec.gov.bd/home/laws" target="_blank">Securities Laws, Rules, Regulations</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/home/bsec">BSEC Directives, Order</a></li>
+								<!-- <li><a class="flink" href="https://www.cse.com.bd/atbdocs/ATB%20Regulations%202022.pdf"  target="_blank">Alternative Trading Board Regulation</a></li> -->
+
+								
+							</ul>
+						</div>
+
+					</div>
+				</div>
+				<div  class="col_b_link col_m_3 col_3 leftcolm">
+					<div class="menu_content">
+						<div class="menu_title"> <h2>Trading</h2></div>
+						<div class="menu_list">
+							<ul>
+								<li><a class="flink" href="https://www.cse.com.bd/trading/system">Trading System</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/trading/orders">Trading Orders</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/trading/hours">Trading Hours</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/trading/hours">Opening &amp; Closing Calculation</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/trading/price_limit">Price Limit</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/trading/margin">Margin Requirements With CSE</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/trading/transaction">Transaction By Clients On Margin</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/trading/service">Internet Trading Services</a></li>
+								<li><a class="flink" href="https://www.cse.com.bd/trading/mobile_trading">Mobile Trading Services</a></li>
+
+							</ul>
+						</div>
+
+					</div>
+
+
+
+<div  id="space10"></div>
+					<div class="menu_content">
+					<div class="menu_title"> <h2>CSE Training</h2></div>
+					<div class="menu_list">
+					<ul>
+			<li><a class="flink" href="https://www.cse.com.bd/media/training">CSE Training</a></li>
+					</ul>
+					</div>
+
+					</div>
+
+				</div>
+
+
+
+
+                    
+             <!--       	<div  id="space10"></div>
+					<div class="menu_content">
+					<div class="menu_title"> <h2>Strategic Partners</h2></div>
+					<div class="menu_list">
+					<ul>
+			<li><a class="flink" target="_blank" href="https://www.cse.com.bd/data/CSE-Information-Memorandum-Feb-2022.pdf">Information Memorandum</a></li>
+					</ul>
+					</div>
+
+					</div>
+
+				</div>
+-->
+				<div  class="col_b_link col_m_3 col_3 leftcolm">
+					<div class="menu_content">
+						<div class="menu_title"> <h2>Useful Links</h2></div>
+						<div class="menu_list">
+							<ul>
+								<li><a class="flink" target="_blank" href="https://sec.gov.bd/">Bangladesh Securities and Exchange Commission</a></li>
+                                                              <li><a class="flink" target="_blank" href="https://www.facebook.com/Bangladesh-Securities-and-Exchange-Commission-BSEC-103309382398332/">BSEC Facebook page</a></li>
+                                                          <li><a class="flink" target="_blank" href="https://www.essbangladesh.com/login.xhtml">Electronic Subscription System</a></li>
+                                                               <li><a class="flink" target="_blank" href="http://cdbl.com.bd/">Central Depository Bangladesh Limited </a></li>    
+                                                           <li><a class="flink" target="_blank" href="https://www.ccbl.com.bd/">Central Counterparty Bangladesh   Ltd(CCBL)</a></li>         
+                                                           <li><a class="flink" target="_blank" href="https://cmsfbd.org/">Capital Market Stabilization Fund (CMSF)</a></li>                                                                                       
+                                                                                       
+								 <li><a class="flink" target="_blank" href="http://www.finlitbd.com/bn/index.php">Financial Literacy Program</a></li>
+								<li><a class="flink" target="_blank" href="https://www.bb.org.bd/">Bangladesh Bank</a></li>
+								
+								<li><a class="flink" target="_blank" href="http://epb.portal.gov.bd/">Export Promotion Bureau</a></li>
+								<li><a class="flink" target="_blank" href="https://nbr.gov.bd/">National Board of Revenue</a></li>
+								<li><a class="flink" target="_blank" href="http://www.roc.gov.bd/">Registrar of Joint Stock Companies and Firms
+								</a></li>
+
+
+							</ul>
+						</div>
+
+					</div>
+					<div class="menu_content">
+						
+						<div class="social_list social_listoff" style="margin-top: 10px;">
+							<ul>
+								<li><a class="icon facebook" title="Facebook" target="_blank" href="https://www.facebook.com/BangladeshCSE">Facebook</a></li>
+									<!-- <li><a class="icon twitter" title="Twitter" href="">twitter</a></li>
+										<li><a class="icon linkedin" title="Linkedin" href="">linkedin</a></li> -->
+										<li><a class="icon ytube" title="Youtube" target="_blank" href="https://www.youtube.com/channel/UC4K1uvsK7uxVIOIuwSTnlAQ">youtube</a></li>
+									<!-- <li><a class="icon blog" title="Blog" href="">blog</a></li>
+										<li><a class="icon newsfeed" title="Newsfeed" href="">newsfeed</a></li> -->
+
+									</ul>
+								</div>
+
+							</div>
+
+
+						</div>
+
+
+					</div>
+					<div class="social_list social_liston">
+						<ul>
+							<li><a class="icon facebook"  title="Facebook" href="">Facebook</a></li>
+							<li><a class="icon twitter" title="Twitter" href="">twitter</a></li>
+							<li><a class="icon linkedin" title="Linkedin" href="">linkedin</a></li>
+							<li><a class="icon ytube" title="Youtube" href="https://www.youtube.com/channel/UC4K1uvsK7uxVIOIuwSTnlAQ">ytube</a></li>
+							<li><a class="icon blog" title="Blog" href="">blog</a></li>
+							<li><a class="icon newsfeed" title="Newsfeed" href="">newsfeed</a></li>
+
+						</ul>
+					</div>
+				</div>
+
+
+
+				<!--################....Start Footer bottom section....###############################-->
+				<div  id="space20"></div>
+				<div  id="space10"></div>
+
+				<div class="row">
+					<div class="inner-content">
+						<div  class="col_m_12 col_12 leftcolm">
+
+							<div class="bottom_menu_list">
+								<ul>
+									<li><a class="flink" href="https://www.cse.com.bd/home/sitemap">Sitemap</a></li><li class="flink">|</li>
+									<!--<li><a class="flink" href="https://www.cse.com.bd/contact">Contact</a></li><li class="flink">|</li> -->
+									<li><a class="flink" href="https://www.cse.com.bd/home/gallery">Photo Gallery</a></li><li class="flink">|</li>
+									<li><a class="flink" href="https://www.cse.com.bd/home/downloads">Download</a></li><li class="flink">|</li>
+									<li><a class="flink" href="https://www.cse.com.bd/home/faq">FAQ</a></li><li class="flink">|</li>
+									<li><a class="flink" href="https://www.cse.com.bd/home/career">Career</a></li><li class="flink">|</li>
+								   	<li><a class="flink" href="https://www.cse.com.bd/home/privacy_policy">privacy_policy</a></li><li class="flink"></li>
+                              <!--   <li><a class="flink" href="https://www.cse.com.bd/RFP">RFP</a></li> 
+								</a></li>  -->
+							</ul>
+						</div>
+
+					</div>
+				</div>
+			</div>
+			<div  id="space10"></div>
+
+			<!--################....End Footer section....###############################-->
+
+			<!--################....Start Footer bottom section....###############################-->
+
+
+
+
+			<!--################....End Footer section....###############################-->
+
+
+
+
+		</div>
+
+
+
+
+
+
+	</div>
+	<div class="copyright">
+		<div class="row">
+			<div class="inner-content">
+				<div  class="col_m_12 col_12 leftcolm">
+					<p>&copy;2024 Chittagong Stock Exchange PLC. All rights reserved.</p>
+					<div  id="space10"></div>
+
+			<!--	<p>Developed &amp; Maintained by <a href="http://www.datacraftbd.com/" target="_blank" style="color:#CCC">Datacraft Ltd.</a></p>  -->
+				
+                            </div>
+
+			</div>
+		</div>
+	</div>
+
+
+	<script type='text/javascript'>
+		$(window).load(function(){
+			$('.ticker_value').load('https://www.cse.com.bd/ticker2.php');
+			//document.addEventListener('contextmenu', event => event.preventDefault());
+		});
+	</script>
+<!-- <script type='text/javascript'>
+	jQuery(function($) {
+		$("img").Lazy();
+	});
+</script> -->
+<!--################....End Footer section....###############################-->
+<script type="text/javascript">
+	$("img").lazyload({
+		effect: "fadeIn",
+		effectspeed: 1000,
+	});
+</script>
+	</div>
+    <script>
+	
+///var w = window.screen.width 
+	//alert(w);
+  if (window.screen.width < 800) {
+	//alert(window).width());
+        $('.pmtop a img').addClass('dmobile');
+		//alert(0);
+    }else{
+        $('.pmtop a img').removeClass('dmobile');
+    }
+var cur_lang = 'en';
+console.clear();
+function CountdownTracker(label, value){
+
+  var el = document.createElement('span');
+
+  el.className = 'flip-clock__piece';
+  el.innerHTML = '<b class="flip-clock__card card"><b class="card__top"></b><b class="card__bottom"></b><b class="card__back"><b class="card__bottom"></b></b></b>' + 
+    '<span class="flip-clock__slot">' + label + '</span>';
+
+  this.el = el;
+
+  var top = el.querySelector('.card__top'),
+      bottom = el.querySelector('.card__bottom'),
+      back = el.querySelector('.card__back'),
+      backBottom = el.querySelector('.card__back .card__bottom');
+
+  this.update = function(val){
+    val = ( '0' + val ).slice(-2);
+    if ( val !== this.currentValue ) {
+      
+      if ( this.currentValue >= 0 ) {
+        back.setAttribute('data-value', this.currentValue);
+        bottom.setAttribute('data-value', this.currentValue);
+      }
+      this.currentValue = val;
+      top.innerText = this.currentValue;
+      backBottom.setAttribute('data-value', this.currentValue);
+
+      this.el.classList.remove('flip');
+      void this.el.offsetWidth;
+      this.el.classList.add('flip');
+    }
+  }
+  
+  this.update(value);
+}
+
+// Calculation adapted from https://www.sitepoint.com/build-javascript-countdown-timer-no-dependencies/
+
+function getTimeRemaining(endtime) {
+  var t = Date.parse(endtime) - Date.parse(new Date());
+  // return {
+  //   'Total': t,
+  //   'Days': Math.floor(t / (1000 * 60 * 60 * 24)),
+  //   'Hours': Math.floor((t / (1000 * 60 * 60)) % 24),
+  //   'Minutes': Math.floor((t / 1000 / 60) % 60),
+  //   'Seconds': Math.floor((t / 1000) % 60)
+  // };
+  if(cur_lang == 'bn'){ 
+    return {
+      'Total': t,
+      'দিন': Math.floor(t / (1000 * 60 * 60 * 24)),
+      'ঘন্টা': Math.floor((t / (1000 * 60 * 60)) % 24),
+      'মিনিট': Math.floor((t / 1000 / 60) % 60),
+      'সেকেন্ড': Math.floor((t / 1000) % 60)
+    };
+  }else if(cur_lang == 'en'){
+    return {
+      'Total': t,
+      'Days': Math.floor(t / (1000 * 60 * 60 * 24)),
+      'Hrs': Math.floor((t / (1000 * 60 * 60)) % 24),
+      'Mins': Math.floor((t / 1000 / 60) % 60),
+      'Secs': Math.floor((t / 1000) % 60)
+    };
+  }
+}
+
+function getTime() {
+  var t = new Date();
+  return {
+    'Total': t,
+    'Hours': t.getHours() % 12,
+    'Minutes': t.getMinutes(),
+    'Seconds': t.getSeconds()
+  };
+}
+
+function Clock(countdown,callback) {
+  
+  countdown = countdown ? new Date(Date.parse(countdown)) : false;
+  callback = callback || function(){};
+  
+  var updateFn = countdown ? getTimeRemaining : getTime;
+
+  this.el = document.createElement('div');
+  this.el.className = 'flip-clock';
+
+  var trackers = {},
+      t = updateFn(countdown),
+      key, timeinterval;
+
+  for ( key in t ){
+    if ( key === 'Total' ) { continue; }
+    trackers[key] = new CountdownTracker(key, t[key]);
+    this.el.appendChild(trackers[key].el);
+  }
+
+  var i = 0;
+  function updateClock() {
+    timeinterval = requestAnimationFrame(updateClock);
+    
+    // throttle so it's not constantly updating the time.
+    if ( i++ % 10 ) { return; }
+    
+    var t = updateFn(countdown);
+    if ( t.Total < 0 ) {
+      cancelAnimationFrame(timeinterval);
+      for ( key in trackers ){
+        trackers[key].update( 0 );
+      }
+      callback();
+      return;
+    }
+    
+    for ( key in trackers ){
+      trackers[key].update( t[key] );
+    }
+  }
+
+  setTimeout(updateClock,500);
+}
+
+var deadline = new Date("Mar 17, 2020 00:01:01");
+// var deadline = new Date(Date.parse(new Date()) + 12 * 24 * 60 * 60 * 1000);
+var c = new Clock(deadline, function(){ 
+	// alert('countdown complete'); 
+});
+// document.body.appendChild(c.el);
+
+//document.getElementById('countdown_block').appendChild(c.el);
+</script>
+</body>
+</html>

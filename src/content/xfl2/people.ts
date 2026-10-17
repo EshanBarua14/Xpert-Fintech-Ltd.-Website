@@ -40,8 +40,8 @@ export const MANAGEMENT: RosterPerson[] = [
   { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman", title: "Managing Director", department: "Leadership", rank: 1 },
   { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony, FCS", formerName: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 2 },
   { key: "md-abul-moshad-chowdhury", name: "Md. Abul Moshad Chowdhury", title: "Head of Application Support and Development", department: "Engineering", rank: 3 },
-  { key: "muhammad-shamsul-maruf", name: "Mohammad Shamsul Maruf", formerName: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 4 },
-  { key: "saikat-biswas", name: "Saikat Biswas", title: "Senior Principal Software Engineer", department: "Engineering", rank: 5 },
+  { key: "saikat-biswas", name: "Saikat Biswas", title: "Senior Principal Software Engineer", department: "Engineering", rank: 4 },
+  { key: "muhammad-shamsul-maruf", name: "Mohammad Shamsul Maruf", formerName: "Muhammad Shamsul Maruf", title: "Principal Software Engineer", department: "Engineering", rank: 5 },
   { key: "mohammad-mehrabul-ferdous", name: "Mohammad Mehrabul Ferdous", title: "Principal Software Engineer", department: "Engineering", rank: 6 },
 ];
 
@@ -52,8 +52,8 @@ export const CONSULTANTS: (RosterPerson & { nameBn?: string; affiliation?: { en:
 ];
 
 export const TEAM: RosterPerson[] = [
-  { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman", title: "Managing Director", department: "Leadership", rank: 1 },
-  { key: "sowkot-osman", name: "Sowkot Osman", title: "Executive Director", department: "Leadership", rank: 2 },
+  { key: "sowkot-osman", name: "Sowkot Osman", title: "Executive Director", department: "Leadership", rank: 1 },
+  { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman", title: "Managing Director", department: "Leadership", rank: 2 },
   { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony, FCS", formerName: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 3 },
   { key: "md-abul-moshad-chowdhury", name: "Md. Abul Moshad Chowdhury", title: "Head of Application Support and Development", department: "Engineering", rank: 4 },
   { key: "saikat-biswas", name: "Saikat Biswas", title: "Senior Principal Software Engineer", department: "Engineering", rank: 5 },

@@ -2000,6 +2000,59 @@ async function seedUcbRank() {
   if (res.count) console.log("• Ranking: UCB Stock Brokerage #1 on DSE (its own statement); add others in Admin → Organizations");
 }
 
+/** Once: Xpert's Facebook page beside LinkedIn and email (footer, contact). Kept if an editor already added one. */
+async function addFacebookLink() {
+  const MARK = "seed.facebook-link-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const URL_FB = "https://www.facebook.com/XpertFintechLtd";
+  const row = await db.siteSetting.findUnique({ where: { key: "social.links" } });
+  const links = Array.isArray(row?.value) ? (row!.value as { label: string; url: string }[]) : [];
+  if (!links.some((l) => /facebook\.com|fb\.com/i.test(l?.url ?? ""))) {
+    const value = [...links, { label: "Facebook", url: URL_FB }];
+    await db.siteSetting.upsert({ where: { key: "social.links" }, update: { value }, create: { key: "social.links", value } });
+    console.log("• Social links: Facebook added beside LinkedIn and email");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
+/** Once (XFL, 15 Oct 2026): Saikat Biswas before Mohammad Shamsul Maruf, in the Management Committee and the team. */
+async function saikatBeforeMaruf() {
+  const MARK = "seed.saikat-before-maruf-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const [saikat, maruf] = await Promise.all(["saikat-biswas", "muhammad-shamsul-maruf"].map((key) => db.person.findUnique({ where: { key }, include: { roles: true } })));
+  let moved = 0;
+  if (saikat && maruf) {
+    for (const r of maruf.roles) {
+      const s = saikat.roles.find((x) => x.group === r.group);
+      if (!s || s.sortOrder < r.sortOrder) continue;
+      // Swap their positions in this group.
+      await db.personRole.update({ where: { id: s.id }, data: { sortOrder: r.sortOrder } });
+      await db.personRole.update({ where: { id: r.id }, data: { sortOrder: s.sortOrder === r.sortOrder ? r.sortOrder + 1 : s.sortOrder } });
+      moved++;
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), moved } } });
+  if (moved) console.log(`• People: Saikat Biswas placed before Mohammad Shamsul Maruf (${moved} list(s))`);
+}
+
+/** Once (XFL, 15 Oct 2026): Sowkot Osman, Executive Director, first in the team, before the Managing Director. */
+async function sowkotFirst() {
+  const MARK = "seed.sowkot-first-2026-10-15";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const sowkot = await db.person.findUnique({ where: { key: "sowkot-osman" }, include: { roles: true } });
+  let moved = 0;
+  for (const r of sowkot?.roles ?? []) {
+    const first = await db.personRole.findFirst({ where: { group: r.group, id: { not: r.id } }, orderBy: { sortOrder: "asc" } });
+    if (!first || r.sortOrder < first.sortOrder) continue;
+    // Everyone before him moves down one; he takes the first place.
+    await db.personRole.updateMany({ where: { group: r.group, id: { not: r.id }, sortOrder: { lt: r.sortOrder } }, data: { sortOrder: { increment: 1 } } });
+    await db.personRole.update({ where: { id: r.id }, data: { sortOrder: first.sortOrder } });
+    moved++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), moved } } });
+  if (moved) console.log("• People: Sowkot Osman (Executive Director) placed first, before the Managing Director");
+}
+
 async function seedMemberProfiles() {
   const MARK = "seed.member-profiles-2026-10-15";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -2043,6 +2096,8 @@ async function main() {
   await upgradePortraits();
   await seedPeople();
   await seedRoster();
+  await saikatBeforeMaruf();
+  await sowkotFirst();
   await seedPortraitFocus();
   await seedMessagesAndGoal();
   await seedLegalDrafts();
@@ -2056,6 +2111,7 @@ async function main() {
   await showMemberApps();
   await prioritiseLeadClients();
   await seedUcbRank();
+  await addFacebookLink();
   await seedDeployments();
   await seedTeamLinks();
   await seedConsultantLinks();

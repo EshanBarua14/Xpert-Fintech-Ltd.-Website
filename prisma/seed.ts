@@ -34,7 +34,10 @@ async function seedSettings() {
     "contact.phone": "+880 2 839 2725",
     "contact.appSupportEmail": "app.support@xpertfintech.com",
     "contact.appSupportPhone": "+880 1901-365408",
-    "social.links": [{ label: "LinkedIn", url: "https://bd.linkedin.com/company/xpertfintech" }],
+    "social.links": [
+      { label: "LinkedIn", url: "https://bd.linkedin.com/company/xpertfintech" },
+      { label: "Facebook", url: "https://www.facebook.com/XpertFintechLtd" },
+    ],
     "leads.alertEmails": [],
     "brand.logoMediaId": "",
   };

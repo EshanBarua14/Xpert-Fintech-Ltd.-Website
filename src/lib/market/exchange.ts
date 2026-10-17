@@ -188,6 +188,7 @@ export type CseSummary = {
   trades?: number;
   /** True when the figures are the previous session's (before today's trading starts). */
   previousSession: boolean;
+  breadth?: Breadth;
 };
 
 /**
@@ -198,6 +199,7 @@ export type CseSummary = {
  */
 export function parseCseSummary(html: string): CseSummary {
   const text = decode(html);
+  const cseBreadth = parseCseBreadth(html);
   const n = String.raw`([+\-−]?[\d,]*\.?\d*)`;
   const block = new RegExp(
     String.raw`TODAY\s*Index\s*${n}\s*%\s*${n}\s*Trade\s*${n}\s*Volume\s*${n}\s*Value\s*${n}\s*YESTERDAY\s*Index\s*${n}\s*%\s*${n}\s*Trade\s*${n}\s*Volume\s*${n}\s*Value\s*${n}`,
@@ -243,6 +245,7 @@ export function parseCseSummary(html: string): CseSummary {
     volume: pick(4, 9),
     trades: tradesToday > 0 ? tradesToday : pick(3, 8),
     previousSession: !today && blocks.length > 0,
+    ...(cseBreadth && { breadth: cseBreadth }),
   };
 }
 
@@ -282,7 +285,27 @@ function findIndex(text: string, name: string, html: string): IndexValue | null 
   return null;
 }
 
-export type DseSummary = { status?: ExchangeSnapshot["status"]; indices: IndexValue[]; turnover?: number; volume?: number; trades?: number };
+/** Advanced / declined / unchanged issues as the exchange itself counts them (traded issues only). */
+export type Breadth = { advancers: number; decliners: number; unchanged: number };
+export type DseSummary = { status?: ExchangeSnapshot["status"]; indices: IndexValue[]; turnover?: number; volume?: number; trades?: number; breadth?: Breadth };
+
+/** dse.com.bd carries its own count in the page's data: "breadth":{"advanced":96,"declined":229,"unchanged":61,…}. */
+function parseDseBreadth(html: string): Breadth | undefined {
+  const m = /\\?"breadth\\?"\s*:\s*\{\s*\\?"advanced\\?"\s*:\s*(\d+)\s*,\s*\\?"declined\\?"\s*:\s*(\d+)\s*,\s*\\?"unchanged\\?"\s*:\s*(\d+)/.exec(html);
+  if (!m) return undefined;
+  const [a, d, u] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  return a + d + u > 0 ? { advancers: a, decliners: d, unchanged: u } : undefined;
+}
+
+/** CSE home page: "Issues Traded 134 · 60 ↑ · 59 ↓ · 15 ↔" (CSE's own count). */
+function parseCseBreadth(html: string): Breadth | undefined {
+  const t = html.replace(/<[^>]*>/g, " ").replace(/&nbsp;|&#160;/g, " ").replace(/&uarr;|&#8593;/g, "↑").replace(/&darr;|&#8595;/g, "↓").replace(/&harr;|&#8596;/g, "↔").replace(/\s+/g, " ");
+  const m = /Issues\s*Traded\s*([\d,]+)\s*([\d,]+)\s*↑\s*([\d,]+)\s*↓\s*([\d,]+)\s*↔/i.exec(t);
+  if (!m) return undefined;
+  const [total, a, d, u] = [num(m[1]), num(m[2]), num(m[3]), num(m[4])];
+  // Only when the three add up to the issues traded: otherwise the line was misread.
+  return total > 0 && a + d + u === total ? { advancers: a, decliners: d, unchanged: u } : undefined;
+}
 
 /**
  * DSE home page (old.dsebd.org): "DSEX Index 5,123.45 12.34 0.24%", the same for
@@ -318,9 +341,11 @@ export function parseDseSummary(html: string): DseSummary {
   if (!(turnover >= 1e8 && turnover <= 5e11)) turnover = NaN;
   const statusText = (/Market\s*Status\s*:?\s*([A-Za-z-]+)/i.exec(text)?.[1] ?? /●\s*(Closed|Halted|Suspended|Pre-?open\w*|Post-?clos\w*)/i.exec(text)?.[1] ?? "").toLowerCase();
   const status: DseSummary["status"] = /pre/.test(statusText) ? "PRE_OPEN" : /post/.test(statusText) ? "POST_CLOSE" : /open/.test(statusText) ? "OPEN" : /halt|suspend/.test(statusText) ? "HALTED" : /clos/.test(statusText) ? "CLOSED" : undefined;
+  const breadth = parseDseBreadth(html);
   return {
     status,
     indices,
+    ...(breadth && { breadth }),
     ...(trades > 0 && { trades }),
     ...(volume > 0 && { volume }),
     ...(turnover > 0 && { turnover: Math.round(turnover) }),
@@ -484,6 +509,8 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
         // Before today's session these are the last session's totals: the page labels them so
         // (lastSession), and they are never recorded as today's (see recordTurnover).
         Object.assign(snap, { turnover: cse.turnover, volume: cse.volume, trades: cse.trades });
+        // The exchange's own advanced/declined/unchanged count (traded issues), over ours from every listed price.
+        if (cse.breadth) Object.assign(snap, cse.breadth);
         extra = `, ${cse.indices.length} indices${cse.previousSession ? " (previous session)" : ""}`;
       }
       if (exchange === "DSE" && dse) {
@@ -491,6 +518,7 @@ export async function exchangeSnapshot(): Promise<{ snapshot: MarketSnapshot | n
         if (dsePrevious && dseRecent) snap.indicesAsOf = dseRecent.date;
         if (dse.status) snap.status = dse.status;
         Object.assign(snap, { turnover: dse.turnover, volume: dse.volume, trades: dse.trades });
+        if (dse.breadth && !dsePrevious) Object.assign(snap, dse.breadth);
         extra = `, ${dse.indices.length} indices${dsePrevious ? ` (session of ${dseRecent?.date})` : ""}${dse.turnover ? ", turnover" : ""}`;
       }
       exchanges.push(snap);

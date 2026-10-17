@@ -813,6 +813,13 @@ async function seedClientLogos() {
   if (skyline) {
     const linked = await db.deployment.updateMany({ where: { key: "skytrade", organizationId: null }, data: { organizationId: skyline.id } });
     if (linked.count) console.log("• SkyTrade linked to Skyline");
+    // Once (XFL, 17 Oct 2026): Skyline Securities' website. Later changes in the admin are kept.
+    const SITE_MARK = "seed.skyline-website-2026-10-17";
+    if (!(await db.siteSetting.findUnique({ where: { key: SITE_MARK } }))) {
+      await db.organization.update({ where: { id: skyline.id }, data: { websiteUrl: "https://www.skylinesecuritiesbd.com/" } });
+      await db.siteSetting.create({ data: { key: SITE_MARK, value: { at: new Date().toISOString() } } });
+      console.log("• Skyline Securities: website set to skylinesecuritiesbd.com");
+    }
   }
 }
 

@@ -114,7 +114,7 @@ function ExchangeGlance({ exchange, ex, t, locale, className, logo }: { exchange
           <li key={name} className="flex min-w-0 flex-col gap-1 rounded-2xl border border-fg/[0.07] bg-fg/[0.02] p-3">
             <span className="font-mono text-[max(11px,0.6875rem)] tracking-widest text-accent">{name}</span>
             <span className="truncate font-display text-lg font-semibold tabular-nums sm:text-xl">{i ? fmt(locale, i.value) : DASH}</span>
-            {i ? <Change pct={i.changePct} locale={locale} /> : <span className="text-xs text-text-secondary">{t.notPublished}</span>}
+            {i ? <Change pct={i.changePct} abs={i.change} locale={locale} /> : <span className="text-xs text-text-secondary">{t.notPublished}</span>}
           </li>
         ))}
       </ul>

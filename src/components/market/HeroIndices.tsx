@@ -37,8 +37,9 @@ export function HeroIndices({ initial, t, locale, logos }: { initial: MarketPayl
                       <dt className="text-gold">{i.name}</dt>
                       <dd className="flex items-baseline gap-2">
                         <span className="text-text-primary">{fmt(locale, i.value)}</span>
-                        <span className={cn("w-[4.5rem] text-right", i.changePct > 0 ? "text-market-up" : i.changePct < 0 ? "text-market-down" : "text-text-secondary")}>
-                          {i.changePct > 0 ? "▲" : i.changePct < 0 ? "▼" : "•"} {fmt(locale, Math.abs(i.changePct), 2)}%
+                        <span className={cn("min-w-[8.5rem] text-right whitespace-nowrap", i.changePct > 0 ? "text-market-up" : i.changePct < 0 ? "text-market-down" : "text-text-secondary")}>
+                          {i.changePct > 0 ? "▲" : i.changePct < 0 ? "▼" : "•"}
+                          {Number.isFinite(i.change) && ` ${fmt(locale, Math.abs(i.change), 2)} ·`} {fmt(locale, Math.abs(i.changePct), 2)}%
                         </span>
                       </dd>
                     </div>

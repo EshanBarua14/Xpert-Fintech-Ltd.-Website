@@ -338,7 +338,8 @@ export async function getHtml(url: string): Promise<string> {
   let res: Response;
   try {
     // Not "no-store": that makes a cached page (the home page) dynamic mid-refresh and Next.js answers 500.
-    res = await fetch(url, { headers, next: { revalidate: 60 }, signal: AbortSignal.timeout(30_000) });
+    // 15 s, under the fastest refresh choice (Admin → Market data), so prices are never held back by this cache.
+    res = await fetch(url, { headers, next: { revalidate: 15 }, signal: AbortSignal.timeout(30_000) });
   } catch (error) {
     // The server left out its intermediate certificate: fetch it, verify it, try again.
     if (!isChainError(error)) throw error;

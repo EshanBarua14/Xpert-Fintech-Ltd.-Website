@@ -11,6 +11,6 @@ jobs:
       - run: |
           mkdir out && cd out
           UA="Mozilla/5.0 (compatible; XpertFintechWebsite/1.0; +https://www.xpertfintech.com)"
-          for u in "cse-home.html https://www.cse.com.bd/" "cse-price.html https://www.cse.com.bd/market/current_price"; do set -- $u; curl -sSL -m 60 -A "$UA" -o $1 -w "$1 %{http_code} %{size_download} %{time_total}s\n" "$2" || echo "$1 curl exit $?"; done | tee log.txt
+          for u in "cse-home.html https://www.cse.com.bd/" "cse-price.html https://www.cse.com.bd/market/current_price"; do set -- $u; curl -ksSL -m 60 -A "$UA" -o $1 -w "$1 %{http_code} %{size_download} %{time_total}s\n" "$2" || echo "$1 curl exit $?"; done | tee log.txt; echo | openssl s_client -connect www.cse.com.bd:443 -servername www.cse.com.bd -showcerts 2>&1 | grep -E "s:|i:|verify|Verify" | head -20 >> log.txt
           git init -q -b tmp && git add . && git -c user.name=ci -c user.email=ci@example.com commit -qm "CSE pages $(date -u +%FT%TZ)"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tmp:tmp/dse-pages

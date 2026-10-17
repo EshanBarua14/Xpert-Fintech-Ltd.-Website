@@ -148,7 +148,6 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
   const { ref, shown } = useCountUp(pct ?? 0);
   const date = (d: string) =>
     new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${d}T00:00:00Z`));
-  const fill = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
   // Years are written without a thousands separator (2028, ২০২৮).
   const year = goal ? String(goal.year).replace(/\d/g, (d) => (locale === "bn" ? "০১২৩৪৫৬৭৮৯"[Number(d)]! : d)) : "";
   const goalPct = goal ? fmt(locale, goal.targetPct, 0) : "";
@@ -157,7 +156,7 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <div ref={ref} data-reveal className="relative flex flex-col gap-8 overflow-hidden rounded-3xl border border-fg/10 bg-navy-900 p-6 sm:p-8 md:p-10">
-        {showPanels ? (
+        {showPanels && (
           <>
             {pct !== null && (
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -180,58 +179,6 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
               ))}
             </div>
             {goal && <p className="text-sm text-text-secondary">{goal.note ?? labels.goalNote.replace("{year}", year)}</p>}
-          </>
-        ) : (
-          <>
-            {pct !== null ? (
-              <div className="flex flex-col gap-3">
-                <p className="text-sm font-medium text-text-secondary">{labels.share}</p>
-                <p className="font-display text-6xl leading-none tracking-[-0.03em] text-text-primary tabular-nums sm:text-7xl md:text-8xl">
-                  {fmt(locale, shown, Number.isInteger(pct) ? 0 : 2)}
-                  <span className="ml-1 text-[0.5em] text-text-secondary">%</span>
-                </p>
-                <p className="text-sm text-text-secondary">{`${labels.overall ?? labels.combined}${headline?.asOf ? ` · ${date(headline.asOf)}` : ""}`}</p>
-              </div>
-            ) : (
-              goal && (
-                <p className="max-w-xl font-display text-3xl leading-tight tracking-[-0.015em] text-balance md:text-4xl">
-                  {labels.goalLead.replace("{pct}", goalPct).replace("{year}", year)}
-                </p>
-              )
-            )}
-
-            {goal && (
-              <div className="flex flex-col gap-4">
-                <div
-                  role={pct !== null ? "img" : undefined}
-                  aria-label={pct !== null ? labels.progress.replace("{now}", fmt(locale, pct, 2)).replace("{pct}", goalPct).replace("{year}", year) : undefined}
-                  className="relative pt-9"
-                >
-                  {/* Goal marker: label above the line, kept inside the card near the right edge. */}
-                  <span
-                    aria-hidden={pct !== null}
-                    className={cn("absolute top-0 text-sm font-semibold whitespace-nowrap text-gold", goal.targetPct > 60 ? "-translate-x-full pr-2" : "pl-2")}
-                    style={{ left: fill(goal.targetPct) }}
-                  >
-                    {goalText}
-                  </span>
-                  <div className="relative h-3 rounded-full bg-fg/[0.08]">
-                    <div className="bar-grow absolute inset-0" data-reveal>
-                      <span className="absolute inset-y-0 left-0 block rounded-full bg-gradient-to-r from-brand-royal to-brand-sky" style={{ width: fill(pct ?? 0) }} />
-                    </div>
-                    <span aria-hidden="true" className="absolute -top-2 -bottom-2 w-0.5 rounded-full bg-gold" style={{ left: fill(goal.targetPct) }} />
-                  </div>
-                  <div aria-hidden="true" className="mt-2 flex justify-between font-mono text-xs text-text-secondary">
-                    <span>{fmt(locale, 0, 0)}%</span>
-                    <span>{fmt(locale, 100, 0)}%</span>
-                  </div>
-                </div>
-                <p className="text-sm text-text-secondary">
-                  {pct !== null && (pct >= goal.targetPct ? labels.reached : labels.toGo.replace("{pts}", fmt(locale, goal.targetPct - pct, 1))) + ". "}
-                  {goal.note ?? labels.goalNote.replace("{year}", year)}
-                </p>
-              </div>
-            )}
           </>
         )}
       </div>

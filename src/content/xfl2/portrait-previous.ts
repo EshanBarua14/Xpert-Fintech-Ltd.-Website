@@ -34,5 +34,5 @@ export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "shamsher-morshed": "bd3dfe193a6927eb94a0de31363707ba756b13d13f0d57ff0deeaf0b8cdedc24",
   "sumon-das": "72302ea3945c72f68a2eb2b6c485e9cb1161ddcab6eacdc65417c64902e4a0ab",
   "talukder-juhaer-hakim": "1632c794d1dfcc2da9463c5105fa34067529e9a17f9ecfcc00ca082d2f588c87",
-  "toha-hossain": "06b8713980cebdad37402941c83a0ce5791764b2e3fc36663a52dafa45244b38",
+  "toha-hossain": ["06b8713980cebdad37402941c83a0ce5791764b2e3fc36663a52dafa45244b38", "c3e1d023374bbcd85bd174965add799ffd12cc515d2b470c994a717c7e5c1727"],
 };

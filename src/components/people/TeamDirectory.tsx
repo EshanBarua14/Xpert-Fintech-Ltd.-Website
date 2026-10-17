@@ -62,7 +62,7 @@ export function TeamDirectory({ people, locale, labels }: { people: TeamMember[]
         </div>
       )}
 
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+      <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8">
         {shown.map((p, i) => (
           <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties}>
             <MemberCard p={p} locale={locale} labels={labels} />
@@ -98,7 +98,7 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
   return (
     <article
       style={{ "--dept": color } as CSSProperties}
-      className="team-card group relative flex h-full flex-col overflow-hidden rounded-xl border border-fg/[0.09] bg-navy-900 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--dept)_55%,transparent)]"
+      className="team-card group relative flex h-full flex-col overflow-hidden rounded-lg border border-fg/[0.09] bg-navy-900 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--dept)_55%,transparent)]"
     >
       <span aria-hidden="true" className="absolute inset-x-0 top-0 z-10 h-1 bg-[var(--dept)]" />
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-[color-mix(in_srgb,var(--dept)_22%,var(--color-navy-800))]">
@@ -107,32 +107,32 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
             src={p.photo.url}
             alt={p.name}
             fill
-            sizes="(min-width: 1280px) 13rem, (min-width: 1024px) 19vw, (min-width: 640px) 32vw, 48vw"
+            sizes="(min-width: 1280px) 10rem, (min-width: 1024px) 14vw, (min-width: 768px) 20vw, (min-width: 640px) 25vw, 33vw"
             quality={90}
             className="person-photo object-cover transition-transform duration-700 group-hover:scale-[1.03]"
             style={focusStyle(p.photo, 0.8)}
           />
         ) : (
           <span aria-hidden="true" className="flex h-full items-center justify-center">
-            <span className="flex size-16 items-center justify-center rounded-full bg-[var(--dept)] font-display text-2xl text-white ring-4 ring-white/10">{initials(p.name)}</span>
+            <span className="flex size-12 items-center justify-center rounded-full bg-[var(--dept)] font-display text-lg text-white ring-2 ring-white/10">{initials(p.name)}</span>
           </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-3.5">
-        <h3 className="font-display text-[0.95rem] leading-tight text-balance text-text-primary">{p.name}</h3>
-        {p.title && <p className="text-xs leading-snug text-text-secondary">{p.title}</p>}
-      </div>
-      <div className="mx-3.5 mt-auto flex min-h-9 items-center gap-2 border-t border-fg/[0.08] py-3">
+      <div className="flex flex-1 flex-col gap-0.5 p-2.5">
+        <h3 className="font-display text-[0.8rem] leading-tight text-balance text-text-primary">{p.name}</h3>
+        {p.title && <p className="text-[0.7rem] leading-snug text-text-secondary">{p.title}</p>}
         {p.department && (
-          <span className="flex min-w-0 items-center gap-2 text-xs font-medium text-text-secondary">
-            <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-[var(--dept)]" />
+          <span className="mt-1 flex min-w-0 items-center gap-1.5 text-[0.65rem] font-medium text-text-secondary">
+            <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-[var(--dept)]" />
             <span className="truncate">{departmentLabel(p.department, locale, labels.departments)}</span>
           </span>
         )}
-        <span className="ml-auto flex items-center gap-2">
+      </div>
+      <div className="mx-2.5 mt-auto flex items-center border-t border-fg/[0.08] py-2">
+        <span className="flex items-center gap-1.5">
           {/* Email and LinkedIn on every card: a link when it is on file, a muted icon until it is added (Admin → People → Contacts). */}
-          <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
-          <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org="Xpert Fintech" labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
+          <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} color="var(--dept)" ink="var(--dept)" size="size-7" />
+          <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org="Xpert Fintech" labels={labels} color="var(--dept)" ink="var(--dept)" size="size-7" />
         </span>
       </div>
     </article>

@@ -31,13 +31,14 @@ export function HeroIndices({ initial, t, locale, logos }: { initial: MarketPayl
                 {ex!.status ? <SessionStatus status={ex!.status} label={t[`marketStatus${ex!.status}` as keyof Messages] as string} className="text-xs" /> : null}
               </span>
               {indices.length > 0 ? (
-                <dl className="flex flex-col gap-1.5 font-mono text-[max(13px,0.8125rem)] tabular-nums">
+                <dl className="flex flex-col gap-2 font-mono text-[max(13px,0.8125rem)] tabular-nums">
                   {indices.map((i) => (
-                    <div key={i.name} className="flex items-baseline justify-between gap-3">
-                      <dt className="text-gold">{i.name}</dt>
-                      <dd className="flex items-baseline gap-2">
+                    <div key={i.name} className="flex items-start justify-between gap-3">
+                      <dt className="pt-px text-gold">{i.name}</dt>
+                      {/* Value on top, point and % change underneath: fits the narrow hero card. */}
+                      <dd className="flex min-w-0 flex-col items-end leading-tight">
                         <span className="text-text-primary">{fmt(locale, i.value)}</span>
-                        <span className={cn("min-w-[8.5rem] text-right whitespace-nowrap", i.changePct > 0 ? "text-market-up" : i.changePct < 0 ? "text-market-down" : "text-text-secondary")}>
+                        <span className={cn("text-[max(11px,0.6875rem)] whitespace-nowrap", i.changePct > 0 ? "text-market-up" : i.changePct < 0 ? "text-market-down" : "text-text-secondary")}>
                           {i.changePct > 0 ? "▲" : i.changePct < 0 ? "▼" : "•"}
                           {Number.isFinite(i.change) && ` ${fmt(locale, Math.abs(i.change), 2)} ·`} {fmt(locale, Math.abs(i.changePct), 2)}%
                         </span>

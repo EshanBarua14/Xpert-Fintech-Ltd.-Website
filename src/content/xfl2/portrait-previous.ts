@@ -8,7 +8,7 @@ export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "aminul-islam": "46d0aa5730c65fbba9e749371bedd7722d9a7e30349ce6c7f2de198a2464e8e1",
   "bishnu-pada-kunda": ["5e3185c1c06dacef9997e5e1f0e21d704b52d3c481575717f9e3b1f5355a572b", "a754c94f7248585f1c24bcc12b618efac790f744a4a06fa37fdc851277112c2e"],
   "dilip-kajuri": "00e8925b6282c40615911568d0f9d529b75be9ad7e7528eecb1428fb29f86399",
-  "eshan-barua": "ef8a4de53dfb73cdff3768faede53fe8a49499304ad9a5eeb23a05cc4c247bc9",
+  "eshan-barua": ["ef8a4de53dfb73cdff3768faede53fe8a49499304ad9a5eeb23a05cc4c247bc9", "592c6f7de22b2854b9bc97879d477ec7f3a1de54185d7ca3b9ff99c77fa6892c"],
   "fakruddin-ali-ahmed-rajib": ["afbeed2fb055b9ec42099f5a7702b6537b22149dc91a3a092d76b47ccda2736a", "42302e473195d88c011a23b8b7f0b4c33382a46ca90bd3f6455bed8315e3e241"],
   "m-shahryar-faiz": ["ea342932942d2df4cf78bae73c1df35717fe8388aa55c965cb3943a31b094129", "7c1e96915b8651bfa445080db6baaf0901d6af6ff5b252c954f4b1b17ec31ce4"],
   "mahmuda-yasmin-farah": "d2d40dafb59a8b942c045c72a7e451743e98d2770bdd6ec087f6b7e76f34b3de",

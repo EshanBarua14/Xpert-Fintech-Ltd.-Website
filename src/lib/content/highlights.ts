@@ -57,10 +57,10 @@ export type WhatsAppSetting = {
 };
 
 export const DEFAULT_STRENGTHS: StrengthsSetting = {
-  titleEn: "Our core strengths",
-  titleBn: "আমাদের মূল শক্তি",
-  introEn: "Why the capital market's leading brokerage houses run their business on Xpert.",
-  introBn: "দেশের শীর্ষস্থানীয় ব্রোকারেজ হাউসগুলো কেন এক্সপার্টে তাদের ব্যবসা চালায়।",
+  titleEn: "Built by brokers. *Trusted* by brokers.",
+  titleBn: "ব্রোকারদের হাতে গড়া। ব্রোকারদের *আস্থায়*।",
+  introEn: "Five reasons the houses that own Xpert also run their business on it.",
+  introBn: "যে হাউসগুলো এক্সপার্টের মালিক, তারাই কেন এতে তাদের ব্যবসা চালায়: পাঁচটি কারণ।",
   items: [
     {
       icon: "users",
@@ -102,10 +102,10 @@ export const DEFAULT_STRENGTHS: StrengthsSetting = {
 
 export const DEFAULT_SAVINGS: SavingsSetting = {
   published: false,
-  titleEn: "{pct}% lower technology cost",
-  titleBn: "প্রযুক্তি ব্যয় {pct}% কম",
-  bodyEn: "Brokerage houses on Xpert share one platform instead of each paying for its own systems.",
-  bodyBn: "এক্সপার্টে থাকা ব্রোকারেজ হাউসগুলো প্রত্যেকে আলাদা সিস্টেমের খরচ না দিয়ে একটি প্ল্যাটফর্ম ভাগ করে নেয়।",
+  titleEn: "Same market. *{pct}% less* to run it.",
+  titleBn: "একই বাজার। চালাতে খরচ *{pct}% কম*।",
+  bodyEn: "Instead of every brokerage paying for its own systems, the houses on Xpert share one platform and split the bill.",
+  bodyBn: "প্রতিটি ব্রোকারেজ আলাদা সিস্টেমের খরচ না দিয়ে, এক্সপার্টের হাউসগুলো একটি প্ল্যাটফর্ম ভাগ করে নেয়, খরচও ভাগ হয়ে যায়।",
   before: null,
   after: null,
   pct: null,

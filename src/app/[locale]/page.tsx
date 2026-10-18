@@ -1,3 +1,4 @@
+import { plain } from "@/components/ui/Emph";
 import type { Metadata } from "next";
 import { getReviewSeconds } from "@/lib/content/reviews";
 import { getDesign, type HomeSection } from "@/lib/content/design";
@@ -143,7 +144,7 @@ export default async function HomePage({ params }: Props) {
         <Shell id="strengths" className="py-12 md:py-16">
           <div className="flex flex-col gap-10">
             <SectionHeader title={strengths.title} body={strengths.intro || null} />
-            <CoreStrengths items={strengths.items} locale={locale} label={strengths.title} />
+            <CoreStrengths items={strengths.items} locale={locale} label={plain(strengths.title)} />
           </div>
         </Shell>
       )}

@@ -1,3 +1,4 @@
+import { Emph } from "@/components/ui/Emph";
 import { SplitWords } from "@/components/ui/SplitWords";
 import Image from "next/image";
 import Link from "next/link";
@@ -59,7 +60,7 @@ export function SectionHeader({
           H === "h1" ? "text-[2.6rem] leading-[1.04] md:text-[4rem]" : "text-[2.05rem] leading-[1.08] md:text-[2.85rem]",
         )}
       >
-        {title}
+        <Emph text={title} />
       </H>
       {body && (
         <p data-reveal style={delay(1)} className="max-w-[44rem] text-[1.0625rem] leading-relaxed text-pretty text-text-secondary md:text-lg">
@@ -601,7 +602,7 @@ export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
         <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <div className="flex max-w-2xl flex-col gap-4">
             <h2 className="font-display text-4xl leading-[1.02] font-semibold tracking-[-0.03em] text-white md:text-6xl">
-              {t.ctaTitle}
+              <Emph text={t.ctaTitle} />
             </h2>
             <p className="text-lg text-white/80">{t.ctaBody}</p>
           </div>

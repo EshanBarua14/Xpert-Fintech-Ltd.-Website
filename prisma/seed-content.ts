@@ -2225,6 +2225,52 @@ async function seedWhatsAppNumber() {
 }
 
 /**
+ * Once (XFL, 19 Oct 2026): sharper headlines for the core strengths and the cost savings
+ * graphic, where the admin still has the earlier wording (anything edited is kept).
+ */
+async function seedSharperHeadlines() {
+  const MARK = "seed.sharper-headlines-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const notes: string[] = [];
+  const st = await db.siteSetting.findUnique({ where: { key: "home.strengths" } });
+  const sv = st?.value as Record<string, unknown> | undefined;
+  if (sv && (sv.titleEn === "Our core strengths" || !sv.titleEn)) {
+    await db.siteSetting.update({
+      where: { key: "home.strengths" },
+      data: {
+        value: {
+          ...sv,
+          titleEn: "Built by brokers. *Trusted* by brokers.",
+          titleBn: "ব্রোকারদের হাতে গড়া। ব্রোকারদের *আস্থায়*।",
+          introEn: "Five reasons the houses that own Xpert also run their business on it.",
+          introBn: "যে হাউসগুলো এক্সপার্টের মালিক, তারাই কেন এতে তাদের ব্যবসা চালায়: পাঁচটি কারণ।",
+        },
+      },
+    });
+    notes.push("core strengths");
+  }
+  const sa = await db.siteSetting.findUnique({ where: { key: "home.savings" } });
+  const av = sa?.value as Record<string, unknown> | undefined;
+  if (av && av.titleEn === "{pct}% lower technology cost") {
+    await db.siteSetting.update({
+      where: { key: "home.savings" },
+      data: {
+        value: {
+          ...av,
+          titleEn: "Same market. *{pct}% less* to run it.",
+          titleBn: "একই বাজার। চালাতে খরচ *{pct}% কম*।",
+          bodyEn: "Instead of every brokerage paying for its own systems, the houses on Xpert share one platform and split the bill.",
+          bodyBn: "প্রতিটি ব্রোকারেজ আলাদা সিস্টেমের খরচ না দিয়ে, এক্সপার্টের হাউসগুলো একটি প্ল্যাটফর্ম ভাগ করে নেয়, খরচও ভাগ হয়ে যায়।",
+        },
+      },
+    });
+    notes.push("cost savings");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), notes } } });
+  if (notes.length) console.log(`• Sharper headlines: ${notes.join(", ")}`);
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2630,6 +2676,7 @@ async function main() {
   await publishReviewCards();
   await showForEditing();
   await seedWhatsAppNumber();
+  await seedSharperHeadlines();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

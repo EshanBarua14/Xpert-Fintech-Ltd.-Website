@@ -1,3 +1,4 @@
+import { plain } from "@/components/ui/Emph";
 import { cn } from "@/lib/utils/cn";
 import { getDesign } from "@/lib/content/design";
 import { contentSlots } from "@/lib/env/hints";
@@ -515,7 +516,7 @@ export default async function ProductPage({ params }: Props) {
             <div className="aurora opacity-70" />
             <div className="relative flex flex-col items-start gap-8 md:flex-row md:items-center md:justify-between">
               <div className="flex max-w-2xl flex-col gap-3">
-                <h2 className="text-gradient font-display text-4xl font-semibold tracking-[-0.035em] text-balance md:text-5xl">{t.ctaTitle}</h2>
+                <h2 className="text-gradient font-display text-4xl font-semibold tracking-[-0.035em] text-balance md:text-5xl">{plain(t.ctaTitle)}</h2>
                 <p className="text-lg text-text-secondary">{tr.name}</p>
               </div>
               <PrimaryButton href={demoHref}>{ctaLabel}</PrimaryButton>

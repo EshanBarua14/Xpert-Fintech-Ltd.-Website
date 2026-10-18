@@ -27,7 +27,7 @@ import "../globals.css";
  * Noto Sans Bengali (text), so both languages share one hierarchy.
  */
 // Only the weights and styles in use are downloaded; the Bangla faces load only when Bangla text is on the page.
-const display = Spectral({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal"], variable: "--font-display-face", display: "swap" });
+const display = Spectral({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--font-display-face", display: "swap" });
 const body = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 const displayBn = Noto_Serif_Bengali({ subsets: ["bengali"], weight: ["500", "600"], variable: "--font-display-bn", display: "swap", preload: false });
 const bodyBn = Noto_Sans_Bengali({ subsets: ["bengali"], weight: ["400", "500", "600"], variable: "--font-body-bn", display: "swap", preload: false });

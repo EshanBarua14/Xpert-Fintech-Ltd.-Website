@@ -1498,44 +1498,6 @@ html {
   .cx-panel { animation: none; }
 }
 
-/* Home → cost savings graphic (SavingsGraphic): the "with Xpert" bar drops from the old cost to the new one. */
-.savings .savings-arc {
-  transition: stroke-dashoffset 1.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.savings .savings-before {
-  background-image: repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in oklab, var(--color-fg, #fff) 6%, transparent) 10px 20px);
-}
-.savings .savings-after {
-  height: calc(100% - 2.5rem);
-  transition: height 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.35s;
-}
-.savings.is-on .savings-after {
-  height: calc((100% - 2.5rem) * var(--k, 0.2));
-}
-.savings .savings-gap {
-  height: calc((100% - 2.5rem) * (1 - var(--k, 0.2)));
-  opacity: 0;
-  transform: translateY(-8px);
-  transition: opacity 0.6s ease 1.4s, transform 0.6s ease 1.4s;
-}
-.savings.is-on .savings-gap {
-  opacity: 1;
-  transform: none;
-}
-.savings.is-on .savings-arrow {
-  animation: savings-drop 1.8s ease-in-out 2s infinite;
-}
-@keyframes savings-drop {
-  0%, 100% { transform: translateY(-3px); }
-  50% { transform: translateY(4px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .savings .savings-arc,
-  .savings .savings-after,
-  .savings .savings-gap { transition: none; }
-  .savings.is-on .savings-arrow { animation: none; }
-}
-
 /* Home → core strengths (CoreStrengths): calm, slow motion that settles. */
 @property --strength-angle {
   syntax: "<angle>";
@@ -1604,42 +1566,13 @@ html {
   letter-spacing: 0.08em;
 }
 
-/* Cost savings: a slow breathing glow once the ring has filled, and a light sweep up the new bar. */
-.savings.is-on .savings-arc {
-  filter: drop-shadow(0 0 0 transparent);
-  animation: savings-breathe 4.5s ease-in-out 1.8s infinite;
-}
-@keyframes savings-breathe {
-  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
-  50% { filter: drop-shadow(0 0 10px color-mix(in oklab, var(--color-brand-sky) 55%, transparent)); }
-}
-.savings .savings-shine {
-  overflow: hidden;
-}
-.savings .savings-shine::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, transparent 0%, rgb(255 255 255 / 0.35) 50%, transparent 100%);
-  transform: translateY(100%);
-}
-.savings.is-on .savings-shine::after {
-  animation: savings-sweep 1.4s ease-out 1.9s 1 both;
-}
-@keyframes savings-sweep {
-  from { transform: translateY(100%); }
-  to { transform: translateY(-100%); }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .strength-card,
   .strength-card .strength-icon,
   .strength-glow { transition: none; }
   .strength-card:hover { transform: none; }
   .strength-card:hover .strength-ring,
-  .strength-card.is-in .strength-pulse,
-  .savings.is-on .savings-arc,
-  .savings.is-on .savings-shine::after { animation: none; }
+  .strength-card.is-in .strength-pulse { animation: none; }
   .js main .strength-card:not(.is-in) .strength-icon { transform: none; opacity: 1; }
 }
 
@@ -1658,4 +1591,95 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .testimonial-card { transition: none; }
   .testimonial-card:hover { transform: none; }
+}
+
+/* Home → cost savings (SavingsGraphic): twenty blocks of cost; the ones no longer paid lift away into gold outlines. */
+.sv-figure > span {
+  background: linear-gradient(120deg, var(--color-brand-sky), var(--color-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.sv-aurora {
+  animation: sv-drift 18s ease-in-out infinite alternate;
+}
+.sv-aurora-2 {
+  animation-duration: 22s;
+  animation-direction: alternate-reverse;
+}
+@keyframes sv-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(40px, 30px, 0) scale(1.12); }
+}
+.sv-block {
+  position: relative;
+  border: 1px dashed transparent;
+  transition:
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.5s ease,
+    border-color 0.6s ease,
+    background-color 0.6s ease;
+  transition-delay: calc(var(--i, 0) * 22ms);
+}
+.js .sv:not(.is-on) .sv-block {
+  transform: scaleY(0.25);
+  opacity: 0;
+}
+.sv-before {
+  background-color: color-mix(in oklab, var(--color-fg) 12%, transparent);
+  background-image: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in oklab, var(--color-fg) 6%, transparent) 6px 12px);
+}
+.sv-kept::before,
+.sv-saved::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--color-brand-sky), var(--color-brand-royal));
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sv-kept::before {
+  box-shadow: 0 0 18px -4px color-mix(in oklab, var(--color-brand-sky) 70%, transparent);
+}
+/* Saved blocks: from the far end inwards, the fill lifts away and a gold outline stays. */
+.sv.is-on .sv-saved {
+  border-color: color-mix(in oklab, var(--color-gold) 60%, transparent);
+  background-color: color-mix(in oklab, var(--color-gold) 8%, transparent);
+  transition-delay: calc(700ms + var(--j, 0) * 70ms);
+}
+.sv.is-on .sv-saved::before {
+  opacity: 0;
+  transform: translateY(-14px) scale(0.6);
+  transition-delay: calc(700ms + var(--j, 0) * 70ms);
+}
+.sv-brace,
+.sv-tag {
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.js .sv:not(.is-on) .sv-brace,
+.js .sv:not(.is-on) .sv-tag {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.sv.is-on .sv-tag {
+  transition-delay: 1.9s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sv-aurora { animation: none; }
+  .sv-block,
+  .sv-kept::before,
+  .sv-saved::before,
+  .sv-brace,
+  .sv-tag { transition: none !important; }
+}
+
+/* With the WhatsApp button at the bottom right, "back to top" sits just above it. */
+html:has(.whatsapp-fab) .back-to-top {
+  bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  right: 1.5rem;
+}
+@media (min-width: 768px) {
+  html:has(.whatsapp-fab) .back-to-top { bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px)); right: 2rem; }
 }

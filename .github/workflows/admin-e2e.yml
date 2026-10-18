@@ -49,6 +49,14 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_NAME=results.json BASE_URL=http://localhost:3000 npx playwright test e2e/admin-crud.spec.ts --project=desktop --retries=0 --reporter=list,json > e2e.log 2>&1
           echo "exit $?" >> e2e.log
           tail -150 e2e.log
+      - name: Download press sources
+        if: always()
+        run: |
+          mkdir -p out/press; i=0
+          i=$((i+1)); curl -sSL -m 40 -A "Mozilla/5.0 (compatible; XpertFintechWebsite/1.0)" -o out/press/$i.html "https://thefinancialexpress.com.bd/economy/10-brokers-to-give-clients-direct-access-to-trading-platform" || true
+          i=$((i+1)); curl -sSL -m 40 -A "Mozilla/5.0 (compatible; XpertFintechWebsite/1.0)" -o out/press/$i.html "https://www.arthosuchak.com/archives/970892/%E0%A6%AA%E0%A7%81%E0%A6%81%E0%A6%9C%E0%A6%BF%E0%A6%AC%E0%A6%BE%E0%A6%9C%E0%A6%BE%E0%A6%B0%E0%A7%87-%E0%A6%93%E0%A6%AF%E0%A6%BC%E0%A6%BE%E0%A6%A8-%E0%A6%B8%E0%A7%8D%E0%A6%9F%E0%A6%AA-%E0%A6%B8/" || true
+          i=$((i+1)); curl -sSL -m 40 -A "Mozilla/5.0 (compatible; XpertFintechWebsite/1.0)" -o out/press/$i.html "https://www.arthosuchak.com/archives/974490/%E0%A6%8F%E0%A6%95%E0%A7%8D%E0%A6%B8%E0%A6%AA%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%9F-%E0%A6%AB%E0%A6%BF%E0%A6%A8%E0%A6%9F%E0%A7%87%E0%A6%95-%E0%A6%B2%E0%A6%BF%E0%A6%AE%E0%A6%BF%E0%A6%9F%E0%A7%87%E0%A6%A1/" || true
+          i=$((i+1)); curl -sSL -m 40 -A "Mozilla/5.0 (compatible; XpertFintechWebsite/1.0)" -o out/press/$i.html "https://dailynewnation.com/news/726794" || true
       - name: Save results for review
         if: always()
         run: |

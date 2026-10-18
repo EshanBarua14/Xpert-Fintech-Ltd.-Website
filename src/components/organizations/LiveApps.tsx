@@ -29,10 +29,10 @@ type StoreLink = { href: string; label: string; kind: "play" | "ios" | "web" };
 
 /** The app's store links: Google Play and App Store (the brokerage's site is the link on its name, so no separate web button). */
 function linksOf(a: LiveApp, labels: Labels): StoreLink[] {
-  return [
-    a.playStoreUrl && { href: a.playStoreUrl, label: labels.android, kind: "play" as const },
-    a.appStoreUrl && { href: a.appStoreUrl, label: labels.ios, kind: "ios" as const },
-  ].filter((l): l is StoreLink => Boolean(l));
+  const links: StoreLink[] = [];
+  if (a.playStoreUrl) links.push({ href: a.playStoreUrl, label: labels.android, kind: "play" });
+  if (a.appStoreUrl) links.push({ href: a.appStoreUrl, label: labels.ios, kind: "ios" });
+  return links;
 }
 
 /** A client of Xpert without a branded app on the stores: its logo, name and website. */

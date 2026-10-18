@@ -46,6 +46,21 @@ export function SiteEffects() {
     };
   }, []);
 
+  // Cards catch a soft light where the pointer is (people, team, reviews and other .glow-track cards).
+  useEffect(() => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const onMove = (e: PointerEvent) => {
+      const card = (e.target as Element | null)?.closest<HTMLElement>(".person-card, .team-card, .testimonial-card, .glow-track");
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      card.style.setProperty("--gx", `${(e.clientX - r.left).toFixed(0)}px`);
+      card.style.setProperty("--gy", `${(e.clientY - r.top).toFixed(0)}px`);
+    };
+    document.addEventListener("pointermove", onMove, { passive: true });
+    return () => document.removeEventListener("pointermove", onMove);
+  }, []);
+
   // Back-to-top button, shown after a long scroll.
   useEffect(() => {
     const btn = document.createElement("button");

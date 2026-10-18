@@ -82,6 +82,7 @@ export default async function LocaleLayout({
         <a href="#main" className="skip-link">
           {t.skipToContent}
         </a>
+        <span aria-hidden="true" className="scroll-progress" />
         <SiteHeader locale={locale} />
         <main id="main" className="relative flex-1 pt-[calc(5rem+var(--ticker-h))] md:pt-[calc(6rem+var(--ticker-h))]">
           {children}

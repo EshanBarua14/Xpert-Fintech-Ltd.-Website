@@ -196,7 +196,16 @@ export default async function HomePage({ params }: Props) {
       {show("reach") && showReach && (
         <Shell id="reach" className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
-            <SectionHeader title={t.reachTitle} />
+            {/* The headline figure (Admin → Market data) leads the section when there is one. */}
+            <SectionHeader
+              title={
+                headline?.dse
+                  ? t.reachTitleShare.replace("{pct}", digits(headline.dse, locale === "bn"))
+                  : headline?.cse
+                    ? t.reachTitleShareCse.replace("{pct}", digits(headline.cse, locale === "bn"))
+                    : t.reachTitle
+              }
+            />
             <MarketReach
               shares={market.shares}
               headline={headline}

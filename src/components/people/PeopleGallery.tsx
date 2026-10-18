@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components/brand/Logo";
 import { focusStyle } from "@/lib/media/focal";
 import Link from "next/link";
 import Image from "next/image";
@@ -341,15 +342,37 @@ export function PeopleGallery({
               <span aria-hidden="true">×</span>
             </button>
             {/* The portrait in the same 4:5 frame as on the card, whatever the window's height: every profile shows its photo the same way. */}
-            <div className="relative hidden flex-col gap-4 bg-navy-800/50 p-5 md:flex">
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-[color-mix(in_srgb,var(--tone)_35%,transparent)]">
+            {/* Wide screens: the profile card on the left (photo, Xpert's logo, name, designation, links); the biography fills the right. */}
+            <div className="relative hidden min-h-0 flex-col gap-4 overflow-y-auto bg-navy-800/50 p-5 md:flex">
+              <div className="relative aspect-[4/5] w-full shrink-0 overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-[color-mix(in_srgb,var(--tone)_35%,transparent)]">
                 <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt={open.name} fill sizes="(min-width: 768px) 22rem, 80vw" quality={90} className="object-cover" style={focusStyle(open.photo, 0.8)} unoptimized={!open.photo} />
               </div>
-              {open.org && <OrgLogo org={open.org} className="h-10 self-start" />}
+              <div className="flex items-center gap-2.5">
+                <Logo height={26} />
+                <span className="font-display text-sm leading-tight font-medium text-text-primary">{company ?? "Xpert Fintech Ltd."}</span>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <p className="font-display text-xl leading-tight font-semibold tracking-[-0.01em] text-balance text-text-primary">{open.name}</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-[var(--tone-ink)]">
+                  <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-[var(--tone)]" />
+                  {open.title ?? groupLabel}
+                </p>
+                {open.affiliation && <Affiliation text={open.affiliation} className="text-xs" />}
+              </div>
+              {open.org && <OrgLogo org={open.org} className="h-9 self-start" />}
+              <div className="mt-auto flex items-center gap-2 border-t border-fg/[0.08] pt-4">
+                <ContactIcon kind="email" value={open.email} name={open.name} labels={labels} size="size-10" />
+                <ContactIcon kind="linkedin" value={open.linkedinUrl} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
+                {open.email && (
+                  <a href={`mailto:${open.email}`} className="min-w-0 truncate text-xs text-text-secondary hover:text-[var(--tone-ink)]">
+                    {open.email}
+                  </a>
+                )}
+              </div>
             </div>
             <div className="person-dialog-body flex min-h-0 flex-col gap-[clamp(0.75rem,2svh,1.5rem)] p-5 sm:p-7 md:p-9">
-              <div className="flex items-center gap-4 pr-10">
-                <span className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-2xl bg-navy-800 md:hidden">
+              <div className="flex items-center gap-4 pr-10 md:hidden">
+                <span className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-2xl bg-navy-800">
                   <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt="" fill sizes="5rem" quality={90} className="object-cover" style={focusStyle(open.photo, 0.8)} unoptimized={!open.photo} />
                 </span>
                 <div className="flex min-w-0 flex-col gap-1.5">
@@ -363,6 +386,7 @@ export function PeopleGallery({
                   {open.affiliation && <Affiliation text={open.affiliation} />}
                 </div>
               </div>
+              <p className="hidden pr-12 text-xs font-semibold tracking-[0.18em] text-text-secondary uppercase md:block">{labels.biography}</p>
               {showPlaceholderBadge && open.isPlaceholder && (
                 <span className="self-start rounded-md border border-gold/50 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-gold">{labels.placeholder}</span>
               )}
@@ -433,7 +457,7 @@ export function PeopleGallery({
                   </div>
                 )}
               </section>
-              <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-fg/[0.08] pt-4">
+              <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-fg/[0.08] pt-4 md:hidden">
                 {open.email ? (
                   <a
                     href={`mailto:${open.email}`}
@@ -459,7 +483,7 @@ export function PeopleGallery({
                 ) : (
                   <ContactIcon kind="linkedin" value={null} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
                 )}
-                {open.org && <OrgLogo org={open.org} className="ml-auto h-9 md:hidden" />}
+                {open.org && <OrgLogo org={open.org} className="ml-auto h-9" />}
               </div>
             </div>
           </div>

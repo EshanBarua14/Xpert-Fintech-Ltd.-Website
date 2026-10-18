@@ -23,7 +23,6 @@ export type SettingsValues = {
   regulatoryBn: string;
   addressBn: string;
   socialLinks: string;
-  alertEmails: string;
 };
 
 function Group({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
@@ -87,7 +86,7 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
         <TextArea id="regulatoryBn" label="Regulatory note (বাংলা)" rows={3} lang="bn" defaultValue={values.regulatoryBn} error={e.regulatoryBn} />
       </Group>
 
-      <Group title="Social links and alerts">
+      <Group title="Social links">
         <TextArea
           id="socialLinks"
           label="Social links"
@@ -96,14 +95,9 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
           defaultValue={values.socialLinks}
           error={e.socialLinks}
         />
-        <TextArea
-          id="alertEmails"
-          label="Send new leads to"
-          rows={4}
-          hint="Email addresses, separated by commas or new lines. Used once the demo form is live."
-          defaultValue={values.alertEmails}
-          error={e.alertEmails}
-        />
+        <p className="self-end text-sm text-text-secondary">
+          Who is emailed about new leads and job applications, and the mail server: <a href="/admin/notifications" className="text-brand-sky hover:underline">Email &amp; notifications</a>.
+        </p>
       </Group>
 
       <div>

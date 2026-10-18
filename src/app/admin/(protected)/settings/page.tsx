@@ -19,7 +19,6 @@ export default async function SettingsPage() {
   ]);
   const get = (key: string) => rows.find((r) => r.key === key)?.value;
   const social = get("social.links");
-  const alerts = get("leads.alertEmails");
 
   const values: SettingsValues = {
     companyNameEn: text(get("company.name"), "en"),
@@ -45,14 +44,13 @@ export default async function SettingsPage() {
           .filter(Boolean)
           .join("\n")
       : "",
-    alertEmails: Array.isArray(alerts) ? alerts.filter((a): a is string => typeof a === "string").join("\n") : "",
   };
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-display text-3xl font-semibold">Settings</h1>
-        <p className="mt-1 text-sm text-text-secondary">Company details, contact information and alerts used across the website.</p>
+        <p className="mt-1 text-sm text-text-secondary">Company details and contact information used across the website.</p>
       </div>
       <SettingsForm values={values} />
     </div>

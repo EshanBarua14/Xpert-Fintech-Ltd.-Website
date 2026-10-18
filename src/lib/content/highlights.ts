@@ -27,6 +27,8 @@ export type SavingsSetting = {
   /** What was paid before Xpert, and with Xpert, in the same unit. */
   before: number | null;
   after: number | null;
+  /** The share saved, when only the percentage is known (used when the two figures are not entered). */
+  pct: number | null;
   /** Written before the number ("৳") and after it ("lakh a month", "% of revenue"). */
   prefix: string;
   unitEn: string;
@@ -96,6 +98,7 @@ export const DEFAULT_SAVINGS: SavingsSetting = {
   bodyBn: "এক্সপার্টে থাকা ব্রোকারেজ হাউসগুলো প্রত্যেকে আলাদা সিস্টেমের খরচ না দিয়ে একটি প্ল্যাটফর্ম ভাগ করে নেয়।",
   before: null,
   after: null,
+  pct: null,
   prefix: "",
   unitEn: "",
   unitBn: "",
@@ -150,6 +153,7 @@ export function readSavings(value: unknown): SavingsSetting {
     bodyBn: str(v.bodyBn),
     before: num(v.before),
     after: num(v.after),
+    pct: num(v.pct),
     prefix: str(v.prefix),
     unitEn: str(v.unitEn),
     unitBn: str(v.unitBn),
@@ -207,7 +211,8 @@ export function savingPct(before: number | null, after: number | null): number |
 /** The savings graphic in the visitor's language, or null when it is not ready to show. */
 export async function getSavings(locale: AppLocale, { drafts = false } = {}) {
   const s = await getSavingsSetting();
-  const pct = savingPct(s.before, s.after);
+  const fromFigures = savingPct(s.before, s.after);
+  const pct = fromFigures ?? (s.pct !== null && s.pct > 0 && s.pct < 100 ? Math.round(s.pct) : null);
   if (pct === null || (!s.published && !drafts)) return null;
   const fill = (v: string) => v.replace(/\{pct\}/g, String(pct));
   return {
@@ -215,8 +220,9 @@ export async function getSavings(locale: AppLocale, { drafts = false } = {}) {
     pct,
     title: fill(pick(locale, s.titleEn, s.titleBn)),
     body: fill(pick(locale, s.bodyEn, s.bodyBn)),
-    before: s.before!,
-    after: s.after!,
+    // Without the two figures, the bars are drawn to scale (100 → 100 − pct) with no amounts printed.
+    before: fromFigures !== null ? s.before! : null,
+    after: fromFigures !== null ? s.after! : null,
     prefix: s.prefix,
     unit: pick(locale, s.unitEn, s.unitBn),
     beforeLabel: pick(locale, s.beforeLabelEn, s.beforeLabelBn),
@@ -232,7 +238,8 @@ export async function getSavings(locale: AppLocale, { drafts = false } = {}) {
 export async function getWhatsApp(locale: AppLocale) {
   const w = await getWhatsAppSetting();
   const digits = w.number.replace(/\D/g, "");
-  if (digits.length < 8) return null;
+  // No number yet: the button still shows and opens the contact page until one is saved.
+  if (digits.length < 8) return { href: `/${locale}/contact`, label: locale === "bn" ? "যোগাযোগ করুন" : "Contact us", external: false };
   const message = pick(locale, w.messageEn, w.messageBn);
-  return { href: `https://wa.me/${digits}${message ? `?text=${encodeURIComponent(message)}` : ""}`, label: pick(locale, w.labelEn, w.labelBn) };
+  return { href: `https://wa.me/${digits}${message ? `?text=${encodeURIComponent(message)}` : ""}`, label: pick(locale, w.labelEn, w.labelBn), external: true };
 }

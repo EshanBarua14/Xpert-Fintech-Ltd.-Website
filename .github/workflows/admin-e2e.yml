@@ -37,7 +37,8 @@ jobs:
       - run: npx prisma migrate deploy && npx prisma generate
       - run: npx prisma db seed 2>&1 | tail -30
       - run: npm run db:seed:content 2>&1 | tail -30 || true
-      - run: npx next build > build.log 2>&1 || (grep -nE "rror|Failed|failed" build.log | head -30 | sed "s/^/::error::/"; tail -40 build.log | sed "s/^/::error::/"; exit 1)
+      # Google Fonts sometimes refuses GitHub's runners (next/font error): try the build up to three times.
+      - run: for i in 1 2 3; do npx next build > build.log 2>&1 && exit 0; grep -q "next/font" build.log || break; echo "::warning::font download failed, retrying ($i)"; sleep 20; done; grep -nE "rror|Failed|failed" build.log | head -30 | sed "s/^/::error::/"; tail -40 build.log | sed "s/^/::error::/"; exit 1
       - run: |
           nohup npx next start -p 3000 > server.log 2>&1 &
           for i in $(seq 1 60); do curl -sf http://localhost:3000/api/health >/dev/null && break; sleep 2; done

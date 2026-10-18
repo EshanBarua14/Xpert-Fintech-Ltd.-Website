@@ -18,7 +18,7 @@ jobs:
       - run: |
           set +e
           npx tsc --noEmit -p . > tsc.log 2>&1; echo "::notice::tsc exit $? with $(grep -c 'error TS' tsc.log) errors"
-          npx next build > build.log 2>&1; code=$?
+          for i in 1 2 3; do npx next build > build.log 2>&1; code=$?; [ $code -eq 0 ] && break; grep -q "next/font" build.log || break; echo "::warning::font download failed, retrying ($i)"; sleep 20; done
           echo "::notice::next build exit $code; $(grep -E 'Compiled|Generating static|Route \(app\)' build.log | tr '\n' ' ' | cut -c1-200)"
           grep -nE "rror|Failed|failed" build.log | head -40 | sed 's/^/::error::/'
           exit $code

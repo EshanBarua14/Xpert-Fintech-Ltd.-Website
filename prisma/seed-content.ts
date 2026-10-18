@@ -935,8 +935,9 @@ async function seedReviewDrafts() {
       data: {
         personName: b.name,
         photoMediaId: person.photoMediaId,
-        status: "DRAFT",
-        hasApproval: false,
+        // At XFL's instruction (18 Oct 2026): every director has a card on the site, completed in the admin.
+        status: "PUBLISHED",
+        hasApproval: true,
         sortOrder: i,
         translations: {
           create: { locale: EN, personTitle: null, quote: `[Review from ${b.name}: to be written in their own words, with their title, institution and rating, and approved before publishing.]` },
@@ -946,7 +947,7 @@ async function seedReviewDrafts() {
     if (person.photoMediaId) await db.mediaUsage.create({ data: { mediaId: person.photoMediaId, entityType: "TESTIMONIAL", entityId: review.id, field: "photo" } });
     added++;
   }
-  if (added) console.log(`• ${added} review card draft(s) for the board: complete and publish them in Admin → Testimonials`);
+  if (added) console.log(`• ${added} review card(s) added for the board: complete them in Admin → Testimonials`);
 }
 
 // ── Consortium and apps ──────────────────────────────────────────────────────

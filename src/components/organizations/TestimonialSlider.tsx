@@ -2,12 +2,13 @@
 
 import { focusStyle } from "@/lib/media/focal";
 import Image from "next/image";
+import { ContactIcon, type ContactLabels } from "@/components/people/ContactIcon";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { TestimonialCard } from "@/lib/public/content";
 import { cn } from "@/lib/utils/cn";
 import { fill } from "@/lib/i18n/digits";
 
-type Labels = { region: string; prev: string; next: string; pause: string; play: string; slide: string; /** "Rated {n} out of 5" */ rating: string; /** "{n}/5" */ ratingShort?: string; /** Digits 0–9 (Bangla numerals on the Bangla site). */ digits?: string; /** Shown instead of a quote still in [brackets] (not yet written). */ pending?: string };
+type Labels = { region: string; prev: string; next: string; pause: string; play: string; slide: string; /** "Rated {n} out of 5" */ rating: string; /** "{n}/5" */ ratingShort?: string; /** Digits 0–9 (Bangla numerals on the Bangla site). */ digits?: string; /** Shown instead of a quote still in [brackets] (not yet written). */ pending?: string; contact?: ContactLabels };
 
 /** Default seconds per position; set in Admin → Testimonials → Slide speed. */
 const DEFAULT_SECONDS = 4;
@@ -139,6 +140,12 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
                   <span className="font-display text-xl leading-tight font-semibold text-text-primary">{t.name}</span>
                   {t.role && <span className="mt-1.5 text-[0.8125rem] leading-snug font-semibold text-gold">{t.role}</span>}
                   {t.organization && <span className="mt-0.5 font-display text-[0.95rem] leading-snug text-brand-sky">{t.organization}</span>}
+                  {labels.contact && (
+                    <span className="mt-3 flex items-center gap-2">
+                      <ContactIcon kind="linkedin" value={t.linkedin ?? null} name={t.name} org={t.organization} labels={labels.contact} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />
+                      <ContactIcon kind="email" value={t.email ?? null} name={t.name} labels={labels.contact} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />
+                    </span>
+                  )}
                 </span>
               </figcaption>
               {t.rating ? (
@@ -170,13 +177,25 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
               </blockquote>
               {t.logo && (
                 <div className="flex items-center border-t border-fg/[0.08] pt-5">
-                  <Image
-                    src={t.logo.url}
-                    alt={t.logoAlt ?? t.organization ?? ""}
-                    width={t.logo.width ?? 160}
-                    height={t.logo.height ?? 48}
-                    className="member-logo h-8 w-auto max-w-[10rem] object-contain object-left"
-                  />
+                  {(() => {
+                    const img = (
+                      <Image
+                        src={t.logo.url}
+                        alt={t.logoAlt ?? t.organization ?? ""}
+                        width={t.logo.width ?? 160}
+                        height={t.logo.height ?? 48}
+                        className="member-logo h-8 w-auto max-w-[10rem] object-contain object-left"
+                      />
+                    );
+                    // The logo opens the organization's website.
+                    return t.logoUrl ? (
+                      <a href={t.logoUrl} target="_blank" rel="noopener noreferrer" title={t.logoAlt ?? t.organization ?? undefined} className="rounded-md transition-opacity hover:opacity-80">
+                        {img}
+                      </a>
+                    ) : (
+                      img
+                    );
+                  })()}
                 </div>
               )}
             </figure>

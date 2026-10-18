@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { hasAdmin, signIn } from "./helpers/admin";
 import path from "node:path";
 import os from "node:os";
+import fs from "node:fs";
 
 /**
  * Admin console, end to end, against a throwaway database (never the live site):
@@ -15,7 +16,30 @@ import os from "node:os";
 
 const STAMP = Date.now().toString(36);
 /** One sign-in for the whole file: the login page locks an account after a few attempts (by design). */
-const STATE = path.join(os.tmpdir(), `xfl-admin-e2e-${process.pid}.json`);
+const STATE = path.join(os.tmpdir(), "xfl-admin-e2e-session.json");
+
+/** Signs in once and keeps the session for every test (and every restarted worker). */
+async function ensureSession(browser: import("@playwright/test").Browser) {
+  if (fs.existsSync(STATE) && Date.now() - fs.statSync(STATE).mtimeMs < 30 * 60_000) return;
+  const context = await browser.newContext({ storageState: undefined });
+  const page = await context.newPage();
+  await signIn(page);
+  await context.storageState({ path: STATE });
+  await context.close();
+}
+
+/** Fields a section needs beyond the generic ones (each form's own rules). */
+const EXTRA: Record<string, (page: Page) => Promise<void>> = {
+  pages: async (page) => page.locator('[name="enPath"]').fill(`e2e-page-${STAMP}`),
+  people: async (page) => page.locator('main form input[name^="role."]').first().check(),
+  resources: async (page) => page.locator("#externalUrl").fill("https://example.com/e2e.pdf"),
+  testimonials: async (page) => {
+    for (const t of await page.locator("main form textarea:visible").all()) if (!(await t.inputValue())) await t.fill("E2E test quote, written for the end-to-end check.");
+  },
+  videos: async (page) => page.locator('main form input[type="url"]:visible').first().fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+  "eco-nodes": async (page) => page.locator("#key").fill(`e2e-node-${STAMP}`),
+  "eco-flows": async (page) => page.locator("#key").fill(`e2e-flow-${STAMP}`),
+};
 
 /** Every admin page that lists or edits something. */
 const PAGES = [
@@ -171,11 +195,7 @@ test.describe("Admin console", () => {
   test.skip(!hasAdmin, "Set E2E_ADMIN_EMAIL and E2E_ADMIN_PASSWORD (see docs/TESTING.md)");
   test.use({ storageState: STATE });
   test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext({ storageState: undefined });
-    const page = await context.newPage();
-    await signIn(page);
-    await context.storageState({ path: STATE });
-    await context.close();
+    await ensureSession(browser);
   });
   test.beforeEach(async ({ page }) => {
     page.on("dialog", (d) => d.accept());
@@ -223,6 +243,7 @@ test.describe("Admin console", () => {
       // Create
       await expectHealthy(page, `${base}/new`);
       await fillRequired(page, section);
+      await EXTRA[section]?.(page);
       await saveButton(page).click();
       await page.waitForURL(new RegExp(`${base}/[0-9a-f-]{36}`), { timeout: 30_000 }).catch(() => undefined);
       expect(page.url(), `create failed: ${await formProblems(page)}`).toMatch(new RegExp(`${base}/[0-9a-f-]{36}`));
@@ -264,8 +285,22 @@ test.describe("Admin console", () => {
   }
 
   for (const url of SETTINGS) {
-    test(`${url}: saves unchanged`, async ({ page }) => {
+    test(`${url}: saves`, async ({ page }) => {
       await expectHealthy(page, url);
+      if (url === "/admin/site-text") {
+        // Saving is only possible after a change: type a text, save, then clear it (back to the default) and save.
+        const box = page.locator("main textarea, main input[type='text']").filter({ hasNot: page.locator("[disabled]") }).nth(1);
+        await box.fill(`E2E text ${STAMP}`);
+        await page.getByRole("button", { name: "Save changes" }).click();
+        await expect(page.getByText("No unsaved changes")).toBeVisible({ timeout: 15_000 });
+        await page.reload();
+        await expect(page.locator(`main :is(textarea,input)[value="E2E text ${STAMP}"], main textarea:has-text("E2E text ${STAMP}")`).first(), "site text not kept").toBeVisible();
+        const again = page.locator("main textarea, main input[type='text']").nth(1);
+        await again.fill("");
+        await page.getByRole("button", { name: "Save changes" }).click();
+        await expect(page.getByText("No unsaved changes")).toBeVisible({ timeout: 15_000 });
+        return;
+      }
       const btn = saveButton(page);
       if (!(await btn.count())) test.skip(true, "no save button");
       await btn.click();
@@ -287,11 +322,7 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
   test.skip(!hasAdmin, "Set E2E_ADMIN_EMAIL and E2E_ADMIN_PASSWORD (see docs/TESTING.md)");
   test.use({ storageState: STATE });
   test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext({ storageState: undefined });
-    const page = await context.newPage();
-    await signIn(page);
-    await context.storageState({ path: STATE });
-    await context.close();
+    await ensureSession(browser);
   });
   test.beforeEach(async ({ page }) => {
     page.on("dialog", (d) => d.accept());
@@ -344,7 +375,7 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
     await page.waitForTimeout(1500);
     await page.reload();
     await expect(page.locator(`form:has(input[value="${from}"]) input[name="toPath"]`)).toHaveValue("/en/contact");
-    await page.locator(`form:has(input[value="${from}"])`).getByRole("button", { name: "Delete" }).click();
+    await page.locator("div").filter({ has: page.locator(`input[value="${from}"]`) }).filter({ has: page.getByRole("button", { name: "Delete" }) }).last().getByRole("button", { name: "Delete" }).click();
     await page.waitForTimeout(1500);
     await page.reload();
     await expect(page.locator(`input[value="${from}"]`)).toHaveCount(0);
@@ -359,7 +390,7 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
     await page.getByRole("button", { name: "Add admin" }).click();
     await expect(page.getByText(`Admin ${email} created`), `admin not created: ${await formProblems(page)}`).toBeVisible({ timeout: 15_000 });
     await page.reload();
-    const card = page.locator("form").filter({ has: page.locator(`input[value="${email}"]`) }).first().locator("xpath=ancestor::*[.//button[normalize-space()='Remove']][1]");
+    const card = page.locator("li, div").filter({ hasText: email }).filter({ has: page.getByRole("button", { name: "Remove" }) }).last();
     await card.getByRole("button", { name: "Deactivate" }).click();
     await expect(card.getByRole("button", { name: "Reactivate" })).toBeVisible({ timeout: 15_000 });
     await card.getByRole("button", { name: "Reactivate" }).click();
@@ -373,7 +404,7 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
   test("/admin/media: upload, edit details, trash, restore, delete", async ({ page }) => {
     await expectHealthy(page, "/admin/media");
     await page.locator("#files").setInputFiles({ name: `e2e-${STAMP}.png`, mimeType: "image/png", buffer: PNG });
-    await page.getByRole("button", { name: "Upload" }).click();
+    await page.getByRole("button", { name: "Upload", exact: true }).click();
     await expect(page.locator("[role='status']").first(), "upload gave no confirmation").toBeVisible({ timeout: 30_000 });
     await page.goto(`/admin/media?q=e2e-${STAMP}`);
     const link = page.locator('main a[href^="/admin/media/"]').filter({ hasNotText: /trash/i }).first();
@@ -402,6 +433,7 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
     test(`/admin/ecosystem/${kind}: create, edit, delete`, async ({ page }) => {
       await expectHealthy(page, `/admin/ecosystem/${kind}/new`);
       await fillRequired(page, `eco-${kind}`);
+      await EXTRA[`eco-${kind}`]?.(page);
       await saveButton(page).click();
       await page.waitForURL(new RegExp(`/admin/ecosystem/${kind}/[0-9a-f-]{36}`), { timeout: 30_000 }).catch(() => undefined);
       expect(page.url(), `create failed: ${await formProblems(page)}`).toMatch(new RegExp(`/admin/ecosystem/${kind}/[0-9a-f-]{36}`));

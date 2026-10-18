@@ -25,7 +25,7 @@ const delay = (d: number) => ({ "--d": d }) as CSSProperties;
 
 export function Shell({ children, className, id }: { children: ReactNode; className?: string; id?: string }) {
   return (
-    <section id={id} className={cn("relative scroll-mt-28", className)}>
+    <section id={id} className={cn("shell relative scroll-mt-28", className)}>
       <div className="mx-auto w-full max-w-7xl px-4 md:px-8">{children}</div>
     </section>
   );
@@ -598,13 +598,26 @@ export function MemberBoard({ names }: { names: string[] }) {
 export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
   return (
     <Shell className="py-14 md:py-20">
-      <div className="relative overflow-hidden rounded-[2rem] bg-brand-royal px-6 py-14 md:px-16 md:py-20">
+      <div className="cta-band relative overflow-hidden rounded-[2rem] px-6 py-14 md:px-16 md:py-20">
+        <span aria-hidden="true" className="cta-grid pointer-events-none absolute inset-0" />
+        <span aria-hidden="true" className="cta-orb pointer-events-none absolute -top-24 -right-16 size-80 rounded-full" />
+        <span aria-hidden="true" className="cta-orb cta-orb-2 pointer-events-none absolute -bottom-32 left-1/4 size-96 rounded-full" />
         <div className="relative flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <div className="flex max-w-2xl flex-col gap-4">
             <h2 className="font-display text-4xl leading-[1.02] font-semibold tracking-[-0.03em] text-white md:text-6xl">
               <Emph text={t.ctaTitle} />
             </h2>
             <p className="text-lg text-white/80">{t.ctaBody}</p>
+            <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white/75">
+              {(locale === "bn" ? ["আমাদের টিমের সঙ্গে সরাসরি ডেমো", "বাংলা বা ইংরেজিতে", "আপনার হাউসের কাজের ধারা ধরে"] : ["A live walkthrough with our team", "In Bangla or English", "Built around your house's workflow"]).map((x) => (
+                <li key={x} className="inline-flex items-center gap-2">
+                  <svg viewBox="0 0 16 16" className="size-4 text-[#7dd3fc]" aria-hidden="true">
+                    <path d="m3.5 8.5 3 3 6-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {x}
+                </li>
+              ))}
+            </ul>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -630,7 +643,9 @@ export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
 
 export function PageHero({ eyebrow, title, body, children }: { eyebrow?: string; title: string; body?: string | null; children?: ReactNode }) {
   return (
-    <section className="hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
+    <section className="page-hero hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
+      <span aria-hidden="true" className="page-hero-grid pointer-events-none absolute inset-0" />
+      <span aria-hidden="true" className="page-hero-glow pointer-events-none absolute -top-40 right-[-10%] size-[36rem] rounded-full" />
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pt-6 pb-6 md:px-8 md:pt-8 md:pb-8">
         <SectionHeader as="h1" eyebrow={eyebrow} title={title} body={body} />
         {children}

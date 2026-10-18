@@ -1724,3 +1724,75 @@ html:has(.whatsapp-fab) .back-to-top {
   .ps-line path:first-child { stroke-dashoffset: 0; }
   .ps-progress { width: 75%; }
 }
+
+/* ── Finish: reading progress, section hairlines, card light, richer closing band ── */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 70;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--color-brand-royal), var(--color-brand-sky), var(--color-gold));
+  pointer-events: none;
+}
+@supports (animation-timeline: scroll()) {
+  .scroll-progress { animation: scroll-progress linear both; animation-timeline: scroll(root block); }
+}
+@supports not (animation-timeline: scroll()) {
+  .scroll-progress { display: none; }
+}
+@keyframes scroll-progress { to { transform: scaleX(1); } }
+
+/* A fine gradient line between consecutive sections. */
+.shell + .shell::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(72rem, calc(100% - 2rem));
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-fg) 10%, transparent) 20%, color-mix(in oklab, var(--color-brand-sky) 35%, transparent) 50%, color-mix(in oklab, var(--color-fg) 10%, transparent) 80%, transparent);
+  pointer-events: none;
+}
+
+/* Cards: a soft light follows the pointer (SiteEffects sets --gx/--gy). */
+.person-card, .team-card, .testimonial-card, .glow-track { --gx: 50%; --gy: -20%; }
+.person-card { --glow: var(--tone); }
+.team-card { --glow: var(--dept); }
+.person-card:hover, .team-card:hover, .testimonial-card:hover, .glow-track:hover {
+  background-image: radial-gradient(380px circle at var(--gx) var(--gy), color-mix(in oklab, var(--glow, var(--color-brand-sky)) 14%, transparent), transparent 55%);
+}
+
+/* Closing band: deep blue gradient, a faint grid, two slow glows. */
+.cta-band {
+  background: linear-gradient(125deg, var(--color-brand-deep, #1e4f94) 0%, var(--color-brand-royal) 45%, color-mix(in oklab, var(--color-brand-royal) 70%, var(--color-brand-sky)) 100%);
+  box-shadow: 0 40px 100px -50px color-mix(in oklab, var(--color-brand-royal) 80%, transparent);
+}
+.cta-grid {
+  background-image: linear-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px), linear-gradient(90deg, rgb(255 255 255 / 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at 70% 30%, #000 0%, transparent 70%);
+}
+.cta-orb {
+  background: radial-gradient(circle, rgb(125 211 252 / 0.35), transparent 65%);
+  filter: blur(10px);
+  animation: sv-drift 16s ease-in-out infinite alternate;
+}
+.cta-orb-2 { background: radial-gradient(circle, color-mix(in oklab, var(--color-gold) 30%, transparent), transparent 65%); animation-duration: 21s; animation-direction: alternate-reverse; }
+@media (prefers-reduced-motion: reduce) {
+  .cta-orb { animation: none; }
+}
+
+/* Inner page intros: a faint grid fading out from the heading, and a slow glow. */
+.page-hero-grid {
+  background-image: linear-gradient(color-mix(in oklab, var(--color-fg) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--color-fg) 5%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 80% at 20% 30%, #000 0%, transparent 70%);
+}
+.page-hero-glow {
+  background: radial-gradient(circle, color-mix(in oklab, var(--color-brand-sky) 18%, transparent), transparent 65%);
+  animation: sv-drift 20s ease-in-out infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) { .page-hero-glow { animation: none; } }

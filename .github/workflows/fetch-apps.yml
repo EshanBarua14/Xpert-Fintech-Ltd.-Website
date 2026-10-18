@@ -10,14 +10,12 @@ jobs:
     steps:
       - run: |
           mkdir out && cd out
-          for p in ebs sjb snm gdf nls bal ibb one rem sky ubr; do
-            for c in bd us; do curl -s -m 30 "https://itunes.apple.com/lookup?bundleId=com.xfltrade.$p&country=$c" > "ios-$p-$c.json"; done
-            curl -s -m 30 -o /dev/null -w "play com.xfltrade.$p %{http_code}\n" "https://play.google.com/store/apps/details?id=com.xfltrade.$p&hl=en" >> play.txt
+          for c in us bd gb in; do curl -s -m 30 "https://itunes.apple.com/lookup?id=6504787994&country=$c" > "ios-mika-$c.json"; curl -s -m 30 "https://itunes.apple.com/lookup?id=914867632&entity=software&country=$c" > "ios-mika-dev-$c.json"; done
+          curl -s -m 30 "https://itunes.apple.com/lookup?id=6753627888&country=us" > ios-ucb-us.json
+          for p in com.xfltrade.ebs com.xfltrade.sjb com.xfltrade.snm com.xfltrade.gdf com.xfltrade.nls com.xfltrade.bal com.xfltrade.ibb com.xfltrade.one com.xfltrade.rem com.xfltrade.sky com.xfltrade.ubr net.mikasecurities.oms; do
+            t=$(curl -sL -m 30 "https://play.google.com/store/apps/details?id=$p&hl=en&gl=bd" | grep -o '<title[^>]*>[^<]*' | head -1 | sed 's/<title[^>]*>//')
+            d=$(curl -sL -m 30 "https://play.google.com/store/apps/details?id=$p&hl=en&gl=bd" | grep -o 'href="/store/apps/dev[^"]*"[^>]*>[^<]*<\|"/store/apps/developer?id=[^"]*"' | head -1)
+            echo "$p | $t | $d" >> play-titles.txt
           done
-          curl -s -m 30 -o /dev/null -w "play net.mikasecurities.oms %{http_code}\n" "https://play.google.com/store/apps/details?id=net.mikasecurities.oms&hl=en" >> play.txt
-          for t in "xpert+fintech" "xfl+trade" "amar+biniyog" "utrade" "trade+securities+bangladesh"; do curl -s -m 30 "https://itunes.apple.com/search?term=$t&entity=software&country=bd&limit=200" > "search-$t.json"; done
-          curl -s -m 30 "https://itunes.apple.com/lookup?id=6504787994&country=bd" > ios-mika.json
-          curl -s -m 30 "https://itunes.apple.com/lookup?id=6753627888&country=bd" > ios-ucb.json
-          curl -sL -m 30 "https://play.google.com/store/apps/details?id=net.mikasecurities.oms&hl=en" > play-mika.html
           git init -q -b tmp && git add . && git -c user.name=ci -c user.email=ci@example.com commit -qm "apps $(date -u +%FT%TZ)"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tmp:tmp/dse-pages

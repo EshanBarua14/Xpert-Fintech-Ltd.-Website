@@ -267,7 +267,7 @@ export function FlagshipHero({
               {market}
             </div>
           )}
-          {facts && facts.length > 0 ? (
+          {facts && facts.length > 0 && (
             <dl data-reveal style={delay(4)} className="mt-2 grid max-w-[34rem] grid-cols-3 border-t border-fg/10 pt-5">
               {facts.slice(0, 3).map((f, i) => (
                 <div key={f.label} className={cn("flex flex-col gap-1", i > 0 && "border-l border-fg/10 pl-4 sm:pl-6")}>
@@ -278,11 +278,12 @@ export function FlagshipHero({
                 </div>
               ))}
             </dl>
-          ) : credentials ? (
-            <div data-reveal style={delay(4)}>
+          )}
+          {credentials ? (
+            <div data-reveal style={delay(5)}>
               {credentials}
             </div>
-          ) : memberCount > 0 && (
+          ) : !facts?.length && memberCount > 0 && (
             <Link
               href={`/${locale}/consortium`}
               data-reveal

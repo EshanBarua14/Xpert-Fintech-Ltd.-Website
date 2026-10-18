@@ -128,7 +128,12 @@ export default async function HomePage({ params }: Props) {
         logos={data.logos}
         credentials={credentials.length ? <CredentialsInline items={credentials} label={t.credentialsTitle} /> : undefined}
         // The figures follow right below in "Our share of the market".
-        facts={showReach ? [] : proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
+        // Who built it, in three real numbers: the brokerage houses that own Xpert, the institutions on it, the apps live.
+        facts={[
+          { value: data.members.length, label: t.proofMembers },
+          { value: data.clients.length, label: t.proofClients },
+          { value: apps.length, label: t.proofApps },
+        ].filter((f) => f.value > 0)}
         market={design.heroIndices && market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} /> : undefined}
       />
 

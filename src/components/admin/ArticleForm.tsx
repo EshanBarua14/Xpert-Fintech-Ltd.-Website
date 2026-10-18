@@ -17,6 +17,7 @@ export type ArticleFormValues = {
   sortOrder: number;
   displayDate: string;
   authorName: string;
+  sourceUrl: string;
   coverMediaId: string;
   videoUrl: string;
   categoryId: string;
@@ -60,7 +61,8 @@ export function ArticleForm({
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Details</legend>
           <TextInput id="displayDate" type="date" label="Date shown to readers" hint="Optional. Defaults to the publish date." defaultValue={values.displayDate} error={e.displayDate} />
-          <TextInput id="authorName" label="Author" defaultValue={values.authorName} error={e.authorName} />
+          <TextInput id="authorName" label="Author or publication" hint="For a press report, the newspaper, e.g. The Financial Express." defaultValue={values.authorName} error={e.authorName} />
+          <TextInput id="sourceUrl" type="url" label="Source link" placeholder="https://" hint="The original report. Shown to readers as a clickable source." defaultValue={values.sourceUrl} error={e.sourceUrl} />
           <Select id="categoryId" label="Category" placeholder="No category" options={categories} defaultValue={values.categoryId} error={e.categoryId} />
           <TextInput id="newCategoryEn" label="…or a new category" hint="English name. Creates it on save." error={e.newCategoryEn} />
           <TextInput id="newCategoryBn" label="New category (বাংলা)" error={e.newCategoryBn} />

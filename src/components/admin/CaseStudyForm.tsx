@@ -9,7 +9,7 @@ import { TextInput } from "@/components/ui/Field";
 import type { ImageOption } from "@/lib/admin/media";
 
 type Text = { title: string; slug: string; summary: string; challenge: string; solution: string; outcome: string };
-export type CaseStudyFormValues = { id?: string; status: "DRAFT" | "PUBLISHED"; publishAt: string; sortOrder: number; coverMediaId: string; en: Text; bn: Text };
+export type CaseStudyFormValues = { id?: string; status: "DRAFT" | "PUBLISHED"; publishAt: string; sortOrder: number; coverMediaId: string; sourceName: string; sourceUrl: string; en: Text; bn: Text };
 
 const FIELDS: FieldSpec[] = [
   { name: "Title", label: "Title" },
@@ -40,6 +40,8 @@ export function CaseStudyForm({ values, images }: { values: CaseStudyFormValues;
           <legend className="px-2 text-sm font-semibold">Media</legend>
           <ImagePicker name="coverMediaId" label="Cover image" options={images} defaultValue={values.coverMediaId} error={e.coverMediaId} />
           <TextInput id="sortOrder" type="number" min={0} label="Order" defaultValue={String(values.sortOrder)} error={e.sortOrder} />
+          <TextInput id="sourceName" label="Source" placeholder="e.g. Google Play, The Financial Express" defaultValue={values.sourceName} error={e.sourceName} />
+          <TextInput id="sourceUrl" type="url" label="Source link" placeholder="https://" hint="Where the facts come from. Shown to visitors as a clickable source." defaultValue={values.sourceUrl} error={e.sourceUrl} />
         </fieldset>
       </aside>
     </form>

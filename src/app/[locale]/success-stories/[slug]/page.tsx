@@ -1,3 +1,4 @@
+import { SourceLink } from "@/components/insights/SourceLink";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -51,6 +52,7 @@ export default async function CaseStudyPage({ params }: Props) {
           </Link>
           <h1 data-reveal className="font-display text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance md:text-6xl">{tr.title}</h1>
           {tr.summary && <p data-reveal className="text-xl leading-relaxed text-text-secondary">{tr.summary}</p>}
+          <SourceLink url={found.caseStudy.sourceUrl} name={found.caseStudy.sourceName} label={t.source} />
         </div>
       </header>
       {cover && (

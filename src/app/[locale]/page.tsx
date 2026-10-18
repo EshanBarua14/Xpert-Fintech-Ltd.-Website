@@ -143,7 +143,7 @@ export default async function HomePage({ params }: Props) {
         <Shell id="strengths" className="py-12 md:py-16">
           <div className="flex flex-col gap-10">
             <SectionHeader title={strengths.title} body={strengths.intro || null} />
-            <CoreStrengths items={strengths.items} locale={locale} />
+            <CoreStrengths items={strengths.items} locale={locale} label={strengths.title} />
           </div>
         </Shell>
       )}

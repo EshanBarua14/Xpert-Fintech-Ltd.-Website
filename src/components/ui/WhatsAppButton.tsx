@@ -4,7 +4,7 @@ import { getWhatsApp } from "@/lib/content/highlights";
 /**
  * A floating "Chat on WhatsApp" button (Admin → Home highlights → WhatsApp).
  * Opens a chat with XFL's number, with the greeting set there filled in.
- * Until a number is saved it opens the contact page instead.
+ * WhatsApp only: shown once a number is saved there.
  */
 export async function WhatsAppButton({ locale }: { locale: AppLocale }) {
   const wa = await getWhatsApp(locale);

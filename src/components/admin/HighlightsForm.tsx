@@ -106,7 +106,7 @@ export function HighlightsForm({
         </div>
       </Group>
 
-      <Group title="WhatsApp button" hint="A floating button at the bottom right of every page that opens a WhatsApp chat with this number, the greeting filled in. Until a number is saved, it opens the contact page.">
+      <Group title="WhatsApp button" hint="A floating button at the bottom right of every page that opens a WhatsApp chat with this number, the greeting filled in. It appears as soon as a number is saved.">
         <div className={pair}>
           <TextInput id="waNumber" label="WhatsApp number" placeholder="+8801XXXXXXXXX" defaultValue={whatsapp.number} error={e.waNumber} />
           <span className="hidden md:block" />

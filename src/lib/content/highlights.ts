@@ -238,8 +238,8 @@ export async function getSavings(locale: AppLocale, { drafts = false } = {}) {
 export async function getWhatsApp(locale: AppLocale) {
   const w = await getWhatsAppSetting();
   const digits = w.number.replace(/\D/g, "");
-  // No number yet: the button still shows and opens the contact page until one is saved.
-  if (digits.length < 8) return { href: `/${locale}/contact`, label: locale === "bn" ? "যোগাযোগ করুন" : "Contact us", external: false };
+  // WhatsApp only: the button appears once a number is saved in Admin → Home highlights.
+  if (digits.length < 8) return null;
   const message = pick(locale, w.messageEn, w.messageBn);
   return { href: `https://wa.me/${digits}${message ? `?text=${encodeURIComponent(message)}` : ""}`, label: pick(locale, w.labelEn, w.labelBn), external: true };
 }

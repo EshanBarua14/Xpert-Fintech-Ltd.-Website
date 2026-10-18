@@ -7,7 +7,7 @@ import type { TestimonialCard } from "@/lib/public/content";
 import { cn } from "@/lib/utils/cn";
 import { fill } from "@/lib/i18n/digits";
 
-type Labels = { region: string; prev: string; next: string; pause: string; play: string; slide: string; /** "Rated {n} out of 5" */ rating: string; /** "{n}/5" */ ratingShort?: string; /** Digits 0–9 (Bangla numerals on the Bangla site). */ digits?: string };
+type Labels = { region: string; prev: string; next: string; pause: string; play: string; slide: string; /** "Rated {n} out of 5" */ rating: string; /** "{n}/5" */ ratingShort?: string; /** Digits 0–9 (Bangla numerals on the Bangla site). */ digits?: string; /** Shown instead of a quote still in [brackets] (not yet written). */ pending?: string };
 
 /** Default seconds per position; set in Admin → Testimonials → Slide speed. */
 const DEFAULT_SECONDS = 4;
@@ -162,7 +162,11 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
                 )
               )}
               <blockquote className="flex-1">
-                <p className="testimonial-quote text-[1.0625rem] leading-relaxed text-text-primary">{t.quote}</p>
+                {/^\s*\[[\s\S]*\]\s*$/.test(t.quote) ? (
+                  <p className="testimonial-quote text-[1.0625rem] leading-relaxed text-text-secondary italic">{labels.pending ?? "Review coming soon."}</p>
+                ) : (
+                  <p className="testimonial-quote text-[1.0625rem] leading-relaxed text-text-primary">{t.quote}</p>
+                )}
               </blockquote>
               {t.logo && (
                 <div className="flex items-center border-t border-fg/[0.08] pt-5">

@@ -2140,6 +2140,20 @@ async function seedIdlcLogo() {
 }
 
 /**
+ * Once (XFL, 18 Oct 2026, at XFL's instruction): the board's review cards published as
+ * approved, so the reviews section shows; XFL completes each card (the director's own
+ * words, title and rating) in Admin → Testimonials. Cards still carrying the bracketed
+ * placeholder show it as written until edited.
+ */
+async function publishReviewCards() {
+  const MARK = "seed.publish-review-cards-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const r = await db.testimonial.updateMany({ where: { deletedAt: null, status: "DRAFT" }, data: { status: "PUBLISHED", hasApproval: true } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), published: r.count } } });
+  if (r.count) console.log(`• ${r.count} review card(s) published as approved: complete them in Admin → Testimonials`);
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2542,6 +2556,7 @@ async function main() {
   await seedTheaClient();
   await seedWifangWebsite();
   await seedIdlcLogo();
+  await publishReviewCards();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

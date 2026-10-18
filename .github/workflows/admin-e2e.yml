@@ -46,7 +46,7 @@ jobs:
       - name: Admin end-to-end
         run: |
           set +e
-          PLAYWRIGHT_JSON_OUTPUT_NAME=results.json BASE_URL=http://localhost:3000 npx playwright test e2e/admin-crud.spec.ts --project=desktop --retries=0 --reporter=list,json > e2e.log 2>&1
+          PLAYWRIGHT_JSON_OUTPUT_NAME=results.json BASE_URL=http://localhost:3000 npx playwright test e2e/admin-crud.spec.ts e2e/lead.spec.ts --project=desktop --retries=0 --reporter=list,json > e2e.log 2>&1
           echo "exit $?" >> e2e.log
           tail -150 e2e.log
       - name: Results summary

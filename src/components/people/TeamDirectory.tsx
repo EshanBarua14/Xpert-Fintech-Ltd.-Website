@@ -62,7 +62,7 @@ export function TeamDirectory({ people, locale, labels }: { people: TeamMember[]
         </div>
       )}
 
-      <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8">
+      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-5 lg:grid-cols-4 xl:grid-cols-5">
         {shown.map((p, i) => (
           <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties}>
             <MemberCard p={p} locale={locale} labels={labels} />
@@ -92,48 +92,47 @@ function Chip({ pressed, onClick, label, count, color }: { pressed: boolean; onC
   );
 }
 
-/** One person: a standard 4:5 portrait across the top of the card (initials on the department colour without one), then name, title, department and contacts. */
+/** One person: a 4:5 portrait with the department on a chip and the name and title on a soft shade at its foot, then the contacts. */
 function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labels: TeamLabels }) {
   const color = departmentColor(p.department);
   return (
     <article
       style={{ "--dept": color } as CSSProperties}
-      className="team-card group relative flex h-full flex-col overflow-hidden rounded-lg border border-fg/[0.09] bg-navy-900 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--dept)_55%,transparent)]"
+      className="team-card group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-fg/[0.08] bg-navy-900 shadow-[0_20px_50px_-36px_rgb(0_0_0/0.6)] transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--dept)_55%,transparent)] hover:shadow-[0_30px_60px_-34px_color-mix(in_srgb,var(--dept)_50%,transparent)]"
     >
-      <span aria-hidden="true" className="absolute inset-x-0 top-0 z-10 h-1 bg-[var(--dept)]" />
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-[color-mix(in_srgb,var(--dept)_22%,var(--color-navy-800))]">
         {p.photo ? (
           <Image
             src={p.photo.url}
             alt={p.name}
             fill
-            sizes="(min-width: 1280px) 10rem, (min-width: 1024px) 14vw, (min-width: 768px) 20vw, (min-width: 640px) 25vw, 33vw"
+            sizes="(min-width: 1280px) 18vw, (min-width: 1024px) 23vw, (min-width: 640px) 31vw, 48vw"
             quality={90}
-            className="person-photo object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            className="person-photo object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
             style={focusStyle(p.photo, 0.8)}
           />
         ) : (
-          <span aria-hidden="true" className="flex h-full items-center justify-center">
-            <span className="flex size-12 items-center justify-center rounded-full bg-[var(--dept)] font-display text-lg text-white ring-2 ring-white/10">{initials(p.name)}</span>
+          <span aria-hidden="true" className="flex h-full items-center justify-center pb-16">
+            <span className="flex size-16 items-center justify-center rounded-full bg-[var(--dept)] font-display text-2xl text-white ring-4 ring-white/10">{initials(p.name)}</span>
           </span>
         )}
-      </div>
-      <div className="flex flex-1 flex-col gap-0.5 p-2.5">
-        <h3 className="font-display text-[0.8rem] leading-tight text-balance text-text-primary">{p.name}</h3>
-        {p.title && <p className="text-[0.7rem] leading-snug text-text-secondary">{p.title}</p>}
+        <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#050d19]/95 via-[#050d19]/50 to-transparent" />
         {p.department && (
-          <span className="mt-1 flex min-w-0 items-center gap-1.5 text-[0.65rem] font-medium text-text-secondary">
+          <span className="absolute top-3 left-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full border border-white/15 bg-[#050d19]/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
             <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-[var(--dept)]" />
             <span className="truncate">{departmentLabel(p.department, locale, labels.departments)}</span>
           </span>
         )}
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-3.5 sm:p-4">
+          <h3 className="font-display text-base leading-tight font-semibold text-balance text-white drop-shadow-[0_2px_8px_rgb(0_0_0/0.45)] sm:text-[1.05rem]">{p.name}</h3>
+          {p.title && <p className="text-xs leading-snug text-white/80">{p.title}</p>}
+        </div>
       </div>
-      <div className="mx-2.5 mt-auto flex items-center border-t border-fg/[0.08] py-2">
-        <span className="flex items-center gap-1.5">
-          {/* Email and LinkedIn on every card: a link when it is on file, a muted icon until it is added (Admin → People → Contacts). */}
-          <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} color="var(--dept)" ink="var(--dept)" size="size-7" />
-          <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org="Xpert Fintech" labels={labels} color="var(--dept)" ink="var(--dept)" size="size-7" />
-        </span>
+      <div className="mt-auto flex items-center gap-1.5 px-3.5 py-3 sm:px-4">
+        {/* Email and LinkedIn on every card: a link when it is on file, a muted icon until it is added (Admin → People → Contacts). */}
+        <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
+        <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org="Xpert Fintech" labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
+        <span aria-hidden="true" className="ml-auto h-1 w-8 rounded-full bg-[var(--dept)] opacity-70 transition-[width] duration-500 group-hover:w-12" />
       </div>
     </article>
   );

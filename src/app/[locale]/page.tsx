@@ -45,6 +45,7 @@ import { MarketReach } from "@/components/market/MarketReach";
 import { HeroIndices } from "@/components/market/HeroIndices";
 import { CoreStrengths } from "@/components/flagship/CoreStrengths";
 import { SavingsGraphic } from "@/components/flagship/SavingsGraphic";
+import { PhoneStage } from "@/components/flagship/PhoneStage";
 import { getSavings, getStrengths } from "@/lib/content/highlights";
 import { exchangeLogos } from "@/components/market/ExchangeMark";
 import { CredentialsInline } from "@/components/blocks/CredentialsBand";
@@ -145,6 +146,38 @@ export default async function HomePage({ params }: Props) {
           <div className="flex flex-col gap-10">
             <SectionHeader title={strengths.title} body={strengths.intro || null} />
             <CoreStrengths items={strengths.items} locale={locale} label={plain(strengths.title)} />
+          </div>
+        </Shell>
+      )}
+
+      {show("phones") && (
+        <Shell id="mobile" className="py-12 md:py-16">
+          <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+            <div className="flex flex-col gap-6">
+              <SectionHeader
+                title={locale === "bn" ? "আপনার ব্রোকারেজ, *প্রতিটি পকেটে*।" : "Your brokerage, *in every pocket*."}
+                body={
+                  locale === "bn"
+                    ? "যে প্ল্যাটফর্মে ডিলিং ডেস্ক চলে, সেটিই চালায় প্রতিটি হাউসের নিজস্ব ট্রেডিং অ্যাপ। বিও অ্যাকাউন্ট খোলা থেকে প্রথম অর্ডার পর্যন্ত, সবই ফোনে।"
+                    : "The platform that runs the dealing desk also powers each house's own trading app. From opening a BO account to the first order, all on a phone."
+                }
+              />
+              {apps.length > 0 && (
+                <p className="flex items-baseline gap-3">
+                  <span className="font-display text-5xl font-semibold text-text-primary tabular-nums">{digits(apps.length, locale === "bn")}</span>
+                  <span className="text-sm text-text-secondary">{locale === "bn" ? "টি ব্র্যান্ডেড অ্যাপ ইতিমধ্যে চালু" : "branded apps already live"}</span>
+                </p>
+              )}
+              <GhostButton href={`/${locale}/consortium`}>{locale === "bn" ? "চালু অ্যাপগুলো দেখুন" : "See the live apps"}</GhostButton>
+            </div>
+            <PhoneStage
+              shots={showcase.flatMap((p) => p.shots.filter((s) => s.device === "PHONE" || (s.width && s.height && s.height > s.width * 1.4)))}
+              labels={
+                locale === "bn"
+                  ? { trade: "ট্রেড", buy: "কিনুন", sell: "বিক্রি", account: "বিও অ্যাকাউন্ট খুলুন", steps: ["ব্যক্তিগত তথ্য", "এনআইডি যাচাই", "নমিনি", "ব্যাংক হিসাব"], verify: "ই-কেওয়াইসি", verifying: "যাচাই চলছে", illustration: "চিত্রিত উদাহরণ" }
+                  : { trade: "Trade", buy: "Buy", sell: "Sell", account: "Open a BO account", steps: ["Personal details", "NID check", "Nominee", "Bank account"], verify: "eKYC", verifying: "Verifying", illustration: "Illustration" }
+              }
+            />
           </div>
         </Shell>
       )}

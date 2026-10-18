@@ -1,7 +1,7 @@
 /**
  * Xpert Fintech in the press, written in our own words from the published
  * reports (each credited, with the date it appeared) and checked against them
- * on 15 October 2026. Figures are the company's own, as the reports say.
+ * on 15 October 2026 (re-read in full on 18 October 2026). Figures are the company's own, as the reports say.
  * Seeded once by `npm run db:seed:content`: news stories under "In the
  * press" and the events they describe. A story or event whose address
  * already exists is left alone; all are editable in the admin.
@@ -47,10 +47,11 @@ export const PRESS_STORIES: PressStory[] = [
     },
     body: {
       en: [
-        "Ten brokerage houses are setting up their own order management system (OMS) so that their clients can trade on the Dhaka and Chittagong stock exchanges directly, The Financial Express reported on 25 August 2023.",
+        "Ten brokerage houses are setting up their own order management system (OMS) so that their clients can trade on the Dhaka and Chittagong stock exchanges directly, Mohammad Mufazzal reported in The Financial Express on 25 August 2023. The system was due to go live the following January.",
         "The brokers named were EBL Securities, Bank Asia Securities, Shahjalal Islami Bank Securities, ONE Securities, Islami Bank Securities, Green Delta Securities, NLI Securities, Apex Investments, Monarch Holdings and UCB Stock Brokerage. Their consortium, Xpert Fintech Ltd, signed an agreement with SK Advisory FZ LLC, a Dubai-based IT firm, for technical support.",
         "The report put the cost of the services at about Tk 3 crore and said other brokers could join later at a lower cost. It noted that most brokers relied on systems provided by the exchanges, which can be overloaded at busy times, and that an own OMS also helps stop trades being placed without a client's consent.",
         "Md. Sayadur Rahman, Chief Executive Officer of EBL Securities, told the paper that clients would be able to trade faster from home once the consortium's OMS was installed.",
+        "At the time, the report said, only five brokerages ran their own OMS (LankaBangla Securities, City Brokerage, Shanta Securities, First Capital and United Financial Services), and others, including IDLC Securities, were working on one. LankaBangla Securities' CEO Saffat Reza said investors complain less when trades go through a broker's own OMS, and that it lets brokers serve more clients.",
         "Source: The Financial Express, 25 August 2023.",
       ].join("\n\n"),
       bn: [
@@ -58,6 +59,7 @@ export const PRESS_STORIES: PressStory[] = [
         "প্রতিবেদনে উল্লিখিত ব্রোকারেজগুলো হলো ইবিএল সিকিউরিটিজ, ব্যাংক এশিয়া সিকিউরিটিজ, শাহজালাল ইসলামী ব্যাংক সিকিউরিটিজ, ওয়ান সিকিউরিটিজ, ইসলামী ব্যাংক সিকিউরিটিজ, গ্রিন ডেল্টা সিকিউরিটিজ, এনএলআই সিকিউরিটিজ, এপেক্স ইনভেস্টমেন্টস, মোনার্ক হোল্ডিংস ও ইউসিবি স্টক ব্রোকারেজ। তাদের কনসোর্টিয়াম এক্সপার্ট ফিনটেক লিমিটেড কারিগরি সহায়তার জন্য দুবাইভিত্তিক আইটি প্রতিষ্ঠান এসকে অ্যাডভাইজরি এফজেড এলএলসির সঙ্গে চুক্তি করেছে।",
         "প্রতিবেদন অনুযায়ী সেবার ব্যয় প্রায় ৩ কোটি টাকা, এবং পরে অন্য ব্রোকাররাও কম খরচে যুক্ত হতে পারবে। বেশির ভাগ ব্রোকার এক্সচেঞ্জের দেওয়া সিস্টেমের ওপর নির্ভর করে, যা ব্যস্ত সময়ে চাপে পড়ে; নিজস্ব ওএমএস গ্রাহকের সম্মতি ছাড়া লেনদেন ঠেকাতেও সাহায্য করে।",
         "ইবিএল সিকিউরিটিজের প্রধান নির্বাহী কর্মকর্তা মো. সায়াদুর রহমান পত্রিকাটিকে বলেন, কনসোর্টিয়ামের ওএমএস চালু হলে গ্রাহকেরা ঘরে বসে আরও দ্রুত লেনদেন করতে পারবেন।",
+        "প্রতিবেদন অনুযায়ী, তখন মাত্র পাঁচটি ব্রোকারেজ (লংকাবাংলা সিকিউরিটিজ, সিটি ব্রোকারেজ, শান্তা সিকিউরিটিজ, ফার্স্ট ক্যাপিটাল ও ইউনাইটেড ফাইন্যান্সিয়াল সার্ভিসেস) নিজস্ব ওএমএস চালাত, আর আইডিএলসি সিকিউরিটিজসহ আরও কয়েকটি এ নিয়ে কাজ করছিল। লংকাবাংলা সিকিউরিটিজের প্রধান নির্বাহী সাফফাত রেজা বলেন, ব্রোকারের নিজস্ব ওএমএসে লেনদেন হলে বিনিয়োগকারীদের অভিযোগ কমে এবং ব্রোকাররা আরও বেশি গ্রাহককে সেবা দিতে পারে।",
         "সূত্র: দ্য ফিন্যান্সিয়াল এক্সপ্রেস, ২৫ আগস্ট ২০২৩।",
       ].join("\n\n"),
     },
@@ -112,14 +114,14 @@ export const PRESS_STORIES: PressStory[] = [
         "Xpert Fintech Limited held “Stakeholders Dayout 2026”, a full-day gathering at a resort near Dhaka, to mark its business growth and set out its roadmap, Arthosuchak reported on 21 September 2026 from the company's press release.",
         "The company started with ten brokerage houses, grew to twelve, and, it says, now has seventeen of the country's leading brokerage houses using its OMS, which handles 45 to 47 percent of DSE's daily turnover and up to 57 percent on the busiest days. It also announced plans to build its own high-capacity matching engine for the stock exchange.",
         "Remons Investment & Securities Ltd. was welcomed as a new institutional shareholder: Chairman Sumon Das handed a symbolic share certificate to its representative, Md. Mofiz Uddin.",
-        "Also present were Director and Executive Committee Chairman Mohammad Rahmat Pasha, Director and Audit Committee Chairman Aminul Islam, Managing Director Md. Shahinur Rahman, Company Secretary Md. Abdur Rahman Rony FCS, and adviser Mohammad Ali FCA, with board members, institutional shareholders and capital-market leaders.",
+        "Also present were Director and Executive Committee Chairman Mohammad Rahmat Pasha, Director and Audit Committee Chairman Aminul Islam, shareholders Md. Wasif Zaman and Md. Mofiz Uddin, Managing Director Md. Shahinur Rahman, Company Secretary Md. Abdur Rahman Rony FCS, adviser Mohammad Ali FCA and Chief Client Representative Md. Rafiqul Bari, with board members, institutional shareholders and capital-market leaders. Senior executives of brokerage houses that use other OMS platforms were welcomed too.",
         "Source: Arthosuchak, 21 September 2026.",
       ].join("\n\n"),
       bn: [
         "ব্যবসায়িক প্রবৃদ্ধি উদ্‌যাপন ও ভবিষ্যৎ রূপরেখা নির্ধারণে এক্সপার্ট ফিনটেক লিমিটেড ঢাকার কাছে একটি রিসোর্টে দিনব্যাপী “স্টেকহোল্ডারস ডেআউট ২০২৬” আয়োজন করে বলে প্রতিষ্ঠানটির সংবাদ বিজ্ঞপ্তির বরাতে ২০২৬ সালের ২১ সেপ্টেম্বর অর্থসূচক জানায়।",
         "দশটি ব্রোকারেজ হাউস নিয়ে যাত্রা শুরু করে পরে বারোটিতে উন্নীত প্রতিষ্ঠানটির তথ্যমতে, এখন দেশের শীর্ষ সতেরোটি ব্রোকারেজ হাউস তাদের ওএমএস ব্যবহার করছে, যার মাধ্যমে ডিএসইর দৈনিক লেনদেনের ৪৫ থেকে ৪৭ শতাংশ এবং সবচেয়ে ব্যস্ত দিনে ৫৭ শতাংশ পর্যন্ত সম্পন্ন হয়। স্টক এক্সচেঞ্জের জন্য নিজস্ব উচ্চক্ষমতার ম্যাচিং ইঞ্জিন তৈরির পরিকল্পনাও ঘোষণা করা হয়।",
         "নতুন প্রাতিষ্ঠানিক শেয়ারহোল্ডার হিসেবে রেমন্স ইনভেস্টমেন্ট অ্যান্ড সিকিউরিটিজ লিমিটেডকে স্বাগত জানানো হয়; চেয়ারম্যান সুমন দাস প্রতিষ্ঠানটির প্রতিনিধি মো. মফিজ উদ্দিনের হাতে প্রতীকী শেয়ার সনদ তুলে দেন।",
-        "উপস্থিত ছিলেন পরিচালক ও নির্বাহী কমিটির চেয়ারম্যান মোহাম্মদ রহমত পাশা, পরিচালক ও অডিট কমিটির চেয়ারম্যান আমিনুল ইসলাম, ব্যবস্থাপনা পরিচালক মো. শাহিনুর রহমান, কোম্পানি সচিব মো. আব্দুর রহমান রনি এফসিএস এবং উপদেষ্টা মোহাম্মদ আলী এফসিএ, সঙ্গে পরিচালনা পর্ষদের সদস্য, প্রাতিষ্ঠানিক শেয়ারহোল্ডার ও পুঁজিবাজারসংশ্লিষ্টরা।",
+        "উপস্থিত ছিলেন পরিচালক ও নির্বাহী কমিটির চেয়ারম্যান মোহাম্মদ রহমত পাশা, পরিচালক ও অডিট কমিটির চেয়ারম্যান আমিনুল ইসলাম, শেয়ারহোল্ডার মো. ওয়াসিফ জামান ও মো. মফিজ উদ্দিন, ব্যবস্থাপনা পরিচালক মো. শাহিনুর রহমান, কোম্পানি সচিব মো. আব্দুর রহমান রনি এফসিএস, উপদেষ্টা মোহাম্মদ আলী এফসিএ এবং প্রধান ক্লায়েন্ট প্রতিনিধি মো. রফিকুল বারী, সঙ্গে পরিচালনা পর্ষদের সদস্য, প্রাতিষ্ঠানিক শেয়ারহোল্ডার ও পুঁজিবাজারসংশ্লিষ্টরা। অন্য ওএমএস প্ল্যাটফর্ম ব্যবহারকারী ব্রোকারেজ হাউসগুলোর ঊর্ধ্বতন নির্বাহীদেরও স্বাগত জানানো হয়।",
         "সূত্র: অর্থসূচক, ২১ সেপ্টেম্বর ২০২৬।",
       ].join("\n\n"),
     },

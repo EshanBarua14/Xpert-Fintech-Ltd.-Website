@@ -8,6 +8,7 @@ Automated browser tests (Playwright) cover the journeys that matter most:
 | `e2e/switching.spec.ts` | Switching to বাংলা keeps the page and is remembered; the theme switch toggles light/dark and survives a reload |
 | `e2e/lead.spec.ts` | A demo request sent from the website appears in **Admin → Leads** (then moves it to the trash) |
 | `e2e/admin-2fa.spec.ts` | An admin turns on two-factor sign-in, a wrong code is refused, a correct code signs in, and two-factor is switched off again |
+| `e2e/admin-crud.spec.ts` | Every admin page and editor opens; every content type (albums, careers, success stories, app deployments, events, leads, news, organizations, pages, people, products, resources, testimonials, videos) is created, edited, moved to the trash, restored and deleted through the real forms; categories, tags, redirects, admins, media upload, ecosystem nodes and flows; settings forms save; Email & notifications saves recipients. Runs on GitHub (`ci/build-check` → admin-e2e) against a throwaway database |
 | `e2e/a11y.spec.ts` | axe accessibility scan (WCAG 2.2 A/AA) of 10 pages in dark and light mode: no serious or critical issues |
 
 ## One-time setup

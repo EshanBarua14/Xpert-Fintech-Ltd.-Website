@@ -116,6 +116,7 @@ export default async function ConsortiumPage({ params }: Props) {
                   noApp: t.consNoApp,
                   noRep: t.consNoRep,
                   website: t.consWebsite,
+                  contact: { linkedin: t.linkedinProfile, email: t.emailPerson, linkedinSearch: t.linkedinSearch, emailMissing: t.emailMissing },
                   android: t.getAndroidApp,
                   ios: t.getIosApp,
                   web: t.openWebApp,

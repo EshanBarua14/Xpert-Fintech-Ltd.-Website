@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { ContactIcon, type ContactLabels } from "@/components/people/ContactIcon";
+import { Icon } from "@/components/ui/Icon";
 import { RankBadge, type RankLabels } from "./RankBadge";
 import Link from "next/link";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import type { ConsortiumMember } from "@/lib/public/consortium";
 import { cn } from "@/lib/utils/cn";
 import { monogram } from "./LogoWall";
@@ -25,6 +27,8 @@ export type ConsortiumLabels = {
   noApp: string;
   noRep: string;
   website: string;
+  /** LinkedIn and email icons beside each representative. */
+  contact?: ContactLabels;
   android: string;
   ios: string;
   web: string;
@@ -365,10 +369,10 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                 {m.reps.length ? (
                   <ul className="flex flex-col gap-3">
                     {m.reps.map((r) => (
-                      <li key={r.name}>
+                      <li key={r.name} className="flex flex-wrap items-center gap-3 rounded-2xl border border-fg/10 p-2.5 pr-3 transition-colors hover:border-gold/60 sm:flex-nowrap">
                         <Link
                           href={r.group === "BOARD" ? labels.boardHref : labels.consultantsHref}
-                          className="group flex items-center gap-3 rounded-2xl border border-fg/10 p-2.5 pr-4 transition-colors hover:border-gold/60"
+                          className="group flex min-w-0 flex-1 items-center gap-3"
                         >
                           <span className="relative aspect-[4/5] w-12 shrink-0 overflow-hidden rounded-xl bg-navy-800">
                             {r.photo ? (
@@ -383,6 +387,28 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                             {r.position && <span className="line-clamp-2 text-xs text-text-secondary">{r.position}</span>}
                           </span>
                         </Link>
+                        {/* LinkedIn, email, and the house's website */}
+                        <span className="flex shrink-0 items-center gap-1.5">
+                          {labels.contact && (
+                            <>
+                              <ContactIcon kind="linkedin" value={r.linkedin ?? null} name={r.name} org={m.name} labels={labels.contact} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />
+                              <ContactIcon kind="email" value={r.email ?? null} name={r.name} labels={labels.contact} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />
+                            </>
+                          )}
+                          {m.websiteUrl && (
+                            <a
+                              href={m.websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`${m.name}: ${m.websiteUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}`}
+                              title={m.websiteUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
+                              className="contact-icon flex size-8 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-300"
+                              style={{ "--c": "var(--color-brand-sky)", "--ci": "var(--color-brand-sky)" } as CSSProperties}
+                            >
+                              <Icon name="globe" className="size-4" />
+                            </a>
+                          )}
+                        </span>
                       </li>
                     ))}
                   </ul>

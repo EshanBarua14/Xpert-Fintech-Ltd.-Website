@@ -2112,6 +2112,16 @@ async function seedTheaClient() {
   console.log("• Thea Securities Ltd. listed as a client (DSE TREC 130)");
 }
 
+/** Once (XFL, 18 Oct 2026): Wifang Securities Ltd.'s website (wifangbd.com, titled "Wifang Securities Ltd."), where the admin has none. */
+async function seedWifangWebsite() {
+  const MARK = "seed.wifang-website-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const r = await db.organization.updateMany({ where: { key: "wifang-securities", websiteUrl: null }, data: { websiteUrl: "https://wifangbd.com/" } });
+  const e = await db.organization.updateMany({ where: { key: "wifang-securities", websiteUrl: "" }, data: { websiteUrl: "https://wifangbd.com/" } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  if (r.count + e.count) console.log("• Wifang Securities: website set to wifangbd.com");
+}
+
 /**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
@@ -2513,6 +2523,7 @@ async function main() {
   await seedShareAndClients();
   await seedInnovaApp();
   await seedTheaClient();
+  await seedWifangWebsite();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

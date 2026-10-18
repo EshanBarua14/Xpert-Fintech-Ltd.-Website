@@ -1,3 +1,4 @@
+import { plain } from "@/components/ui/Emph";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -101,7 +102,7 @@ export default async function ConsortiumPage({ params }: Props) {
                 members={members}
                 locale={locale}
                 labels={{
-                  title: t.consExplorerTitle,
+                  title: plain(t.consExplorerTitle),
                   body: t.consExplorerBody,
                   hub: t.consHub,
                   pick: t.consPick,

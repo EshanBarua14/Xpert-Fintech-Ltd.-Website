@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { Emph } from "@/components/ui/Emph";
 
 export type SavingsData = {
   draft: boolean;
@@ -128,16 +129,16 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
             </svg>
             {t.lower}
           </p>
-          <h3 className="font-display text-3xl leading-tight font-semibold text-balance text-text-primary md:text-4xl">{data.title}</h3>
+          <h3 className="font-display text-3xl leading-tight font-semibold text-balance text-text-primary md:text-4xl"><Emph text={data.title} /></h3>
           {data.body && <p className="max-w-md leading-relaxed text-text-secondary">{data.body}</p>}
         </div>
 
         {/* The cost in blocks */}
-        <figure className="flex flex-col gap-7 rounded-3xl border border-fg/[0.08] bg-fg/[0.02] p-5 md:p-7" aria-label={t.chart}>
+        <figure className="flex flex-col gap-7 rounded-3xl border border-fg/[0.08] bg-gradient-to-br from-brand-sky/[0.06] via-transparent to-gold/[0.06] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.05)] md:p-7" aria-label={t.chart}>
           <div className="flex flex-col gap-3">
             <div className="flex items-baseline justify-between gap-4 text-sm">
               <span className="font-semibold text-text-secondary">{data.beforeLabel}</span>
-              <span className="font-mono font-semibold text-text-primary tabular-nums">{amount(data.before, 100)}</span>
+              <span className="font-mono font-semibold text-[#ef7a73] tabular-nums">{amount(data.before, 100)}</span>
             </div>
             <ol className="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-[3px] md:gap-1" aria-hidden="true">
               {Array.from({ length: BLOCKS }, (_, i) => (
@@ -181,7 +182,11 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
               {t.pay}
             </span>
             <span className="inline-flex items-center gap-2">
-              <span aria-hidden="true" className="size-3 rounded-[3px] border border-dashed border-gold/70 bg-gold/10" />
+              <span aria-hidden="true" className="size-3 rounded-[3px] bg-[#e5534b]" />
+              {data.beforeLabel}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span aria-hidden="true" className="size-3 rounded-[3px] border border-gold/60 bg-gold/25" />
               {t.save}
             </span>
             <span className="ml-auto">{t.each}</span>

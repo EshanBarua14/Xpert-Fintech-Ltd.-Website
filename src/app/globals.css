@@ -1592,9 +1592,17 @@ html {
   transform: scaleY(0.25);
   opacity: 0;
 }
+/* Colour story: the old cost in a muted coral (money going out), what is still paid in the brand blue, what is saved in warm gold. */
 .sv-before {
-  background-color: color-mix(in oklab, var(--color-fg) 12%, transparent);
-  background-image: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in oklab, var(--color-fg) 6%, transparent) 6px 12px);
+  background-image:
+    repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in oklab, #ffffff 7%, transparent) 6px 12px),
+    linear-gradient(180deg, color-mix(in oklab, #e5534b 62%, var(--color-navy-800)) 0%, color-mix(in oklab, #e5534b 38%, var(--color-navy-800)) 100%);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, #ffffff 14%, transparent);
+}
+[data-theme="light"] .sv-before {
+  background-image:
+    repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in oklab, #ffffff 30%, transparent) 6px 12px),
+    linear-gradient(180deg, #ef8a83 0%, #e2675f 100%);
 }
 .sv-kept::before,
 .sv-saved::before {
@@ -1602,18 +1610,22 @@ html {
   position: absolute;
   inset: -1px;
   border-radius: inherit;
-  background: linear-gradient(180deg, var(--color-brand-sky), var(--color-brand-royal));
+  background: linear-gradient(180deg, color-mix(in oklab, var(--color-brand-sky) 85%, #ffffff) 0%, var(--color-brand-sky) 35%, var(--color-brand-royal) 100%);
   transition:
     opacity 0.7s ease,
     transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .sv-kept::before {
-  box-shadow: 0 0 18px -4px color-mix(in oklab, var(--color-brand-sky) 70%, transparent);
+  box-shadow:
+    0 0 22px -4px color-mix(in oklab, var(--color-brand-sky) 75%, transparent),
+    inset 0 1px 0 color-mix(in oklab, #ffffff 45%, transparent);
 }
 /* Saved blocks: from the far end inwards, the fill lifts away and a gold outline stays. */
 .sv.is-on .sv-saved {
-  border-color: color-mix(in oklab, var(--color-gold) 60%, transparent);
-  background-color: color-mix(in oklab, var(--color-gold) 8%, transparent);
+  border-style: solid;
+  border-color: color-mix(in oklab, var(--color-gold) 55%, transparent);
+  background-color: color-mix(in oklab, var(--color-gold) 16%, transparent);
+  box-shadow: inset 0 0 14px -4px color-mix(in oklab, var(--color-gold) 60%, transparent), 0 0 16px -8px color-mix(in oklab, var(--color-gold) 70%, transparent);
   transition-delay: calc(700ms + var(--j, 0) * 70ms);
 }
 .sv.is-on .sv-saved::before {
@@ -1668,3 +1680,15 @@ html:has(.whatsapp-fab) .back-to-top {
 @media (prefers-reduced-motion: reduce) {
   .wa-ping, .wa-panel { animation: none; }
 }
+
+/* Headline hook words (*…* in the copy): display italic with the brand gradient. Bangla has no italic: colour only. */
+.emph {
+  font-style: italic;
+  font-weight: 500;
+  background: linear-gradient(100deg, var(--color-brand-sky) 0%, var(--color-gold) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.06em;
+}
+:lang(bn) .emph { font-style: normal; font-weight: 600; }

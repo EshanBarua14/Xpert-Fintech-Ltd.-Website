@@ -2079,6 +2079,40 @@ async function seedInnovaApp() {
 }
 
 /**
+ * Once (XFL, 18 Oct 2026): Thea Securities Ltd. confirmed as a client, listed with
+ * IDLC Securities under "Also running on Xpert". Name and DSE TREC No. 130 as on DSE's
+ * TREC holder list; no website found, so its name is not a link. An organization
+ * edited in the admin keeps its name.
+ */
+async function seedTheaClient() {
+  const MARK = "seed.thea-client-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const names = { en: "Thea Securities Ltd.", bn: "থিয়া সিকিউরিটিজ লিমিটেড" };
+  let org = await db.organization.findUnique({ where: { key: "thia-securities" }, include: { translations: true } });
+  if (!org) {
+    org = await db.organization.create({
+      data: { key: "thia-securities", kind: "CLIENT", status: "PUBLISHED", sortOrder: 130, dseTrec: "130", translations: { create: [{ locale: EN, name: names.en }, { locale: BN, name: names.bn }] } },
+      include: { translations: true },
+    });
+  } else {
+    await db.organization.update({
+      where: { id: org.id },
+      data: { status: "PUBLISHED", deletedAt: null, ...(org.kind !== "CONSORTIUM_MEMBER" && { kind: "CLIENT" }), ...(!org.dseTrec && { dseTrec: "130" }) },
+    });
+    if (!org.updatedById) {
+      for (const l of ["en", "bn"] as const) {
+        const locale = l === "en" ? EN : BN;
+        const tr = org.translations.find((t) => t.locale === locale);
+        if (tr) await db.organizationTranslation.update({ where: { id: tr.id }, data: { name: names[l] } });
+        else await db.organizationTranslation.create({ data: { organizationId: org.id, locale, name: names[l] } });
+      }
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log("• Thea Securities Ltd. listed as a client (DSE TREC 130)");
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2478,6 +2512,7 @@ async function main() {
   await seedSourcesAndStories();
   await seedShareAndClients();
   await seedInnovaApp();
+  await seedTheaClient();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

@@ -24,17 +24,21 @@ export type LiveApp = {
   rank?: BrokerRank | null;
 };
 
-type Labels = { android: string; ios: string; web: string; featured?: string; rank?: RankLabels; locale?: "en" | "bn" };
-type StoreLink = { href: string; label: string; kind: "play" | "ios" | "web" };
+type Labels = { android: string; ios: string; web: string; featured?: string; rank?: RankLabels; locale?: "en" | "bn"; site?: string; othersTitle?: string };
+type StoreLink = { href: string; label: string; kind: "play" | "ios" | "web" | "site" };
 
-/** Every public link the app has: Google Play, App Store and the web app. */
+/** Every public link the app has: Google Play, App Store, the web app, and the brokerage's own website. */
 function linksOf(a: LiveApp, labels: Labels): StoreLink[] {
   return [
     a.playStoreUrl && { href: a.playStoreUrl, label: labels.android, kind: "play" as const },
     a.appStoreUrl && { href: a.appStoreUrl, label: labels.ios, kind: "ios" as const },
     a.webUrl && { href: a.webUrl, label: labels.web, kind: "web" as const },
+    a.brokerageUrl && { href: a.brokerageUrl, label: labels.site ?? "Website", kind: "site" as const },
   ].filter((l): l is StoreLink => Boolean(l));
 }
+
+/** A client of Xpert without a branded app on the stores: its logo, name and website. */
+export type OtherClient = { id: string; name: string; url: string | null; logo?: { url: string; width: number | null; height: number | null } | null };
 
 /** The featured app: its brokerage's logo large, what it is, and its store buttons at full size. */
 function FeaturedApp({ a, labels }: { a: LiveApp; labels: Labels }) {
@@ -96,8 +100,8 @@ function FeaturedApp({ a, labels }: { a: LiveApp; labels: Labels }) {
  * linking to its public store listing — evidence anyone can check. Tiles light
  * up in sequence like orders printing on a board; static for reduced motion.
  */
-export function LiveApps({ apps: all, labels }: { apps: LiveApp[]; labels: Labels }) {
-  if (!all.length) return null;
+export function LiveApps({ apps: all, labels, others = [] }: { apps: LiveApp[]; labels: Labels; others?: OtherClient[] }) {
+  if (!all.length && !others.length) return null;
   // The first featured app gets its own large card; the rest follow as tiles.
   const lead = all.find((a) => a.featured);
   const apps = lead ? all.filter((a) => a !== lead) : all;
@@ -167,12 +171,49 @@ export function LiveApps({ apps: all, labels }: { apps: LiveApp[]; labels: Label
       })}
     </ul>
     )}
+    {others.length > 0 && (
+      <div className="mt-6 flex flex-col gap-3">
+        {labels.othersTitle && <p className="text-xs font-semibold text-text-secondary">{labels.othersTitle}</p>}
+        <ul className="flex flex-wrap justify-center gap-3">
+          {others.map((o) => (
+            <li key={o.id} className="w-full min-[420px]:w-[calc((100%-0.75rem)/2)] lg:w-[calc((100%-2.25rem)/4)]">
+              <div className="glass flex h-full items-center gap-3 rounded-3xl p-4">
+                {o.logo ? (
+                  <span className="flex h-11 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">
+                    <Image src={o.logo.url} alt="" width={o.logo.width ?? 120} height={o.logo.height ?? 60} className="h-full w-full object-contain" />
+                  </span>
+                ) : (
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-brand-sky/30 bg-gradient-to-br from-brand-sky/20 to-brand-royal/20 font-mono text-[max(11px,0.6875rem)] font-semibold tracking-wider text-accent">
+                    {monogram(o.name)}
+                  </span>
+                )}
+                <span className="flex min-w-0 flex-1 flex-col gap-2">
+                  <span className="line-clamp-2 font-display text-sm leading-snug font-semibold text-text-primary">{o.name}</span>
+                  {o.url && (
+                    <a
+                      href={o.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${o.name}: ${labels.site ?? "Website"}`}
+                      className="inline-flex h-8 items-center gap-1.5 self-start rounded-full border border-fg/15 px-2.5 text-xs font-semibold whitespace-nowrap text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-fg"
+                    >
+                      <StoreGlyph kind="site" />
+                      {labels.site ?? "Website"}
+                    </a>
+                  )}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
     </div>
   );
 }
 
 /** A small generic mark for each kind of link: a play triangle, a phone, a globe. */
-function StoreGlyph({ kind }: { kind: "play" | "ios" | "web" }) {
+function StoreGlyph({ kind }: { kind: "play" | "ios" | "web" | "site" }) {
   const common = { "aria-hidden": true as const, viewBox: "0 0 16 16", className: "size-3.5 shrink-0" };
   if (kind === "play") return <svg {...common} fill="currentColor"><path d="M4 2.6v10.8c0 .5.5.8.9.5l8.4-5.4a.6.6 0 0 0 0-1L4.9 2.1c-.4-.3-.9 0-.9.5Z" /></svg>;
   if (kind === "ios")

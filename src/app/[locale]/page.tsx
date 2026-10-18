@@ -22,7 +22,7 @@ import { LogoWall } from "@/components/organizations/LogoWall";
 import { ClientMarquee } from "@/components/organizations/ClientMarquee";
 import { ProductShowcase } from "@/components/products/ProductShowcase";
 import { LiveApps } from "@/components/organizations/LiveApps";
-import { getLiveApps } from "@/lib/public/company";
+import { getLiveApps, getOtherClients } from "@/lib/public/company";
 import { getShowcase } from "@/lib/public/showcase";
 import { RoleGuide } from "@/components/flagship/RoleGuide";
 import { FiguresStrip } from "@/components/flagship/FiguresStrip";
@@ -93,6 +93,7 @@ export default async function HomePage({ params }: Props) {
     Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]),
     Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds(), getFigures(), getRiskPageHref(locale)]),
   ]);
+  const otherClients = await getOtherClients(locale);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -263,7 +264,7 @@ export default async function HomePage({ params }: Props) {
             {apps.length > 0 && (
               <div className="flex flex-col gap-5">
                 <p className="text-xs font-semibold text-text-secondary">{t.liveAppsTitle}</p>
-                <LiveApps apps={apps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp, featured: t.featuredApp, rank: { broker: t.rankBroker, asOf: t.rankAsOf, source: t.rankSourceLabel }, locale }} />
+                <LiveApps apps={apps} others={otherClients} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp, site: t.brokerWebsite, othersTitle: t.otherClientsTitle, featured: t.featuredApp, rank: { broker: t.rankBroker, asOf: t.rankAsOf, source: t.rankSourceLabel }, locale }} />
               </div>
             )}
           </div>

@@ -89,3 +89,31 @@ export const getLiveApps = cache(async (locale: AppLocale) => {
     };
   });
 });
+
+/**
+ * Clients and consortium members with no published branded app: shown under the
+ * apps with their logo and website, so every client of Xpert is listed there.
+ */
+export const getOtherClients = cache(async (locale: AppLocale) => {
+  const rows = await db.organization.findMany({
+    where: {
+      ...publishedWhere(),
+      kind: { in: ["CONSORTIUM_MEMBER", "CLIENT"] },
+      deployments: { none: { ...publishedWhere(), appName: { not: null } } },
+    },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    include: { translations: true },
+  });
+  const logos = await mediaMap(rows.map((o) => (o.logoPermission ? o.logoMediaId : null)), locale);
+  return rows
+    .map((o) => {
+      const logo = o.logoPermission && o.logoMediaId ? logos.get(o.logoMediaId) : undefined;
+      return {
+        id: o.id,
+        name: pick(o.translations, locale)?.name ?? "",
+        url: o.websiteUrl || null,
+        logo: logo ? { url: logo.url, width: logo.width, height: logo.height } : null,
+      };
+    })
+    .filter((o) => o.name);
+});

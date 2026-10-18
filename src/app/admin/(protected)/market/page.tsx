@@ -182,6 +182,10 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
           asOf={headline?.asOf ?? ""}
           dse={headline?.dse !== undefined ? String(headline.dse) : ""}
           cse={headline?.cse !== undefined ? String(headline.cse) : ""}
+          source={headline?.source ?? ""}
+          sourceUrl={headline?.sourceUrl ?? ""}
+          noteEn={headline?.note?.en ?? ""}
+          noteBn={headline?.note?.bn ?? ""}
         />
       </section>
 

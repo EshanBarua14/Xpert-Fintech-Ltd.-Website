@@ -1990,6 +1990,49 @@ async function seedSourcesAndStories() {
 }
 
 /**
+ * Once (CTO decision, 18 Oct 2026):
+ *  - Market share: the figure on the site is DSE's. Arthosuchak (20 Aug and 21 Sep 2026,
+ *    the second from XFL's press release) reports 45-47% of DSE's daily turnover through
+ *    Xpert's OMS, up to 57% on the busiest days. Shown as DSE 45% (the low end), as of
+ *    21 Sep 2026, with the range as a note and the report as source; CSE stays "to be
+ *    published". Applied only if the figure on the site is still the earlier "combined 45%"
+ *    (or none), so a figure entered in the admin is kept.
+ *  - Clients: Innova Securities and Wifang Securities, named among the 16 brokerage houses
+ *    using Xpert's OMS (Arthosuchak, 20 Aug 2026), are published; with IDLC Securities they
+ *    are the 17 the company reported on 21 Sep 2026.
+ */
+async function seedShareAndClients() {
+  const MARK = "seed.share-clients-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const notes: string[] = [];
+  const row = await db.siteSetting.findUnique({ where: { key: "market.headlineShare" } });
+  const v = (row?.value ?? null) as { pct?: number | null; dse?: number; cse?: number } | null;
+  const earlier = !v || (Number(v.pct) === 45 && v.dse === undefined && v.cse === undefined);
+  if (earlier) {
+    const report = PRESS_STORIES.find((p) => p.slug.en === "stakeholders-dayout-2026");
+    const value = {
+      pct: null,
+      asOf: "2026-09-21",
+      dse: 45,
+      source: "Arthosuchak",
+      ...(report && { sourceUrl: report.sourceUrl }),
+      note: {
+        en: "45–47% of DSE's daily turnover on a typical day, up to 57% on the busiest (company figures).",
+        bn: "সাধারণ দিনে ডিএসইর দৈনিক লেনদেনের ৪৫–৪৭%, সবচেয়ে ব্যস্ত দিনে ৫৭% পর্যন্ত (প্রতিষ্ঠানের তথ্য)।",
+      },
+    };
+    await db.siteSetting.upsert({ where: { key: "market.headlineShare" }, update: { value }, create: { key: "market.headlineShare", value } });
+    notes.push("market share: DSE 45% (Arthosuchak, 21 Sep 2026)");
+  }
+  for (const key of ["innova-securities", "wifang-securities"]) {
+    const r = await db.organization.updateMany({ where: { key, deletedAt: null, status: "DRAFT" }, data: { status: "PUBLISHED", kind: "CLIENT" } });
+    if (r.count) notes.push(`${key} published`);
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), notes } } });
+  if (notes.length) console.log(`• ${notes.join("; ")}`);
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2387,6 +2430,7 @@ async function main() {
   await seedClientApps();
   await seedFirstCapitalApp();
   await seedSourcesAndStories();
+  await seedShareAndClients();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

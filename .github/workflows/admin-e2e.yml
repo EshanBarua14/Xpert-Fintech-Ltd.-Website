@@ -37,7 +37,7 @@ jobs:
       - run: npx prisma migrate deploy && npx prisma generate
       - run: npx prisma db seed 2>&1 | tail -30
       - run: npm run db:seed:content 2>&1 | tail -30 || true
-      - run: npx next build > build.log 2>&1 || (tail -60 build.log; exit 1)
+      - run: npx next build > build.log 2>&1 || (grep -nE "rror|Failed|failed" build.log | head -30 | sed "s/^/::error::/"; tail -40 build.log | sed "s/^/::error::/"; exit 1)
       - run: |
           nohup npx next start -p 3000 > server.log 2>&1 &
           for i in $(seq 1 60); do curl -sf http://localhost:3000/api/health >/dev/null && break; sleep 2; done
@@ -52,7 +52,7 @@ jobs:
       - name: Save results for review
         if: always()
         run: |
-          mkdir -p out && cp e2e.log out/ 2>/dev/null; cp results.json out/ 2>/dev/null; tail -300 server.log > out/server.log 2>/dev/null
+          mkdir -p out && cp e2e.log build.log out/ 2>/dev/null; cp results.json out/ 2>/dev/null; tail -300 server.log > out/server.log 2>/dev/null
           find test-results -name '*.png' | head -40 | while read f; do cp "$f" "out/$(echo $f | tr '/' '_')"; done
           cd out && git init -q -b tmp && git add . && git -c user.name=ci -c user.email=ci@example.com commit -qm "admin e2e $(date -u +%FT%TZ)"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tmp:tmp/dse-pages

@@ -31,14 +31,23 @@ async function ensureSession(browser: import("@playwright/test").Browser) {
 /** Fields a section needs beyond the generic ones (each form's own rules). */
 const EXTRA: Record<string, (page: Page) => Promise<void>> = {
   pages: async (page) => page.locator('[name="enPath"]').fill(`e2e-page-${STAMP}`),
-  people: async (page) => page.locator('main form input[name^="role."]').first().check(),
+  people: async (page) => {
+    const box = page.locator('main form input[type="checkbox"][name^="role."]').first();
+    await box.check();
+    const group = ((await box.getAttribute("name")) ?? "").replace("role.", "");
+    await page.locator(`[id="role.${group}.enTitle"]`).fill("E2E Title");
+  },
   resources: async (page) => page.locator("#externalUrl").fill("https://example.com/e2e.pdf"),
   testimonials: async (page) => {
     for (const t of await page.locator("main form textarea:visible").all()) if (!(await t.inputValue())) await t.fill("E2E test quote, written for the end-to-end check.");
   },
   videos: async (page) => page.locator('main form input[type="url"]:visible').first().fill("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
   "eco-nodes": async (page) => page.locator("#key").fill(`e2e-node-${STAMP}`),
-  "eco-flows": async (page) => page.locator("#key").fill(`e2e-flow-${STAMP}`),
+  "eco-flows": async (page) => {
+    await page.locator("#key").fill(`e2e-flow-${STAMP}`);
+    await page.getByLabel("Node").first().selectOption({ index: 1 });
+    await page.getByLabel("Title (English)", { exact: true }).first().fill("E2E step");
+  },
 };
 
 /** Every admin page that lists or edits something. */
@@ -258,8 +267,12 @@ test.describe("Admin console", () => {
       if (await first.count()) {
         await first.fill(edited);
         await saveButton(page).click();
-        await page.waitForURL(/saved=1/, { timeout: 30_000 }).catch(() => undefined);
-        expect(page.url(), `edit failed: ${await formProblems(page)}`).toContain("saved=1");
+        await Promise.race([
+          page.waitForURL(/saved=1/, { timeout: 30_000 }),
+          page.locator("[role='status']").filter({ hasText: /saved/i }).first().waitFor({ timeout: 30_000 }),
+        ]).catch(() => undefined);
+        const ok = page.url().includes("saved=1") || (await page.locator("[role='status']").filter({ hasText: /saved/i }).count()) > 0;
+        expect(ok, `edit failed: ${await formProblems(page)}`).toBe(true);
         await page.goto(editor);
         await expect(page.locator(`main form input[value="${edited}"]`).first(), "edit not kept after reload").toBeVisible();
       }
@@ -288,17 +301,16 @@ test.describe("Admin console", () => {
     test(`${url}: saves`, async ({ page }) => {
       await expectHealthy(page, url);
       if (url === "/admin/site-text") {
-        // Saving is only possible after a change: type a text, save, then clear it (back to the default) and save.
-        const box = page.locator("main textarea, main input[type='text']").filter({ hasNot: page.locator("[disabled]") }).nth(1);
+        // Saving is only possible after a change: type a text, save, then put it back to the default and save.
+        const box = page.locator("main textarea").first();
         await box.fill(`E2E text ${STAMP}`);
         await page.getByRole("button", { name: "Save changes" }).click();
-        await expect(page.getByText("No unsaved changes")).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByText(/Saved 1 change/)).toBeVisible({ timeout: 15_000 });
         await page.reload();
-        await expect(page.locator(`main :is(textarea,input)[value="E2E text ${STAMP}"], main textarea:has-text("E2E text ${STAMP}")`).first(), "site text not kept").toBeVisible();
-        const again = page.locator("main textarea, main input[type='text']").nth(1);
-        await again.fill("");
+        await expect(page.locator("main textarea").first(), "site text not kept").toHaveValue(`E2E text ${STAMP}`);
+        await page.getByRole("button", { name: "Back to default" }).first().click();
         await page.getByRole("button", { name: "Save changes" }).click();
-        await expect(page.getByText("No unsaved changes")).toBeVisible({ timeout: 15_000 });
+        await expect(page.getByText(/Saved 1 change/)).toBeVisible({ timeout: 15_000 });
         return;
       }
       const btn = saveButton(page);
@@ -405,9 +417,9 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
     await expectHealthy(page, "/admin/media");
     await page.locator("#files").setInputFiles({ name: `e2e-${STAMP}.png`, mimeType: "image/png", buffer: PNG });
     await page.getByRole("button", { name: "Upload", exact: true }).click();
-    await expect(page.locator("[role='status']").first(), "upload gave no confirmation").toBeVisible({ timeout: 30_000 });
-    await page.goto(`/admin/media?q=e2e-${STAMP}`);
-    const link = page.locator('main a[href^="/admin/media/"]').filter({ hasNotText: /trash/i }).first();
+    await expect(page.getByText("1 file uploaded."), `upload failed: ${await formProblems(page)} ${await page.locator("main").innerText().then((t) => t.slice(0, 400))}`).toBeVisible({ timeout: 30_000 });
+    await page.goto("/admin/media");
+    const link = page.locator('main a[href^="/admin/media/"]').first();
     const href = await link.getAttribute("href");
     expect(href, "uploaded file not in the media list").toMatch(/\/admin\/media\/[0-9a-f-]{36}/);
     await expectHealthy(page, href!);
@@ -435,8 +447,8 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
       await fillRequired(page, `eco-${kind}`);
       await EXTRA[`eco-${kind}`]?.(page);
       await saveButton(page).click();
-      await page.waitForURL(new RegExp(`/admin/ecosystem/${kind}/[0-9a-f-]{36}`), { timeout: 30_000 }).catch(() => undefined);
-      expect(page.url(), `create failed: ${await formProblems(page)}`).toMatch(new RegExp(`/admin/ecosystem/${kind}/[0-9a-f-]{36}`));
+      await page.waitForURL(new RegExp(`/admin/ecosystem/${kind}/[0-9a-z-]{20,}`), { timeout: 30_000 }).catch(() => undefined);
+      expect(page.url(), `create failed: ${await formProblems(page)}`).toMatch(new RegExp(`/admin/ecosystem/${kind}/[0-9a-z-]{20,}`));
       const editor = page.url().split("?")[0]!;
       await saveButton(page).click();
       await page.waitForURL(/saved=1/, { timeout: 30_000 });

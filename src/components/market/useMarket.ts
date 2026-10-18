@@ -113,11 +113,16 @@ export function useMarket(initial: MarketPayload) {
 
   // The session (pre-opening, open, post-closing, closed) follows the clock in Dhaka,
   // so it changes on time even between refreshes: checked every 20 seconds.
-  const [minute, setMinute] = useState(() => Math.floor(Date.now() / 60_000));
+  // The first render keeps the session the server rendered (a cached page may be minutes or hours
+  // old, and recomputing it here would make the browser's markup differ: React error 418).
+  // Right after hydration the browser's clock takes over.
+  const [minute, setMinute] = useState<number | null>(null);
   useEffect(() => {
-    const id = setInterval(() => setMinute(Math.floor(Date.now() / 60_000)), 20_000);
+    const tick = () => setMinute(Math.floor(Date.now() / 60_000));
+    tick();
+    const id = setInterval(tick, 20_000);
     return () => clearInterval(id);
   }, []);
-  const data = useMemo(() => withSessions(current.data, new Date()), [current.data, minute]);
+  const data = useMemo(() => (minute === null ? current.data : withSessions(current.data, new Date())), [current.data, minute]);
   return { ...current, data };
 }

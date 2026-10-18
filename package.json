@@ -25,7 +25,7 @@
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install --with-deps chromium",
     "test:a11y": "playwright test a11y",
-    "db:seed:content": "tsx prisma/seed-content.ts",
+    "db:seed:content": "prisma generate && tsx prisma/seed-content.ts",
     "assets:import": "tsx scripts/import-assets.ts",
     "admin:password": "tsx scripts/reset-admin-password.ts",
     "setup": "tsx scripts/setup.ts",

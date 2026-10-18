@@ -30,13 +30,15 @@ export const CLIENT_LOGOS: ClientLogo[] = [
   // with IDLC Securities, the 17 the company reported on 21 Sep 2026.
   { key: "innova-securities", name: "Innova Securities Limited" },
   { key: "wifang-securities", name: "Wifang Securities Limited" },
+  // Confirmed by XFL as a client (18 Oct 2026); name as on DSE's TREC holder list.
+  { key: "thia-securities", name: "Thea Securities Ltd." },
 ];
 
 /**
  * Added as clients earlier from a logo set, but not on XFL's confirmed client
  * list: the seed moves them to drafts (logos stay in the media library).
  */
-export const NOT_CLIENTS = ["monarch-holdings", "royal-capital", "thia-securities"];
+export const NOT_CLIENTS = ["monarch-holdings", "royal-capital"];
 
 /** "Bank Asia Securities Limited" and "Bank Asia Securities Ltd." are the same organization. */
 export function orgNameKey(name: string): string {

@@ -27,12 +27,11 @@ export type LiveApp = {
 type Labels = { android: string; ios: string; web: string; featured?: string; rank?: RankLabels; locale?: "en" | "bn"; site?: string; othersTitle?: string };
 type StoreLink = { href: string; label: string; kind: "play" | "ios" | "web" };
 
-/** Every public link the app has: Google Play, App Store and the web app (the brokerage's site is the link on its name). */
+/** The app's store links: Google Play and App Store (the brokerage's site is the link on its name, so no separate web button). */
 function linksOf(a: LiveApp, labels: Labels): StoreLink[] {
   return [
     a.playStoreUrl && { href: a.playStoreUrl, label: labels.android, kind: "play" as const },
     a.appStoreUrl && { href: a.appStoreUrl, label: labels.ios, kind: "ios" as const },
-    a.webUrl && { href: a.webUrl, label: labels.web, kind: "web" as const },
   ].filter((l): l is StoreLink => Boolean(l));
 }
 

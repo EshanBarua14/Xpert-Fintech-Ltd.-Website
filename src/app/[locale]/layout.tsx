@@ -12,6 +12,7 @@ import { marketMode } from "@/lib/market/data";
 import { Noto_Sans_Bengali, Noto_Serif_Bengali, Schibsted_Grotesk, Spectral } from "next/font/google";
 import { SiteHeader } from "@/components/navigation/SiteHeader";
 import { SiteFooter } from "@/components/navigation/SiteFooter";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { SiteEffects } from "@/components/motion/SiteEffects";
 import { AmbientBackground } from "@/components/motion/AmbientBackground";
 import { isLocale } from "@/lib/i18n/config";
@@ -83,6 +84,7 @@ export default async function LocaleLayout({
           {children}
         </main>
         <SiteFooter locale={locale} />
+        <WhatsAppButton locale={locale} />
         <SiteEffects />
         <NavProgress />
       </body>

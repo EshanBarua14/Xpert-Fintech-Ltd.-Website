@@ -88,6 +88,7 @@ export function HeaderClient({
   labels,
   logo,
   ticker,
+  tickerOnHome = true,
 }: {
   locale: AppLocale;
   items: NavLink[];
@@ -95,8 +96,11 @@ export function HeaderClient({
   logo: ReactNode;
   /** DSE · CSE ticker settings; the ticker is shown above the navigation when market data is on. */
   ticker?: TickerProps;
+  /** False when Admin → Design hides the ticker on the home page. */
+  tickerOnHome?: boolean;
 }) {
   const pathname = usePathname();
+  const onHome = pathname === "/" || pathname === `/${locale}` || pathname === `/${locale}/`;
   const [menuOpen, setMenuOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -161,7 +165,7 @@ export function HeaderClient({
 
   return (
     <header className="fixed inset-x-0 top-0 z-(--z-sticky)">
-      {ticker && <TickerBar {...ticker} />}
+      {ticker && (tickerOnHome || !onHome) && <TickerBar {...ticker} />}
       <div className="site-bar-wrap px-3 pt-3 md:px-6 md:pt-4">
       <div
         className={cn(

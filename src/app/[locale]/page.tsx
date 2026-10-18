@@ -42,6 +42,9 @@ import { getMarketPayload } from "@/lib/market/data";
 import { MarketPulse } from "@/components/market/MarketPulse";
 import { MarketReach } from "@/components/market/MarketReach";
 import { HeroIndices } from "@/components/market/HeroIndices";
+import { CoreStrengths } from "@/components/flagship/CoreStrengths";
+import { SavingsGraphic } from "@/components/flagship/SavingsGraphic";
+import { getSavings, getStrengths } from "@/lib/content/highlights";
 import { exchangeLogos } from "@/components/market/ExchangeMark";
 import { CredentialsInline } from "@/components/blocks/CredentialsBand";
 import { getCredentials } from "@/lib/content/credentials";
@@ -93,7 +96,7 @@ export default async function HomePage({ params }: Props) {
     Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]),
     Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds(), getFigures(), getRiskPageHref(locale)]),
   ]);
-  const otherClients = await getOtherClients(locale);
+  const [otherClients, strengths, savings] = await Promise.all([getOtherClients(locale), getStrengths(locale), getSavings(locale, { drafts: editorHints() })]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -114,6 +117,8 @@ export default async function HomePage({ params }: Props) {
   return (
     <>
       {orgLd}
+      {/* Admin → Design → Home page can switch the DSE · CSE ticker off here (globals.css gives its space back). */}
+      {!show("ticker") && <span data-no-ticker hidden />}
       <FlagshipHero
         t={t}
         locale={locale}
@@ -124,7 +129,7 @@ export default async function HomePage({ params }: Props) {
         credentials={credentials.length ? <CredentialsInline items={credentials} label={t.credentialsTitle} /> : undefined}
         // The figures follow right below in "Our share of the market".
         facts={showReach ? [] : proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
-        market={market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} /> : undefined}
+        market={show("heroMarket") && market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} /> : undefined}
       />
 
       {show("clients") && data.clients.length > 0 && (
@@ -134,6 +139,26 @@ export default async function HomePage({ params }: Props) {
           </div>
           <ClientMarquee clients={data.clients} label={t.clientsEyebrow} />
         </section>
+      )}
+
+      {show("strengths") && strengths.items.length > 0 && (
+        <Shell id="strengths" className="py-12 md:py-16">
+          <div className="flex flex-col gap-10">
+            <SectionHeader title={strengths.title} body={strengths.intro || null} />
+            <CoreStrengths items={strengths.items} locale={locale} />
+          </div>
+        </Shell>
+      )}
+
+      {show("savings") && savings && (
+        <Shell id="savings" className="py-12 md:py-16">
+          <SavingsGraphic data={savings} locale={locale} />
+        </Shell>
+      )}
+      {show("savings") && !savings && editorHints() && (
+        <Shell id="savings" className="py-12 md:py-16">
+          <ContentSlot kind="figure" locale={locale} title="Cost savings graphic: enter the cost before and with Xpert, with its source" adminHref="/admin/highlights" className="min-h-0" />
+        </Shell>
       )}
 
       {show("reach") && showReach && (

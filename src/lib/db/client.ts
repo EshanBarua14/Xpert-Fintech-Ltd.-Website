@@ -44,6 +44,21 @@ function summarize(data: unknown): Record<string, unknown> | undefined {
   return { fields, ...(Object.keys(values).length && { values }) };
 }
 
+/**
+ * A where written for a unique lookup can use a compound key ({ articleId_locale:
+ * { articleId, locale } }), which findMany does not accept: spread such keys
+ * into their fields ({ articleId, locale }) so the same record is found.
+ */
+function flattenWhere(where: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+  if (!where) return where;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(where)) {
+    if (k.includes("_") && v && typeof v === "object" && !Array.isArray(v) && !(v instanceof Date)) Object.assign(out, v);
+    else out[k] = v;
+  }
+  return out;
+}
+
 const REVISION_OPS = new Set(["update", "upsert", "delete", "updateMany", "deleteMany"]);
 
 /** Copies the current state of what an admin is about to change into Revision. Never blocks the change. */
@@ -66,12 +81,12 @@ async function keepRevision(base: PrismaClient, model: string, operation: string
     let ids: unknown[] = [];
     if (translation) {
       // A new translation names its record in the data; otherwise the where says which.
-      const rows = operation === "create" || !a.where ? [] : await delegate(model).findMany({ where: a.where, select: { [translation.fk]: true }, take: 50 }).catch(() => []);
+      const rows = operation === "create" || !a.where ? [] : await delegate(model).findMany({ where: flattenWhere(a.where), select: { [translation.fk]: true }, take: 50 }).catch(() => []);
       ids = rows.map((r) => r[translation.fk]);
       const fromCreate = a.create?.[translation.fk] ?? a.data?.[translation.fk];
       if (fromCreate) ids.push(fromCreate);
     } else if (operation === "updateMany" || operation === "deleteMany") {
-      const rows = await delegate(model).findMany({ where: a.where ?? {}, take: 50 }).catch(() => []);
+      const rows = await delegate(model).findMany({ where: flattenWhere(a.where) ?? {}, take: 50 }).catch(() => []);
       const idName = idField(target) ?? "id";
       ids = rows.map((r) => r[idName]);
     } else {

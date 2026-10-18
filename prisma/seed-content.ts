@@ -1860,6 +1860,38 @@ async function seedClientApps() {
 }
 
 /**
+ * Once (XFL, 18 Oct 2026): First Capital Securities' app, Puji, on Google Play
+ * (com.ecosoftbd.puji): "introduced by First Capital Securities Limited &
+ * developed by EcoSoftBD IT Limited" (its store listing, checked 18 Oct 2026).
+ */
+async function seedFirstCapitalApp() {
+  const MARK = "seed.first-capital-app-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const org = await db.organization.findUnique({ where: { key: "first-capital-securities" }, select: { id: true } });
+  let added = false;
+  if (org && !(await db.deployment.findFirst({ where: { OR: [{ key: "puji" }, { androidPackage: "com.ecosoftbd.puji" }] } }))) {
+    const offering = await db.offering.findUnique({ where: { key: "trading-platform" }, select: { id: true } });
+    const last = await db.deployment.findFirst({ orderBy: { sortOrder: "desc" }, select: { sortOrder: true } });
+    await db.deployment.create({
+      data: {
+        key: "puji",
+        appName: "Puji",
+        androidPackage: "com.ecosoftbd.puji",
+        playStoreUrl: "https://play.google.com/store/apps/details?id=com.ecosoftbd.puji",
+        organizationId: org.id,
+        offeringId: offering?.id ?? null,
+        linksCheckedAt: new Date("2026-10-18"),
+        status: "PUBLISHED",
+        sortOrder: (last?.sortOrder ?? 0) + 1,
+      },
+    });
+    added = true;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), added } } });
+  if (added) console.log("• First Capital Securities: Puji (Google Play) added to the live apps");
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2255,6 +2287,7 @@ async function main() {
   await seedClientStoryDrafts();
   await publishFactOnlyStories();
   await seedClientApps();
+  await seedFirstCapitalApp();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

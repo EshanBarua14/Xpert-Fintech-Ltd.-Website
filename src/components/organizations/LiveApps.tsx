@@ -27,13 +27,12 @@ export type LiveApp = {
 type Labels = { android: string; ios: string; web: string; featured?: string; rank?: RankLabels; locale?: "en" | "bn"; site?: string; othersTitle?: string };
 type StoreLink = { href: string; label: string; kind: "play" | "ios" | "web" | "site" };
 
-/** Every public link the app has: Google Play, App Store, the web app, and the brokerage's own website. */
+/** Every public link the app has: Google Play, App Store and the web app (the brokerage's site is the link on its name). */
 function linksOf(a: LiveApp, labels: Labels): StoreLink[] {
   return [
     a.playStoreUrl && { href: a.playStoreUrl, label: labels.android, kind: "play" as const },
     a.appStoreUrl && { href: a.appStoreUrl, label: labels.ios, kind: "ios" as const },
     a.webUrl && { href: a.webUrl, label: labels.web, kind: "web" as const },
-    a.brokerageUrl && { href: a.brokerageUrl, label: labels.site ?? "Website", kind: "site" as const },
   ].filter((l): l is StoreLink => Boolean(l));
 }
 
@@ -187,19 +186,13 @@ export function LiveApps({ apps: all, labels, others = [] }: { apps: LiveApp[]; 
                     {monogram(o.name)}
                   </span>
                 )}
-                <span className="flex min-w-0 flex-1 flex-col gap-2">
-                  <span className="line-clamp-2 font-display text-sm leading-snug font-semibold text-text-primary">{o.name}</span>
-                  {o.url && (
-                    <a
-                      href={o.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${o.name}: ${labels.site ?? "Website"}`}
-                      className="inline-flex h-8 items-center gap-1.5 self-start rounded-full border border-fg/15 px-2.5 text-xs font-semibold whitespace-nowrap text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-fg"
-                    >
-                      <StoreGlyph kind="site" />
-                      {labels.site ?? "Website"}
+                <span className="flex min-w-0 flex-1 flex-col">
+                  {o.url ? (
+                    <a href={o.url} target="_blank" rel="noopener noreferrer" className="line-clamp-2 font-display text-sm leading-snug font-semibold text-text-primary underline decoration-fg/20 underline-offset-4 transition-colors hover:text-brand-sky hover:decoration-brand-sky/60">
+                      {o.name}
                     </a>
+                  ) : (
+                    <span className="line-clamp-2 font-display text-sm leading-snug font-semibold text-text-primary">{o.name}</span>
                   )}
                 </span>
               </div>

@@ -130,7 +130,25 @@ export function MarketGoalForm({ values }: { values: GoalValues }) {
 }
 
 /** Xpert's overall share as XFL states it (e.g. 45%), with the date it applies to. Empty removes it. */
-export function HeadlineShareForm({ pct, asOf, dse = "", cse = "" }: { pct: string; asOf: string; dse?: string; cse?: string }) {
+export function HeadlineShareForm({
+  pct,
+  asOf,
+  dse = "",
+  cse = "",
+  source = "",
+  sourceUrl = "",
+  noteEn = "",
+  noteBn = "",
+}: {
+  pct: string;
+  asOf: string;
+  dse?: string;
+  cse?: string;
+  source?: string;
+  sourceUrl?: string;
+  noteEn?: string;
+  noteBn?: string;
+}) {
   const { state, pending, onSubmit } = useActionForm<MarketState>(saveHeadlineShare, {});
   const e = state.errors ?? {};
   return (
@@ -141,6 +159,10 @@ export function HeadlineShareForm({ pct, asOf, dse = "", cse = "" }: { pct: stri
         <TextInput id="avgCse" inputMode="decimal" label="CSE market share (%)" defaultValue={cse} hint="Xpert's share of CSE turnover. Shown on the home page and the CSE market card." error={e.avgCse || undefined} />
         <TextInput id="headlineAsOf" type="date" label="As of" defaultValue={asOf} hint="Shown next to the figures. Optional." error={e.headlineAsOf || undefined} />
         <TextInput id="headlinePct" inputMode="decimal" label="Both exchanges combined (%), optional" defaultValue={pct} hint="Used only when neither DSE nor CSE is filled in. Leave empty otherwise." error={e.headlinePct || undefined} />
+        <TextInput id="headlineSource" label="Source" placeholder="e.g. Arthosuchak" defaultValue={source} hint="Where the figures come from; shown as a link." />
+        <TextInput id="headlineSourceUrl" type="url" label="Source link" placeholder="https://" defaultValue={sourceUrl} error={e.headlineSourceUrl || undefined} />
+        <TextInput id="headlineNoteEn" label="Note (English), optional" placeholder="45–47% on a typical day, up to 57% on the busiest" defaultValue={noteEn} />
+        <TextInput id="headlineNoteBn" label="Note (বাংলা), optional" lang="bn" defaultValue={noteBn} />
       </div>
       <div>
         <SubmitButton pending={pending}>Save shares</SubmitButton>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { CountUp } from "@/components/motion/CountUp";
+import { SourceLink } from "@/components/insights/SourceLink";
 import type { ShareFigure } from "@/lib/market/types";
 import { cn } from "@/lib/utils/cn";
 
@@ -22,12 +23,14 @@ export type ReachLabels = {
   exchange?: string;
   /** Under an exchange with no figure yet ("Figure to be published"). */
   pending?: string;
+  /** "Source", before the link to where the figures come from. */
+  source?: string;
 };
 
 type Props = {
   shares: ShareFigure[];
   /** Overall share stated by XFL (Admin → Market data); shown instead of the computed one. */
-  headline?: { pct: number | null; asOf: string | null; dse?: number; cse?: number } | null;
+  headline?: { pct: number | null; asOf: string | null; dse?: number; cse?: number; source?: string; sourceUrl?: string; note?: { en: string; bn?: string } } | null;
   goal: { targetPct: number; year: number; note: string | null } | null;
   clientBase: { value: number; label: string }[];
   /** Admin → Figures: more numbers with their source, in the same card. */
@@ -182,6 +185,8 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
                   <span className="ml-1 text-[0.45em] text-text-secondary">%</span>
                 </p>
                 <p className="text-sm text-text-secondary">{hero.caption}</p>
+                {headline?.note && <p className="text-sm text-text-secondary">{(locale === "bn" && headline.note.bn) || headline.note.en}</p>}
+                <SourceLink url={headline?.sourceUrl} name={headline?.source} label={labels.source ?? "Source"} className="text-xs text-text-secondary" />
               </>
             ) : (
               goal && <p className="max-w-md font-display text-3xl leading-tight tracking-[-0.015em] text-balance md:text-4xl">{labels.goalLead.replace("{pct}", goalPct).replace("{year}", year)}</p>

@@ -158,6 +158,10 @@ const headlineSchema = z.object({
   asOf: z.string().trim().refine((v) => v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v), "Pick a date."),
   dse: z.string().trim().transform((v) => v.replace(/[%\s]/g, "")).refine((v) => v === "" || (Number(v) > 0 && Number(v) <= 100), "Enter a percentage above 0 and up to 100, or leave empty."),
   cse: z.string().trim().transform((v) => v.replace(/[%\s]/g, "")).refine((v) => v === "" || (Number(v) > 0 && Number(v) <= 100), "Enter a percentage above 0 and up to 100, or leave empty."),
+  source: z.string().trim().max(120),
+  sourceUrl: z.string().trim().max(500).refine((v) => v === "" || /^https:\/\/\S+$/.test(v), "Enter a full address starting with https://"),
+  noteEn: z.string().trim().max(200),
+  noteBn: z.string().trim().max(200),
 });
 
 /**
@@ -167,18 +171,35 @@ const headlineSchema = z.object({
  */
 export async function saveHeadlineShare(_prev: MarketState, formData: FormData): Promise<MarketState> {
   const admin = await requireAdmin();
-  const parsed = headlineSchema.safeParse({ pct: formData.get("headlinePct") ?? "", asOf: formData.get("headlineAsOf") ?? "", dse: formData.get("avgDse") ?? "", cse: formData.get("avgCse") ?? "" });
+  const parsed = headlineSchema.safeParse({
+    pct: formData.get("headlinePct") ?? "",
+    asOf: formData.get("headlineAsOf") ?? "",
+    dse: formData.get("avgDse") ?? "",
+    cse: formData.get("avgCse") ?? "",
+    source: formData.get("headlineSource") ?? "",
+    sourceUrl: formData.get("headlineSourceUrl") ?? "",
+    noteEn: formData.get("headlineNoteEn") ?? "",
+    noteBn: formData.get("headlineNoteBn") ?? "",
+  });
   if (!parsed.success) {
     const e = toFieldErrors(parsed.error);
-    return { errors: { headlinePct: e.pct ?? "", headlineAsOf: e.asOf ?? "", avgDse: e.dse ?? "", avgCse: e.cse ?? "" }, message: "Please fix the highlighted fields." };
+    return { errors: { headlinePct: e.pct ?? "", headlineAsOf: e.asOf ?? "", avgDse: e.dse ?? "", avgCse: e.cse ?? "", headlineSourceUrl: e.sourceUrl ?? "" }, message: "Please fix the highlighted fields." };
   }
-  const { pct, asOf, dse, cse } = parsed.data;
+  const { pct, asOf, dse, cse, source, sourceUrl, noteEn, noteBn } = parsed.data;
   if (pct === "" && dse === "" && cse === "") {
     await db.siteSetting.deleteMany({ where: { key: HEADLINE_SHARE_KEY } });
     refresh();
     return { ok: true, savedAt: Date.now(), message: "Removed. The home page shows the share worked out from the daily figures." };
   }
-  const value = { pct: pct ? Number(pct) : null, asOf: asOf || null, ...(dse && { dse: Number(dse) }), ...(cse && { cse: Number(cse) }) };
+  const value = {
+    pct: pct ? Number(pct) : null,
+    asOf: asOf || null,
+    ...(dse && { dse: Number(dse) }),
+    ...(cse && { cse: Number(cse) }),
+    ...(source && { source }),
+    ...(sourceUrl && { sourceUrl }),
+    ...(noteEn && { note: { en: noteEn, ...(noteBn && { bn: noteBn }) } }),
+  };
   await db.siteSetting.upsert({ where: { key: HEADLINE_SHARE_KEY }, update: { value, updatedById: admin.id }, create: { key: HEADLINE_SHARE_KEY, value, updatedById: admin.id } });
   refresh();
   return {

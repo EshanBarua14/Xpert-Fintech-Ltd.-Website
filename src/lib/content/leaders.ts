@@ -95,7 +95,17 @@ export const getMarketGoal = cache(async (): Promise<MarketGoal | null> => {
  * of the figure worked out from the daily turnover entries.
  */
 /** Overall share (home page), and the daily average share of each exchange shown on the market cards. */
-export type HeadlineShare = { pct: number | null; asOf: string | null; dse?: number; cse?: number };
+export type HeadlineShare = {
+  pct: number | null;
+  asOf: string | null;
+  dse?: number;
+  cse?: number;
+  /** Where the figures come from, shown as a clickable source. */
+  source?: string;
+  sourceUrl?: string;
+  /** One line under the figures, e.g. the typical range and the peak. */
+  note?: { en: string; bn?: string };
+};
 export const HEADLINE_SHARE_KEY = "market.headlineShare";
 
 export function readHeadlineShare(value: unknown): HeadlineShare | null {
@@ -107,7 +117,11 @@ export function readHeadlineShare(value: unknown): HeadlineShare | null {
   const cse = avg(o.cse);
   if (pct === null && dse === undefined && cse === undefined) return null;
   const asOf = typeof o.asOf === "string" && /^\d{4}-\d{2}-\d{2}$/.test(o.asOf) ? o.asOf : null;
-  return { pct, asOf, ...(dse !== undefined && { dse }), ...(cse !== undefined && { cse }) };
+  const source = typeof o.source === "string" && o.source.trim() ? o.source.trim() : undefined;
+  const sourceUrl = typeof o.sourceUrl === "string" && /^https:\/\/\S+$/.test(o.sourceUrl) ? o.sourceUrl : undefined;
+  const n = o.note && typeof o.note === "object" ? (o.note as Record<string, unknown>) : null;
+  const note = n && typeof n.en === "string" && n.en.trim() ? { en: n.en.trim(), ...(typeof n.bn === "string" && n.bn.trim() && { bn: n.bn.trim() }) } : undefined;
+  return { pct, asOf, ...(dse !== undefined && { dse }), ...(cse !== undefined && { cse }), ...(source && { source }), ...(sourceUrl && { sourceUrl }), ...(note && { note }) };
 }
 
 export const getHeadlineShare = cache(async (): Promise<HeadlineShare | null> => {

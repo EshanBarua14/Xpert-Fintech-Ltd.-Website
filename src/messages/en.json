@@ -104,10 +104,10 @@
   "thanksContact": "We have received your message and will reply soon.",
   "orReachUs": "Or reach us directly",
   "securityCheck": "Security check",
-  "heroEyebrow": "Built by brokers · For Bangladesh's capital market",
-  "heroTitleA": "The market won't wait.",
-  "heroTitleB": "*Neither should your brokerage.*",
-  "heroBody": "Trading, risk checks, eKYC, BO accounts, documents and back office for DSE and CSE, on one platform. Built and owned by the brokerage houses that trade on it every day.",
+  "heroEyebrow": "Owned by Bangladesh's top brokerage houses",
+  "heroTitleA": "Built by the country's top brokerage houses.",
+  "heroTitleB": "*Trusted by the market.*",
+  "heroBody": "The brokerage houses that trade on DSE and CSE every day came together to build their own platform: trading, risk checks, eKYC, BO accounts and back office, working as one.",
   "explorePlatform": "Explore the platform",
   "trustLine": "{n} member brokerage houses",
   "platformEyebrow": "The platform",
@@ -767,5 +767,7 @@
   "mixedAlbum": "Photos and videos",
   "rankBroker": "#{n} broker on {exchange}",
   "rankAsOf": "as of {date}",
-  "rankSourceLabel": "Source"
+  "rankSourceLabel": "Source",
+  "reachTitleShare": "{pct}% of DSE's turnover *already runs through Xpert*",
+  "reachTitleShareCse": "{pct}% of CSE's turnover *already runs through Xpert*"
 }

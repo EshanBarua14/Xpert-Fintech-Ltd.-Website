@@ -369,19 +369,38 @@ export function PeopleGallery({
               <div className="relative aspect-[4/5] w-full shrink-0 overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-[color-mix(in_srgb,var(--tone)_35%,transparent)]">
                 <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt={open.name} fill sizes="(min-width: 768px) 22rem, 80vw" quality={90} className="object-cover" style={focusStyle(open.photo, 0.8)} unoptimized={!open.photo} />
               </div>
-              <div className="flex items-center gap-2.5">
-                <Logo height={26} />
-                <span className="font-display text-sm leading-tight font-medium text-text-primary">{company ?? "Xpert Fintech Ltd."}</span>
+              {/* Name and their seat at Xpert, then their own organisation, each as the same row: logo, organisation, role. */}
+              <div className="flex flex-col gap-1">
+                <p className="font-display text-[1.35rem] leading-tight font-semibold tracking-[-0.01em] text-balance text-text-primary">{open.name}</p>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <p className="font-display text-xl leading-tight font-semibold tracking-[-0.01em] text-balance text-text-primary">{open.name}</p>
-                <p className="flex items-center gap-2 text-sm font-semibold text-[var(--tone-ink)]">
-                  <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-[var(--tone)]" />
-                  {open.title ?? groupLabel}
-                </p>
-                {open.affiliation && <Affiliation text={open.affiliation} className="text-xs" />}
-              </div>
-              {open.org && <OrgLogo org={open.org} className="h-9 self-start" />}
+              <ul className="flex flex-col gap-2">
+                <li className="flex items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--tone)_35%,transparent)] bg-[color-mix(in_srgb,var(--tone)_8%,transparent)] p-2.5">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-black/5">
+                    <Logo height={26} />
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-sm leading-snug font-semibold text-[var(--tone-ink)]">{open.title ?? groupLabel}</span>
+                    <span className="truncate text-xs text-text-secondary">{company ?? "Xpert Fintech Ltd."}</span>
+                  </span>
+                </li>
+                {open.affiliation && (
+                  <li className="flex items-center gap-3 rounded-xl border border-fg/10 p-2.5">
+                    <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-black/5">
+                      {open.org ? (
+                        <Image src={open.org.logo.url} alt={open.org.name} width={open.org.logo.width ?? 80} height={open.org.logo.height ?? 80} className="h-8 w-8 object-contain" />
+                      ) : (
+                        <SocialIcon kind="web" className="size-4 text-[#0b1c31]" />
+                      )}
+                    </span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="text-sm leading-snug font-semibold text-text-primary">{splitAffiliation(open.affiliation).designation || open.affiliation}</span>
+                      {splitAffiliation(open.affiliation).institution && (
+                        <span className="text-xs leading-snug text-text-secondary">{splitAffiliation(open.affiliation).institution}</span>
+                      )}
+                    </span>
+                  </li>
+                )}
+              </ul>
               <div className="mt-auto flex items-center gap-2 border-t border-fg/[0.08] pt-4">
                 <ContactIcon kind="email" value={open.email} name={open.name} labels={labels} size="size-10" />
                 <ContactIcon kind="linkedin" value={open.linkedinUrl} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />

@@ -54,6 +54,7 @@ export default async function AboutPage({ params }: Props) {
     getPageByPath(loc, "company/about"),
   ]);
   const [chairman, md] = await Promise.all([getLeaderMessage("chairman", loc), getLeaderMessage("md", loc)]);
+  const contact = { linkedin: t.linkedinProfile, email: t.emailPerson, linkedinSearch: t.linkedinSearch, emailMissing: t.emailMissing };
   const sections = page ? toSections(page, loc) : [];
   const ctx = sections.length ? await blockContext(loc, mediaIdsOf(sections)) : null;
   const tr = page ? pick(page.translations, loc) : undefined;
@@ -117,8 +118,8 @@ export default async function AboutPage({ params }: Props) {
       {(chairman || md) && (
         <Shell className="about-justify pb-10 md:pb-12">
           <div className="flex flex-col gap-20 md:gap-28">
-            {chairman && <LeaderMessage message={chairman} heading={t.chairmanMessage} compact />}
-            {md && <LeaderMessage message={md} heading={t.mdMessage} compact />}
+            {chairman && <LeaderMessage message={chairman} heading={t.chairmanMessage} compact contact={contact} />}
+            {md && <LeaderMessage message={md} heading={t.mdMessage} compact contact={contact} />}
           </div>
         </Shell>
       )}

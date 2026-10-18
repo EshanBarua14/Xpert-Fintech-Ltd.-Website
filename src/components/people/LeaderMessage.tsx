@@ -2,6 +2,7 @@ import { focusStyle } from "@/lib/media/focal";
 import Image from "next/image";
 import type { LeaderMessage as Message } from "@/lib/content/leaders";
 import { cn } from "@/lib/utils/cn";
+import { ContactIcon, type ContactLabels } from "./ContactIcon";
 
 function initials(name: string | null) {
   return (name ?? "")
@@ -19,7 +20,7 @@ function initials(name: string | null) {
  * paragraph as a larger lead. Text and signatory come from Admin → Messages
  * and Admin → People.
  */
-export function LeaderMessage({ message, heading, compact = false }: { message: Message; heading: string; compact?: boolean }) {
+export function LeaderMessage({ message, heading, compact = false, contact }: { message: Message; heading: string; compact?: boolean; contact?: ContactLabels }) {
   const [lead, ...rest] = message.paragraphs;
   const id = `leader-${message.key}`;
   return (
@@ -38,6 +39,12 @@ export function LeaderMessage({ message, heading, compact = false }: { message: 
           <figcaption className="flex flex-col gap-1">
             <span className="font-display text-xl leading-tight text-text-primary">{message.name}</span>
             {message.title && <span className="text-sm text-text-secondary">{message.title}</span>}
+            {contact && (
+              <span className="mt-3 flex items-center gap-2">
+                <ContactIcon kind="linkedin" value={message.linkedin} name={message.name} org="Xpert Fintech" labels={contact} color="var(--color-gold)" ink="var(--color-gold)" size="size-9" />
+                <ContactIcon kind="email" value={message.email} name={message.name} labels={contact} color="var(--color-gold)" ink="var(--color-gold)" size="size-9" />
+              </span>
+            )}
           </figcaption>
         )}
       </figure>

@@ -26,6 +26,8 @@ export type ConsortiumRep = {
   /** From Admin → People: icons beside the representative. */
   linkedin?: string | null;
   email?: string | null;
+  /** Their own website (else the house's). */
+  website?: string | null;
 };
 export type ConsortiumMember = {
   id: string;
@@ -101,6 +103,7 @@ export const getConsortium = cache(async (locale: AppLocale): Promise<Consortium
               photoStyle: photo ? focusStyle(photo, 1) : undefined,
               linkedin: p.linkedinUrl || null,
               email: p.email || null,
+              website: p.websiteUrl || null,
             },
           ];
         });

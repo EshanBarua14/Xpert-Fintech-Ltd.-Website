@@ -10,6 +10,8 @@ export type ContactLabels = {
   linkedinSearch: string;
   /** "Email not listed yet" */
   emailMissing: string;
+  /** "Website" */
+  website?: string;
 };
 
 /**
@@ -60,6 +62,38 @@ export function ContactIcon({
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label} className={cn(cls, !value && "contact-icon-soft")} style={style}>
       <SocialIcon kind="linkedin" className="size-4" />
+    </a>
+  );
+}
+
+/** A globe icon to a person's own or their organisation's website, styled like the email and LinkedIn icons. */
+export function WebsiteIcon({
+  href,
+  name,
+  label = "Website",
+  color = "var(--tone)",
+  ink = "var(--tone-ink)",
+  size = "size-9",
+}: {
+  href: string;
+  name: string;
+  label?: string;
+  color?: string;
+  ink?: string;
+  size?: string;
+}) {
+  const external = /^https?:\/\//i.test(href);
+  const text = `${label}: ${external ? href.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "") : name}`;
+  return (
+    <a
+      href={href}
+      {...(external && { target: "_blank", rel: "noopener noreferrer" })}
+      aria-label={text}
+      title={text}
+      className={cn("contact-icon flex shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-300", size)}
+      style={{ "--c": color, "--ci": ink } as CSSProperties}
+    >
+      <SocialIcon kind="web" className="size-4" />
     </a>
   );
 }

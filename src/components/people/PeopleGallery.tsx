@@ -8,7 +8,10 @@ import { useRef, useState, type CSSProperties } from "react";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 import { cn } from "@/lib/utils/cn";
 import { institutionOf, splitAffiliation } from "@/lib/people/affiliation";
-import { ContactIcon } from "./ContactIcon";
+import { ContactIcon, WebsiteIcon } from "./ContactIcon";
+
+/** Their own website, else their organisation's, else Xpert's (the home page). */
+const siteOf = (p: GalleryPerson) => p.websiteUrl || p.org?.url || "/";
 
 /**
  * Board and management profiles: photo cards that open a full profile in a
@@ -29,10 +32,12 @@ export type GalleryPerson = {
   photo: { url: string; width: number | null; height: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
   linkedinUrl: string | null;
   email: string | null;
+  /** Their own or their organisation's website (Admin → People). */
+  websiteUrl?: string | null;
   /** Seeded stand-in until XFL sends the real profile. */
   isPlaceholder: boolean;
   /** The organization named in the affiliation, when its logo may be shown. */
-  org?: { name: string; logo: { url: string; width: number | null; height: number | null } } | null;
+  org?: { name: string; logo: { url: string; width: number | null; height: number | null }; url?: string | null } | null;
 };
 
 export type GalleryLabels = {
@@ -47,6 +52,8 @@ export type GalleryLabels = {
   linkedinSearch: string;
   /** No email on file yet */
   emailMissing: string;
+  /** "Website" */
+  website?: string;
   placeholder: string;
   role: string;
   /** Biography pages: "Previous part", "Next part", "Part {n} of {total}". */
@@ -244,6 +251,7 @@ function PersonCard({
           ) : (
             <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org={p.org?.name ?? institutionOf(p.affiliation)} labels={labels} />
           )}
+          <WebsiteIcon href={siteOf(p)} name={p.org?.name ?? company ?? p.name} label={labels.website} />
           <button
             type="button"
             tabIndex={-1}
@@ -377,6 +385,7 @@ export function PeopleGallery({
               <div className="mt-auto flex items-center gap-2 border-t border-fg/[0.08] pt-4">
                 <ContactIcon kind="email" value={open.email} name={open.name} labels={labels} size="size-10" />
                 <ContactIcon kind="linkedin" value={open.linkedinUrl} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
+                <WebsiteIcon href={siteOf(open)} name={open.org?.name ?? company ?? open.name} label={labels.website} size="size-10" />
                 {open.email && (
                   <a href={`mailto:${open.email}`} className="min-w-0 truncate text-xs text-text-secondary hover:text-[var(--tone-ink)]">
                     {open.email}
@@ -497,6 +506,7 @@ export function PeopleGallery({
                 ) : (
                   <ContactIcon kind="linkedin" value={null} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
                 )}
+                <WebsiteIcon href={siteOf(open)} name={open.org?.name ?? company ?? open.name} label={labels.website} size="size-10" />
                 {open.org && <OrgLogo org={open.org} className="ml-auto h-9" />}
               </div>
             </div>

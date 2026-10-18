@@ -44,6 +44,7 @@ export default async function TeamPage({ params }: Props) {
         photo: photo ? { url: photo.url, width: photo.width, height: photo.height, focal: photo.focal ?? null } : null,
         email: p.email,
         linkedinUrl: p.linkedinUrl,
+        websiteUrl: p.websiteUrl ?? null,
       };
     })
     .filter((m) => m.name);

@@ -4,11 +4,11 @@ import { saveContacts, type ContactsState } from "@/app/admin/(protected)/people
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
 
-export type ContactRow = { id: string; name: string; role: string; email: string; linkedin: string; affiliation: string };
+export type ContactRow = { id: string; name: string; role: string; email: string; linkedin: string; website: string; affiliation: string };
 
 const input = "h-10 w-full rounded-control border bg-fg/[0.03] px-3 text-sm outline-none focus-visible:border-brand-sky";
 
-/** One table to fill in everyone's email, LinkedIn and position at their organisation. */
+/** One table to fill in everyone's email, LinkedIn, website and position at their organisation. */
 export function ContactsForm({ rows }: { rows: ContactRow[] }) {
   const { state, pending, onSubmit } = useActionForm<ContactsState>(saveContacts, {});
   const e = state.errors ?? {};
@@ -30,12 +30,13 @@ export function ContactsForm({ rows }: { rows: ContactRow[] }) {
     <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
       <FormMessage message={state.message} isError={Boolean(state.errors)} />
       <div className="overflow-x-auto rounded-card border border-fg/10">
-        <table className="w-full min-w-[960px] text-left text-sm">
+        <table className="w-full min-w-[1180px] text-left text-sm">
           <thead className="border-b border-fg/10 text-xs text-text-secondary">
             <tr>
               <th className="px-3 py-3 font-medium">Person</th>
               <th className="px-2 py-3 font-medium">Work email</th>
               <th className="px-2 py-3 font-medium">LinkedIn</th>
+              <th className="px-2 py-3 font-medium">Website</th>
               <th className="px-2 py-3 font-medium">Position at their organisation</th>
             </tr>
           </thead>
@@ -49,6 +50,7 @@ export function ContactsForm({ rows }: { rows: ContactRow[] }) {
                 </td>
                 {field("email", r, r.email, "email", "name@xpertfintech.com", "Work email")}
                 {field("linkedin", r, r.linkedin, "url", "https://www.linkedin.com/in/…", "LinkedIn")}
+                {field("website", r, r.website, "url", "https://…", "Website")}
                 {field("affiliation", r, r.affiliation, "text", "Managing Director, Apex Investments Ltd.", "Position at their organisation")}
               </tr>
             ))}

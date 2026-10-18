@@ -2,7 +2,7 @@ import { focusStyle } from "@/lib/media/focal";
 import Image from "next/image";
 import type { LeaderMessage as Message } from "@/lib/content/leaders";
 import { cn } from "@/lib/utils/cn";
-import { ContactIcon, type ContactLabels } from "./ContactIcon";
+import { ContactIcon, WebsiteIcon, type ContactLabels } from "./ContactIcon";
 
 function initials(name: string | null) {
   return (name ?? "")
@@ -43,6 +43,7 @@ export function LeaderMessage({ message, heading, compact = false, contact }: { 
               <span className="mt-3 flex items-center gap-2">
                 <ContactIcon kind="linkedin" value={message.linkedin} name={message.name} org="Xpert Fintech" labels={contact} color="var(--color-gold)" ink="var(--color-gold)" size="size-9" />
                 <ContactIcon kind="email" value={message.email} name={message.name} labels={contact} color="var(--color-gold)" ink="var(--color-gold)" size="size-9" />
+                <WebsiteIcon href={message.website || "/"} name="Xpert Fintech Ltd." label={contact.website} color="var(--color-gold)" ink="var(--color-gold)" size="size-9" />
               </span>
             )}
           </figcaption>

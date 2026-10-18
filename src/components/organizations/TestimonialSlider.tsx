@@ -2,7 +2,7 @@
 
 import { focusStyle } from "@/lib/media/focal";
 import Image from "next/image";
-import { ContactIcon, type ContactLabels } from "@/components/people/ContactIcon";
+import { ContactIcon, WebsiteIcon, type ContactLabels } from "@/components/people/ContactIcon";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import type { TestimonialCard } from "@/lib/public/content";
 import { cn } from "@/lib/utils/cn";
@@ -144,6 +144,7 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
                     <span className="mt-3 flex items-center gap-2">
                       <ContactIcon kind="linkedin" value={t.linkedin ?? null} name={t.name} org={t.organization} labels={labels.contact} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />
                       <ContactIcon kind="email" value={t.email ?? null} name={t.name} labels={labels.contact} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />
+                      {t.website && <WebsiteIcon href={t.website} name={t.organization ?? t.name} label={labels.contact.website} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />}
                     </span>
                   )}
                 </span>

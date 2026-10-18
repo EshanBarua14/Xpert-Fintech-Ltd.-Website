@@ -14,6 +14,11 @@ const linkedin = z
   .trim()
   .max(300)
   .refine((v) => v === "" || /^https:\/\/([a-z]{2,3}\.)?(www\.)?linkedin\.com\//i.test(v), "Use a LinkedIn address, e.g. https://www.linkedin.com/in/name");
+const website = z
+  .string()
+  .trim()
+  .max(300)
+  .refine((v) => v === "" || /^https?:\/\/[^\s]+\.[^\s]+$/i.test(v), "Use the full address, e.g. https://www.example.com");
 const affiliation = z.string().trim().max(200, "Keep it under 200 characters.");
 
 /** Saves email, LinkedIn and position-at-organisation for many people at once (Admin → People → Contact details). */
@@ -25,10 +30,12 @@ export async function saveContacts(_prev: ContactsState, formData: FormData): Pr
     const e = email.safeParse(formData.get(`email.${id}`) ?? "");
     const l = linkedin.safeParse(formData.get(`linkedin.${id}`) ?? "");
     const a = affiliation.safeParse(formData.get(`affiliation.${id}`) ?? "");
+    const w = website.safeParse(formData.get(`website.${id}`) ?? "");
+    if (!w.success) errors[`website.${id}`] = w.error.issues[0]!.message;
     if (!e.success) errors[`email.${id}`] = e.error.issues[0]!.message;
     if (!l.success) errors[`linkedin.${id}`] = l.error.issues[0]!.message;
     if (!a.success) errors[`affiliation.${id}`] = a.error.issues[0]!.message;
-    return { id, email: e.success ? e.data || null : null, linkedinUrl: l.success ? l.data || null : null, affiliation: a.success ? a.data || null : null };
+    return { id, email: e.success ? e.data || null : null, linkedinUrl: l.success ? l.data || null : null, websiteUrl: w.success ? w.data || null : null, affiliation: a.success ? a.data || null : null };
   });
   if (Object.keys(errors).length) return { errors, message: "Please fix the highlighted fields." };
 
@@ -37,8 +44,8 @@ export async function saveContacts(_prev: ContactsState, formData: FormData): Pr
     const p = await db.person.findUnique({ where: { id: r.id }, include: { translations: { where: { locale: "en" } } } });
     if (!p) continue;
     const en = p.translations[0];
-    if (p.email !== r.email || p.linkedinUrl !== r.linkedinUrl) {
-      await db.person.update({ where: { id: r.id }, data: { email: r.email, linkedinUrl: r.linkedinUrl, updatedById: admin.id } });
+    if (p.email !== r.email || p.linkedinUrl !== r.linkedinUrl || (p.websiteUrl ?? null) !== r.websiteUrl) {
+      await db.person.update({ where: { id: r.id }, data: { email: r.email, linkedinUrl: r.linkedinUrl, websiteUrl: r.websiteUrl, updatedById: admin.id } });
       changed++;
     }
     if (en && (en.affiliation ?? null) !== r.affiliation) {

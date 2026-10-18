@@ -41,6 +41,7 @@ export type LeaderMessage = {
   /** From Admin → People: icons under the signatory. */
   linkedin: string | null;
   email: string | null;
+  website: string | null;
   photo: { url: string; width: number | null; height: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
   /** Not published yet: shown only outside production, marked as a draft, so editors can review it in place. */
   draft: boolean;
@@ -87,6 +88,7 @@ export const getLeaderMessage = cache(async (key: LeaderKey, locale: AppLocale):
     title,
     linkedin: person?.linkedinUrl || null,
     email: person?.email || null,
+    website: person?.websiteUrl || null,
     photo: photo ? { url: photo.url, width: photo.width, height: photo.height, focal: photo.focal ?? null } : null,
     draft: !m.published && editorHints(),
   };

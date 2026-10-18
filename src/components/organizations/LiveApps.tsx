@@ -25,7 +25,7 @@ export type LiveApp = {
 };
 
 type Labels = { android: string; ios: string; web: string; featured?: string; rank?: RankLabels; locale?: "en" | "bn"; site?: string; othersTitle?: string };
-type StoreLink = { href: string; label: string; kind: "play" | "ios" | "web" | "site" };
+type StoreLink = { href: string; label: string; kind: "play" | "ios" | "web" };
 
 /** Every public link the app has: Google Play, App Store and the web app (the brokerage's site is the link on its name). */
 function linksOf(a: LiveApp, labels: Labels): StoreLink[] {

@@ -1,15 +1,7 @@
 import "server-only";
 import { db } from "@/lib/db/client";
 import { mailConfigured, sendMailWithRetry } from "@/lib/mail/smtp";
-
-/** Who gets new-lead emails: Admin → Settings → "Send new leads to", else LEAD_ALERT_EMAILS. */
-async function recipients(): Promise<string[]> {
-  const row = await db.siteSetting.findUnique({ where: { key: "leads.alertEmails" } }).catch(() => null);
-  const raw: unknown = row?.value;
-  const fromSettings: string[] = Array.isArray(raw) ? raw.filter((x): x is string => typeof x === "string") : [];
-  const fromEnv = (process.env.LEAD_ALERT_EMAILS ?? "").split(/[,\s]+/).filter(Boolean);
-  return [...new Set((fromSettings.length ? fromSettings : fromEnv).map((e) => e.trim().toLowerCase()))].filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
-}
+import { alertRecipients } from "@/lib/mail/config";
 
 const SOURCE = { DEMO_REQUEST: "Demo request", CONTACT_FORM: "Contact message" } as Record<string, string>;
 
@@ -19,8 +11,8 @@ const SOURCE = { DEMO_REQUEST: "Demo request", CONTACT_FORM: "Contact message" }
  * failure; problems are logged and never shown to the visitor.
  */
 export async function notifyNewLead(leadId: string): Promise<void> {
-  if (!mailConfigured()) return;
-  const to = await recipients();
+  if (!(await mailConfigured())) return;
+  const to = await alertRecipients("leads");
   if (!to.length) return;
   const lead = await db.lead.findUnique({
     where: { id: leadId },

@@ -2,6 +2,8 @@
 
 import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { notifyNewApplication } from "@/lib/careers/notify";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { publishedWhere } from "@/lib/db/publishing";
@@ -87,6 +89,7 @@ export async function applyForJob(_prev: ApplyState, formData: FormData): Promis
   if (recent) return { status: "success" };
 
   const storageKey = `${randomUUID()}.pdf`;
+  let applicationId: string | null = null;
   try {
     await storage().put(storageKey, cv!.data, "application/pdf");
     await db.$transaction(async (tx) => {
@@ -114,6 +117,7 @@ export async function applyForJob(_prev: ApplyState, formData: FormData): Promis
           ip,
         },
       });
+      applicationId = application.id;
       // Marks the CV as in use, so it cannot be deleted from the media library by mistake.
       await tx.mediaUsage.create({ data: { mediaId: media.id, entityType: "CAREER", entityId: job.id, field: `cv:${application.id}` } });
     });
@@ -123,5 +127,8 @@ export async function applyForJob(_prev: ApplyState, formData: FormData): Promis
     return { status: "error", message: "generic" };
   }
   revalidatePath("/admin", "layout");
+  // Emails the team (Admin → Email & notifications) after the reply is sent.
+  const id = applicationId as string | null;
+  if (id) after(() => notifyNewApplication(id));
   return { status: "success" };
 }

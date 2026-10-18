@@ -47,7 +47,6 @@ const schema = z.object({
   regulatoryEn: optionalText(800),
   regulatoryBn: optionalText(800),
   socialLinks: z.string().max(2000),
-  alertEmails: z.string().max(1000),
 });
 
 /** "LinkedIn | https://…" per line → [{ label, url }]. */
@@ -65,15 +64,6 @@ function parseSocialLinks(text: string): { value: { label: string; url: string }
   return { value: links };
 }
 
-function parseEmails(text: string): { value: string[] } | { error: string } {
-  const list = text
-    .split(/[\s,;]+/)
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  const bad = list.find((e) => !z.string().email().safeParse(e).success);
-  return bad ? { error: `"${bad}" is not a valid email.` } : { value: [...new Set(list)] };
-}
-
 export async function saveSettings(_prev: SettingsState, formData: FormData): Promise<SettingsState> {
   const admin = await requireAdmin();
   const parsed = schema.safeParse(Object.fromEntries(Object.keys(schema.shape).map((k) => [k, formData.get(k) ?? ""])));
@@ -82,8 +72,6 @@ export async function saveSettings(_prev: SettingsState, formData: FormData): Pr
 
   const social = parseSocialLinks(v.socialLinks);
   if ("error" in social) return { errors: { socialLinks: social.error } };
-  const alerts = parseEmails(v.alertEmails);
-  if ("error" in alerts) return { errors: { alertEmails: alerts.error } };
 
   const localized = (en: string | null | undefined, bn: string | null | undefined) =>
     ({ en: en ?? "", ...(bn ? { bn } : {}) }) as Prisma.InputJsonValue;
@@ -98,7 +86,6 @@ export async function saveSettings(_prev: SettingsState, formData: FormData): Pr
     "social.links": social.value,
     "company.registration": localized(v.registrationEn, v.registrationBn),
     "company.regulatory": localized(v.regulatoryEn, v.regulatoryBn),
-    "leads.alertEmails": alerts.value,
   };
 
   await db.$transaction(async (tx) => {

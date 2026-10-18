@@ -2,6 +2,7 @@ import "server-only";
 import net from "node:net";
 import tls from "node:tls";
 import { randomUUID } from "node:crypto";
+import { getMailConfig, type MailConfig } from "./config";
 
 /**
  * A small SMTP client for the site's notification emails (no extra
@@ -15,8 +16,9 @@ import { randomUUID } from "node:crypto";
  */
 export type Mail = { to: string[]; subject: string; text: string; replyTo?: string };
 
-export function mailConfigured(): boolean {
-  return Boolean(process.env.SMTP_HOST && process.env.MAIL_FROM);
+/** True when a mail server is set (Admin → Email & notifications, or .env). */
+export async function mailConfigured(): Promise<boolean> {
+  return (await getMailConfig()) !== null;
 }
 
 const enc = (s: string) => (/^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${Buffer.from(s, "utf8").toString("base64")}?=`);
@@ -90,18 +92,13 @@ async function expect(c: Conn, ok: number[], what: string) {
   return r;
 }
 
-export async function sendMail(mail: Mail): Promise<void> {
-  const host = process.env.SMTP_HOST;
-  const from = process.env.MAIL_FROM;
-  if (!host || !from) throw new Error("SMTP is not configured (SMTP_HOST, MAIL_FROM)");
+export async function sendMail(mail: Mail, override?: MailConfig): Promise<void> {
+  const cfg = override ?? (await getMailConfig());
+  if (!cfg) throw new Error("No mail server is set (Admin → Email & notifications, or SMTP_HOST and MAIL_FROM in .env)");
   if (!mail.to.length) return;
-  const port = Number(process.env.SMTP_PORT || 587);
-  const user = process.env.SMTP_USER || "";
-  const pass = process.env.SMTP_PASSWORD || "";
-  const rejectUnauthorized = process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false";
+  const { host, port, user, pass, from, rejectUnauthorized, implicitTls } = cfg;
   const timeout = 15_000;
 
-  const implicitTls = process.env.SMTP_SECURE === "true" || port === 465;
   const raw: net.Socket | tls.TLSSocket =
     implicitTls ? tls.connect({ host, port, servername: host, rejectUnauthorized }) : net.connect({ host, port });
   raw.setTimeout(timeout, () => raw.destroy(new Error("SMTP timed out")));

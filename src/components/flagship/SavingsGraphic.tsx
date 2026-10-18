@@ -156,6 +156,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
                 </span>
               </div>
               <div className="savings-after relative mx-auto w-full max-w-36 rounded-t-2xl bg-gradient-to-t from-brand-royal to-brand-sky shadow-[0_0_40px_-8px] shadow-brand-sky/60">
+                <span aria-hidden="true" className="savings-shine absolute inset-0 rounded-t-2xl" />
                 <p className="absolute -top-8 inset-x-0 text-center font-mono text-sm font-semibold text-brand-sky tabular-nums md:text-base">{data.after !== null ? money(data.after) : `${nf.format(100 - data.pct)}%`}</p>
               </div>
             </div>

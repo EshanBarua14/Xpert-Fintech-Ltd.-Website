@@ -1535,3 +1535,127 @@ html {
   .savings .savings-gap { transition: none; }
   .savings.is-on .savings-arrow { animation: none; }
 }
+
+/* Home → core strengths (CoreStrengths): calm, slow motion that settles. */
+@property --strength-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.strength-card {
+  background-image: radial-gradient(120% 80% at 0% 0%, color-mix(in oklab, var(--color-brand-sky) 7%, transparent), transparent 60%);
+  transition:
+    border-color 0.4s ease,
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s ease;
+}
+.strength-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px -28px color-mix(in oklab, var(--color-brand-sky) 45%, transparent);
+}
+.strength-ring {
+  padding: 1px;
+  background: conic-gradient(from var(--strength-angle), transparent 0 70%, color-mix(in oklab, var(--color-brand-sky) 70%, transparent) 82%, color-mix(in oklab, var(--color-gold) 70%, transparent) 90%, transparent 100%);
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.strength-card:hover .strength-ring {
+  opacity: 1;
+  animation: strength-orbit 4s linear infinite;
+}
+@keyframes strength-orbit {
+  to { --strength-angle: 360deg; }
+}
+.strength-glow {
+  opacity: 0.5;
+  transition: opacity 0.6s ease, transform 0.8s ease;
+}
+.strength-card:hover .strength-glow {
+  opacity: 1;
+  transform: scale(1.15);
+}
+/* As each card arrives: the icon settles in and sends out one soft ring. */
+.js main .strength-card:not(.is-in) .strength-icon {
+  transform: scale(0.7) rotate(-8deg);
+  opacity: 0;
+}
+.strength-card .strength-icon {
+  transition:
+    transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.5s ease;
+  transition-delay: calc(var(--d, 0) * 90ms + 180ms);
+}
+.strength-card.is-in .strength-pulse {
+  animation: strength-pulse 1.6s ease-out calc(var(--d, 0) * 90ms + 500ms) 1 both;
+}
+@keyframes strength-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-brand-sky) 55%, transparent); }
+  100% { box-shadow: 0 0 0 18px transparent; }
+}
+.strength-card:hover .strength-icon {
+  transform: translateY(-2px) scale(1.06);
+}
+.strength-num {
+  transition: color 0.4s ease, letter-spacing 0.4s ease;
+}
+.strength-card:hover .strength-num {
+  color: var(--color-gold);
+  letter-spacing: 0.08em;
+}
+
+/* Cost savings: a slow breathing glow once the ring has filled, and a light sweep up the new bar. */
+.savings.is-on .savings-arc {
+  filter: drop-shadow(0 0 0 transparent);
+  animation: savings-breathe 4.5s ease-in-out 1.8s infinite;
+}
+@keyframes savings-breathe {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  50% { filter: drop-shadow(0 0 10px color-mix(in oklab, var(--color-brand-sky) 55%, transparent)); }
+}
+.savings .savings-shine {
+  overflow: hidden;
+}
+.savings .savings-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, transparent 0%, rgb(255 255 255 / 0.35) 50%, transparent 100%);
+  transform: translateY(100%);
+}
+.savings.is-on .savings-shine::after {
+  animation: savings-sweep 1.4s ease-out 1.9s 1 both;
+}
+@keyframes savings-sweep {
+  from { transform: translateY(100%); }
+  to { transform: translateY(-100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strength-card,
+  .strength-card .strength-icon,
+  .strength-glow { transition: none; }
+  .strength-card:hover { transform: none; }
+  .strength-card:hover .strength-ring,
+  .strength-card.is-in .strength-pulse,
+  .savings.is-on .savings-arc,
+  .savings.is-on .savings-shine::after { animation: none; }
+  .js main .strength-card:not(.is-in) .strength-icon { transform: none; opacity: 1; }
+}
+
+/* Reviews: cards lift gently under the pointer. */
+.testimonial-card {
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s ease,
+    border-color 0.4s ease;
+}
+.testimonial-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in oklab, var(--color-brand-sky) 35%, transparent);
+  box-shadow: 0 24px 48px -28px color-mix(in oklab, var(--color-brand-sky) 40%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .testimonial-card { transition: none; }
+  .testimonial-card:hover { transform: none; }
+}

@@ -27,6 +27,7 @@ export const HOME_SECTIONS = [
   { key: "clients", label: "Client logos" },
   { key: "strengths", label: "Core strengths (Admin → Home highlights)" },
   { key: "savings", label: "Cost savings graphic (Admin → Home highlights)" },
+  { key: "phones", label: "Floating phones (product screens on mobile)" },
   { key: "reach", label: "Market share and client base" },
   { key: "figures", label: "Xpert in numbers (Admin → Figures)" },
   { key: "showcase", label: "Product showcase" },

@@ -1692,3 +1692,35 @@ html:has(.whatsapp-fab) .back-to-top {
   padding-right: 0.06em;
 }
 :lang(bn) .emph { font-style: normal; font-weight: 600; }
+
+/* Home → phones (PhoneStage): three floating phones that lean towards the pointer. */
+.ps { perspective: 1400px; --px: 0; --py: 0; }
+.ps-glow { background: radial-gradient(circle, color-mix(in oklab, var(--color-brand-sky) 28%, transparent), transparent 65%); animation: cn-breathe 6s ease-in-out infinite; }
+.ps-phone {
+  position: absolute;
+  width: 10.5rem;
+  height: 22rem;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (min-width: 768px) { .ps-phone { width: 14.5rem; height: 30rem; } }
+.ps-phone-0 { z-index: 3; transform: rotateY(calc(var(--px) * 14deg)) rotateX(calc(var(--py) * -10deg)); }
+.ps-phone-1 { z-index: 2; transform: translateX(-62%) scale(0.86) rotate(-7deg) rotateY(calc(18deg + var(--px) * 10deg)); filter: brightness(0.92); }
+.ps-phone-2 { z-index: 2; transform: translateX(62%) scale(0.86) rotate(7deg) rotateY(calc(-18deg + var(--px) * 10deg)); filter: brightness(0.92); }
+.ps-frame { animation: ps-float 6s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -2s); }
+@keyframes ps-float { 50% { transform: translateY(-14px); } }
+.ps-line path:first-child { stroke-dasharray: 400; stroke-dashoffset: 400; animation: ps-draw 3.5s ease-out 0.4s infinite; }
+@keyframes ps-draw { 60%, 100% { stroke-dashoffset: 0; } }
+.ps-progress { animation: ps-progress 6s ease-in-out infinite; }
+@keyframes ps-progress { 0% { width: 10%; } 70%, 100% { width: 100%; } }
+.ps-tick { animation: ps-tick 6s ease-in-out infinite; animation-delay: calc(var(--s) * 1s); }
+@keyframes ps-tick { 0%, 10% { background: color-mix(in oklab, var(--color-fg) 10%, transparent); } 20%, 100% { background: #25b16a; } }
+.ps-scan { animation: ps-scan 2.6s ease-in-out infinite alternate; }
+@keyframes ps-scan { from { top: 8%; } to { top: 90%; } }
+.ps-dot { animation: wa-dot 1.2s ease-in-out infinite; }
+@keyframes wa-dot { 50% { opacity: 0.3; } }
+@media (prefers-reduced-motion: reduce) {
+  .ps-frame, .ps-glow, .ps-line path:first-child, .ps-progress, .ps-tick, .ps-scan, .ps-dot { animation: none; }
+  .ps-line path:first-child { stroke-dashoffset: 0; }
+  .ps-progress { width: 75%; }
+}

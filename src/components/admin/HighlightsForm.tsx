@@ -81,7 +81,7 @@ export function HighlightsForm({
           <TextInput id="before" label="Cost before Xpert" inputMode="decimal" placeholder="25" defaultValue={n(savings.before)} error={e.before} />
           <TextInput id="after" label="Cost with Xpert" inputMode="decimal" placeholder="5" defaultValue={n(savings.after)} error={e.after} />
           <TextInput id="prefix" label="Before the number" placeholder="৳" defaultValue={savings.prefix} error={e.prefix} />
-          <span className="hidden md:block" />
+          <TextInput id="pct" label="Or only the share saved (%)" inputMode="decimal" placeholder="80" hint="Used when the two costs are empty: bars drawn to scale." defaultValue={n(savings.pct)} error={e.pct} />
           <TextInput id="unitEn" label="Unit (English)" placeholder="lakh a month" defaultValue={savings.unitEn} error={e.unitEn} />
           <TextInput id="unitBn" label="Unit (বাংলা)" lang="bn" placeholder="লাখ / মাস" defaultValue={savings.unitBn} error={e.unitBn} />
         </div>
@@ -106,7 +106,7 @@ export function HighlightsForm({
         </div>
       </Group>
 
-      <Group title="WhatsApp button" hint="A floating button at the bottom right of every page that opens a WhatsApp chat with this number, the greeting filled in. Leave the number empty to hide it.">
+      <Group title="WhatsApp button" hint="A floating button at the bottom right of every page that opens a WhatsApp chat with this number, the greeting filled in. Until a number is saved, it opens the contact page.">
         <div className={pair}>
           <TextInput id="waNumber" label="WhatsApp number" placeholder="+8801XXXXXXXXX" defaultValue={whatsapp.number} error={e.waNumber} />
           <span className="hidden md:block" />

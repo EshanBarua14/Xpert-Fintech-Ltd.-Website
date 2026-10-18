@@ -2154,6 +2154,49 @@ async function publishReviewCards() {
 }
 
 /**
+ * Once (XFL, 18 Oct 2026, at XFL's instruction): show on the site what XFL will edit in the admin.
+ *  - The Chairman's and the Managing Director's messages published (Admin → Messages).
+ *  - The cost savings graphic published with XFL's figure, an 80% lower cost, drawn to scale
+ *    (no amounts until XFL enters the before and with-Xpert costs in Admin → Home highlights).
+ *    A graphic already filled in the admin is left alone.
+ */
+async function showForEditing() {
+  const MARK = "seed.show-for-editing-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const notes: string[] = [];
+  for (const key of ["message.chairman", "message.md"]) {
+    const row = await db.siteSetting.findUnique({ where: { key } });
+    const v = row?.value as Record<string, unknown> | undefined;
+    if (v && v.published !== true) {
+      await db.siteSetting.update({ where: { key }, data: { value: { ...v, published: true } } });
+      notes.push(`${key.replace("message.", "")} message published`);
+    }
+  }
+  const savings = await db.siteSetting.findUnique({ where: { key: "home.savings" } });
+  const sv = savings?.value as Record<string, unknown> | undefined;
+  if (!sv || (sv.published !== true && sv.before == null && sv.after == null)) {
+    const value = {
+      ...(sv ?? {}),
+      published: true,
+      pct: 80,
+      titleEn: "{pct}% lower technology cost",
+      titleBn: "প্রযুক্তি ব্যয় {pct}% কম",
+      bodyEn: "Brokerage houses on Xpert share one platform instead of each paying for its own systems.",
+      bodyBn: "এক্সপার্টে থাকা ব্রোকারেজ হাউসগুলো প্রত্যেকে আলাদা সিস্টেমের খরচ না দিয়ে একটি প্ল্যাটফর্ম ভাগ করে নেয়।",
+      beforeLabelEn: "Before Xpert",
+      beforeLabelBn: "এক্সপার্টের আগে",
+      afterLabelEn: "With Xpert",
+      afterLabelBn: "এক্সপার্টের সঙ্গে",
+      source: "Xpert Fintech Ltd.",
+    };
+    await db.siteSetting.upsert({ where: { key: "home.savings" }, update: { value }, create: { key: "home.savings", value } });
+    notes.push("cost savings graphic published (80%)");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), notes } } });
+  if (notes.length) console.log(`• ${notes.join("; ")}: edit in the admin`);
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2557,6 +2600,7 @@ async function main() {
   await seedWifangWebsite();
   await seedIdlcLogo();
   await publishReviewCards();
+  await showForEditing();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

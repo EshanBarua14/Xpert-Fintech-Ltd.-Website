@@ -54,6 +54,7 @@ export async function saveHighlights(_prev: HighlightsState, formData: FormData)
     bodyBn: g("vBodyBn"),
     before: number("before"),
     after: number("after"),
+    pct: number("pct"),
     prefix: g("prefix"),
     unitEn: g("unitEn"),
     unitBn: g("unitBn"),
@@ -73,9 +74,10 @@ export async function saveHighlights(_prev: HighlightsState, formData: FormData)
     errors.after = "The cost with Xpert must be lower than the cost before.";
   if (savings.sourceUrl && !/^https?:\/\/\S+$/i.test(savings.sourceUrl)) errors.sourceUrl = "Enter the full address, starting with https://";
   if (savings.asOf && !/^\d{4}-\d{2}-\d{2}$/.test(savings.asOf)) errors.asOf = "Pick a date.";
+  if (savings.pct !== null && (savings.pct <= 0 || savings.pct >= 100)) errors.pct = "Enter a percentage between 1 and 99.";
   if (savings.published) {
-    if (savings.before === null) errors.before = "Enter the cost before Xpert to publish.";
-    if (savings.after === null) errors.after ??= "Enter the cost with Xpert to publish.";
+    const figures = savings.before !== null && savings.after !== null;
+    if (!figures && savings.pct === null) errors.pct = "Enter the two costs, or the share saved, to publish.";
     if (!savings.source) errors.source = "Name the source of these figures to publish, e.g. XFL cost study, 2026.";
   }
 
@@ -98,11 +100,11 @@ export async function saveHighlights(_prev: HighlightsState, formData: FormData)
   });
   revalidatePath("/", "layout");
   revalidatePath("/admin/highlights");
-  const pct = savingPct(savings.before, savings.after);
+  const pct = savingPct(savings.before, savings.after) ?? savings.pct;
   const notes = [
     `${items.length} strength(s)`,
     savings.published && pct !== null ? `cost savings live (−${pct}%)` : "cost savings not published",
-    waDigits ? "WhatsApp button on" : "WhatsApp button off (no number)",
+    waDigits ? "WhatsApp button opens a chat" : "no WhatsApp number yet: the button opens the contact page",
   ];
   return { ok: true, savedAt: Date.now(), message: `Saved: ${notes.join("; ")}.` };
 }

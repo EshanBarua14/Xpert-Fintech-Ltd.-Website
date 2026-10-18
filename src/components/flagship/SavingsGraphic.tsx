@@ -7,8 +7,9 @@ export type SavingsData = {
   pct: number;
   title: string;
   body: string;
-  before: number;
-  after: number;
+  /** Null when only the percentage is known: bars drawn to scale, no amounts printed. */
+  before: number | null;
+  after: number | null;
   prefix: string;
   unit: string;
   beforeLabel: string;
@@ -77,7 +78,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
 
   const nf = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US", { maximumFractionDigits: 2 });
   const money = (v: number) => `${data.prefix}${nf.format(v)}${data.unit ? ` ${data.unit}` : ""}`;
-  const afterShare = Math.max(4, (data.after / data.before) * 100);
+  const afterShare = Math.max(4, data.before && data.after !== null ? (data.after / data.before) * 100 : 100 - data.pct);
   const R = 88;
   const C = 2 * Math.PI * R;
   const asOf = data.asOf
@@ -141,7 +142,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
             {/* The old cost, as a dashed line across both bars */}
             <span aria-hidden="true" className="absolute inset-x-0 top-10 border-t border-dashed border-fg/25" />
             <div className="relative flex h-full flex-col justify-end">
-              <p className="mb-2 text-center font-mono text-sm font-semibold text-text-primary tabular-nums md:text-base">{money(data.before)}</p>
+              <p className="mb-2 text-center font-mono text-sm font-semibold text-text-primary tabular-nums md:text-base">{data.before !== null ? money(data.before) : `${nf.format(100)}%`}</p>
               <div className="savings-before relative mx-auto h-[calc(100%-2.5rem)] w-full max-w-36 overflow-hidden rounded-t-2xl bg-fg/[0.12]" />
             </div>
             <div className="relative flex h-full flex-col justify-end">
@@ -155,7 +156,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
                 </span>
               </div>
               <div className="savings-after relative mx-auto w-full max-w-36 rounded-t-2xl bg-gradient-to-t from-brand-royal to-brand-sky shadow-[0_0_40px_-8px] shadow-brand-sky/60">
-                <p className="absolute -top-8 inset-x-0 text-center font-mono text-sm font-semibold text-brand-sky tabular-nums md:text-base">{money(data.after)}</p>
+                <p className="absolute -top-8 inset-x-0 text-center font-mono text-sm font-semibold text-brand-sky tabular-nums md:text-base">{data.after !== null ? money(data.after) : `${nf.format(100 - data.pct)}%`}</p>
               </div>
             </div>
           </div>

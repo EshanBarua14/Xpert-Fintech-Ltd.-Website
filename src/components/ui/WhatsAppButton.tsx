@@ -4,7 +4,7 @@ import { getWhatsApp } from "@/lib/content/highlights";
 /**
  * A floating "Chat on WhatsApp" button (Admin → Home highlights → WhatsApp).
  * Opens a chat with XFL's number, with the greeting set there filled in.
- * Not shown until a number is saved.
+ * Until a number is saved it opens the contact page instead.
  */
 export async function WhatsAppButton({ locale }: { locale: AppLocale }) {
   const wa = await getWhatsApp(locale);
@@ -12,8 +12,7 @@ export async function WhatsAppButton({ locale }: { locale: AppLocale }) {
   return (
     <a
       href={wa.href}
-      target="_blank"
-      rel="noopener noreferrer"
+      {...(wa.external && { target: "_blank", rel: "noopener noreferrer" })}
       aria-label={wa.label}
       className="whatsapp-fab group fixed right-4 bottom-4 z-(--z-sticky) inline-flex h-14 items-center gap-0 rounded-full sm:gap-2 bg-[#25d366] pr-4 pl-4 text-white shadow-lg shadow-black/25 ring-1 ring-black/10 transition-transform duration-200 hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25d366] md:right-6 md:bottom-6 print:hidden"
     >

@@ -26,12 +26,15 @@ export function CoreStrengths({ items, locale }: { items: StrengthCard[]; locale
             i === 0 && leadWide && "lg:col-span-2",
           )}
         >
-          <span aria-hidden="true" className="strength-glow pointer-events-none absolute -top-24 -right-24 size-56 rounded-full bg-brand-sky/10 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
+          {/* A slow light that circles the border on hover, and a soft glow in the corner */}
+          <span aria-hidden="true" className="strength-ring pointer-events-none absolute inset-0 rounded-3xl" />
+          <span aria-hidden="true" className="strength-glow pointer-events-none absolute -top-24 -right-24 size-56 rounded-full bg-brand-sky/10 blur-3xl" />
           <div className="relative flex items-center justify-between gap-4">
-            <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-royal to-brand-sky text-white shadow-lg shadow-brand-royal/20">
-              <Icon name={s.icon} className="size-6" />
+            <span className="strength-icon relative flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-royal to-brand-sky text-white shadow-lg shadow-brand-royal/20">
+              <span aria-hidden="true" className="strength-pulse absolute inset-0 rounded-2xl" />
+              <Icon name={s.icon} className="relative size-6" />
             </span>
-            <span aria-hidden="true" className="font-mono text-sm text-text-secondary tabular-nums">
+            <span aria-hidden="true" className="strength-num font-mono text-sm text-text-secondary tabular-nums">
               {digits(String(i + 1).padStart(2, "0"), locale === "bn")}
             </span>
           </div>

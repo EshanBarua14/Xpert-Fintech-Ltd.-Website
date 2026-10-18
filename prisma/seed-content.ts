@@ -2123,6 +2123,23 @@ async function seedWifangWebsite() {
 }
 
 /**
+ * Once (XFL, 18 Oct 2026): the IDLC logo XFL supplied replaces the one on IDLC Securities'
+ * card (the client-logo step only fills empty logos, and IDLC already had a placeholder).
+ */
+async function seedIdlcLogo() {
+  const MARK = "seed.idlc-logo-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const org = await db.organization.findUnique({ where: { key: "idlc-securities" }, select: { id: true } });
+  const logo = org ? await seedImage("logos", "idlc-securities", "IDLC logo", ["logo", "client"]) : null;
+  if (!org || !logo) return; // tried again on the next run
+  await db.organization.update({ where: { id: org.id }, data: { logoMediaId: logo, logoPermission: true } });
+  await db.mediaUsage.deleteMany({ where: { entityType: "ORGANIZATION", entityId: org.id, field: "logo" } });
+  await db.mediaUsage.create({ data: { mediaId: logo, entityType: "ORGANIZATION", entityId: org.id, field: "logo" } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log("• IDLC Securities: logo replaced with the one XFL supplied (run npm run media:to-db next)");
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2524,11 +2541,15 @@ async function main() {
   await seedInnovaApp();
   await seedTheaClient();
   await seedWifangWebsite();
+  await seedIdlcLogo();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();
   await seedIdlcClient();
   await seedBanglaGaps();
+  // What is in place: the one-time steps already applied (each runs once, so later runs print nothing for them).
+  const done = await db.siteSetting.findMany({ where: { key: { startsWith: "seed." } }, select: { key: true }, orderBy: { updatedAt: "desc" }, take: 12 });
+  if (done.length) console.log(`Latest one-time steps applied: ${done.map((d) => d.key.replace(/^seed\./, "")).join(", ")}`);
   console.log("Content seed complete.");
 }
 

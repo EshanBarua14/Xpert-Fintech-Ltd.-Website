@@ -371,7 +371,7 @@ export function PeopleGallery({
               </div>
               {/* Name and their seat at Xpert, then their own organisation, each as the same row: logo, organisation, role. */}
               <div className="flex flex-col gap-1">
-                <p className="font-display text-[1.35rem] leading-tight font-semibold tracking-[-0.01em] text-balance text-text-primary">{open.name}</p>
+                <p className="text-center font-display text-[1.35rem] leading-tight font-semibold tracking-[-0.01em] text-balance text-text-primary">{open.name}</p>
               </div>
               <ul className="flex flex-col gap-2">
                 <li className="flex items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--tone)_35%,transparent)] bg-[color-mix(in_srgb,var(--tone)_8%,transparent)] p-2.5">
@@ -412,7 +412,8 @@ export function PeopleGallery({
                 )}
               </div>
             </div>
-            <div className="person-dialog-body flex min-h-0 flex-col gap-[clamp(0.75rem,2svh,1.5rem)] p-5 sm:p-7 md:p-9">
+            {/* The biography sits in the middle of its column, in a size that fills the space without crowding it. */}
+            <div className="person-dialog-body flex min-h-0 flex-col gap-[clamp(0.75rem,2svh,1.5rem)] p-5 sm:p-7 md:justify-center md:p-10 lg:px-14">
               <div className="flex items-center gap-4 pr-10 md:hidden">
                 <span className="relative aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-2xl bg-navy-800">
                   <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt="" fill sizes="5rem" quality={90} className="object-cover" style={focusStyle(open.photo, 0.8)} unoptimized={!open.photo} />
@@ -442,7 +443,7 @@ export function PeopleGallery({
                   if (start == null || end == null || Math.abs(end - start) < 45 || pages.length < 2) return;
                   go(end < start ? at + 1 : at - 1);
                 }}
-                className="flex min-h-0 flex-col gap-[0.7em] border-l-2 border-[var(--tone)] pl-4 text-[clamp(13px,1.75svh,15.5px)] leading-[1.62] text-text-primary/90">
+                className="flex min-h-0 max-w-[62ch] flex-col gap-[0.8em] border-l-2 border-[var(--tone)] pl-5 text-[clamp(13px,1.75svh,15.5px)] leading-[1.7] text-text-primary/90 md:text-[clamp(14px,2svh,17px)]">
                 {pages.length ? (
                   <div key={`${open.id}-${at}`} className={cn("bio-page flex flex-col gap-[0.7em]", pages.length > 1 && "min-h-[8em]")} aria-live="polite">
                     {pages[at]!.map((para, i) => (

@@ -1498,53 +1498,49 @@ html {
   .cx-panel { animation: none; }
 }
 
-/* Home → core strengths (CoreStrengths): an explorer with a moving picture per strength. */
-.cs-progress { transform: scaleX(0); }
-.cs-progress.is-running { animation: cs-progress var(--cs-ms, 6000ms) linear forwards; }
-.cs-progress.is-paused { transform: scaleX(0.04); }
-@keyframes cs-progress { to { transform: scaleX(1); } }
-.cs-list { scrollbar-width: none; }
-.cs-list::-webkit-scrollbar { display: none; }
-.cs-art { animation: cs-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.cs-text { animation: cs-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both; }
-@keyframes cs-in { from { opacity: 0; transform: translateY(10px); } }
-.cs-aurora { animation: sv-drift 20s ease-in-out infinite alternate; }
-.cs-aurora-2 { animation-duration: 26s; animation-direction: alternate-reverse; }
-.cs-spin { animation: cs-spin 60s linear infinite; }
-.cs-spin-rev { animation: cs-spin 24s linear infinite reverse; }
-@keyframes cs-spin { to { transform: rotate(360deg); } }
-.cs-breathe { animation: cs-breathe 4s ease-in-out infinite; }
-@keyframes cs-breathe { 50% { transform: scale(1.18); opacity: 0.5; } }
-.cs-pulse-dot { animation: cs-pulse-dot 2.8s ease-in infinite; }
-@keyframes cs-pulse-dot {
-  0% { transform: translate(0, 0); opacity: 0; }
-  15% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+/* Home → core strengths (CoreStrengths): a constellation around the Xpert core. */
+.cn-line {
+  stroke: color-mix(in oklab, var(--color-fg) 14%, transparent);
+  stroke-width: 1;
+  transition: stroke 0.6s ease, stroke-width 0.6s ease;
 }
-.cs-ripple { animation: cs-ripple 3.6s ease-out infinite; opacity: 0; }
-@keyframes cs-ripple { 0% { transform: scale(0.7); opacity: 0.7; } 100% { transform: scale(1.5); opacity: 0; } }
-.cs-scanline { animation: cs-scan 3s ease-in-out infinite; }
-@keyframes cs-scan { 0% { transform: translateY(10px); } 100% { transform: translateY(170px); } }
-.cs-pop { animation: cs-pop 3.6s ease-out infinite both; }
-@keyframes cs-pop { 0% { transform: scale(0); opacity: 0; } 12% { transform: scale(1.1); opacity: 1; } 20% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
-.cs-route-a, .cs-flow-a { animation: cs-main 7s ease-in-out infinite; }
-.cs-route-b, .cs-flow-b { animation: cs-backup 7s ease-in-out infinite; }
-@keyframes cs-main { 0%, 45% { opacity: 1; } 55%, 90% { opacity: 0.15; } 100% { opacity: 1; } }
-@keyframes cs-backup { 0%, 45% { opacity: 0.25; } 55%, 90% { opacity: 1; } 100% { opacity: 0.25; } }
-.cs-roof { animation: cs-roof 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both; }
-@keyframes cs-roof { from { transform: translateY(-24px); opacity: 0; } }
-.cs-pillar { animation: cs-rise 0.8s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
-@keyframes cs-rise { from { transform: scaleY(0); } }
-.cs-beat { stroke-dasharray: 420; animation: cs-beat 3.2s linear infinite; }
-@keyframes cs-beat { from { stroke-dashoffset: 420; } to { stroke-dashoffset: -420; } }
-.cs-led { animation: cs-led 1.8s steps(2, jump-none) infinite; }
-@keyframes cs-led { 50% { opacity: 0.25; } }
+.cn-line.is-on {
+  stroke: color-mix(in oklab, var(--color-brand-sky) 70%, transparent);
+  stroke-width: 2;
+}
+.cn-stream {
+  stroke: var(--color-gold);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 2 14;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.cn-stream.is-on {
+  opacity: 1;
+  animation: cn-stream 1.1s linear infinite;
+}
+@keyframes cn-stream { to { stroke-dashoffset: 16; } }
+.cn-halo {
+  background: radial-gradient(circle, color-mix(in oklab, var(--color-brand-sky) 22%, transparent) 0%, transparent 65%);
+  animation: cn-breathe 5s ease-in-out infinite;
+}
+@keyframes cn-breathe { 50% { transform: scale(1.08); opacity: 0.6; } }
+.cn-orbit { animation: cs-spin 50s linear infinite; }
+@keyframes cs-spin { to { transform: rotate(360deg); } }
+.cn-swap { animation: cn-swap 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes cn-swap { from { opacity: 0; transform: translateY(8px); } }
+.cn-node.is-on {
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-brand-sky) 12%, transparent), 0 20px 40px -24px color-mix(in oklab, var(--color-brand-sky) 60%, transparent);
+}
+/* Arrival: the core settles, the strengths come out to their places one by one, the lines draw. */
+.js .cn:not(.is-seen) .cn-node { opacity: 0; scale: 0.8; }
+.js .cn:not(.is-seen) .cn-core { opacity: 0; scale: 0.9; }
+.cn .cn-node { transition: opacity 0.6s ease, scale 0.7s cubic-bezier(0.34, 1.4, 0.64, 1), border-color 0.5s, background-color 0.5s, box-shadow 0.5s; transition-delay: calc(var(--k, 0) * 110ms + 250ms), calc(var(--k, 0) * 110ms + 250ms), 0s, 0s, 0s; }
+.cn .cn-core { transition: opacity 0.7s ease, scale 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
 @media (prefers-reduced-motion: reduce) {
-  .cs-art, .cs-text, .cs-aurora, .cs-spin, .cs-spin-rev, .cs-breathe, .cs-pulse-dot, .cs-ripple, .cs-scanline, .cs-pop,
-  .cs-route-a, .cs-route-b, .cs-roof, .cs-pillar, .cs-beat, .cs-led { animation: none; }
-  .cs-flow-a, .cs-flow-b, .cs-pulse-dot, .cs-ripple { display: none; }
-  .cs-pop { opacity: 1; }
+  .cn-stream.is-on, .cn-halo, .cn-orbit, .cn-swap { animation: none; }
+  .js .cn:not(.is-seen) .cn-node, .js .cn:not(.is-seen) .cn-core { opacity: 1; scale: 1; }
 }
 
 /* Reviews: cards lift gently under the pointer. */

@@ -244,20 +244,20 @@ function PersonCard({
             </p>
           )
         )}
-        <div className="mt-auto flex items-center gap-2 border-t border-fg/[0.08] pt-4">
-          {!p.email && showPlaceholderBadge ? <ContactSlot kind="email" name={p.name} /> : <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} />}
+        <div className="mt-auto flex items-center gap-1.5 border-t border-fg/[0.08] pt-4">
+          {!p.email && showPlaceholderBadge ? <ContactSlot kind="email" name={p.name} /> : <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} size="size-8" />}
           {!p.linkedinUrl && showPlaceholderBadge ? (
             <ContactSlot kind="linkedin" name={p.name} />
           ) : (
-            <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org={p.org?.name ?? institutionOf(p.affiliation)} labels={labels} />
+            <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org={p.org?.name ?? institutionOf(p.affiliation)} labels={labels} size="size-8" />
           )}
-          <WebsiteIcon href={siteOf(p)} name={p.org?.name ?? company ?? p.name} label={labels.website} />
+          <WebsiteIcon href={siteOf(p)} name={p.org?.name ?? company ?? p.name} label={labels.website} size="size-8" />
           <button
             type="button"
             tabIndex={-1}
             aria-hidden="true"
             onClick={(e) => onOpen(e.currentTarget)}
-            className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--tone)_40%,transparent)] px-3.5 text-sm font-semibold text-[var(--tone-ink)] transition-[gap,background-color,color,border-color] hover:gap-2.5 hover:border-[var(--tone)] hover:bg-[var(--tone)] hover:text-white"
+            className="ml-auto inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-[color-mix(in_srgb,var(--tone)_14%,transparent)] pr-2.5 pl-3.5 text-[13px] font-semibold whitespace-nowrap text-[var(--tone-ink)] ring-1 ring-[color-mix(in_srgb,var(--tone)_35%,transparent)] transition-[gap,background-color,color,box-shadow] hover:gap-2 hover:bg-[var(--tone)] hover:text-white hover:ring-[var(--tone)]"
           >
             {labels.viewProfile}
             <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 fill-none stroke-current stroke-[1.8]"><path d="M3 8h10M9 4l4 4-4 4" /></svg>

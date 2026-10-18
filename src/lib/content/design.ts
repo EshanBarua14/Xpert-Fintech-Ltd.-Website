@@ -32,7 +32,6 @@ export const HOME_SECTIONS = [
   { key: "showcase", label: "Product showcase" },
   { key: "roles", label: "Built for every desk (products by role)" },
   { key: "testimonials", label: "Client reviews" },
-  { key: "market", label: "Today on DSE and CSE" },
   { key: "apps", label: "Live branded apps" },
   { key: "flow", label: "Order flow" },
   { key: "rms", label: "Risk checks (RMS, built into the OMS)" },
@@ -60,6 +59,8 @@ export type Design = {
   ticker: TickerPlace;
   /** DSE and CSE index tiles in the home page hero. */
   heroIndices: boolean;
+  /** The "Today on DSE and CSE" cards on the home page (by default only on the DSE and CSE pages). */
+  homeMarket: boolean;
 };
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -84,6 +85,7 @@ export function readDesign(value: unknown): Design {
     hidden: (Array.isArray(v.hidden) ? v.hidden : []).filter((x): x is HomeSection => HOME_SECTIONS.some((s) => s.key === x)),
     ticker: TICKER_PLACES.some((t) => t.value === v.ticker) ? (v.ticker as TickerPlace) : "markets",
     heroIndices: v.heroIndices === true,
+    homeMarket: v.homeMarket === true,
   };
 }
 

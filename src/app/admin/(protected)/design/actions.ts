@@ -38,7 +38,7 @@ export async function saveDesign(_prev: DesignState, formData: FormData): Promis
   const hidden = HOME_SECTIONS.filter((s) => formData.get(`home.${s.key}`) !== "on").map((s) => s.key);
   if (Object.keys(errors).length) return { errors, message: "Please fix the highlighted colour codes." };
   // Read back through the validator, so only known keys, valid colours and real icons are stored.
-  const value = readDesign({ colors, tones, products, navIcons, hidden, ticker: String(formData.get("ticker") ?? ""), heroIndices: formData.get("heroIndices") === "on" });
+  const value = readDesign({ colors, tones, products, navIcons, hidden, ticker: String(formData.get("ticker") ?? ""), heroIndices: formData.get("heroIndices") === "on", homeMarket: formData.get("homeMarket") === "on" });
   await db.siteSetting.upsert({ where: { key: DESIGN_KEY }, update: { value, updatedById: admin.id }, create: { key: DESIGN_KEY, value, updatedById: admin.id } });
   revalidatePath("/", "layout");
   return { ok: true, savedAt: Date.now(), message: "Saved. The website uses the new design at once." };

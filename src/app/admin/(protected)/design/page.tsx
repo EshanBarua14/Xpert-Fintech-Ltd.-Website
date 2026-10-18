@@ -69,6 +69,7 @@ export default async function DesignPage() {
           ticker: design.ticker,
           tickerPlaces: TICKER_PLACES.map((t) => ({ value: t.value, label: t.label })),
           heroIndices: design.heroIndices,
+          homeMarket: design.homeMarket,
           icons: ICON_NAMES,
         }}
       />

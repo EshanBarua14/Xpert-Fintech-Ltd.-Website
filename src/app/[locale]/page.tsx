@@ -271,7 +271,7 @@ export default async function HomePage({ params }: Props) {
         </Shell>
       )}
 
-      {show("market") && hasMarket && (
+      {design.homeMarket && hasMarket && (
         <Shell id="market" className="py-12 md:py-16">
           <div className="flex flex-col gap-12">
             <SectionHeader eyebrow={t.marketEyebrow} title={t.marketTitle} />

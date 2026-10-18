@@ -166,11 +166,12 @@ function ExchangeGlance({ exchange, ex, t, locale, className, logo }: { exchange
  * switch on phones), each with status, indices,
  * breadth and totals and the top gainers and losers, in identical layouts. Refreshes itself every 20 s.
  */
-export function MarketPulse({ initial, t, locale, logos }: { initial: MarketPayload; t: Messages; locale: Locale; logos?: ExchangeLogos }) {
+export function MarketPulse({ initial, t, locale, logos, only }: { initial: MarketPayload; t: Messages; locale: Locale; logos?: ExchangeLogos; only?: "DSE" | "CSE" }) {
   const { data, loaded } = useMarket(initial);
   const snapOf = (x: "DSE" | "CSE") => data.snapshot?.exchanges.find((e) => e.exchange === x);
   // Both cards always, side by side, so DSE and CSE read the same way.
-  const list: ("DSE" | "CSE")[] = (["DSE", "CSE"] as const).some((x) => snapOf(x)) ? ["DSE", "CSE"] : [];
+  // On an exchange's own page (only), just that exchange.
+  const list: ("DSE" | "CSE")[] = only ? (snapOf(only) ? [only] : []) : (["DSE", "CSE"] as const).some((x) => snapOf(x)) ? ["DSE", "CSE"] : [];
   const [tab, setTab] = useState<"DSE" | "CSE">(list[0] ?? "DSE");
   if (!list.length) {
     // Prices are on but not here yet (the exchange answered slowly): say so; they appear by themselves.

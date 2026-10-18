@@ -181,7 +181,7 @@ function PersonCard({
   featured?: boolean;
   onOpen: (trigger: HTMLButtonElement) => void;
 }) {
-  const role = company ? `${p.title ?? groupLabel}, ${company}` : (p.title ?? groupLabel);
+  const title = p.title ?? groupLabel;
   return (
     <article
       // The whole card opens the profile (links inside it keep their own action); the name button is the keyboard route.
@@ -190,10 +190,9 @@ function PersonCard({
         const name = e.currentTarget.querySelector<HTMLButtonElement>(".person-name");
         if (name) onOpen(name);
       }}
-      className="person-card group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.6rem] border border-fg/[0.08] bg-navy-900 transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--tone)_60%,transparent)]"
+      className="person-card group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.75rem] border border-fg/[0.08] bg-navy-900 shadow-[0_24px_60px_-40px_rgb(0_0_0/0.6)] transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-1.5 hover:border-[color-mix(in_srgb,var(--tone)_55%,transparent)] hover:shadow-[0_40px_80px_-40px_color-mix(in_srgb,var(--tone)_45%,transparent)]"
     >
-      <span aria-hidden="true" className="absolute inset-x-0 top-0 z-10 h-[3px] bg-gradient-to-r from-[var(--tone)] via-[color-mix(in_srgb,var(--tone)_50%,transparent)] to-transparent" />
-      {/* The portrait also opens the profile; the name button below is the one in the tab order. */}
+      {/* Portrait, with the name and title set on a soft shade at its foot */}
       <button type="button" tabIndex={-1} aria-hidden="true" onClick={(e) => onOpen(e.currentTarget)} className="relative block aspect-[4/5] w-full overflow-hidden bg-navy-800">
         <Image
           src={p.photo?.url ?? PLACEHOLDER_PHOTO}
@@ -202,27 +201,42 @@ function PersonCard({
           height={p.photo?.height ?? 600}
           sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           quality={90}
-          className="person-photo h-full w-full object-cover"
+          className="person-photo h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
           style={focusStyle(p.photo, 0.8)}
           unoptimized={!p.photo}
         />
+        <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-[#050d19]/95 via-[#050d19]/55 to-transparent" />
         <span aria-hidden="true" className="person-sheen pointer-events-none absolute inset-0" />
         {showPlaceholderBadge && p.isPlaceholder && (
           <span className="absolute top-4 right-4 rounded-md bg-[#06111f]/85 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-[#e0b252]">{labels.placeholder}</span>
         )}
-        {p.org && <OrgLogo org={p.org} className="absolute bottom-4 left-4 h-9" />}
+        {p.org && <OrgLogo org={p.org} className="absolute top-4 left-4 h-8" />}
+        <span className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-2 p-5 text-left sm:p-6">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white backdrop-blur-md">
+            <span className="size-1.5 rounded-full bg-[var(--tone)]" />
+            {title}
+          </span>
+          <span className="font-display text-[1.45rem] leading-tight font-semibold text-balance text-white drop-shadow-[0_2px_8px_rgb(0_0_0/0.45)]">{p.name}</span>
+        </span>
       </button>
 
       <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
-        <div className="flex flex-col gap-1.5">
-          <h3 className="font-display text-[1.4rem] leading-tight text-text-primary">
-            <button type="button" aria-haspopup="dialog" data-person={p.id} onClick={(e) => onOpen(e.currentTarget)} className="person-name text-left focus-visible:outline-offset-4">
-              {p.name}
-            </button>
-          </h3>
-          <p className="text-sm font-semibold text-[var(--tone-ink)]">{role}</p>
-          {p.affiliation && <Affiliation text={p.affiliation} />}
-        </div>
+        {/* The visible name is on the portrait; this is the keyboard and screen-reader route to the profile. */}
+        <h3 className="sr-only">
+          <button type="button" aria-haspopup="dialog" data-person={p.id} onClick={(e) => onOpen(e.currentTarget)} className="person-name">
+            {p.name}
+          </button>
+        </h3>
+        {p.affiliation ? (
+          <Affiliation text={p.affiliation} />
+        ) : (
+          company && (
+            <p className="flex items-center gap-2 text-sm font-medium text-text-secondary">
+              <Logo height={18} />
+              {company}
+            </p>
+          )
+        )}
         <div className="mt-auto flex items-center gap-2 border-t border-fg/[0.08] pt-4">
           {!p.email && showPlaceholderBadge ? <ContactSlot kind="email" name={p.name} /> : <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} />}
           {!p.linkedinUrl && showPlaceholderBadge ? (
@@ -235,7 +249,7 @@ function PersonCard({
             tabIndex={-1}
             aria-hidden="true"
             onClick={(e) => onOpen(e.currentTarget)}
-            className="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--tone-ink)] transition-[gap] hover:gap-2.5"
+            className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--tone)_40%,transparent)] px-3.5 text-sm font-semibold text-[var(--tone-ink)] transition-[gap,background-color,color,border-color] hover:gap-2.5 hover:border-[var(--tone)] hover:bg-[var(--tone)] hover:text-white"
           >
             {labels.viewProfile}
             <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5 fill-none stroke-current stroke-[1.8]"><path d="M3 8h10M9 4l4 4-4 4" /></svg>

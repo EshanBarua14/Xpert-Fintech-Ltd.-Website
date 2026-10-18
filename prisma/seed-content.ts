@@ -2123,25 +2123,6 @@ async function seedWifangWebsite() {
 }
 
 /**
- * Once (XFL, 18 Oct 2026): the home page hero without the DSE · CSE price ticker and
- * index tiles. Both stay available: Admin → Design → Home page switches them back on.
- * Core strengths, the cost savings graphic and the WhatsApp button are set in
- * Admin → Home highlights (strengths start from built-in text; the graphic and the
- * button stay hidden until their figures and number are entered).
- */
-async function seedHomeHeroQuiet() {
-  const MARK = "seed.home-hero-quiet-2026-10-18";
-  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
-  const row = await db.siteSetting.findUnique({ where: { key: "site.design" } });
-  const value = (row?.value && typeof row.value === "object" && !Array.isArray(row.value) ? row.value : {}) as Record<string, unknown>;
-  const hidden = Array.isArray(value.hidden) ? (value.hidden as string[]) : [];
-  const next = { ...value, hidden: [...new Set([...hidden, "ticker", "heroMarket"])] };
-  await db.siteSetting.upsert({ where: { key: "site.design" }, update: { value: next }, create: { key: "site.design", value: next } });
-  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
-  console.log("• Home page: price ticker and hero indices switched off (Admin → Design → Home page)");
-}
-
-/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2543,7 +2524,6 @@ async function main() {
   await seedInnovaApp();
   await seedTheaClient();
   await seedWifangWebsite();
-  await seedHomeHeroQuiet();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

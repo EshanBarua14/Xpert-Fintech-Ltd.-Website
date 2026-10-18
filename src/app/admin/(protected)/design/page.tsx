@@ -2,7 +2,7 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { ConfirmButton } from "@/components/admin/AdminUi";
 import { DesignForm } from "@/components/admin/DesignForm";
-import { COLOR_FIELDS, getDesign, HOME_SECTIONS, TONE_FIELDS } from "@/lib/content/design";
+import { COLOR_FIELDS, getDesign, HOME_SECTIONS, TICKER_PLACES, TONE_FIELDS } from "@/lib/content/design";
 import { iconFor } from "@/lib/content/nav-icons";
 import { PRODUCT_STYLE } from "@/components/products/ProductMark";
 import { ICON_NAMES } from "@/components/ui/Icon";
@@ -66,6 +66,9 @@ export default async function DesignPage() {
             }),
           nav,
           home: HOME_SECTIONS.map((h) => ({ key: h.key, label: h.label, shown: !design.hidden.includes(h.key) })),
+          ticker: design.ticker,
+          tickerPlaces: TICKER_PLACES.map((t) => ({ value: t.value, label: t.label })),
+          heroIndices: design.heroIndices,
           icons: ICON_NAMES,
         }}
       />

@@ -735,9 +735,10 @@ html.has-ticker {
   --ticker-h: 2.25rem;
   scroll-padding-top: var(--ticker-h);
 }
-/* A page that hides the ticker (the home page, when Admin → Design says so) gives its space back. */
-html.has-ticker:has([data-no-ticker]) {
-  --ticker-h: 0px;
+/* Ticker only on the market pages (Admin → Design): those pages carry the marker. */
+html.ticker-markets:has([data-ticker-page]) {
+  --ticker-h: 2.25rem;
+  scroll-padding-top: var(--ticker-h);
 }
 .ticker-lane {
   mask-image: linear-gradient(90deg, transparent, #000 4%, #000 94%, transparent);

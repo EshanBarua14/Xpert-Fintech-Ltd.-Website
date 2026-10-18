@@ -63,10 +63,13 @@ export default async function LocaleLayout({
   // Admin → Site text edits (loaded at start-up; refreshed here at most once a minute).
   await ensureTextOverrides();
   const t = getMessages(locale);
-  const css = designCss(await getDesign());
+  const design = await getDesign();
+  const css = designCss(design);
+  // Admin → Design → DSE · CSE prices: room for the ticker on every page, or only on the market pages.
+  const tickerClass = marketMode() === "none" || design.ticker === "off" ? "" : design.ticker === "all" ? " has-ticker" : " ticker-markets";
 
   return (
-    <html lang={locale} className={`${display.variable} ${body.variable} ${displayBn.variable} ${bodyBn.variable}${marketMode() !== "none" ? " has-ticker" : ""}`} suppressHydrationWarning>
+    <html lang={locale} className={`${display.variable} ${body.variable} ${displayBn.variable} ${bodyBn.variable}${tickerClass}`} suppressHydrationWarning>
       <head>
         {/* Lets CSS hide scroll-reveal content only when JavaScript can reveal it again. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />

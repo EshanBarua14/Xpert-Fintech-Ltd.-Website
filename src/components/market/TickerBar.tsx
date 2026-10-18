@@ -188,14 +188,14 @@ export type TickerProps = {
   logos?: Logos;
 };
 
-export function TickerBar({ mode, locale, labels, logos }: TickerProps) {
+export function TickerBar({ mode, locale, labels, logos, only }: TickerProps & { only?: "DSE" | "CSE" }) {
   const [initial] = useState<MarketPayload>(() => ({ mode, providerName: null, delayMinutes: 0, snapshot: null, shares: [] }));
   const { data, moves, loaded } = useMarket(initial);
   const [paused, setPaused] = useState(false);
 
   const byEx = (ex: Ex) => data.snapshot?.exchanges.find((e) => e.exchange === ex);
   // Prices only: Xpert's market share is shown in the market section, not in the ticker.
-  const exchanges: Ex[] = (["DSE", "CSE"] as const).filter((ex) => byEx(ex));
+  const exchanges: Ex[] = (["DSE", "CSE"] as const).filter((ex) => byEx(ex) && (!only || ex === only));
 
   const combined = exchanges.flatMap((ex) => [
     { key: `${ex}-ex`, kind: "exchange" as const, label: ex },

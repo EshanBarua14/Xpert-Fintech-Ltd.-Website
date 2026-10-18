@@ -117,8 +117,6 @@ export default async function HomePage({ params }: Props) {
   return (
     <>
       {orgLd}
-      {/* Admin → Design → Home page can switch the DSE · CSE ticker off here (globals.css gives its space back). */}
-      {!show("ticker") && <span data-no-ticker hidden />}
       <FlagshipHero
         t={t}
         locale={locale}
@@ -129,7 +127,7 @@ export default async function HomePage({ params }: Props) {
         credentials={credentials.length ? <CredentialsInline items={credentials} label={t.credentialsTitle} /> : undefined}
         // The figures follow right below in "Our share of the market".
         facts={showReach ? [] : proof.filter((p) => p.label !== t.proofProducts && p.label !== t.proofExchanges)}
-        market={show("heroMarket") && market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} /> : undefined}
+        market={design.heroIndices && market.mode !== "none" ? <HeroIndices initial={market} t={t} locale={locale} logos={exchangeLogos(data.logos.parties)} /> : undefined}
       />
 
       {show("clients") && data.clients.length > 0 && (

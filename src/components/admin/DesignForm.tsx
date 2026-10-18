@@ -13,6 +13,9 @@ export type DesignFormValues = {
   products: { key: string; name: string; from: string; to: string; icon: string; defaults: { from: string; to: string; icon: string } }[];
   nav: { path: string; label: string; depth: number; icon: string; auto: string }[];
   home: { key: string; label: string; shown: boolean }[];
+  ticker: string;
+  tickerPlaces: { value: string; label: string }[];
+  heroIndices: boolean;
   icons: string[];
 };
 
@@ -156,6 +159,26 @@ export function DesignForm({ values }: { values: DesignFormValues }) {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className={box}>
+        <div>
+          <h2 className="font-display text-xl font-semibold">DSE · CSE prices</h2>
+          <p className="mt-1 text-sm text-text-secondary">Where the live price ticker runs, and whether the home page hero shows the index tiles.</p>
+        </div>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 text-sm font-semibold">Price ticker</legend>
+          {values.tickerPlaces.map((t) => (
+            <label key={t.value} className="flex items-center gap-3 rounded-xl border border-fg/[0.08] px-4 py-3 text-sm">
+              <input type="radio" name="ticker" value={t.value} defaultChecked={values.ticker === t.value} className="h-4 w-4 accent-brand-royal" />
+              {t.label}
+            </label>
+          ))}
+        </fieldset>
+        <label className="flex items-center gap-3 rounded-xl border border-fg/[0.08] px-4 py-3 text-sm">
+          <input type="checkbox" name="heroIndices" defaultChecked={values.heroIndices} className="h-4 w-4 accent-brand-royal" />
+          DSE and CSE index tiles in the home page hero
+        </label>
       </section>
 
       <div className="sticky bottom-4 flex justify-end">

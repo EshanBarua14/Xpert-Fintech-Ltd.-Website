@@ -88,7 +88,7 @@ export function HeaderClient({
   labels,
   logo,
   ticker,
-  tickerOnHome = true,
+  tickerEverywhere = false,
 }: {
   locale: AppLocale;
   items: NavLink[];
@@ -96,11 +96,14 @@ export function HeaderClient({
   logo: ReactNode;
   /** DSE · CSE ticker settings; the ticker is shown above the navigation when market data is on. */
   ticker?: TickerProps;
-  /** False when Admin → Design hides the ticker on the home page. */
-  tickerOnHome?: boolean;
+  /** True: the ticker runs on every page. False: only on the market pages, each exchange's page showing its own. */
+  tickerEverywhere?: boolean;
 }) {
   const pathname = usePathname();
-  const onHome = pathname === "/" || pathname === `/${locale}` || pathname === `/${locale}/`;
+  const marketPath = (pathname ?? "").match(new RegExp(`^/${locale}/markets(?:/([^/]+))?`));
+  const tickerExchange = marketPath?.[1]?.toUpperCase();
+  const tickerOnly = tickerExchange === "DSE" || tickerExchange === "CSE" ? tickerExchange : undefined;
+  const showTicker = Boolean(ticker) && (tickerEverywhere || Boolean(marketPath));
   const [menuOpen, setMenuOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -165,7 +168,7 @@ export function HeaderClient({
 
   return (
     <header className="fixed inset-x-0 top-0 z-(--z-sticky)">
-      {ticker && (tickerOnHome || !onHome) && <TickerBar {...ticker} />}
+      {ticker && showTicker && <TickerBar {...ticker} only={tickerEverywhere ? undefined : tickerOnly} />}
       <div className="site-bar-wrap px-3 pt-3 md:px-6 md:pt-4">
       <div
         className={cn(

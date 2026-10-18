@@ -24,8 +24,6 @@ export const TONE_FIELDS = [
   { key: "team", label: "Team leadership" },
 ] as const;
 export const HOME_SECTIONS = [
-  { key: "ticker", label: "DSE · CSE price ticker at the top of the home page" },
-  { key: "heroMarket", label: "DSE and CSE indices in the home page hero" },
   { key: "clients", label: "Client logos" },
   { key: "strengths", label: "Core strengths (Admin → Home highlights)" },
   { key: "savings", label: "Cost savings graphic (Admin → Home highlights)" },
@@ -44,6 +42,14 @@ export const HOME_SECTIONS = [
 ] as const;
 export type HomeSection = (typeof HOME_SECTIONS)[number]["key"];
 
+/** Where the DSE · CSE price ticker runs: only on the market pages (each exchange's page shows its own), on every page, or nowhere. */
+export const TICKER_PLACES = [
+  { value: "markets", label: "Only on the market pages (DSE page: DSE, CSE page: CSE)" },
+  { value: "all", label: "At the top of every page" },
+  { value: "off", label: "Nowhere" },
+] as const;
+export type TickerPlace = (typeof TICKER_PLACES)[number]["value"];
+
 export type ProductLook = { from?: string; to?: string; icon?: string };
 export type Design = {
   colors: Partial<Record<(typeof COLOR_FIELDS)[number]["key"], string>>;
@@ -51,6 +57,9 @@ export type Design = {
   products: Record<string, ProductLook>;
   navIcons: Record<string, string>;
   hidden: HomeSection[];
+  ticker: TickerPlace;
+  /** DSE and CSE index tiles in the home page hero. */
+  heroIndices: boolean;
 };
 
 const HEX = /^#[0-9a-f]{6}$/i;
@@ -73,6 +82,8 @@ export function readDesign(value: unknown): Design {
     ),
     navIcons: Object.fromEntries(Object.entries(obj(v.navIcons)).flatMap(([k, i]) => (icon(i) ? [[k, icon(i)!]] : []))),
     hidden: (Array.isArray(v.hidden) ? v.hidden : []).filter((x): x is HomeSection => HOME_SECTIONS.some((s) => s.key === x)),
+    ticker: TICKER_PLACES.some((t) => t.value === v.ticker) ? (v.ticker as TickerPlace) : "markets",
+    heroIndices: v.heroIndices === true,
   };
 }
 

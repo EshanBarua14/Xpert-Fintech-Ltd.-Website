@@ -111,6 +111,7 @@ export default async function ConsortiumPage({ params }: Props) {
                   consultant: t.consConsultant,
                   appLive: t.consAppLive,
                   representedBy: t.consRepresentedBy,
+                  roleAtXpert: t.consRoleAtXpert,
                   apps: t.consApps,
                   noApp: t.consNoApp,
                   noRep: t.consNoRep,

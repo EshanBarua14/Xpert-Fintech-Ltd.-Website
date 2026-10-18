@@ -73,6 +73,7 @@ const PAGES = [
   "/admin/messages",
   "/admin/navigation",
   "/admin/news",
+  "/admin/notifications",
   "/admin/news/categories",
   "/admin/news/tags",
   "/admin/organizations",
@@ -469,4 +470,28 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
       expect(alerts, `save showed an error: ${alerts.join(" | ")}`).toEqual([]);
     });
   }
+
+  test("/admin/notifications: recipients saved; test email explains a missing server", async ({ page }) => {
+    await expectHealthy(page, "/admin/notifications");
+    await page.locator("#leadEmails").fill(`sales-${STAMP}@example.com, ops-${STAMP}@example.com`);
+    await page.locator("#careerEmails").fill(`hr-${STAMP}@example.com`);
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByText(/^Saved\./), `not saved: ${await formProblems(page)}`).toBeVisible({ timeout: 15_000 });
+    await page.reload();
+    await expect(page.locator("#leadEmails")).toHaveValue(new RegExp(`sales-${STAMP}@example.com\\nops-${STAMP}@example.com`));
+    await expect(page.locator("#careerEmails")).toHaveValue(`hr-${STAMP}@example.com`);
+    // A bad address is refused with a message.
+    await page.locator("#careerEmails").fill("not-an-email");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.locator("[role='alert']").first()).toBeVisible({ timeout: 15_000 });
+    // No mail server on the test machine: the test email says so instead of failing silently.
+    await page.goto("/admin/notifications");
+    await page.getByRole("button", { name: "Send test email" }).click();
+    await expect(page.locator("[role='alert']").filter({ hasText: /mail server|Could not send/i }).first()).toBeVisible({ timeout: 30_000 });
+    // The live counts behind the menu badges.
+    const r = await page.request.get("/api/admin/inbox");
+    expect(r.status()).toBe(200);
+    const inbox = (await r.json()) as { leads: number; applications: number };
+    expect(typeof inbox.leads).toBe("number");
+  });
 });

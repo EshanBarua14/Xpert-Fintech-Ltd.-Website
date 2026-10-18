@@ -401,12 +401,14 @@ export function PeopleGallery({
                   </li>
                 )}
               </ul>
-              <div className="mt-auto flex items-center gap-2 border-t border-fg/[0.08] pt-4">
-                <ContactIcon kind="email" value={open.email} name={open.name} labels={labels} size="size-10" />
-                <ContactIcon kind="linkedin" value={open.linkedinUrl} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
-                <WebsiteIcon href={siteOf(open)} name={open.org?.name ?? company ?? open.name} label={labels.website} size="size-10" />
+              <div className="mt-auto flex flex-col items-center gap-2 border-t border-fg/[0.08] pt-4">
+                <div className="flex items-center justify-center gap-2">
+                  <ContactIcon kind="email" value={open.email} name={open.name} labels={labels} size="size-10" />
+                  <ContactIcon kind="linkedin" value={open.linkedinUrl} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
+                  <WebsiteIcon href={siteOf(open)} name={open.org?.name ?? company ?? open.name} label={labels.website} size="size-10" />
+                </div>
                 {open.email && (
-                  <a href={`mailto:${open.email}`} className="min-w-0 truncate text-xs text-text-secondary hover:text-[var(--tone-ink)]">
+                  <a href={`mailto:${open.email}`} className="max-w-full truncate text-xs text-text-secondary hover:text-[var(--tone-ink)]">
                     {open.email}
                   </a>
                 )}

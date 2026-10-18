@@ -16,6 +16,7 @@ export type DesignFormValues = {
   ticker: string;
   tickerPlaces: { value: string; label: string }[];
   heroIndices: boolean;
+  homeMarket: boolean;
   icons: string[];
 };
 
@@ -164,7 +165,7 @@ export function DesignForm({ values }: { values: DesignFormValues }) {
       <section className={box}>
         <div>
           <h2 className="font-display text-xl font-semibold">DSE · CSE prices</h2>
-          <p className="mt-1 text-sm text-text-secondary">Where the live price ticker runs, and whether the home page hero shows the index tiles.</p>
+          <p className="mt-1 text-sm text-text-secondary">Where the live price ticker runs, and what the home page shows. The DSE and CSE pages under Markets always show their own ticker, summary and full price board.</p>
         </div>
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 text-sm font-semibold">Price ticker</legend>
@@ -178,6 +179,10 @@ export function DesignForm({ values }: { values: DesignFormValues }) {
         <label className="flex items-center gap-3 rounded-xl border border-fg/[0.08] px-4 py-3 text-sm">
           <input type="checkbox" name="heroIndices" defaultChecked={values.heroIndices} className="h-4 w-4 accent-brand-royal" />
           DSE and CSE index tiles in the home page hero
+        </label>
+        <label className="flex items-center gap-3 rounded-xl border border-fg/[0.08] px-4 py-3 text-sm">
+          <input type="checkbox" name="homeMarket" defaultChecked={values.homeMarket} className="h-4 w-4 accent-brand-royal" />
+          &ldquo;Today on DSE and CSE&rdquo; cards on the home page (always on the DSE and CSE pages)
         </label>
       </section>
 

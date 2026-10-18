@@ -2033,6 +2033,52 @@ async function seedShareAndClients() {
 }
 
 /**
+ * Once (XFL, 18 Oct 2026): Innova Securities Ltd. is live on Xpert.
+ *  - Android app "Innova OMS" (com.innovaoms.oms), linked from Innova's own website
+ *    (innovasecurities.com.bd) and described on Google Play as "OMS application for
+ *    Innova Securities Ltd."; no App Store listing found.
+ *  - Web trading: the OMS login Innova's website links to (ibl.xfltrade.com, Xpert-hosted).
+ *  - Website innovasecurities.com.bd and DSE TREC No. 302, as its website states,
+ *    set only where the admin has none.
+ */
+async function seedInnovaApp() {
+  const MARK = "seed.innova-app-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const notes: string[] = [];
+  const org = await db.organization.findUnique({ where: { key: "innova-securities" }, select: { id: true, websiteUrl: true, dseTrec: true } });
+  if (org) {
+    const data: { websiteUrl?: string; dseTrec?: string } = {};
+    if (!org.websiteUrl) data.websiteUrl = "https://innovasecurities.com.bd/";
+    if (!org.dseTrec) data.dseTrec = "302";
+    if (Object.keys(data).length) {
+      await db.organization.update({ where: { id: org.id }, data });
+      notes.push(`details: ${Object.keys(data).join(", ")}`);
+    }
+    if (!(await db.deployment.findFirst({ where: { OR: [{ key: "innova-oms" }, { androidPackage: "com.innovaoms.oms" }] } }))) {
+      const offering = await db.offering.findUnique({ where: { key: "trading-platform" }, select: { id: true } });
+      const last = await db.deployment.findFirst({ orderBy: { sortOrder: "desc" }, select: { sortOrder: true } });
+      await db.deployment.create({
+        data: {
+          key: "innova-oms",
+          appName: "Innova OMS",
+          androidPackage: "com.innovaoms.oms",
+          playStoreUrl: "https://play.google.com/store/apps/details?id=com.innovaoms.oms",
+          webUrl: "https://ibl.xfltrade.com/app/Login",
+          organizationId: org.id,
+          offeringId: offering?.id ?? null,
+          linksCheckedAt: new Date("2026-10-18"),
+          status: "PUBLISHED",
+          sortOrder: (last?.sortOrder ?? 0) + 1,
+        },
+      });
+      notes.push("Innova OMS (Google Play, web) added to the live apps");
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), notes } } });
+  if (notes.length) console.log(`• Innova Securities: ${notes.join("; ")}`);
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2431,6 +2477,7 @@ async function main() {
   await seedFirstCapitalApp();
   await seedSourcesAndStories();
   await seedShareAndClients();
+  await seedInnovaApp();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

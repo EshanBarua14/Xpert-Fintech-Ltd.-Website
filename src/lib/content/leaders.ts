@@ -38,6 +38,9 @@ export type LeaderMessage = {
   paragraphs: string[];
   name: string | null;
   title: string | null;
+  /** From Admin → People: icons under the signatory. */
+  linkedin: string | null;
+  email: string | null;
   photo: { url: string; width: number | null; height: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
   /** Not published yet: shown only outside production, marked as a draft, so editors can review it in place. */
   draft: boolean;
@@ -61,7 +64,8 @@ export const getLeaderMessage = cache(async (key: LeaderKey, locale: AppLocale):
   if (!text || (!m.published && !previewDrafts())) return null;
   // The signatory by key; failing that (a profile created by the old-site importer
   // under another key), by the name XFL gave for that person.
-  const include = { translations: true, roles: { where: { group: ROLE_GROUP[key] }, include: { translations: true } } } as const;
+  // Every role, the one of this message's group first (an MD kept under Team still gets a title).
+  const include = { translations: true, roles: { orderBy: { sortOrder: "asc" }, include: { translations: true } } } as const;
   const rosterName = [...BOARD, ...MANAGEMENT].find((p) => p.key === m.personKey)?.name;
   const person = m.personKey
     ? ((await db.person.findFirst({ where: { ...publishedWhere(), key: m.personKey }, include })) ??
@@ -70,8 +74,10 @@ export const getLeaderMessage = cache(async (key: LeaderKey, locale: AppLocale):
         : null))
     : null;
   const tr = person?.translations.find((t) => t.locale === locale) ?? person?.translations.find((t) => t.locale === "en");
-  const roleTr = person?.roles[0]?.translations;
-  const title = roleTr?.find((t) => t.locale === locale)?.title ?? roleTr?.find((t) => t.locale === "en")?.title ?? null;
+  const role = person?.roles.find((r) => r.group === ROLE_GROUP[key]) ?? person?.roles[0];
+  const roleTr = role?.translations;
+  const fallbackTitle = key === "chairman" ? (locale === "bn" ? "চেয়ারম্যান" : "Chairman") : locale === "bn" ? "ব্যবস্থাপনা পরিচালক" : "Managing Director";
+  const title = roleTr?.find((t) => t.locale === locale)?.title || roleTr?.find((t) => t.locale === "en")?.title || fallbackTitle;
   const photos = person?.photoMediaId ? await mediaMap([person.photoMediaId], locale) : null;
   const photo = person?.photoMediaId ? photos?.get(person.photoMediaId) : null;
   return {
@@ -79,6 +85,8 @@ export const getLeaderMessage = cache(async (key: LeaderKey, locale: AppLocale):
     paragraphs: text.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean),
     name: tr?.name ?? null,
     title,
+    linkedin: person?.linkedinUrl || null,
+    email: person?.email || null,
     photo: photo ? { url: photo.url, width: photo.width, height: photo.height, focal: photo.focal ?? null } : null,
     draft: !m.published && editorHints(),
   };

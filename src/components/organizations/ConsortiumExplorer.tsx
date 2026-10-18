@@ -19,6 +19,8 @@ export type ConsortiumLabels = {
   consultant: string;
   appLive: string;
   representedBy: string;
+  /** "{title}, Xpert Fintech Ltd.": the representative's position at Xpert. */
+  roleAtXpert?: string;
   apps: string;
   noApp: string;
   noRep: string;
@@ -377,7 +379,7 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                           </span>
                           <span className="flex min-w-0 flex-col">
                             <span className="font-semibold text-text-primary group-hover:text-gold">{r.name}</span>
-                            <span className="text-xs text-gold">{r.group === "BOARD" ? r.title ?? labels.boardSeat : r.title ?? labels.consultant}</span>
+                            <span className="text-xs text-gold">{(labels.roleAtXpert ?? "{title}").replace("{title}", r.group === "BOARD" ? r.title ?? labels.boardSeat : r.title ?? labels.consultant)}</span>
                             {r.position && <span className="line-clamp-2 text-xs text-text-secondary">{r.position}</span>}
                           </span>
                         </Link>

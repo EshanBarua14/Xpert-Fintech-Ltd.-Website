@@ -104,7 +104,7 @@ export async function saveHighlights(_prev: HighlightsState, formData: FormData)
   const notes = [
     `${items.length} strength(s)`,
     savings.published && pct !== null ? `cost savings live (−${pct}%)` : "cost savings not published",
-    waDigits ? "WhatsApp button opens a chat" : "no WhatsApp number yet: the button opens the contact page",
+    waDigits ? "WhatsApp button opens a chat" : "no WhatsApp number yet: the button is hidden",
   ];
   return { ok: true, savedAt: Date.now(), message: `Saved: ${notes.join("; ")}.` };
 }

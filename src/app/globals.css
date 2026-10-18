@@ -1498,82 +1498,53 @@ html {
   .cx-panel { animation: none; }
 }
 
-/* Home → core strengths (CoreStrengths): calm, slow motion that settles. */
-@property --strength-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
+/* Home → core strengths (CoreStrengths): an explorer with a moving picture per strength. */
+.cs-progress { transform: scaleX(0); }
+.cs-progress.is-running { animation: cs-progress var(--cs-ms, 6000ms) linear forwards; }
+.cs-progress.is-paused { transform: scaleX(0.04); }
+@keyframes cs-progress { to { transform: scaleX(1); } }
+.cs-list { scrollbar-width: none; }
+.cs-list::-webkit-scrollbar { display: none; }
+.cs-art { animation: cs-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.cs-text { animation: cs-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both; }
+@keyframes cs-in { from { opacity: 0; transform: translateY(10px); } }
+.cs-aurora { animation: sv-drift 20s ease-in-out infinite alternate; }
+.cs-aurora-2 { animation-duration: 26s; animation-direction: alternate-reverse; }
+.cs-spin { animation: cs-spin 60s linear infinite; }
+.cs-spin-rev { animation: cs-spin 24s linear infinite reverse; }
+@keyframes cs-spin { to { transform: rotate(360deg); } }
+.cs-breathe { animation: cs-breathe 4s ease-in-out infinite; }
+@keyframes cs-breathe { 50% { transform: scale(1.18); opacity: 0.5; } }
+.cs-pulse-dot { animation: cs-pulse-dot 2.8s ease-in infinite; }
+@keyframes cs-pulse-dot {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)); opacity: 0; }
 }
-.strength-card {
-  background-image: radial-gradient(120% 80% at 0% 0%, color-mix(in oklab, var(--color-brand-sky) 7%, transparent), transparent 60%);
-  transition:
-    border-color 0.4s ease,
-    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.5s ease;
-}
-.strength-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 24px 48px -28px color-mix(in oklab, var(--color-brand-sky) 45%, transparent);
-}
-.strength-ring {
-  padding: 1px;
-  background: conic-gradient(from var(--strength-angle), transparent 0 70%, color-mix(in oklab, var(--color-brand-sky) 70%, transparent) 82%, color-mix(in oklab, var(--color-gold) 70%, transparent) 90%, transparent 100%);
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-.strength-card:hover .strength-ring {
-  opacity: 1;
-  animation: strength-orbit 4s linear infinite;
-}
-@keyframes strength-orbit {
-  to { --strength-angle: 360deg; }
-}
-.strength-glow {
-  opacity: 0.5;
-  transition: opacity 0.6s ease, transform 0.8s ease;
-}
-.strength-card:hover .strength-glow {
-  opacity: 1;
-  transform: scale(1.15);
-}
-/* As each card arrives: the icon settles in and sends out one soft ring. */
-.js main .strength-card:not(.is-in) .strength-icon {
-  transform: scale(0.7) rotate(-8deg);
-  opacity: 0;
-}
-.strength-card .strength-icon {
-  transition:
-    transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.5s ease;
-  transition-delay: calc(var(--d, 0) * 90ms + 180ms);
-}
-.strength-card.is-in .strength-pulse {
-  animation: strength-pulse 1.6s ease-out calc(var(--d, 0) * 90ms + 500ms) 1 both;
-}
-@keyframes strength-pulse {
-  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-brand-sky) 55%, transparent); }
-  100% { box-shadow: 0 0 0 18px transparent; }
-}
-.strength-card:hover .strength-icon {
-  transform: translateY(-2px) scale(1.06);
-}
-.strength-num {
-  transition: color 0.4s ease, letter-spacing 0.4s ease;
-}
-.strength-card:hover .strength-num {
-  color: var(--color-gold);
-  letter-spacing: 0.08em;
-}
-
+.cs-ripple { animation: cs-ripple 3.6s ease-out infinite; opacity: 0; }
+@keyframes cs-ripple { 0% { transform: scale(0.7); opacity: 0.7; } 100% { transform: scale(1.5); opacity: 0; } }
+.cs-scanline { animation: cs-scan 3s ease-in-out infinite; }
+@keyframes cs-scan { 0% { transform: translateY(10px); } 100% { transform: translateY(170px); } }
+.cs-pop { animation: cs-pop 3.6s ease-out infinite both; }
+@keyframes cs-pop { 0% { transform: scale(0); opacity: 0; } 12% { transform: scale(1.1); opacity: 1; } 20% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; } }
+.cs-route-a, .cs-flow-a { animation: cs-main 7s ease-in-out infinite; }
+.cs-route-b, .cs-flow-b { animation: cs-backup 7s ease-in-out infinite; }
+@keyframes cs-main { 0%, 45% { opacity: 1; } 55%, 90% { opacity: 0.15; } 100% { opacity: 1; } }
+@keyframes cs-backup { 0%, 45% { opacity: 0.25; } 55%, 90% { opacity: 1; } 100% { opacity: 0.25; } }
+.cs-roof { animation: cs-roof 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.8s both; }
+@keyframes cs-roof { from { transform: translateY(-24px); opacity: 0; } }
+.cs-pillar { animation: cs-rise 0.8s cubic-bezier(0.34, 1.4, 0.64, 1) both; }
+@keyframes cs-rise { from { transform: scaleY(0); } }
+.cs-beat { stroke-dasharray: 420; animation: cs-beat 3.2s linear infinite; }
+@keyframes cs-beat { from { stroke-dashoffset: 420; } to { stroke-dashoffset: -420; } }
+.cs-led { animation: cs-led 1.8s steps(2, jump-none) infinite; }
+@keyframes cs-led { 50% { opacity: 0.25; } }
 @media (prefers-reduced-motion: reduce) {
-  .strength-card,
-  .strength-card .strength-icon,
-  .strength-glow { transition: none; }
-  .strength-card:hover { transform: none; }
-  .strength-card:hover .strength-ring,
-  .strength-card.is-in .strength-pulse { animation: none; }
-  .js main .strength-card:not(.is-in) .strength-icon { transform: none; opacity: 1; }
+  .cs-art, .cs-text, .cs-aurora, .cs-spin, .cs-spin-rev, .cs-breathe, .cs-pulse-dot, .cs-ripple, .cs-scanline, .cs-pop,
+  .cs-route-a, .cs-route-b, .cs-roof, .cs-pillar, .cs-beat, .cs-led { animation: none; }
+  .cs-flow-a, .cs-flow-b, .cs-pulse-dot, .cs-ripple { display: none; }
+  .cs-pop { opacity: 1; }
 }
 
 /* Reviews: cards lift gently under the pointer. */

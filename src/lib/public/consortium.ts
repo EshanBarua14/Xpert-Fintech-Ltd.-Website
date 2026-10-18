@@ -16,7 +16,17 @@ import { getOrganizations, mediaMap } from "@/lib/public/content";
  *  - the branded trading app(s) it runs on Xpert's platform (Admin → Deployments)
  */
 export type ConsortiumApp = { name: string; playStoreUrl: string | null; appStoreUrl: string | null; webUrl: string | null };
-export type ConsortiumRep = { name: string; title: string | null; position: string | null; group: "BOARD" | "CONSULTANT"; photo: string | null; photoStyle?: import("react").CSSProperties };
+export type ConsortiumRep = {
+  name: string;
+  title: string | null;
+  position: string | null;
+  group: "BOARD" | "CONSULTANT";
+  photo: string | null;
+  photoStyle?: import("react").CSSProperties;
+  /** From Admin → People: icons beside the representative. */
+  linkedin?: string | null;
+  email?: string | null;
+};
 export type ConsortiumMember = {
   id: string;
   name: string;
@@ -89,6 +99,8 @@ export const getConsortium = cache(async (locale: AppLocale): Promise<Consortium
               group: role.group as "BOARD" | "CONSULTANT",
               photo: photo?.url ?? null,
               photoStyle: photo ? focusStyle(photo, 1) : undefined,
+              linkedin: p.linkedinUrl || null,
+              email: p.email || null,
             },
           ];
         });

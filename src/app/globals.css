@@ -1650,3 +1650,9 @@ html:has(.whatsapp-fab) .back-to-top {
 @media (min-width: 768px) {
   html:has(.whatsapp-fab) .back-to-top { bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px)); right: 2rem; }
 }
+
+/* People cards: the name button is visually hidden (the name sits on the portrait), so the whole card shows keyboard focus. */
+.person-card:has(.person-name:focus-visible) {
+  outline: 2px solid var(--tone);
+  outline-offset: 3px;
+}

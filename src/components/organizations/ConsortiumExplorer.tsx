@@ -330,7 +330,6 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                   <p className="flex flex-wrap gap-1.5 text-xs font-semibold">
                     <span className="rounded-full bg-brand-sky/10 px-2.5 py-1 text-brand-sky">{labels.shareholder}</span>
                     {m.reps.some((r) => r.group === "BOARD") && <span className="rounded-full bg-gold/15 px-2.5 py-1 text-gold">{labels.boardSeat}</span>}
-                    {m.apps.length > 0 && <span className="rounded-full bg-market-up/10 px-2.5 py-1 text-market-up">{labels.appLive}</span>}
                   </p>
                 </div>
               </div>

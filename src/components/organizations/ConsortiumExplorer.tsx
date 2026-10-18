@@ -26,6 +26,8 @@ export type ConsortiumLabels = {
   apps: string;
   noApp: string;
   noRep: string;
+  /** Placeholder card when a house has no representative on file: "Representative to be announced". */
+  repPending?: string;
   website: string;
   /** LinkedIn and email icons beside each representative. */
   contact?: ContactLabels;
@@ -222,7 +224,7 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
               const consult = !seat && x.reps.length > 0;
               const mark = place(i, n, MARK_R);
               // Two small marks side by side, along the outer ring.
-              const side = { x: -Math.sin(mark.a) * 9, y: Math.cos(mark.a) * 9 };
+              const side = { x: -Math.sin(mark.a) * 14, y: Math.cos(mark.a) * 14 };
               return (
                 <g
                   key={x.id}
@@ -236,7 +238,9 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                   style={{ transform: on ? "scale(1.12)" : "scale(1)", transformOrigin: `${p.x}px ${p.y}px`, transition: reduce ? undefined : "transform 450ms cubic-bezier(0.16, 1, 0.3, 1)" }}
                   className="cursor-pointer outline-none [&:focus-visible>rect.cx-plate]:stroke-brand-sky [&:focus-visible>rect.cx-plate]:stroke-[3]"
                 >
-                  {(seat || consult) && <circle cx={mark.x - side.x} cy={mark.y - side.y} r={6} className={consult ? "fill-gold/50" : "fill-gold"} />}
+                  {/* Three marks along the outer ring: shareholder (every member), board member, branded app */}
+                  <circle cx={mark.x - side.x} cy={mark.y - side.y} r={6} className="fill-[#22b57a]" />
+                  {(seat || consult) && <circle cx={mark.x} cy={mark.y} r={6} className={consult ? "fill-gold/50" : "fill-gold"} />}
                   {x.apps.length > 0 && <circle cx={mark.x + side.x} cy={mark.y + side.y} r={6} className="fill-brand-sky" />}
                   <rect
                     className={cn("cx-plate transition-[stroke,stroke-width] duration-300", on ? "stroke-brand-sky" : "stroke-black/10")}
@@ -263,6 +267,10 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
         </div>
         {/* Legend */}
         <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-text-secondary">
+          <li className="flex items-center gap-2">
+            <span aria-hidden="true" className="size-2.5 rounded-full bg-[#22b57a]" />
+            {labels.shareholder}
+          </li>
           <li className="flex items-center gap-2">
             <span aria-hidden="true" className="size-2.5 rounded-full bg-gold" />
             {labels.legendSeat}
@@ -412,7 +420,32 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-text-secondary">{labels.noRep}</p>
+                  // No representative on file yet: the same card, with a placeholder portrait.
+                  <div className="flex items-center gap-3 rounded-2xl border border-dashed border-fg/15 p-2.5 pr-3">
+                    <span className="relative flex aspect-[4/5] w-12 shrink-0 items-end justify-center overflow-hidden rounded-xl bg-navy-800">
+                      <svg viewBox="0 0 40 50" className="h-full w-full text-fg/20" aria-hidden="true">
+                        <circle cx="20" cy="19" r="8" fill="currentColor" />
+                        <path d="M5 50c1.5-10 7.5-15 15-15s13.5 5 15 15Z" fill="currentColor" />
+                      </svg>
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="font-semibold text-text-secondary">{labels.repPending ?? labels.noRep}</span>
+                      <span className="text-xs text-gold">{labels.shareholder}, Xpert Fintech Ltd.</span>
+                      <span className="line-clamp-1 text-xs text-text-secondary">{m.name}</span>
+                    </span>
+                    {m.websiteUrl && (
+                      <a
+                        href={m.websiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${m.name}: ${m.websiteUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}`}
+                        className="contact-icon flex size-8 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-300"
+                        style={{ "--c": "var(--color-brand-sky)", "--ci": "var(--color-brand-sky)" } as CSSProperties}
+                      >
+                        <Icon name="globe" className="size-4" />
+                      </a>
+                    )}
+                  </div>
                 )}
               </section>
 

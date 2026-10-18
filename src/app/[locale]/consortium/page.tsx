@@ -116,6 +116,7 @@ export default async function ConsortiumPage({ params }: Props) {
                   apps: t.consApps,
                   noApp: t.consNoApp,
                   noRep: t.consNoRep,
+                  repPending: locale === "bn" ? "প্রতিনিধির নাম শিগগিরই" : "Representative to be announced",
                   website: t.consWebsite,
                   contact: { linkedin: t.linkedinProfile, email: t.emailPerson, linkedinSearch: t.linkedinSearch, emailMissing: t.emailMissing, website: locale === "bn" ? "ওয়েবসাইট" : "Website" },
                   android: t.getAndroidApp,

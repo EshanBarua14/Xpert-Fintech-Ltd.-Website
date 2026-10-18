@@ -706,7 +706,10 @@ async function seedMessagesAndGoal() {
     await db.siteSetting.create({ data: { key: "market.headlineShare", value: { pct: 45, asOf: "2026-10-08" } } });
     console.log("• Overall market share set to 45% (Admin → Market data → Overall market share)");
   }
-  console.log("• Chairman's and MD's messages saved as drafts (publish in Admin → Messages); market-share goal set");
+  // Says what is actually stored (the messages are published by a later step at XFL's instruction).
+  const states = await db.siteSetting.findMany({ where: { key: { in: LEADER_MESSAGES.map((m) => `message.${m.key}`) } } });
+  const live = states.filter((r) => (r.value as { published?: boolean } | null)?.published === true).length;
+  console.log(`• Chairman's and MD's messages: ${live} of ${LEADER_MESSAGES.length} published (Admin → Messages); market-share goal set`);
 }
 
 /**

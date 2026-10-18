@@ -15,6 +15,12 @@ import { mediaIdsOf, toSections } from "@/lib/public/blocks";
 import { getCompanyStory, getMilestones, getPeopleCounts } from "@/lib/public/company";
 import { getPageByPath, getSeo } from "@/lib/public/content";
 import { getFlagshipData } from "@/lib/public/flagship";
+import { CountUp } from "@/components/motion/CountUp";
+import { CoreStrengths } from "@/components/flagship/CoreStrengths";
+import { getStrengths } from "@/lib/content/highlights";
+import { getHeadlineShare } from "@/lib/content/leaders";
+import { plain } from "@/components/ui/Emph";
+import { digits } from "@/lib/i18n/digits";
 import { blockContext, buildMetadata } from "@/lib/public/seo";
 import { formatEventDate, pick } from "@/lib/public/text";
 
@@ -53,12 +59,23 @@ export default async function AboutPage({ params }: Props) {
     getFlagshipData(loc),
     getPageByPath(loc, "company/about"),
   ]);
-  const [chairman, md] = await Promise.all([getLeaderMessage("chairman", loc), getLeaderMessage("md", loc)]);
+  const [chairman, md, strengths, headline] = await Promise.all([getLeaderMessage("chairman", loc), getLeaderMessage("md", loc), getStrengths(loc), getHeadlineShare()]);
   const contact = { linkedin: t.linkedinProfile, email: t.emailPerson, linkedinSearch: t.linkedinSearch, emailMissing: t.emailMissing, website: loc === "bn" ? "ওয়েবসাইট" : "Website" };
   const sections = page ? toSections(page, loc) : [];
   const ctx = sections.length ? await blockContext(loc, mediaIdsOf(sections)) : null;
   const tr = page ? pick(page.translations, loc) : undefined;
   const nf = new Intl.NumberFormat(loc === "bn" ? "bn-BD" : "en-US");
+
+  // At a glance: only figures the site already holds (Admin → Organizations, Products, People, Market data).
+  const glance = [
+    { value: flagship.members.length, label: t.proofMembers },
+    { value: flagship.clients.length, label: t.proofClients },
+    { value: flagship.offerings.length, label: t.proofProducts },
+    { value: counts.TEAM, label: loc === "bn" ? "এক্সপার্টের টিমে" : "People on the team" },
+    { value: flagship.exchanges.length, label: t.proofExchanges },
+  ].filter((g) => g.value > 0);
+  const share = headline?.dse ?? headline?.cse ?? null;
+  const shareEx = headline?.dse ? "DSE" : "CSE";
 
   const people = [
     { href: "company/board", title: t.board, body: t.boardLinkBody, count: counts.BOARD, icon: "shield" },
@@ -71,6 +88,22 @@ export default async function AboutPage({ params }: Props) {
   return (
     <div>
       <PageHero eyebrow={t.companyEyebrow} title={tr?.title ?? t.aboutTitle} body={story.summary} />
+
+      {/* At a glance */}
+      {glance.length > 0 && (
+        <Shell className="pb-10 md:pb-12">
+          <dl className="glance grid grid-cols-2 overflow-hidden rounded-[1.75rem] border border-fg/10 bg-navy-900/60 sm:grid-cols-3 lg:grid-cols-5">
+            {glance.map((g, i) => (
+              <div key={g.label} data-reveal style={{ "--d": i } as CSSProperties} className="glance-cell relative flex flex-col gap-2 p-6 md:p-7">
+                <dd className="font-display text-4xl leading-none text-text-primary md:text-5xl">
+                  <CountUp value={g.value} locale={loc} />
+                </dd>
+                <dt className="text-sm leading-snug text-text-secondary">{g.label}</dt>
+              </div>
+            ))}
+          </dl>
+        </Shell>
+      )}
 
       {/* Story, mission, vision: the story as reading text on the left, mission and vision as two statements on the right, top-aligned. */}
       {(story.about || story.mission || story.vision) && (
@@ -93,23 +126,45 @@ export default async function AboutPage({ params }: Props) {
               </div>
             )}
             {(story.mission || story.vision) && (
-              <dl className={cn("flex flex-col divide-y divide-fg/10", story.about ? "lg:col-span-6" : "lg:col-span-12 lg:flex-row lg:divide-x lg:divide-y-0")}>
+              <dl className={cn("flex flex-col", story.about ? "lg:col-span-6" : "lg:col-span-12 lg:flex-row lg:gap-4")}>
                 {[
                   { label: t.mission, text: story.mission, dot: "bg-gold" },
                   { label: t.vision, text: story.vision, dot: "bg-brand-sky" },
                 ]
                   .filter((x) => x.text)
                   .map((x, i) => (
-                    <div key={x.label} data-reveal style={{ "--d": i + 1 } as CSSProperties} className="flex flex-col gap-3 py-8 first:pt-0 last:pb-0 lg:first:pt-1">
-                      <dt className="flex items-center gap-2.5 text-sm font-semibold text-text-secondary">
+                    <div key={x.label} data-reveal style={{ "--d": i + 1 } as CSSProperties} className="glow-track relative mb-4 flex flex-col gap-3 overflow-hidden rounded-3xl border border-fg/10 bg-navy-900/60 p-7 last:mb-0">
+                      <span aria-hidden="true" className={cn("absolute inset-y-0 left-0 w-1", x.dot)} />
+                      <dt className="flex items-center gap-2.5 text-xs font-semibold tracking-[0.18em] text-text-secondary uppercase">
                         <span aria-hidden="true" className={cn("size-2 rounded-full", x.dot)} />
                         {x.label}
                       </dt>
-                      <dd className="font-display text-lg leading-snug text-text-primary md:text-xl">{x.text}</dd>
+                      <dd className="font-display text-xl leading-snug text-text-primary md:text-2xl">{x.text}</dd>
                     </div>
                   ))}
               </dl>
             )}
+          </div>
+        </Shell>
+      )}
+
+      {/* What sets Xpert apart (Admin → Home highlights → Core strengths), with the market share beside the heading */}
+      {strengths.items.length > 0 && (
+        <Shell className="pb-10 md:pb-12">
+          <div className="flex flex-col gap-10">
+            <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+              <SectionHeader title={strengths.title} body={strengths.intro || null} />
+              {share !== null && (
+                <div data-reveal className="glow-track flex shrink-0 items-center gap-4 rounded-3xl border border-gold/30 bg-gold/[0.06] px-6 py-5">
+                  <span className="emph font-display text-5xl leading-none font-semibold">{digits(share, loc === "bn")}%</span>
+                  <span className="max-w-[12rem] text-sm leading-snug text-text-secondary">
+                    {loc === "bn" ? `${shareEx === "DSE" ? "ডিএসইর" : "সিএসইর"} লেনদেন এক্সপার্টের মাধ্যমে` : `of ${shareEx} turnover runs through Xpert`}
+                    {headline?.source && <span className="mt-1 block text-xs opacity-80">{loc === "bn" ? "সূত্র" : "Source"}: {headline.source}</span>}
+                  </span>
+                </div>
+              )}
+            </div>
+            <CoreStrengths items={strengths.items} locale={loc} label={plain(strengths.title)} />
           </div>
         </Shell>
       )}

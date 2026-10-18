@@ -54,7 +54,7 @@ export default async function AboutPage({ params }: Props) {
     getPageByPath(loc, "company/about"),
   ]);
   const [chairman, md] = await Promise.all([getLeaderMessage("chairman", loc), getLeaderMessage("md", loc)]);
-  const contact = { linkedin: t.linkedinProfile, email: t.emailPerson, linkedinSearch: t.linkedinSearch, emailMissing: t.emailMissing };
+  const contact = { linkedin: t.linkedinProfile, email: t.emailPerson, linkedinSearch: t.linkedinSearch, emailMissing: t.emailMissing, website: loc === "bn" ? "ওয়েবসাইট" : "Website" };
   const sections = page ? toSections(page, loc) : [];
   const ctx = sections.length ? await blockContext(loc, mediaIdsOf(sections)) : null;
   const tr = page ? pick(page.translations, loc) : undefined;

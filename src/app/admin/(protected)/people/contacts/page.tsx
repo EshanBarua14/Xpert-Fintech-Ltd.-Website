@@ -27,6 +27,7 @@ export default async function PeopleContactsPage() {
         role: role ? `${role.translations[0]?.title || "(no title)"} · ${PERSON_GROUP_LABELS[role.group]}` : "",
         email: p.email ?? "",
         linkedin: p.linkedinUrl ?? "",
+        website: p.websiteUrl ?? "",
         affiliation: p.translations[0]?.affiliation ?? "",
       };
     });

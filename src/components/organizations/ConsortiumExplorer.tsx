@@ -394,13 +394,13 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                               <ContactIcon kind="email" value={r.email ?? null} name={r.name} labels={labels.contact} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />
                             </>
                           )}
-                          {m.websiteUrl && (
+                          {(r.website || m.websiteUrl) && (
                             <a
-                              href={m.websiteUrl}
+                              href={(r.website || m.websiteUrl)!}
                               target="_blank"
                               rel="noopener noreferrer"
-                              aria-label={`${m.name}: ${m.websiteUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}`}
-                              title={m.websiteUrl.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
+                              aria-label={`${m.name}: ${(r.website || m.websiteUrl)!.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}`}
+                              title={(r.website || m.websiteUrl)!.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
                               className="contact-icon flex size-8 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-300"
                               style={{ "--c": "var(--color-brand-sky)", "--ci": "var(--color-brand-sky)" } as CSSProperties}
                             >

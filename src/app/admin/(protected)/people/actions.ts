@@ -19,6 +19,7 @@ const schema = z.object({
   sortOrder: z.coerce.number().int().min(0).max(9999),
   photoMediaId: optionalId,
   linkedinUrl: optionalHttpsUrl.refine((v) => !v || /^https:\/\/([a-z]{2,3}\.)?(www\.)?linkedin\.com\//i.test(v), "Enter a LinkedIn address, e.g. https://www.linkedin.com/in/name"),
+  websiteUrl: optionalHttpsUrl,
   email: z
     .string()
     .trim()
@@ -60,6 +61,7 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
     sortOrder: get("sortOrder") || 0,
     photoMediaId: get("photoMediaId"),
     linkedinUrl: get("linkedinUrl"),
+    websiteUrl: get("websiteUrl"),
     email: get("email"),
     department: get("department"),
     isPlaceholder: formData.get("isPlaceholder") === "on",
@@ -94,6 +96,7 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
     sortOrder: v.sortOrder,
     photoMediaId: v.photoMediaId,
     linkedinUrl: v.linkedinUrl,
+    websiteUrl: v.websiteUrl,
     email: v.email,
     department: v.department,
     isPlaceholder: v.isPlaceholder,

@@ -16,6 +16,7 @@ export type PersonFormValues = {
   sortOrder: number;
   photoMediaId: string;
   linkedinUrl: string;
+  websiteUrl: string;
   email: string;
   department: string;
   isPlaceholder: boolean;
@@ -71,6 +72,15 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
             hint="Optional. Shown as a LinkedIn icon on the card and in the profile."
             defaultValue={values.linkedinUrl}
             error={e.linkedinUrl}
+          />
+          <TextInput
+            id="websiteUrl"
+            type="url"
+            label="Website"
+            placeholder="https://…"
+            hint="Optional. Their own or their organisation's site, shown as a globe icon. Empty: their organisation's website is used."
+            defaultValue={values.websiteUrl}
+            error={e.websiteUrl}
           />
           <TextInput
             id="department"

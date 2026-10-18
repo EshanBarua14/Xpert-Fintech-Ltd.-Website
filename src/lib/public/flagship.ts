@@ -105,7 +105,7 @@ export const getFlowProducts = cache(async (locale: AppLocale): Promise<Record<s
   return out;
 });
 
-export type OrgLogoEntry = { names: string[]; name: string; logo: MemberLogo };
+export type OrgLogoEntry = { names: string[]; name: string; logo: MemberLogo; /** The organisation's website. */ url?: string | null };
 
 const normOrg = (v: string) =>
   v
@@ -129,7 +129,7 @@ export const getOrgLogos = cache(async (locale: AppLocale): Promise<OrgLogoEntry
     const tr = pick(r.translations, locale);
     if (!m || !tr) return [];
     const names = r.translations.flatMap((t) => [t.name, t.shortName]).filter((n): n is string => Boolean(n && n.trim().length > 3)).map(normOrg);
-    return [{ names, name: tr.name, logo: { url: m.url, width: m.width, height: m.height } }];
+    return [{ names, name: tr.name, url: r.websiteUrl ?? null, logo: { url: m.url, width: m.width, height: m.height } }];
   });
 });
 
@@ -140,7 +140,7 @@ export function orgForText(orgs: OrgLogoEntry[], text: string | null | undefined
   let best: OrgLogoEntry | null = null;
   let len = 0;
   for (const o of orgs) for (const n of o.names) if (n && t.includes(n) && n.length > len) { best = o; len = n.length; }
-  return best ? { name: best.name, logo: best.logo } : null;
+  return best ? { name: best.name, logo: best.logo, url: best.url ?? null } : null;
 }
 
 /**

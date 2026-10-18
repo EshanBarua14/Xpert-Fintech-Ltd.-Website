@@ -105,6 +105,7 @@ export async function PeopleGrid({
       bio: tr?.bio ?? null,
       photo: photo ? { url: photo.url, width: photo.width, height: photo.height, focal: photo.focal ?? null } : null,
       linkedinUrl: p.linkedinUrl,
+      websiteUrl: p.websiteUrl ?? null,
       email: p.email,
       isPlaceholder: p.isPlaceholder,
     };
@@ -127,6 +128,7 @@ export async function PeopleGrid({
         email: t.emailPerson,
         linkedinSearch: t.linkedinSearch,
         emailMissing: t.emailMissing,
+        website: locale === "bn" ? "ওয়েবসাইট" : "Website",
         placeholder: t.placeholderBadge,
         role: t.roleLabel,
         prevPage: t.bioPrev,

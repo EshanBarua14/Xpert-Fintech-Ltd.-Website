@@ -11,6 +11,7 @@ export const emptyPerson: PersonFormValues = {
   sortOrder: 0,
   photoMediaId: "",
   linkedinUrl: "",
+  websiteUrl: "",
   email: "",
   department: "",
   isPlaceholder: false,
@@ -30,6 +31,7 @@ export function toPersonFormValues(p: {
   sortOrder: number;
   photoMediaId: string | null;
   linkedinUrl: string | null;
+  websiteUrl?: string | null;
   email: string | null;
   department: string | null;
   isPlaceholder: boolean;
@@ -53,6 +55,7 @@ export function toPersonFormValues(p: {
     sortOrder: p.sortOrder,
     photoMediaId: p.photoMediaId ?? "",
     linkedinUrl: p.linkedinUrl ?? "",
+    websiteUrl: p.websiteUrl ?? "",
     email: p.email ?? "",
     department: p.department ?? "",
     isPlaceholder: p.isPlaceholder,

@@ -197,6 +197,8 @@ export type TestimonialCard = {
   /** From Admin → People (matched by name): shown as icons on the card. */
   linkedin?: string | null;
   email?: string | null;
+  /** Their own website, else their organisation's. */
+  website?: string | null;
   /** 1–5 stars, when the client gave a rating. */
   rating: number | null;
   /** Not published or no written approval yet: only shown outside production, marked as a draft. */
@@ -228,6 +230,7 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           select: {
             photoMediaId: true,
             linkedinUrl: true,
+            websiteUrl: true,
             email: true,
             translations: { select: { locale: true, name: true, affiliation: true } },
             roles: { orderBy: { sortOrder: "asc" }, select: { group: true, translations: { select: { locale: true, title: true } } } },
@@ -315,6 +318,7 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           logoAlt: org ? (pick(org.translations, locale)?.name ?? null) : named ? (pick(named.translations, locale)?.name ?? null) : null,
           logoUrl: (org ?? named)?.websiteUrl || null,
           linkedin: personOf(r)?.linkedinUrl || null,
+          website: personOf(r)?.websiteUrl || (org ?? named)?.websiteUrl || null,
           email: personOf(r)?.email || null,
           rating: r.rating && r.rating >= 1 && r.rating <= 5 ? r.rating : null,
           draft: preview && editorHints() && !(r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date())),

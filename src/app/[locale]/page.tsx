@@ -265,6 +265,7 @@ export default async function HomePage({ params }: Props) {
                 rating: t.testimonialRating,
                 ratingShort: t.testimonialRatingShort,
                 digits: locale === "bn" ? "০১২৩৪৫৬৭৮৯" : undefined,
+                pending: locale === "bn" ? "মতামত শিগগিরই আসছে।" : "Review coming soon.",
               }}
             />
           </div>

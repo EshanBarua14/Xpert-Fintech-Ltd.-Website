@@ -1,0 +1,238 @@
+import "server-only";
+import { cache } from "react";
+import { db } from "@/lib/db/client";
+import { ICON_NAMES } from "@/components/ui/Icon";
+import type { AppLocale } from "@/lib/i18n/config";
+
+/**
+ * Admin → Home highlights: the "core strengths" cards, the cost-savings graphic
+ * and the WhatsApp button. Each is one setting; Admin → Design → Home page
+ * switches the two home sections on and off.
+ */
+export const STRENGTHS_KEY = "home.strengths";
+export const SAVINGS_KEY = "home.savings";
+export const WHATSAPP_KEY = "site.whatsapp";
+export const MAX_STRENGTHS = 8;
+
+export type Strength = { icon: string; titleEn: string; titleBn: string; bodyEn: string; bodyBn: string };
+export type StrengthsSetting = { titleEn: string; titleBn: string; introEn: string; introBn: string; items: Strength[] };
+
+export type SavingsSetting = {
+  /** Shown on the live site only when published and both figures are entered. */
+  published: boolean;
+  titleEn: string;
+  titleBn: string;
+  bodyEn: string;
+  bodyBn: string;
+  /** What was paid before Xpert, and with Xpert, in the same unit. */
+  before: number | null;
+  after: number | null;
+  /** Written before the number ("৳") and after it ("lakh a month", "% of revenue"). */
+  prefix: string;
+  unitEn: string;
+  unitBn: string;
+  beforeLabelEn: string;
+  beforeLabelBn: string;
+  afterLabelEn: string;
+  afterLabelBn: string;
+  source: string;
+  sourceUrl: string;
+  asOf: string;
+  noteEn: string;
+  noteBn: string;
+};
+
+export type WhatsAppSetting = { number: string; labelEn: string; labelBn: string; messageEn: string; messageBn: string };
+
+export const DEFAULT_STRENGTHS: StrengthsSetting = {
+  titleEn: "Our core strengths",
+  titleBn: "আমাদের মূল শক্তি",
+  introEn: "Why the capital market's leading brokerage houses run their business on Xpert.",
+  introBn: "দেশের শীর্ষস্থানীয় ব্রোকারেজ হাউসগুলো কেন এক্সপার্টে তাদের ব্যবসা চালায়।",
+  items: [
+    {
+      icon: "users",
+      titleEn: "Built by the market's top brokers",
+      titleBn: "বাজারের শীর্ষ ব্রোকারদের হাতে গড়া",
+      bodyEn: "Designed with the brokerage houses that own Xpert and trade on it every day, so every screen follows how a dealing desk really works.",
+      bodyBn: "এক্সপার্টের মালিক ও প্রতিদিন এতে লেনদেনকারী ব্রোকারেজ হাউসগুলোর সঙ্গে মিলে তৈরি, তাই প্রতিটি স্ক্রিন ডিলিং ডেস্কের বাস্তব কাজের ধারা মেনে চলে।",
+    },
+    {
+      icon: "shield",
+      titleEn: "Enterprise-grade security",
+      titleBn: "এন্টারপ্রাইজ-মানের নিরাপত্তা",
+      bodyEn: "Access controls on every desk, encrypted connections and pre-trade risk checks protect each account and every order.",
+      bodyBn: "প্রতিটি ডেস্কে প্রবেশাধিকার নিয়ন্ত্রণ, এনক্রিপ্টেড সংযোগ ও লেনদেনের আগে ঝুঁকি যাচাই প্রতিটি অ্যাকাউন্ট ও অর্ডার সুরক্ষিত রাখে।",
+    },
+    {
+      icon: "network",
+      titleEn: "High-availability network",
+      titleBn: "উচ্চ প্রাপ্যতার নেটওয়ার্ক",
+      bodyEn: "A redundant network built to keep orders flowing to DSE and CSE through the busiest hours of the trading day.",
+      bodyBn: "লেনদেনের সবচেয়ে ব্যস্ত সময়েও ডিএসই ও সিএসইতে অর্ডার পৌঁছে দিতে তৈরি রিডানড্যান্ট নেটওয়ার্ক।",
+    },
+    {
+      icon: "briefcase",
+      titleEn: "Owned by leading institutions",
+      titleBn: "শীর্ষস্থানীয় প্রতিষ্ঠানের মালিকানাধীন",
+      bodyEn: "A capital-market fintech owned by a consortium of the country's leading bank-backed and independent brokerage houses.",
+      bodyBn: "দেশের শীর্ষস্থানীয় ব্যাংক-সমর্থিত ও স্বতন্ত্র ব্রোকারেজ হাউসগুলোর একটি কনসোর্টিয়ামের মালিকানাধীন পুঁজিবাজার ফিনটেক।",
+    },
+    {
+      icon: "cloud",
+      titleEn: "Institutional-grade infrastructure",
+      titleBn: "প্রাতিষ্ঠানিক মানের অবকাঠামো",
+      bodyEn: "Data-centre hosting, monitoring and backups built for regulated institutions, not for a single office.",
+      bodyBn: "একটি অফিসের জন্য নয়, নিয়ন্ত্রিত প্রতিষ্ঠানের জন্য তৈরি ডেটা সেন্টার হোস্টিং, পর্যবেক্ষণ ও ব্যাকআপ।",
+    },
+  ],
+};
+
+export const DEFAULT_SAVINGS: SavingsSetting = {
+  published: false,
+  titleEn: "{pct}% lower technology cost",
+  titleBn: "প্রযুক্তি ব্যয় {pct}% কম",
+  bodyEn: "Brokerage houses on Xpert share one platform instead of each paying for its own systems.",
+  bodyBn: "এক্সপার্টে থাকা ব্রোকারেজ হাউসগুলো প্রত্যেকে আলাদা সিস্টেমের খরচ না দিয়ে একটি প্ল্যাটফর্ম ভাগ করে নেয়।",
+  before: null,
+  after: null,
+  prefix: "",
+  unitEn: "",
+  unitBn: "",
+  beforeLabelEn: "Before Xpert",
+  beforeLabelBn: "এক্সপার্টের আগে",
+  afterLabelEn: "With Xpert",
+  afterLabelBn: "এক্সপার্টের সঙ্গে",
+  source: "",
+  sourceUrl: "",
+  asOf: "",
+  noteEn: "",
+  noteBn: "",
+};
+
+export const DEFAULT_WHATSAPP: WhatsAppSetting = {
+  number: "",
+  labelEn: "Chat on WhatsApp",
+  labelBn: "হোয়াটসঅ্যাপে কথা বলুন",
+  messageEn: "Hello Xpert Fintech, I would like to know more about your products.",
+  messageBn: "হ্যালো এক্সপার্ট ফিনটেক, আপনাদের পণ্য সম্পর্কে আরও জানতে চাই।",
+};
+
+const obj = (v: unknown) => (v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {});
+const str = (v: unknown, fallback = "") => (typeof v === "string" ? v : fallback);
+const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+
+export function readStrengths(value: unknown): StrengthsSetting {
+  if (value === undefined || value === null) return DEFAULT_STRENGTHS;
+  const v = obj(value);
+  const items = (Array.isArray(v.items) ? v.items : [])
+    .map((x) => obj(x))
+    .map((x) => ({
+      icon: ICON_NAMES.includes(str(x.icon)) ? str(x.icon) : "check",
+      titleEn: str(x.titleEn),
+      titleBn: str(x.titleBn),
+      bodyEn: str(x.bodyEn),
+      bodyBn: str(x.bodyBn),
+    }))
+    .filter((x) => x.titleEn);
+  return { titleEn: str(v.titleEn), titleBn: str(v.titleBn), introEn: str(v.introEn), introBn: str(v.introBn), items: items.slice(0, MAX_STRENGTHS) };
+}
+
+export function readSavings(value: unknown): SavingsSetting {
+  if (value === undefined || value === null) return DEFAULT_SAVINGS;
+  const v = obj(value);
+  const d = DEFAULT_SAVINGS;
+  return {
+    published: v.published === true,
+    titleEn: str(v.titleEn, d.titleEn),
+    titleBn: str(v.titleBn, d.titleBn),
+    bodyEn: str(v.bodyEn),
+    bodyBn: str(v.bodyBn),
+    before: num(v.before),
+    after: num(v.after),
+    prefix: str(v.prefix),
+    unitEn: str(v.unitEn),
+    unitBn: str(v.unitBn),
+    beforeLabelEn: str(v.beforeLabelEn, d.beforeLabelEn),
+    beforeLabelBn: str(v.beforeLabelBn, d.beforeLabelBn),
+    afterLabelEn: str(v.afterLabelEn, d.afterLabelEn),
+    afterLabelBn: str(v.afterLabelBn, d.afterLabelBn),
+    source: str(v.source),
+    sourceUrl: str(v.sourceUrl),
+    asOf: str(v.asOf),
+    noteEn: str(v.noteEn),
+    noteBn: str(v.noteBn),
+  };
+}
+
+export function readWhatsApp(value: unknown): WhatsAppSetting {
+  if (value === undefined || value === null) return DEFAULT_WHATSAPP;
+  const v = obj(value);
+  return {
+    number: str(v.number),
+    labelEn: str(v.labelEn, DEFAULT_WHATSAPP.labelEn),
+    labelBn: str(v.labelBn, DEFAULT_WHATSAPP.labelBn),
+    messageEn: str(v.messageEn),
+    messageBn: str(v.messageBn),
+  };
+}
+
+async function setting(key: string) {
+  const row = await db.siteSetting.findUnique({ where: { key } }).catch(() => null);
+  return row?.value ?? null;
+}
+
+export const getStrengthsSetting = cache(async () => readStrengths(await setting(STRENGTHS_KEY)));
+export const getSavingsSetting = cache(async () => readSavings(await setting(SAVINGS_KEY)));
+export const getWhatsAppSetting = cache(async () => readWhatsApp(await setting(WHATSAPP_KEY)));
+
+const pick = (locale: AppLocale, en: string, bn: string) => (locale === "bn" && bn.trim() ? bn : en);
+
+/** The strengths in the visitor's language (Bangla falls back to English field by field). */
+export async function getStrengths(locale: AppLocale) {
+  const s = await getStrengthsSetting();
+  return {
+    title: pick(locale, s.titleEn, s.titleBn),
+    intro: pick(locale, s.introEn, s.introBn),
+    items: s.items.map((i) => ({ icon: i.icon, title: pick(locale, i.titleEn, i.titleBn), body: pick(locale, i.bodyEn, i.bodyBn) })),
+  };
+}
+
+/** Percentage saved, from the two figures; null when they do not describe a saving. */
+export function savingPct(before: number | null, after: number | null): number | null {
+  if (before === null || after === null || before <= 0 || after < 0 || after >= before) return null;
+  return Math.round(((before - after) / before) * 100);
+}
+
+/** The savings graphic in the visitor's language, or null when it is not ready to show. */
+export async function getSavings(locale: AppLocale, { drafts = false } = {}) {
+  const s = await getSavingsSetting();
+  const pct = savingPct(s.before, s.after);
+  if (pct === null || (!s.published && !drafts)) return null;
+  const fill = (v: string) => v.replace(/\{pct\}/g, String(pct));
+  return {
+    draft: !s.published,
+    pct,
+    title: fill(pick(locale, s.titleEn, s.titleBn)),
+    body: fill(pick(locale, s.bodyEn, s.bodyBn)),
+    before: s.before!,
+    after: s.after!,
+    prefix: s.prefix,
+    unit: pick(locale, s.unitEn, s.unitBn),
+    beforeLabel: pick(locale, s.beforeLabelEn, s.beforeLabelBn),
+    afterLabel: pick(locale, s.afterLabelEn, s.afterLabelBn),
+    source: s.source,
+    sourceUrl: s.sourceUrl,
+    asOf: s.asOf,
+    note: pick(locale, s.noteEn, s.noteBn),
+  };
+}
+
+/** The wa.me link and label, or null when no number is set. */
+export async function getWhatsApp(locale: AppLocale) {
+  const w = await getWhatsAppSetting();
+  const digits = w.number.replace(/\D/g, "");
+  if (digits.length < 8) return null;
+  const message = pick(locale, w.messageEn, w.messageBn);
+  return { href: `https://wa.me/${digits}${message ? `?text=${encodeURIComponent(message)}` : ""}`, label: pick(locale, w.labelEn, w.labelBn) };
+}

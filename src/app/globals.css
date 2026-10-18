@@ -735,6 +735,10 @@ html.has-ticker {
   --ticker-h: 2.25rem;
   scroll-padding-top: var(--ticker-h);
 }
+/* A page that hides the ticker (the home page, when Admin → Design says so) gives its space back. */
+html.has-ticker:has([data-no-ticker]) {
+  --ticker-h: 0px;
+}
 .ticker-lane {
   mask-image: linear-gradient(90deg, transparent, #000 4%, #000 94%, transparent);
 }
@@ -1491,4 +1495,42 @@ html {
 @keyframes cx-panel-in { from { opacity: 0; transform: translateY(8px); } }
 @media (prefers-reduced-motion: reduce) {
   .cx-panel { animation: none; }
+}
+
+/* Home → cost savings graphic (SavingsGraphic): the "with Xpert" bar drops from the old cost to the new one. */
+.savings .savings-arc {
+  transition: stroke-dashoffset 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.savings .savings-before {
+  background-image: repeating-linear-gradient(135deg, transparent 0 10px, color-mix(in oklab, var(--color-fg, #fff) 6%, transparent) 10px 20px);
+}
+.savings .savings-after {
+  height: calc(100% - 2.5rem);
+  transition: height 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.35s;
+}
+.savings.is-on .savings-after {
+  height: calc((100% - 2.5rem) * var(--k, 0.2));
+}
+.savings .savings-gap {
+  height: calc((100% - 2.5rem) * (1 - var(--k, 0.2)));
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.6s ease 1.4s, transform 0.6s ease 1.4s;
+}
+.savings.is-on .savings-gap {
+  opacity: 1;
+  transform: none;
+}
+.savings.is-on .savings-arrow {
+  animation: savings-drop 1.8s ease-in-out 2s infinite;
+}
+@keyframes savings-drop {
+  0%, 100% { transform: translateY(-3px); }
+  50% { transform: translateY(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .savings .savings-arc,
+  .savings .savings-after,
+  .savings .savings-gap { transition: none; }
+  .savings.is-on .savings-arrow { animation: none; }
 }

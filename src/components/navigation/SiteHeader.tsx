@@ -51,6 +51,8 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
       labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language, overview: t.overview, toLight: t.themeToLight, toDark: t.themeToDark, search: searchLabels(t) }}
       logo={<BrandLockup text="roomy" priority name={info.companyName} tagline={t.brandTagline} />}
       ticker={ticker}
+      // Admin → Design → Home page: the ticker can be switched off on the home page only.
+      tickerOnHome={!design.hidden.includes("ticker")}
     />
   );
 }

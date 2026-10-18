@@ -24,7 +24,11 @@ export const TONE_FIELDS = [
   { key: "team", label: "Team leadership" },
 ] as const;
 export const HOME_SECTIONS = [
+  { key: "ticker", label: "DSE · CSE price ticker at the top of the home page" },
+  { key: "heroMarket", label: "DSE and CSE indices in the home page hero" },
   { key: "clients", label: "Client logos" },
+  { key: "strengths", label: "Core strengths (Admin → Home highlights)" },
+  { key: "savings", label: "Cost savings graphic (Admin → Home highlights)" },
   { key: "reach", label: "Market share and client base" },
   { key: "figures", label: "Xpert in numbers (Admin → Figures)" },
   { key: "showcase", label: "Product showcase" },

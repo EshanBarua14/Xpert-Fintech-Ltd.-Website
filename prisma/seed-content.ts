@@ -2198,6 +2198,33 @@ async function showForEditing() {
 }
 
 /**
+ * Once (XFL, 19 Oct 2026): the WhatsApp number for demo requests, +880 1684-810100, with a
+ * demo-request message typed in for the visitor. Set only where Admin → Home highlights has
+ * no number yet; change it there at any time.
+ */
+async function seedWhatsAppNumber() {
+  const MARK = "seed.whatsapp-number-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const row = await db.siteSetting.findUnique({ where: { key: "site.whatsapp" } });
+  const v = (row?.value && typeof row.value === "object" && !Array.isArray(row.value) ? row.value : {}) as Record<string, unknown>;
+  let changed = false;
+  if (!String(v.number ?? "").replace(/\D/g, "")) {
+    const value = {
+      ...v,
+      number: "+880 1684-810100",
+      labelEn: v.labelEn || "Chat on WhatsApp",
+      labelBn: v.labelBn || "হোয়াটসঅ্যাপে কথা বলুন",
+      messageEn: "Hello Xpert Fintech, I would like to request a demo of your brokerage platform. Please let me know a convenient time.",
+      messageBn: "হ্যালো এক্সপার্ট ফিনটেক, আমি আপনাদের ব্রোকারেজ প্ল্যাটফর্মের একটি ডেমো দেখতে চাই। অনুগ্রহ করে সুবিধাজনক সময় জানাবেন।",
+    };
+    await db.siteSetting.upsert({ where: { key: "site.whatsapp" }, update: { value }, create: { key: "site.whatsapp", value } });
+    changed = true;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), changed } } });
+  if (changed) console.log("• WhatsApp button: +880 1684-810100 (Admin → Home highlights)");
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2602,6 +2629,7 @@ async function main() {
   await seedIdlcLogo();
   await publishReviewCards();
   await showForEditing();
+  await seedWhatsAppNumber();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

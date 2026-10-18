@@ -44,7 +44,17 @@ export type SavingsSetting = {
   noteBn: string;
 };
 
-export type WhatsAppSetting = { number: string; labelEn: string; labelBn: string; messageEn: string; messageBn: string };
+export type WhatsAppSetting = {
+  number: string;
+  labelEn: string;
+  labelBn: string;
+  /** Typed into WhatsApp for the visitor. */
+  messageEn: string;
+  messageBn: string;
+  /** The welcome line in the little panel the button opens. */
+  greetingEn: string;
+  greetingBn: string;
+};
 
 export const DEFAULT_STRENGTHS: StrengthsSetting = {
   titleEn: "Our core strengths",
@@ -114,11 +124,13 @@ export const DEFAULT_SAVINGS: SavingsSetting = {
 };
 
 export const DEFAULT_WHATSAPP: WhatsAppSetting = {
-  number: "",
+  number: "+880 1684-810100",
   labelEn: "Chat on WhatsApp",
   labelBn: "হোয়াটসঅ্যাপে কথা বলুন",
-  messageEn: "Hello Xpert Fintech, I would like to know more about your products.",
-  messageBn: "হ্যালো এক্সপার্ট ফিনটেক, আপনাদের পণ্য সম্পর্কে আরও জানতে চাই।",
+  messageEn: "Hello Xpert Fintech, I would like to request a demo of your brokerage platform. Please let me know a convenient time.",
+  messageBn: "হ্যালো এক্সপার্ট ফিনটেক, আমি আপনাদের ব্রোকারেজ প্ল্যাটফর্মের একটি ডেমো দেখতে চাই। অনুগ্রহ করে সুবিধাজনক সময় জানাবেন।",
+  greetingEn: "Hi there! Want to see Xpert in action? Chat with our team on WhatsApp or give us a call, and we'll set up your demo.",
+  greetingBn: "স্বাগতম! এক্সপার্ট কীভাবে কাজ করে দেখতে চান? হোয়াটসঅ্যাপে আমাদের টিমের সঙ্গে কথা বলুন বা কল করুন, আমরা আপনার ডেমোর ব্যবস্থা করব।",
 };
 
 const obj = (v: unknown) => (v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {});
@@ -178,6 +190,8 @@ export function readWhatsApp(value: unknown): WhatsAppSetting {
     labelBn: str(v.labelBn, DEFAULT_WHATSAPP.labelBn),
     messageEn: str(v.messageEn),
     messageBn: str(v.messageBn),
+    greetingEn: str(v.greetingEn, DEFAULT_WHATSAPP.greetingEn),
+    greetingBn: str(v.greetingBn, DEFAULT_WHATSAPP.greetingBn),
   };
 }
 
@@ -241,5 +255,12 @@ export async function getWhatsApp(locale: AppLocale) {
   // WhatsApp only: the button appears once a number is saved in Admin → Home highlights.
   if (digits.length < 8) return null;
   const message = pick(locale, w.messageEn, w.messageBn);
-  return { href: `https://wa.me/${digits}${message ? `?text=${encodeURIComponent(message)}` : ""}`, label: pick(locale, w.labelEn, w.labelBn), external: true };
+  return {
+    href: `https://wa.me/${digits}${message ? `?text=${encodeURIComponent(message)}` : ""}`,
+    tel: `tel:+${digits}`,
+    number: w.number,
+    label: pick(locale, w.labelEn, w.labelBn),
+    greeting: pick(locale, w.greetingEn, w.greetingBn),
+    external: true,
+  };
 }

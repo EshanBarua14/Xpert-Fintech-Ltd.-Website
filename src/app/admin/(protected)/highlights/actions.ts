@@ -82,12 +82,20 @@ export async function saveHighlights(_prev: HighlightsState, formData: FormData)
   }
 
   // WhatsApp
-  const whatsapp: WhatsAppSetting = { number: g("waNumber"), labelEn: g("waLabelEn"), labelBn: g("waLabelBn"), messageEn: g("waMessageEn"), messageBn: g("waMessageBn") };
+  const whatsapp: WhatsAppSetting = {
+    number: g("waNumber"),
+    labelEn: g("waLabelEn"),
+    labelBn: g("waLabelBn"),
+    messageEn: g("waMessageEn"),
+    messageBn: g("waMessageBn"),
+    greetingEn: g("waGreetingEn"),
+    greetingBn: g("waGreetingBn"),
+  };
   const waDigits = whatsapp.number.replace(/\D/g, "");
   if (whatsapp.number && (waDigits.length < 8 || waDigits.length > 15 || !/^[+\d\s()-]+$/.test(whatsapp.number)))
     errors.waNumber = "Enter the number with the country code, e.g. +8801XXXXXXXXX.";
   for (const k of ["waLabelEn", "waLabelBn"]) long(k, 40);
-  for (const k of ["waMessageEn", "waMessageBn"]) long(k, 300);
+  for (const k of ["waMessageEn", "waMessageBn", "waGreetingEn", "waGreetingBn"]) long(k, 300);
 
   if (Object.keys(errors).length) return { errors, message: "Please fix the highlighted fields." };
 

@@ -106,14 +106,16 @@ export function HighlightsForm({
         </div>
       </Group>
 
-      <Group title="WhatsApp button" hint="A floating button at the bottom right of every page that opens a WhatsApp chat with this number, the greeting filled in. It appears as soon as a number is saved.">
+      <Group title="WhatsApp button" hint="A floating WhatsApp button at the bottom right of every page. It opens a small panel with your welcome line and two buttons: chat on WhatsApp (the message typed in for the visitor) or call this number. Leave the number empty to hide it.">
         <div className={pair}>
           <TextInput id="waNumber" label="WhatsApp number" placeholder="+8801XXXXXXXXX" defaultValue={whatsapp.number} error={e.waNumber} />
           <span className="hidden md:block" />
           <TextInput id="waLabelEn" label="Button text (English)" defaultValue={whatsapp.labelEn} error={e.waLabelEn} />
           <TextInput id="waLabelBn" label="Button text (বাংলা)" lang="bn" defaultValue={whatsapp.labelBn} error={e.waLabelBn} />
-          <TextArea id="waMessageEn" label="Greeting filled in (English)" rows={2} defaultValue={whatsapp.messageEn} error={e.waMessageEn} />
-          <TextArea id="waMessageBn" label="Greeting filled in (বাংলা)" lang="bn" rows={2} defaultValue={whatsapp.messageBn} error={e.waMessageBn} />
+          <TextArea id="waMessageEn" label="Message typed in WhatsApp (English)" rows={2} defaultValue={whatsapp.messageEn} error={e.waMessageEn} />
+          <TextArea id="waMessageBn" label="Message typed in WhatsApp (বাংলা)" lang="bn" rows={2} defaultValue={whatsapp.messageBn} error={e.waMessageBn} />
+          <TextArea id="waGreetingEn" label="Welcome line in the panel (English)" rows={2} defaultValue={whatsapp.greetingEn} error={e.waGreetingEn} />
+          <TextArea id="waGreetingBn" label="Welcome line in the panel (বাংলা)" lang="bn" rows={2} defaultValue={whatsapp.greetingBn} error={e.waGreetingBn} />
         </div>
       </Group>
 

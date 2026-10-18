@@ -1656,3 +1656,15 @@ html:has(.whatsapp-fab) .back-to-top {
   outline: 2px solid var(--tone);
   outline-offset: 3px;
 }
+
+/* WhatsApp button: a soft ring now and then, and the panel rises in. */
+.wa-ping { animation: wa-ping 3.2s ease-out 2s infinite; }
+@keyframes wa-ping {
+  0% { box-shadow: 0 0 0 0 rgb(37 211 102 / 0.5); }
+  60%, 100% { box-shadow: 0 0 0 16px rgb(37 211 102 / 0); }
+}
+.wa-panel { animation: wa-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; transform-origin: bottom right; }
+@keyframes wa-in { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
+@media (prefers-reduced-motion: reduce) {
+  .wa-ping, .wa-panel { animation: none; }
+}

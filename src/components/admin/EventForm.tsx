@@ -20,6 +20,8 @@ export type EventFormValues = {
   startsAt: string;
   endsAt: string;
   dateIsApprox: boolean;
+  sourceName: string;
+  sourceUrl: string;
   coverMediaId: string;
   videoUrl: string;
   legacyUrl: string | null;
@@ -128,6 +130,11 @@ export function EventForm({
               <span className="block text-xs text-text-secondary">The website shows only the month and year.</span>
             </span>
           </label>
+        </fieldset>
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
+          <legend className="px-2 text-sm font-semibold">Source</legend>
+          <TextInput id="sourceName" label="Reported by" placeholder="e.g. Arthosuchak" defaultValue={values.sourceName} error={e.sourceName} />
+          <TextInput id="sourceUrl" type="url" label="Source link" placeholder="https://" hint="The published report. Shown to visitors as a clickable source." defaultValue={values.sourceUrl} error={e.sourceUrl} />
         </fieldset>
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Media</legend>

@@ -9,7 +9,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { formInput } from "@/lib/admin/forms";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { purgeCaseStudy } from "@/lib/admin/purge";
-import { optionalId, optionalText, parseLocalDateTime, slugField, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
+import { optionalHttpsUrl, optionalId, optionalText, parseLocalDateTime, slugField, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 
 export type CaseStudyState = { errors?: FieldErrors; message?: string };
 
@@ -19,6 +19,8 @@ const schema = z.object({
   publishAt: z.string().optional(),
   sortOrder: z.coerce.number().int().min(0).max(9999),
   coverMediaId: optionalId,
+  sourceName: optionalText(120),
+  sourceUrl: optionalHttpsUrl,
   enTitle: z.string().trim().min(1, "English title is required.").max(200),
   enSlug: slugField,
   enSummary: optionalText(800),
@@ -45,7 +47,7 @@ export async function saveCaseStudy(_prev: CaseStudyState, formData: FormData): 
   const enSlug = v.enSlug || slugify(v.enTitle);
   if (!enSlug) return { errors: { enSlug: "Enter a URL slug using English letters." } };
   const bnSlug = v.bnSlug || enSlug;
-  const data = { status: v.status, publishAt: parseLocalDateTime(v.publishAt), sortOrder: v.sortOrder, coverMediaId: v.coverMediaId, updatedById: admin.id };
+  const data = { status: v.status, publishAt: parseLocalDateTime(v.publishAt), sortOrder: v.sortOrder, coverMediaId: v.coverMediaId, sourceName: v.sourceName ?? null, sourceUrl: v.sourceUrl, updatedById: admin.id };
   const text = (l: "en" | "bn") => ({
     slug: l === "en" ? enSlug : bnSlug,
     title: l === "en" ? v.enTitle : v.bnTitle,

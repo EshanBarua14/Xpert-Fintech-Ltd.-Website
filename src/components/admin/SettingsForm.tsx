@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { saveSettings, type SettingsState } from "@/app/admin/(protected)/settings/actions";
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { TextArea, TextInput } from "@/components/ui/Field";
@@ -96,7 +97,7 @@ export function SettingsForm({ values }: { values: SettingsValues }) {
           error={e.socialLinks}
         />
         <p className="self-end text-sm text-text-secondary">
-          Who is emailed about new leads and job applications, and the mail server: <a href="/admin/notifications" className="text-brand-sky hover:underline">Email &amp; notifications</a>.
+          Who is emailed about new leads and job applications, and the mail server: <Link href="/admin/notifications" className="text-brand-sky hover:underline">Email &amp; notifications</Link>.
         </p>
       </Group>
 

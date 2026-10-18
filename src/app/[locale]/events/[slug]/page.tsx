@@ -1,3 +1,4 @@
+import { SourceLink } from "@/components/insights/SourceLink";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -103,6 +104,7 @@ export default async function EventPage({ params }: Props) {
               {tr.summary}
             </p>
           )}
+          <SourceLink url={event.sourceUrl} name={event.sourceName} label={t.source} />
         </header>
       </section>
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-4 pb-16 md:px-8">

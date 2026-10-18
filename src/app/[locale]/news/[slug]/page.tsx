@@ -1,3 +1,4 @@
+import { SourceLink } from "@/components/insights/SourceLink";
 import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -88,10 +89,16 @@ export default async function ArticlePage({ params }: Props) {
               {tr.subtitle}
             </p>
           )}
-          {card.author && (
-            <p data-reveal style={{ "--d": 3 } as CSSProperties} className="text-sm text-text-secondary">
-              {t.byAuthor.replace("{name}", card.author)}
-            </p>
+          {card.sourceUrl ? (
+            <div data-reveal style={{ "--d": 3 } as CSSProperties}>
+              <SourceLink url={card.sourceUrl} name={card.author} label={t.source} />
+            </div>
+          ) : (
+            card.author && (
+              <p data-reveal style={{ "--d": 3 } as CSSProperties} className="text-sm text-text-secondary">
+                {t.byAuthor.replace("{name}", card.author)}
+              </p>
+            )
           )}
         </div>
       </header>

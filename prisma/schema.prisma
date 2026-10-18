@@ -898,6 +898,9 @@ model DeploymentTranslation {
 model CaseStudy {
   id           String        @id @default(uuid()) @db.Uuid
   coverMediaId String?       @db.Uuid
+  /// Where the facts come from (e.g. the app's store page or a news report).
+  sourceName   String?
+  sourceUrl    String?
   status       ContentStatus @default(DRAFT)
   publishAt    DateTime?
   sortOrder    Int           @default(0)
@@ -1215,6 +1218,8 @@ model Article {
   categoryId   String?          @db.Uuid
   category     ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   authorName   String?
+  /// The original report this story is based on (shown as a clickable source).
+  sourceUrl    String?
   coverMediaId String?          @db.Uuid
   /// A YouTube, Vimeo or Facebook video for the story: played on the story page, its picture on the card when there is no cover.
   videoUrl     String?
@@ -1271,6 +1276,9 @@ model Event {
   endsAt       DateTime?
   /// True when the exact date still needs confirming — shown as month/year only.
   dateIsApprox Boolean       @default(false)
+  /// The published report about this event (shown as a clickable source).
+  sourceName   String?
+  sourceUrl    String?
   coverMediaId String?       @db.Uuid
   videoUrl     String?
   legacyUrl    String?

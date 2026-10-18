@@ -18,6 +18,8 @@ export type ArticleCardData = {
   category: string | null;
   categorySlug: string | null;
   author: string | null;
+  /** The original report (a press story), shown as a clickable source. */
+  sourceUrl: string | null;
   cover: MediaInfo | null;
   /** The story's video (YouTube, Vimeo or Facebook), when it has one. */
   video: { embedUrl: string; thumbnail: string | null } | null;
@@ -60,6 +62,7 @@ function toCard(a: ArticleRow, locale: AppLocale, covers: Map<string, MediaInfo>
     category: cat?.name ?? null,
     categorySlug: cat?.slug ?? null,
     author: a.authorName,
+    sourceUrl: a.sourceUrl ?? null,
     cover: covers.get(a.coverMediaId ?? "") ?? null,
     video: (() => {
       const v = parseVideoUrl(a.videoUrl);

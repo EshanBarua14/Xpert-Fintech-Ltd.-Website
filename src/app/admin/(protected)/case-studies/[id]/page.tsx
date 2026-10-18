@@ -24,7 +24,7 @@ export default async function CaseStudyPage({ params, searchParams }: { params: 
     </Link>
   );
   if (id === "new") {
-    const values: CaseStudyFormValues = { status: "DRAFT", publishAt: "", sortOrder: 0, coverMediaId: "", en: { ...emptyText }, bn: { ...emptyText } };
+    const values: CaseStudyFormValues = { status: "DRAFT", publishAt: "", sortOrder: 0, coverMediaId: "", sourceName: "", sourceUrl: "", en: { ...emptyText }, bn: { ...emptyText } };
     return (
       <div className="flex flex-col gap-6">
         {back}
@@ -57,7 +57,7 @@ export default async function CaseStudyPage({ params, searchParams }: { params: 
       {!c.deletedAt && (
         <CaseStudyForm
           images={images}
-          values={{ id: c.id, status: c.status, publishAt: toLocalInput(c.publishAt), sortOrder: c.sortOrder, coverMediaId: c.coverMediaId ?? "", en: text("en"), bn: text("bn") }}
+          values={{ id: c.id, status: c.status, publishAt: toLocalInput(c.publishAt), sortOrder: c.sortOrder, coverMediaId: c.coverMediaId ?? "", sourceName: c.sourceName ?? "", sourceUrl: c.sourceUrl ?? "", en: text("en"), bn: text("bn") }}
         />
       )}
       <TrashControls id={c.id} inTrash={Boolean(c.deletedAt)} noun="success story" onTrash={trashCaseStudy} onRestore={restoreCaseStudy} onDelete={deleteCaseStudyForever} />

@@ -1788,6 +1788,78 @@ async function publishFactOnlyStories() {
 }
 
 /**
+ * Once (XFL, 18 Oct 2026): every client's app and website, checked on Google Play,
+ * the App Store (Apple's lookup by app ID) and each house's own site that day.
+ *  - Mika Securities' app: Amar Biniyog, on Google Play (net.mikasecurities.oms) and the
+ *    App Store (id6504787994); XFL confirms it runs on Xpert.
+ *  - UCB Stock Brokerage's app is now "UGrow" on Google Play and "UGrow by UCBSTOCK" on the
+ *    App Store (same app, com.xfltrade.ubr).
+ *  - Websites: AB Securities (absecuritiesltd.com), First Capital Securities (fcslbd.com).
+ *  - Names: "Skyline Securities" (its own site), "Remons Investment & Securities Ltd.".
+ * The other ten apps have no App Store listing (Apple's lookup, 18 Oct 2026).
+ */
+async function seedClientApps() {
+  const MARK = "seed.client-apps-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const notes: string[] = [];
+  const checked = new Date("2026-10-18");
+
+  // Names
+  const rename = async (key: string, en: string, bn: string | null) => {
+    const org = await db.organization.findUnique({ where: { key }, include: { translations: true } });
+    if (!org) return;
+    for (const t of org.translations) {
+      const name = t.locale === EN ? en : bn;
+      if (name && t.name !== name) await db.organizationTranslation.update({ where: { id: t.id }, data: { name } });
+    }
+    notes.push(en);
+  };
+  await rename("skyline", "Skyline Securities", "স্কাইলাইন সিকিউরিটিজ");
+  await rename("remons-investment", "Remons Investment & Securities Ltd.", null);
+
+  // Websites (kept when one is already set in the admin)
+  for (const [key, url] of [["ab-securities", "https://absecuritiesltd.com"], ["first-capital-securities", "https://fcslbd.com"]] as const) {
+    const r = await db.organization.updateMany({ where: { key, OR: [{ websiteUrl: null }, { websiteUrl: "" }] }, data: { websiteUrl: url } });
+    if (r.count) notes.push(`${key} website`);
+  }
+
+  // UCB's app, renamed by UCB
+  const ucb = await db.deployment.findUnique({ where: { key: "utrade-ucb-stock" } });
+  if (ucb) {
+    await db.deployment.update({
+      where: { id: ucb.id },
+      data: { appName: "UGrow by UCBSTOCK", appStoreUrl: "https://apps.apple.com/us/app/ugrow-by-ucbstock/id6753627888", linksCheckedAt: checked },
+    });
+    notes.push("UGrow by UCBSTOCK");
+  }
+
+  // Mika Securities' app
+  const mika = await db.organization.findUnique({ where: { key: "mika-securities" }, select: { id: true } });
+  if (mika && !(await db.deployment.findFirst({ where: { OR: [{ key: "amar-biniyog" }, { androidPackage: "net.mikasecurities.oms" }] } }))) {
+    const offering = await db.offering.findUnique({ where: { key: "trading-platform" }, select: { id: true } });
+    const last = await db.deployment.findFirst({ orderBy: { sortOrder: "desc" }, select: { sortOrder: true } });
+    await db.deployment.create({
+      data: {
+        key: "amar-biniyog",
+        appName: "Amar Biniyog",
+        androidPackage: "net.mikasecurities.oms",
+        playStoreUrl: "https://play.google.com/store/apps/details?id=net.mikasecurities.oms",
+        appStoreUrl: "https://apps.apple.com/us/app/amar-biniyog/id6504787994",
+        organizationId: mika.id,
+        offeringId: offering?.id ?? null,
+        linksCheckedAt: checked,
+        status: "PUBLISHED",
+        sortOrder: (last?.sortOrder ?? 0) + 1,
+      },
+    });
+    notes.push("Amar Biniyog (Mika Securities)");
+  }
+
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), notes } } });
+  if (notes.length) console.log(`• Client apps and websites updated: ${notes.join(", ")}`);
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2182,6 +2254,7 @@ async function main() {
   await seedCaseStudyDrafts();
   await seedClientStoryDrafts();
   await publishFactOnlyStories();
+  await seedClientApps();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

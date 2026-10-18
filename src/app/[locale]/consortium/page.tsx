@@ -146,7 +146,7 @@ export default async function ConsortiumPage({ params }: Props) {
         <Shell className="py-12 md:py-16">
           <div className="flex flex-col gap-10">
             <SectionHeader title={t.consAppsTitle} body={t.consAppsBody} />
-            <LiveApps apps={liveApps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp, featured: t.featuredApp, rank: { broker: t.rankBroker, asOf: t.rankAsOf, source: t.rankSourceLabel }, locale }} />
+            <LiveApps apps={liveApps} labels={{ android: t.getAndroidApp, ios: t.getIosApp, web: t.openWebApp, site: t.brokerWebsite, featured: t.featuredApp, rank: { broker: t.rankBroker, asOf: t.rankAsOf, source: t.rankSourceLabel }, locale }} />
           </div>
         </Shell>
       )}

@@ -119,6 +119,8 @@ export const MEMBER_PROFILES: MemberProfile[] = [
   },
   {
     key: "ab-securities",
+    // Its own site; the domain is registered to "68, WW Tower, Level-6, Motijheel", AB Securities' head office on AB Bank's page (checked 18 Oct 2026).
+    website: "https://absecuritiesltd.com",
     dseTrec: "201",
     cseTrec: "101",
     description: {

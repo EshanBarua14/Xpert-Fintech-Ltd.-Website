@@ -1892,6 +1892,104 @@ async function seedFirstCapitalApp() {
 }
 
 /**
+ * Once (XFL, 18 Oct 2026): clickable sources, and success stories told from what is on record.
+ *  - News stories from the press get their report's address (src/content/xfl2/press.ts).
+ *  - Events get the report that describes them.
+ *  - Each client's success story is rewritten from verified facts only: the house's own
+ *    description (member-profiles.ts), its app and the stores it is on (Admin → App
+ *    deployments), the exchanges it trades on; its store page is the source. Stories for
+ *    Mika Securities (Amar Biniyog) and First Capital Securities (Puji) are published too.
+ *    A story already edited in the admin is left alone.
+ */
+async function seedSourcesAndStories() {
+  const MARK = "seed.sources-stories-2026-10-18";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  let articles = 0;
+  let events = 0;
+  let stories = 0;
+  for (const p of PRESS_STORIES) {
+    const tr = await db.articleTranslation.findFirst({ where: { locale: EN, slug: p.slug.en }, select: { articleId: true } });
+    if (!tr) continue;
+    const r = await db.article.updateMany({ where: { id: tr.articleId, sourceUrl: null }, data: { sourceUrl: p.sourceUrl, authorName: p.source } });
+    articles += r.count;
+    // The fuller text, re-read from the report (18 Oct 2026), where no editor has changed the story.
+    const article = await db.article.findUnique({ where: { id: tr.articleId }, include: { translations: true } });
+    if (article && !article.updatedById) {
+      for (const t of article.translations) {
+        const l = t.locale === BN ? "bn" : "en";
+        if (t.body !== p.body[l]) await db.articleTranslation.update({ where: { id: t.id }, data: { body: p.body[l], excerpt: p.excerpt[l] } });
+      }
+    }
+  }
+  const bySlug = (slug: string) => PRESS_STORIES.find((p) => p.slug.en === slug);
+  const EVENT_SOURCES: Record<string, string> = {
+    "seminar-capital-market-digitization-2026": "xpert-fintech-one-stop-service-capital-market",
+    "stakeholders-dayout-2026": "stakeholders-dayout-2026",
+    "ecosoftbd-mou-signing": "xpert-fintech-acquires-ecosoftbd-new-nation",
+  };
+  for (const [key, story] of Object.entries(EVENT_SOURCES)) {
+    const p = bySlug(story);
+    if (!p) continue;
+    const r = await db.event.updateMany({ where: { key, sourceUrl: null }, data: { sourceName: p.source, sourceUrl: p.sourceUrl } });
+    events += r.count;
+  }
+
+  const drafts = [...CASE_STUDY_DRAFTS, ...CLIENT_STORY_DRAFTS];
+  for (const d of drafts) {
+    const tr = await db.caseStudyTranslation.findFirst({ where: { slug: d.slug, locale: EN }, select: { caseStudyId: true } });
+    if (!tr) continue;
+    const story = await db.caseStudy.findUnique({ where: { id: tr.caseStudyId }, include: { translations: true } });
+    if (!story || story.deletedAt || story.updatedById) continue;
+    const org = await db.organization.findUnique({ where: { key: d.key }, include: { translations: true } });
+    const app = org ? await db.deployment.findFirst({ where: { organizationId: org.id, status: "PUBLISHED", deletedAt: null, appName: { not: null } }, orderBy: { sortOrder: "asc" } }) : null;
+    if (!org || !app?.appName) continue; // no app on record: the story stays as it is
+    const profile = MEMBER_PROFILES.find((m) => m.key === d.key);
+    const nameOf = (l: "en" | "bn") => org.translations.find((t) => t.locale === (l === "en" ? EN : BN))?.name ?? org.translations[0]?.name ?? "";
+    const member = org.kind === "CONSORTIUM_MEMBER";
+    const dse = Boolean(org.dseTrec ?? profile?.dseTrec);
+    const cse = Boolean(org.cseTrec ?? profile?.cseTrec);
+    const exch = { en: dse && cse ? "DSE and CSE" : cse ? "CSE" : "DSE", bn: dse && cse ? "ডিএসই ও সিএসই" : cse ? "সিএসই" : "ডিএসই" };
+    const stores = { en: app.appStoreUrl ? "Google Play and the App Store" : "Google Play", bn: app.appStoreUrl ? "গুগল প্লে ও অ্যাপ স্টোর" : "গুগল প্লে" };
+    const trec = [org.dseTrec ?? profile?.dseTrec ? `DSE TREC ${org.dseTrec ?? profile?.dseTrec}` : null, org.cseTrec ?? profile?.cseTrec ? `CSE TREC ${org.cseTrec ?? profile?.cseTrec}` : null].filter(Boolean).join(", ");
+    const ecosoft = app.androidPackage?.startsWith("com.ecosoftbd.");
+    const text = {
+      en: {
+        title: `${nameOf("en")}: ${app.appName} on ${member ? "the shared Xpert platform" : "Xpert's platform"}`,
+        summary: `${nameOf("en")}${member ? ", a member of the consortium that owns Xpert Fintech," : ""} gives its investors ${app.appName}, a trading app on ${stores.en}${ecosoft ? ", developed by EcoSoftBD IT Limited, the order management system company Xpert Fintech acquired" : " built on the Xpert platform"}.`,
+        solution: [
+          profile?.description.en ?? null,
+          `Investors trade from ${app.appName}; every order passes the risk checks built into the Xpert Trading OMS before it reaches ${exch.en}.`,
+          trec ? `${nameOf("en")} holds ${trec}.` : null,
+        ].filter(Boolean).join(" "),
+      },
+      bn: {
+        title: `${nameOf("bn")}: ${member ? "শেয়ার করা এক্সপার্ট প্ল্যাটফর্মে" : "এক্সপার্টের প্ল্যাটফর্মে"} ${app.appName}`,
+        summary: `${nameOf("bn")}${member ? " — এক্সপার্ট ফিনটেকের মালিক কনসোর্টিয়ামের সদস্য —" : ""} তাদের বিনিয়োগকারীদের দেয় ${app.appName}, ${stores.bn}-তে পাওয়া একটি ট্রেডিং অ্যাপ${ecosoft ? ", যা তৈরি করেছে এক্সপার্ট ফিনটেকের অধিগ্রহণ করা অর্ডার ম্যানেজমেন্ট সিস্টেম প্রতিষ্ঠান ইকোসফটবিডি আইটি লিমিটেড" : ", এক্সপার্ট প্ল্যাটফর্মে তৈরি"}।`,
+        solution: [
+          profile?.description.bn ?? null,
+          `বিনিয়োগকারীরা ${app.appName} থেকে লেনদেন করেন; প্রতিটি অর্ডার ${exch.bn}-তে পৌঁছানোর আগে এক্সপার্ট ট্রেডিং ওএমএস-এর ভেতরের ঝুঁকি যাচাই পার হয়।`,
+          trec ? `${trec}।` : null,
+        ].filter(Boolean).join(" "),
+      },
+    };
+    for (const t of story.translations) {
+      const l = t.locale === BN ? "bn" : "en";
+      await db.caseStudyTranslation.update({
+        where: { id: t.id },
+        data: { title: text[l].title, summary: text[l].summary, challenge: null, solution: text[l].solution, outcome: null },
+      });
+    }
+    await db.caseStudy.update({
+      where: { id: story.id },
+      data: { status: "PUBLISHED", publishAt: null, sourceName: "Google Play", sourceUrl: app.playStoreUrl ?? app.appStoreUrl ?? null },
+    });
+    stories++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), articles, events, stories } } });
+  console.log(`• Sources: ${articles} news stor${articles === 1 ? "y" : "ies"} and ${events} event(s) link to their report; ${stories} success stories told from what is on record, each with its store page as source`);
+}
+
+/**
  * Once: a draft success story for every client that has none yet (each with
  * only what is on record; results, figures and the quote in [brackets]).
  * Drafts never show on the live site; fill them in with each client and
@@ -2288,6 +2386,7 @@ async function main() {
   await publishFactOnlyStories();
   await seedClientApps();
   await seedFirstCapitalApp();
+  await seedSourcesAndStories();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

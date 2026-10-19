@@ -172,7 +172,7 @@ export default async function AboutPage({ params }: Props) {
                     size="sm"
                     locale={loc === "bn" ? "bn" : "en"}
                     label={`${digits(share, loc === "bn")}% ${loc === "bn" ? `${shareEx === "DSE" ? "ডিএসইর" : "সিএসইর"} লেনদেন এক্সপার্টের মাধ্যমে` : `of ${shareEx} turnover runs through Xpert`}`}
-                    className="w-[15rem] max-w-full shrink-0"
+                    className="w-36 shrink-0"
                   />
                   <span className="max-w-[15rem] text-sm leading-snug text-balance text-text-secondary">
                     {loc === "bn" ? `${shareEx === "DSE" ? "ডিএসইর" : "সিএসইর"} লেনদেন এক্সপার্টের মাধ্যমে` : `of ${shareEx} turnover runs through Xpert`}

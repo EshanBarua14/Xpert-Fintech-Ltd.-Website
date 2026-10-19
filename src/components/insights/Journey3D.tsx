@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { digits } from "@/lib/i18n/digits";
 import { cn } from "@/lib/utils/cn";
 
@@ -12,11 +12,11 @@ export type JourneyView = {
 };
 
 /**
- * Admin → Success stories → Growth journey, drawn in 3D: the milestones stand
- * on a lit floor in order, those with a number as bars that grow to it (the
- * number and year float above), the others as glowing markers. Under the scene
+ * Admin → Success stories → Growth journey as a column timeline: milestones in
+ * order on one baseline, those with a number as columns that rise to it (the
+ * number above, the year below), the others as small markers. Under the scene
  * each milestone is told (what happened, with its source), numbered to match.
- * The scene sways and leans towards the pointer; reduced motion shows it still.
+ * Calm motion (columns rise once, no bounce); reduced motion shows it still.
  */
 export function Journey3D({ data, locale, sourceLabel }: { data: JourneyView; locale: "en" | "bn"; sourceLabel: string }) {
   const root = useRef<HTMLDivElement>(null);
@@ -39,24 +39,11 @@ export function Journey3D({ data, locale, sourceLabel }: { data: JourneyView; lo
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  const onMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== "mouse") return;
-    const r = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--px", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
-    e.currentTarget.style.setProperty("--py", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
-  };
-  const onLeave = (e: PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.style.setProperty("--px", "0");
-    e.currentTarget.style.setProperty("--py", "0");
-  };
-
   const steps = data.steps;
   const max = Math.max(1, ...steps.map((s) => s.value ?? 0));
   const n = steps.length;
   const now = steps.reduce((last, s, i) => (s.value !== null ? i : last), -1);
   // Along the floor's diagonal, which reads left to right on screen.
-  const span = Math.min(34, 8 * Math.max(1, n - 1));
-  const at = (i: number) => (n === 1 ? 0 : -span / 2 + (span * i) / (n - 1)) / Math.SQRT2;
   const num = (v: number) => digits(new Intl.NumberFormat("en-US").format(v), locale === "bn");
   const idx = (i: number) => digits(String(i + 1).padStart(2, "0"), locale === "bn");
 
@@ -68,50 +55,37 @@ export function Journey3D({ data, locale, sourceLabel }: { data: JourneyView; lo
       </div>
 
       <div className="relative overflow-hidden rounded-[2rem] border border-fg/10 bg-navy-900/70">
+        {/* A column timeline: milestones in order on one baseline; those with a number rise to it. */}
         <div
-          className="x3 jr3"
+          className="jrc grid items-end gap-3 px-5 pt-14 pb-5 md:gap-5 md:px-8"
+          style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
           role="img"
           aria-label={`${data.metric}: ${steps
             .filter((s) => s.value !== null)
             .map((s) => `${s.date} ${num(s.value!)}`)
             .join(", ")}`}
-          onPointerMove={onMove}
-          onPointerLeave={onLeave}
         >
-          <div className="x3-world" aria-hidden="true">
-            <div className="jr3-floor" />
-            <div className="jr3-path" style={{ "--len": `${span + 6}em` } as CSSProperties} />
-            {steps.map((s, i) => {
-              const x = at(i);
-              const y = -at(i);
-              const h = s.value !== null ? 2 + (s.value / max) * 12 : 0;
-              return (
-                <div key={i} style={{ "--i": i } as CSSProperties}>
-                  <div className="jr3-pad" style={{ "--x": `${x}em`, "--y": `${y}em` } as CSSProperties} />
+          {steps.map((s, i) => {
+            const h = s.value !== null ? 18 + (s.value / max) * 82 : 0;
+            return (
+              <div key={i} className="flex flex-col items-center gap-2" aria-hidden="true" style={{ "--i": i } as CSSProperties}>
+                <div className="relative flex h-44 w-full items-end justify-center md:h-56">
                   {s.value !== null ? (
-                    <div className={cn("x3-box jr3-bar", i === now && "is-now")} style={{ "--x": `${x}em`, "--y": `${y}em`, "--w": "3.6em", "--d": "3.6em", "--hmax": `${h}em`, "--i": i } as CSSProperties}>
-                      <i className="t" />
-                      <i className="s" />
-                      <i className="e" />
+                    <div className={cn("jrc-col relative w-full max-w-[4.5rem] rounded-t-md", i === now && "is-now")} style={{ height: `${h}%` }}>
+                      <span className="jrc-num absolute inset-x-0 -top-8 text-center font-display text-2xl leading-none font-semibold text-text-primary tabular-nums md:text-3xl">
+                        {num(s.value)}
+                      </span>
                     </div>
                   ) : (
-                    <div className="x3-box jr3-gem" style={{ "--x": `${x}em`, "--y": `${y}em`, "--w": "2em", "--d": "2em", "--h": "2em", "--i": i } as CSSProperties}>
-                      <i className="t" />
-                      <i className="s" />
-                      <i className="e" />
-                    </div>
+                    <span className="jrc-mark mb-0 block size-3 rotate-45 rounded-[2px]" />
                   )}
-                  <div className="x3-bill jr3-label" style={{ "--x": `${x}em`, "--y": `${y}em`, "--z": `${(s.value !== null ? h : 2) + 1.2}em`, "--i": i } as CSSProperties}>
-                    <span className="flex flex-col items-center leading-none">
-                      {s.value !== null && <b className="jr3-num">{num(s.value)}</b>}
-                      <span className="jr3-year">{digits(s.year, locale === "bn")}</span>
-                      <span className="jr3-idx">{idx(i)}</span>
-                    </span>
-                  </div>
                 </div>
-              );
-            })}
-          </div>
+                <span className="h-px w-full bg-fg/15" />
+                <span className="font-mono text-xs font-semibold text-text-secondary tabular-nums">{digits(s.year, locale === "bn")}</span>
+                <span className="font-mono text-[11px] text-gold tabular-nums">{idx(i)}</span>
+              </div>
+            );
+          })}
         </div>
         {data.metric && (
           <p className="pointer-events-none absolute top-4 left-5 flex items-center gap-2 text-xs font-semibold text-text-secondary">

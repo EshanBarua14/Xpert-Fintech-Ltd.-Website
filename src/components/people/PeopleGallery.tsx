@@ -197,7 +197,7 @@ function PersonCard({
         const name = e.currentTarget.querySelector<HTMLButtonElement>(".person-name");
         if (name) onOpen(name);
       }}
-      className="person-card group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.75rem] border border-fg/[0.08] bg-navy-900 shadow-[0_24px_60px_-40px_rgb(0_0_0/0.6)] transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-1.5 hover:border-[color-mix(in_srgb,var(--tone)_55%,transparent)] hover:shadow-[0_40px_80px_-40px_color-mix(in_srgb,var(--tone)_45%,transparent)]"
+      className="person-card group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.75rem] border border-fg/[0.08] bg-navy-900 transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-1.5 hover:border-[color-mix(in_srgb,var(--tone)_55%,transparent)]"
     >
       {/* Portrait, with the name and title set on a soft shade at its foot */}
       <button type="button" tabIndex={-1} aria-hidden="true" onClick={(e) => onOpen(e.currentTarget)} className="relative block aspect-[4/5] w-full overflow-hidden bg-navy-800">
@@ -212,28 +212,26 @@ function PersonCard({
           style={focusStyle(p.photo, 0.8)}
           unoptimized={!p.photo}
         />
-        <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-[#050d19]/95 via-[#050d19]/55 to-transparent" />
-        <span aria-hidden="true" className="person-sheen pointer-events-none absolute inset-0" />
+        {/* The portrait stays clean: no shade over the face; name and title sit under it. */}
         {showPlaceholderBadge && p.isPlaceholder && (
           <span className="absolute top-4 right-4 rounded-md bg-[#06111f]/85 px-2 py-0.5 text-[max(11px,0.6875rem)] font-semibold text-[#e0b252]">{labels.placeholder}</span>
         )}
         {p.org && <OrgLogo org={p.org} className="absolute top-4 left-4 h-8" />}
-        <span className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-2 p-5 text-left sm:p-6">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-white backdrop-blur-md">
+      </button>
+
+      <div className="flex flex-1 flex-col gap-4 border-t-2 border-[color-mix(in_srgb,var(--tone)_55%,transparent)] p-5 sm:p-6">
+        <div className="flex flex-col items-start gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--tone)_14%,transparent)] px-2.5 py-1 text-[11px] font-semibold tracking-wide text-[var(--tone-ink)] ring-1 ring-[color-mix(in_srgb,var(--tone)_30%,transparent)]">
             <span className="size-1.5 rounded-full bg-[var(--tone)]" />
             {title}
           </span>
-          <span className="font-display text-[1.45rem] leading-tight font-semibold text-balance text-white drop-shadow-[0_2px_8px_rgb(0_0_0/0.45)]">{p.name}</span>
-        </span>
-      </button>
-
-      <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
-        {/* The visible name is on the portrait; this is the keyboard and screen-reader route to the profile. */}
-        <h3 className="sr-only">
-          <button type="button" aria-haspopup="dialog" data-person={p.id} onClick={(e) => onOpen(e.currentTarget)} className="person-name">
-            {p.name}
-          </button>
-        </h3>
+          {/* The name opens the profile (keyboard and screen readers too). */}
+          <h3 className="font-display text-[1.4rem] leading-tight font-semibold text-balance text-text-primary">
+            <button type="button" aria-haspopup="dialog" data-person={p.id} onClick={(e) => onOpen(e.currentTarget)} className="person-name text-left">
+              {p.name}
+            </button>
+          </h3>
+        </div>
         {p.affiliation ? (
           <Affiliation text={p.affiliation} />
         ) : (

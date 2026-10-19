@@ -104,7 +104,7 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
   return (
     <article
       style={{ "--dept": color } as CSSProperties}
-      className="team-card group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-fg/[0.08] bg-navy-900 shadow-[0_20px_50px_-36px_rgb(0_0_0/0.6)] transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--dept)_55%,transparent)] hover:shadow-[0_30px_60px_-34px_color-mix(in_srgb,var(--dept)_50%,transparent)]"
+      className="team-card group relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-fg/[0.08] bg-navy-900 transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--dept)_55%,transparent)]"
     >
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-[color-mix(in_srgb,var(--dept)_22%,var(--color-navy-800))]">
         {p.photo ? (
@@ -122,17 +122,17 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
             <span className="flex size-16 items-center justify-center rounded-full bg-[var(--dept)] font-display text-2xl text-white ring-4 ring-white/10">{initials(p.name)}</span>
           </span>
         )}
-        <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#050d19]/95 via-[#050d19]/50 to-transparent" />
         {p.department && (
           <span className="absolute top-3 left-3 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1.5 rounded-full border border-white/15 bg-[#050d19]/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
             <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-[var(--dept)]" />
             <span className="truncate">{departmentLabel(p.department, locale, labels.departments)}</span>
           </span>
         )}
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-3.5 sm:p-4">
-          <h3 className="font-display text-base leading-tight font-semibold text-balance text-white drop-shadow-[0_2px_8px_rgb(0_0_0/0.45)] sm:text-[1.05rem]">{p.name}</h3>
-          {p.title && <p className="text-xs leading-snug text-white/80">{p.title}</p>}
-        </div>
+      </div>
+      {/* Name and title under the portrait, so no shade falls on the face. */}
+      <div className="flex flex-col gap-1 border-t-2 border-[color-mix(in_srgb,var(--dept)_60%,transparent)] px-3.5 pt-3 sm:px-4">
+        <h3 className="font-display text-base leading-tight font-semibold text-balance text-text-primary sm:text-[1.05rem]">{p.name}</h3>
+        {p.title && <p className="text-xs leading-snug text-text-secondary">{p.title}</p>}
       </div>
       <div className="mt-auto flex items-center gap-1.5 px-3.5 py-3 sm:px-4">
         {/* Email and LinkedIn on every card: a link when it is on file, a muted icon until it is added (Admin → People → Contacts). */}

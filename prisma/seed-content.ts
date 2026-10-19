@@ -2141,6 +2141,99 @@ async function seedTheaClient() {
   console.log("• Thea Securities Ltd. listed as a client (DSE TREC 130)");
 }
 
+/**
+ * XFL, 19 Oct 2026: Bluechip Securities Ltd. and Square Securities Management Ltd.
+ * are clients. Their logos are taken from their own websites the first time the
+ * seed runs on a machine with internet (saved to prisma/seed-media/logos, then
+ * attached like the other client logos); if that fails, the name shows until a
+ * logo is uploaded in Admin → Organizations.
+ */
+const NEW_CLIENT_LOGO_SOURCES: { key: string; site: string; logo?: string }[] = [
+  { key: "bluechip-securities", site: "https://bluechipsecuritiesltd.com/", logo: "https://bluechipsecuritiesltd.com/wp-content/uploads/2020/01/Logo-Bluechip-Final.jpg" },
+  { key: "square-securities", site: "https://www.ssml.com.bd/" },
+];
+async function fetchNewClientLogos() {
+  const dir = path.join(process.cwd(), "prisma", "seed-media", "logos");
+  for (const c of NEW_CLIENT_LOGO_SOURCES) {
+    if (["png", "jpg", "jpeg", "webp"].some((ext) => existsSync(path.join(dir, `${c.key}.${ext}`)))) continue;
+    const org = await db.organization.findUnique({ where: { key: c.key }, select: { logoMediaId: true } });
+    if (org?.logoMediaId) continue;
+    try {
+      let url = c.logo;
+      if (!url) {
+        // The first image on the home page whose address or alt text says "logo".
+        const html = await (await fetch(c.site, { signal: AbortSignal.timeout(15000) })).text();
+        const img = [...html.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]).find((tag) => /logo/i.test(tag));
+        const src = img?.match(/\bsrc=["']([^"']+)["']/i)?.[1];
+        if (src) url = new URL(src, c.site).toString();
+      }
+      if (!url) throw new Error("no logo found on the home page");
+      const data = Buffer.from(await (await fetch(url, { signal: AbortSignal.timeout(15000) })).arrayBuffer());
+      const type = sniff(data);
+      if (!type || type.kind !== "IMAGE" || type.ext === "gif") throw new Error(`not a PNG, JPEG or WebP image: ${url}`);
+      await mkdir(dir, { recursive: true });
+      await writeFile(path.join(dir, `${c.key}.${type.ext}`), data);
+      console.log(`• ${c.key}: logo taken from ${url} — check it in Admin → Organizations`);
+    } catch (e) {
+      console.log(`• ${c.key}: logo could not be fetched (${(e as Error).message}); upload it in Admin → Organizations`);
+    }
+  }
+}
+
+/**
+ * Once (XFL, 19 Oct 2026): details for the two new clients, where the admin has none.
+ *  - Bluechip Securities Ltd.: bluechipsecuritiesltd.com; DSE TREC No. 47 (its corporate profile page).
+ *  - Square Securities Management Ltd.: ssml.com.bd; DSE TREC No. 076 (DSE TREC holder list,
+ *    as republished by NRBC Bank Securities).
+ * Bangla names added; names edited in the admin are kept.
+ */
+async function seedBluechipSquare() {
+  const MARK = "seed.bluechip-square-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const rows = [
+    { key: "bluechip-securities", website: "https://bluechipsecuritiesltd.com/", dseTrec: "47", en: "Bluechip Securities Ltd.", bn: "ব্লুচিপ সিকিউরিটিজ লিমিটেড" },
+    { key: "square-securities", website: "https://www.ssml.com.bd/", dseTrec: "076", en: "Square Securities Management Ltd.", bn: "স্কয়ার সিকিউরিটিজ ম্যানেজমেন্ট লিমিটেড" },
+  ];
+  for (const r of rows) {
+    const org = await db.organization.findUnique({ where: { key: r.key }, include: { translations: true } });
+    if (!org || org.deletedAt) continue;
+    await db.organization.update({
+      where: { id: org.id },
+      data: { status: "PUBLISHED", ...(org.kind !== "CONSORTIUM_MEMBER" && { kind: "CLIENT" }), ...(!org.websiteUrl && { websiteUrl: r.website }), ...(!org.dseTrec && { dseTrec: r.dseTrec }) },
+    });
+    if (!org.translations.some((t) => t.locale === BN)) await db.organizationTranslation.create({ data: { organizationId: org.id, locale: BN, name: r.bn } });
+    if (!org.translations.some((t) => t.locale === EN)) await db.organizationTranslation.create({ data: { organizationId: org.id, locale: EN, name: r.en } });
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log("• Bluechip Securities (DSE TREC 47) and Square Securities Management (DSE TREC 076) listed as clients");
+}
+
+/**
+ * Once (XFL, 19 Oct 2026): Wasif Zaman, Deputy Managing Director, Mika Securities Limited,
+ * as Mika Securities' representative. No seat at Xpert, so no positions: he shows only on
+ * the consortium map (Admin → People, contact details and photo can be added there).
+ */
+async function seedMikaRepresentative() {
+  const MARK = "seed.mika-rep-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  if (!(await db.person.findUnique({ where: { key: "wasif-zaman" } }))) {
+    await db.person.create({
+      data: {
+        key: "wasif-zaman",
+        status: "PUBLISHED",
+        translations: {
+          create: [
+            { locale: EN, name: "Wasif Zaman", affiliation: "Deputy Managing Director, Mika Securities Limited" },
+            { locale: BN, name: "ওয়াসিফ জামান", affiliation: "উপ-ব্যবস্থাপনা পরিচালক, মিকা সিকিউরিটিজ লিমিটেড" },
+          ],
+        },
+      },
+    });
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log("• Wasif Zaman added as Mika Securities' representative (consortium map)");
+}
+
 /** Once (XFL, 18 Oct 2026): Wifang Securities Ltd.'s website (wifangbd.com, titled "Wifang Securities Ltd."), where the admin has none. */
 async function seedWifangWebsite() {
   const MARK = "seed.wifang-website-2026-10-18";
@@ -2660,6 +2753,7 @@ async function main() {
   await seedMessagesAndGoal();
   await seedLegalDrafts();
   await mergePlatformIntoProducts();
+  await fetchNewClientLogos();
   await seedClientLogos();
   await seedInstitutions();
   await seedCredentials();
@@ -2699,6 +2793,8 @@ async function main() {
   await seedShareAndClients();
   await seedInnovaApp();
   await seedTheaClient();
+  await seedBluechipSquare();
+  await seedMikaRepresentative();
   await seedWifangWebsite();
   await seedIdlcLogo();
   await publishReviewCards();

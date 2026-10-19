@@ -12,7 +12,10 @@ import { getOrganizations, mediaMap } from "@/lib/public/content";
  * The consortium as relations, all from the database (nothing assumed):
  *  - each member brokerage house (Admin → Organizations, kind Consortium member)
  *  - who represents it on Xpert's Board or as a consultant (People whose
- *    position names the house, e.g. "CEO & Director, Apex Investments Ltd.")
+ *    position names the house, e.g. "CEO & Director, Apex Investments Ltd."),
+ *    or as its representative only: a person with no role at Xpert (Admin →
+ *    People, no positions) whose position names the house
+ *    (e.g. "Deputy Managing Director, Mika Securities Limited")
  *  - the branded trading app(s) it runs on Xpert's platform (Admin → Deployments)
  */
 export type ConsortiumApp = { name: string; playStoreUrl: string | null; appStoreUrl: string | null; webUrl: string | null };
@@ -20,7 +23,8 @@ export type ConsortiumRep = {
   name: string;
   title: string | null;
   position: string | null;
-  group: "BOARD" | "CONSULTANT";
+  /** REPRESENTATIVE: the house's representative, with no seat at Xpert. */
+  group: "BOARD" | "CONSULTANT" | "REPRESENTATIVE";
   photo: string | null;
   photoStyle?: import("react").CSSProperties;
   /** From Admin → People: icons beside the representative. */
@@ -63,7 +67,7 @@ export const getConsortium = cache(async (locale: AppLocale): Promise<Consortium
       .catch(() => []),
     db.person
       .findMany({
-        where: { ...publishedWhere(), isPlaceholder: false, roles: { some: { group: { in: ["BOARD", "CONSULTANT"] } } } },
+        where: { ...publishedWhere(), isPlaceholder: false, AND: [{ OR: [{ roles: { some: { group: { in: ["BOARD", "CONSULTANT"] } } } }, { roles: { none: {} } }] }] },
         include: { translations: true, roles: { include: { translations: true } } },
         orderBy: { sortOrder: "asc" },
       })
@@ -91,14 +95,15 @@ export const getConsortium = cache(async (locale: AppLocale): Promise<Consortium
         .flatMap((p) => {
           const ptr = pick(p.translations, locale);
           const role = p.roles.find((r) => r.group === "BOARD") ?? p.roles.find((r) => r.group === "CONSULTANT");
-          if (!ptr?.name || !role) return [];
+          // No role at all: the house's representative only. Any other roles (team, management) are not a seat here.
+          if (!ptr?.name || (!role && p.roles.length)) return [];
           const photo = p.photoMediaId ? media.get(p.photoMediaId) : undefined;
           return [
             {
               name: ptr.name,
-              title: pick(role.translations, locale)?.title ?? null,
+              title: role ? (pick(role.translations, locale)?.title ?? null) : null,
               position: ptr.affiliation ?? null,
-              group: role.group as "BOARD" | "CONSULTANT",
+              group: role ? (role.group as "BOARD" | "CONSULTANT") : ("REPRESENTATIVE" as const),
               photo: photo?.url ?? null,
               photoStyle: photo ? focusStyle(photo, 1) : undefined,
               linkedin: p.linkedinUrl || null,

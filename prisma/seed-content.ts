@@ -2148,9 +2148,10 @@ async function seedTheaClient() {
  * attached like the other client logos); if that fails, the name shows until a
  * logo is uploaded in Admin → Organizations.
  */
-const NEW_CLIENT_LOGO_SOURCES: { key: string; site: string; logo?: string }[] = [
+const NEW_CLIENT_LOGO_SOURCES: { key: string; site: string; logo?: string; alts?: string[] }[] = [
   { key: "bluechip-securities", site: "https://bluechipsecuritiesltd.com/", logo: "https://bluechipsecuritiesltd.com/wp-content/uploads/2020/01/Logo-Bluechip-Final.jpg" },
-  { key: "square-securities", site: "https://www.ssml.com.bd/" },
+  // Its site redirects HTTPS to HTTP, so the plain-HTTP addresses are tried too.
+  { key: "square-securities", site: "https://www.ssml.com.bd/", alts: ["https://ssml.com.bd/", "http://www.ssml.com.bd/", "http://ssml.com.bd/"] },
 ];
 async function fetchNewClientLogos() {
   const dir = path.join(process.cwd(), "prisma", "seed-media", "logos");
@@ -2161,11 +2162,20 @@ async function fetchNewClientLogos() {
     try {
       let url = c.logo;
       if (!url) {
-        // The first image on the home page whose address or alt text says "logo".
-        const html = await (await fetch(c.site, { signal: AbortSignal.timeout(15000) })).text();
-        const img = [...html.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]).find((tag) => /logo/i.test(tag));
-        const src = img?.match(/\bsrc=["']([^"']+)["']/i)?.[1];
-        if (src) url = new URL(src, c.site).toString();
+        // The first image on the home page whose address or alt text says "logo" (each address tried in turn).
+        for (const site of [c.site, ...(c.alts ?? [])]) {
+          try {
+            const html = await (await fetch(site, { signal: AbortSignal.timeout(15000), redirect: "follow" })).text();
+            const img = [...html.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]).find((tag) => /logo/i.test(tag));
+            const src = img?.match(/\bsrc=["']([^"']+)["']/i)?.[1];
+            if (src) {
+              url = new URL(src, site).toString();
+              break;
+            }
+          } catch {
+            // try the next address
+          }
+        }
       }
       if (!url) throw new Error("no logo found on the home page");
       const data = Buffer.from(await (await fetch(url, { signal: AbortSignal.timeout(15000) })).arrayBuffer());

@@ -81,10 +81,10 @@ export function CoreStrengths({ items, locale, label }: { items: StrengthCard[];
         </svg>
 
         {/* The core */}
-        <div className="absolute top-1/2 left-1/2 flex size-[min(34%,22rem)] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+        <div className="absolute top-1/2 left-1/2 flex size-[min(38%,24rem)] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
           <span aria-hidden="true" className="cn-halo absolute inset-[-14%] rounded-full" />
           <span aria-hidden="true" className="cn-orbit absolute inset-[-6%] rounded-full border border-dashed border-brand-sky/30" />
-          <div className="cn-core relative flex size-full flex-col items-center justify-center gap-2 rounded-full border border-fg/10 bg-navy-900/85 p-8 text-center shadow-[0_30px_80px_-30px] shadow-brand-sky/40 backdrop-blur">
+          <div className="cn-core relative flex size-full flex-col items-center justify-center gap-2 rounded-full border border-fg/10 bg-navy-900/85 px-10 py-8 text-center shadow-[0_30px_80px_-30px] shadow-brand-sky/40 backdrop-blur">
             <span key={`i-${active}`} className="cn-swap flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-royal to-brand-sky text-white shadow-lg shadow-brand-sky/30">
               <Icon name={current.icon} className="size-6" />
             </span>
@@ -97,7 +97,7 @@ export function CoreStrengths({ items, locale, label }: { items: StrengthCard[];
               {current.title}
             </p>
             {current.body && (
-              <p key={`b-${active}`} className={cn("cn-swap text-[0.8125rem] leading-relaxed text-text-secondary xl:text-sm", current.stat ? "line-clamp-3" : "line-clamp-5")}>
+              <p key={`b-${active}`} className="cn-swap text-[0.78rem] leading-snug text-text-secondary xl:text-[0.8125rem]">
                 {current.body}
               </p>
             )}

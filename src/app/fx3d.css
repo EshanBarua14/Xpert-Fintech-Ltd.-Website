@@ -65,14 +65,14 @@
   transform-origin: left center;
   transition: transform 0.9s var(--ease-pro);
 }
-.svb-before { background: color-mix(in oklab, var(--color-fg) 26%, transparent); }
-.svb-after { background: linear-gradient(90deg, var(--color-brand-royal), var(--color-brand-sky)); transition-delay: 0.15s; }
+.svb-before { background: linear-gradient(90deg, #f0857d, #d9473f); box-shadow: 0 0 18px -6px rgb(217 71 63 / 0.6); }
+.svb-after { background: linear-gradient(90deg, #1e64c8, #22bceb); box-shadow: 0 0 18px -4px rgb(34 188 235 / 0.7); transition-delay: 0.15s; }
 .js .svb:not(.is-on) .svb-bar { transform: scaleX(0); }
 .svb-saved {
   position: absolute;
   top: 0;
   bottom: 0;
-  border: 1.5px dashed var(--color-gold);
+  border: 1.5px dashed #d9a640;
   border-left: 0;
   border-radius: 0 0.6rem 0.6rem 0;
   background: color-mix(in oklab, var(--color-gold) 7%, transparent);
@@ -81,7 +81,8 @@
   justify-content: center;
   transition: opacity 0.6s var(--ease-pro);
 }
-.svb-saved-label { font-family: var(--font-mono, ui-monospace); font-size: 0.75rem; font-weight: 600; color: var(--color-gold); white-space: nowrap; }
+.svb-saved-label { font-family: var(--font-mono, ui-monospace); font-size: 0.75rem; font-weight: 700; color: #b07a17; white-space: nowrap; padding: 0.15rem 0.5rem; border-radius: 999px; background: color-mix(in oklab, var(--color-navy-900) 80%, transparent); }
+[data-theme="dark"] .svb-saved-label { color: #f0c66e; }
 .js .svb:not(.is-split) .svb-saved { opacity: 0; }
 .sv-figure > span {
   background: linear-gradient(120deg, var(--color-brand-sky), var(--color-gold));
@@ -206,7 +207,8 @@
 .ow.is-on .cap-mark { filter: drop-shadow(0 0 3px color-mix(in oklab, var(--color-gold) 70%, transparent)); }
 
 /* Light passing across lit tiles and filled bars. */
-.pro-shimmer { position: relative; overflow: hidden; }
+.pro-shimmer { overflow: hidden; }
+.pro-shimmer:not(.svb-bar) { position: relative; }
 .pro-shimmer::after {
   content: "";
   position: absolute;
@@ -231,7 +233,8 @@
   box-shadow: 0 0 10px var(--color-brand-sky), 0 0 22px var(--color-brand-sky);
 }
 .svb-saved {
-  background-image: repeating-linear-gradient(135deg, color-mix(in oklab, var(--color-gold) 9%, transparent) 0 6px, transparent 6px 12px);
+  background-color: rgb(224 178 82 / 0.12);
+  background-image: repeating-linear-gradient(135deg, rgb(224 178 82 / 0.22) 0 6px, transparent 6px 12px);
 }
 
 /* Growth journey: glass columns with a lit top edge, and a trend line drawn through them. */

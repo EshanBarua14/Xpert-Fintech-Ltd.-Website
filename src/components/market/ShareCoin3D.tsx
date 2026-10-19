@@ -126,7 +126,7 @@ export function ShareCoin3D({ pct, caption, goal, label, locale, size = "md", cl
           {caption && size !== "sm" && <span className="mt-2 text-xs font-medium text-text-secondary">{caption}</span>}
         </div>
       </div>
-      {goal && size !== "sm" && (
+      {goal && goal.label && size !== "sm" && (
         <span className="inline-flex items-center gap-2 text-xs font-semibold text-gold">
           <span aria-hidden="true" className="h-3 w-0.5 rounded-full bg-gold" />
           {goal.label}

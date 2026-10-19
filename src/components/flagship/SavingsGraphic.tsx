@@ -142,7 +142,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
             <div className="flex flex-col gap-2.5" aria-hidden="true">
               <div className="flex items-baseline justify-between gap-4 text-sm">
                 <span className="font-semibold text-text-secondary">{data.beforeLabel}</span>
-                <span className="font-mono font-semibold text-text-primary tabular-nums">{amount(data.before, 100)}</span>
+                <span className="font-mono font-semibold text-[#d9473f] tabular-nums">{amount(data.before, 100)}</span>
               </div>
               <div className="svb-track">
                 <span className="svb-bar svb-before" style={{ "--w": "100%" } as CSSProperties} />
@@ -171,15 +171,15 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
 
           <figcaption className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-fg/[0.08] pt-4 text-xs text-text-secondary">
             <span className="inline-flex items-center gap-2">
-              <span aria-hidden="true" className="size-3 rounded-[3px] bg-gradient-to-br from-brand-royal to-brand-sky" />
+              <span aria-hidden="true" className="size-3 rounded-[3px] bg-gradient-to-br from-[#1e64c8] to-[#22bceb]" />
               {t.pay}
             </span>
             <span className="inline-flex items-center gap-2">
-              <span aria-hidden="true" className="size-3 rounded-[3px] bg-[color-mix(in_srgb,var(--color-fg)_28%,transparent)]" />
+              <span aria-hidden="true" className="size-3 rounded-[3px] bg-gradient-to-br from-[#f0857d] to-[#d9473f]" />
               {data.beforeLabel}
             </span>
             <span className="inline-flex items-center gap-2">
-              <span aria-hidden="true" className="size-3 rounded-[3px] border border-dashed border-gold" />
+              <span aria-hidden="true" className="size-3 rounded-[3px] border border-dashed border-[#d9a640] bg-[#e0b252]/20" />
               {t.save}
             </span>
             <span className="ml-auto">{t.each}</span>

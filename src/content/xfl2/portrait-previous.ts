@@ -17,7 +17,7 @@ export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "md-hasan-uddin": "213d2b8fe237f222274e92a300db69df4aeb62735ec633f1f20f2fa3d0e4adb7",
   "md-hefaj-uddin": "bf5de074508615a0b00a38173e69c5f94998c53189a714c76ee78b557dba12b1",
   "md-refat-hossen": "9930199f57a309d6263cc50d5519e114045b06fa66777733b4d16456c24b5b18",
-  "md-shahinur-rahman": "ce8165221bbef631a90533e2ce21d9c339f6ecf2861a51c70b1fa1f14d194c88",
+  "md-shahinur-rahman": ["ce8165221bbef631a90533e2ce21d9c339f6ecf2861a51c70b1fa1f14d194c88", "71fe61342016209a69afd06593fb3515b8ab087437764fc66b30d85559307676"], // new photo supplied 19 Oct 2026
   "md-sirajul-islam": "900db2e75d64718c2fa72c0521e7c9065a58fa663aa47758e0ea57acf3415a87",
   "md-yeasin-hossain": "b27e9a55acb7f1d2ab71aabb76be1428c3605124f88ac154f01147523c6d58e9",
   "mohammad-ali": "5ee3b4bc18c7dd32adf3f0ecbc6d1126b2949376841112660125a1cd807b6ed4",

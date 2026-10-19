@@ -12,11 +12,11 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "wasif-zaman": { x: 0.43, y: 0.52, zoom: 1.35 },
   "md-mofizuddin": { x: 0.5, y: 0.46 },
   "asaduzzaman": { x: 0.495, y: 0.44 },
-  "bishnu-pada-kunda": { x: 0.537, y: 0.35 },
+  "bishnu-pada-kunda": { x: 0.5, y: 0.35 }, // new photo 19 Oct 2026
   "dilip-kajuri": { x: 0.484, y: 0.352, zoom: 1.08 },
-  "eshan-barua": { x: 0.49, y: 0.47 },
+  "eshan-barua": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
   "fakruddin-ali-ahmed-rajib": { x: 0.53, y: 0.45 }, // re-framed 15 Oct to head and shoulders like the others (plain background extended above)
-  "m-shahryar-faiz": { x: 0.524, y: 0.486 },
+  "m-shahryar-faiz": { x: 0.5, y: 0.33 }, // new photo 19 Oct 2026
   "mahmuda-yasmin-farah": { x: 0.496, y: 0.424, zoom: 1.1 },
   "md-abdur-rahman-rony": { x: 0.49, y: 0.42 }, // new photo 19 Oct 2026
   "md-abul-moshad-chowdhury": { x: 0.5, y: 0.34 }, // new photo 19 Oct 2026
@@ -27,7 +27,7 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "md-sirajul-islam": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
   "md-yeasin-hossain": { x: 0.49, y: 0.38 }, // new photo 19 Oct 2026
   "mohammad-ali": { x: 0.5, y: 0.5 },
-  "mohammad-ashiqur-rahman-bhuiyan": { x: 0.52, y: 0.43 },
+  "mohammad-ashiqur-rahman-bhuiyan": { x: 0.5, y: 0.36 }, // new photo 19 Oct 2026
   "mohammad-erfanul-islam": { x: 0.51, y: 0.36 }, // new photo 19 Oct 2026
   "mohammad-mehrabul-ferdous": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
   "mohammed-rahmat-pasha": { x: 0.52, y: 0.46 },
@@ -37,7 +37,7 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "najmul-hasan-rifat": { x: 0.53, y: 0.43 }, // new photo 19 Oct 2026
   "saikat-biswas": { x: 0.5, y: 0.37 }, // new photo 19 Oct 2026
   "shaleh-akram": { x: 0.5, y: 0.45 }, // photo of 19 Oct 2026 (evening)
-  "shamsher-morshed": { x: 0.49, y: 0.43 },
+  "shamsher-morshed": { x: 0.5, y: 0.36 }, // new photo 19 Oct 2026
   "sumon-das": { x: 0.501, y: 0.409 },
   "talukder-juhaer-hakim": { x: 0.5, y: 0.38 }, // new photo 19 Oct 2026
   "toha-hossain": { x: 0.49, y: 0.51 },

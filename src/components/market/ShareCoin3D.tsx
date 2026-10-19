@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties, type PointerEvent } from "react";
+import { useEffect, useId, useRef } from "react";
 import { cn } from "@/lib/utils/cn";
-
-const BASE_LAYERS = 12;
-const WEDGE_LAYERS = 28;
 
 const fmt = (locale: string, v: number, digits: number) =>
   new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(v);
@@ -12,9 +9,9 @@ const fmt = (locale: string, v: number, digits: number) =>
 type Props = {
   /** The share, 0–100 (Admin → Market data). */
   pct: number;
-  /** Under the figure, e.g. "of DSE turnover · 12 Oct". */
+  /** Under the figure, e.g. "DSE · 21 Sep". */
   caption?: string;
-  /** Gold pin on the rim at the goal, with its label (e.g. "Goal 60% · 2028"). */
+  /** A gold tick on the ring at the goal, with its label (e.g. "Goal 70% by 2028"). */
   goal?: { pct: number; label: string } | null;
   /** Screen-reader text for the whole figure. */
   label: string;
@@ -23,110 +20,111 @@ type Props = {
   className?: string;
 };
 
+const R = 84;
+const C = 2 * Math.PI * R;
+
 /**
- * A share of the market drawn as a 3D pie: a glass disc for the whole turnover
- * and, pulled out of it, a raised wedge for Xpert's share. When it scrolls into
- * view the wedge opens to the figure and rises while the figure counts up; the
- * scene sways gently and leans towards the pointer. CSS 3D only (fx3d.css).
- * The real figure is in the server HTML; reduced-motion visitors see it still.
+ * A share of the market as a precise donut: a thin track for the whole
+ * turnover and Xpert's share drawn along it when it comes into view, the figure
+ * counting up in the centre, and a gold tick at the goal. Calm, exact motion
+ * (one ease-out, no bounce); reduced-motion visitors see it drawn.
+ * (Kept under its earlier name so callers stay the same.)
  */
 export function ShareCoin3D({ pct, caption, goal, label, locale, size = "md", className }: Props) {
+  const gid = `donut-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const root = useRef<HTMLDivElement>(null);
+  const arc = useRef<SVGCircleElement>(null);
   const num = useRef<HTMLSpanElement>(null);
   const p = Math.max(0, Math.min(100, pct));
   const digits = Number.isInteger(p) ? 0 : 2;
 
   useEffect(() => {
     const el = root.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
     const set = (k: number) => {
-      el.style.setProperty("--p", String(p * k));
-      el.style.setProperty("--rise", String(k));
+      arc.current?.setAttribute("stroke-dasharray", `${(C * p * k) / 100} ${C}`);
       if (num.current) num.current.textContent = fmt(locale, p * k, digits);
     };
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      set(1);
+      return;
+    }
     set(0);
     let raf = 0;
     const io = new IntersectionObserver(
       ([e]) => {
         if (!e?.isIntersecting) return;
         io.disconnect();
-        const start = performance.now() + 250;
+        const start = performance.now() + 150;
         const tick = (now: number) => {
-          const k = Math.max(0, Math.min(1, (now - start) / 1900));
-          set(1 - Math.pow(1 - k, 4));
+          const k = Math.max(0, Math.min(1, (now - start) / 1600));
+          set(1 - Math.pow(1 - k, 3));
           if (k < 1) raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
       },
-      { threshold: 0.35 },
+      { threshold: 0.4 },
     );
     io.observe(el);
     return () => {
       io.disconnect();
       cancelAnimationFrame(raf);
-      set(1);
     };
   }, [p, digits, locale]);
 
-  const onMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== "mouse") return;
-    const r = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--px", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
-    e.currentTarget.style.setProperty("--py", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+  const g = goal ? Math.max(0, Math.min(100, goal.pct)) : null;
+  // Angles start at 12 o'clock, clockwise.
+  const at = (v: number, r: number) => {
+    const a = ((v / 100) * 360 - 90) * (Math.PI / 180);
+    return { x: 100 + Math.cos(a) * r, y: 100 + Math.sin(a) * r };
   };
-  const onLeave = (e: PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.style.setProperty("--px", "0");
-    e.currentTarget.style.setProperty("--py", "0");
-  };
-
-  // The wedge is centred on the front of the disc; the goal sits at its own angle from the wedge's start.
-  const r = size === "sm" ? 6.4 : 9.5;
-  const start = 180 - p * 1.8;
-  const goalAngle = goal ? start + Math.max(0, Math.min(100, goal.pct)) * 3.6 : 0;
-  const gx = Math.sin((goalAngle * Math.PI) / 180) * r * 0.93;
-  const gy = -Math.cos((goalAngle * Math.PI) / 180) * r * 0.93;
 
   return (
-    <div
-      ref={root}
-      role="img"
-      aria-label={label}
-      onPointerMove={onMove}
-      onPointerLeave={onLeave}
-      className={cn("x3 sh3", size === "sm" && "is-sm", className)}
-      style={{ "--p": p, "--rise": 1 } as CSSProperties}
-    >
-      <div className="x3-world" aria-hidden="true">
-        <div className="sh3-floor" />
-        <div className="sh3-shadow" />
-        {Array.from({ length: BASE_LAYERS }, (_, i) => (
-          <div key={`b${i}`} className={cn("sh3-l sh3-base", i === BASE_LAYERS - 1 && "is-top")} style={{ "--i": i } as CSSProperties} />
-        ))}
-        {Array.from({ length: WEDGE_LAYERS }, (_, i) => (
-          <div key={`w${i}`} className={cn("sh3-l sh3-wedge", i === WEDGE_LAYERS - 1 && "is-top")} style={{ "--i": i } as CSSProperties} />
-        ))}
-        {goal && (
-          <>
-            <div className="sh3-pin" style={{ "--a": `${goalAngle}deg` } as CSSProperties}>
-              <b />
-            </div>
-            <div className="x3-bill" style={{ "--x": `${gx}em`, "--y": `${gy}em`, "--z": "1.5em" } as CSSProperties}>
-              <div className="sh3-goalwrap">
-                <span className="sh3-goal">{goal.label}</span>
-              </div>
-            </div>
-          </>
-        )}
-        <div className="x3-bill" style={{ "--x": "0em", "--y": `${r * 0.5 + 1.5}em`, "--z": size === "sm" ? "7em" : "9.5em" } as CSSProperties}>
-          <div className="sh3-tag">
-            <span className="sh3-num">
-              <span ref={num}>{fmt(locale, p, digits)}</span>
-              <small>%</small>
-            </span>
-            {caption && <span className="sh3-cap">{caption}</span>}
-          </div>
+    <div ref={root} role="img" aria-label={label} className={cn("donut relative mx-auto flex flex-col items-center gap-3", size === "sm" ? "w-40" : "w-full max-w-[17rem]", className)}>
+      <div className="relative w-full">
+        <svg viewBox="0 0 200 200" className="block w-full" aria-hidden="true">
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="var(--color-brand-sky)" />
+              <stop offset="1" stopColor="var(--color-brand-royal)" />
+            </linearGradient>
+          </defs>
+          {/* Fine ticks every 10%. */}
+          {Array.from({ length: 10 }, (_, i) => {
+            const a = at(i * 10, 99);
+            const b = at(i * 10, 95);
+            return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} className="donut-tick" />;
+          })}
+          <circle cx="100" cy="100" r={R} className="donut-track" />
+          <circle
+            ref={arc}
+            cx="100"
+            cy="100"
+            r={R}
+            className="donut-arc"
+            stroke={`url(#${gid})`}
+            strokeDasharray={`${(C * p) / 100} ${C}`}
+            transform="rotate(-90 100 100)"
+          />
+          {g !== null && (
+            <g className="donut-goal">
+              <line x1={at(g, R - 11).x} y1={at(g, R - 11).y} x2={at(g, R + 11).x} y2={at(g, R + 11).y} />
+            </g>
+          )}
+        </svg>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+          <span className={cn("font-display leading-none font-semibold tracking-[-0.03em] text-text-primary tabular-nums", size === "sm" ? "text-3xl" : "text-5xl")}>
+            <span ref={num}>{fmt(locale, p, digits)}</span>
+            <span className="ml-0.5 text-[0.5em] text-text-secondary">%</span>
+          </span>
+          {caption && size !== "sm" && <span className="mt-2 text-xs font-medium text-text-secondary">{caption}</span>}
         </div>
       </div>
+      {goal && size !== "sm" && (
+        <span className="inline-flex items-center gap-2 text-xs font-semibold text-gold">
+          <span aria-hidden="true" className="h-3 w-0.5 rounded-full bg-gold" />
+          {goal.label}
+        </span>
+      )}
     </div>
   );
 }

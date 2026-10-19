@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Emph } from "@/components/ui/Emph";
 import { digits } from "@/lib/i18n/digits";
 import { cn } from "@/lib/utils/cn";
@@ -11,7 +11,7 @@ const TEXT = {
   en: {
     capital: "Paid-up capital",
     crore: "crore",
-    coin: "Each coin is ৳{v} crore",
+    coin: "Each mark is ৳{v} crore",
     source: "Source",
     houses: "Owner brokerage houses",
     parents: "Parent institutions",
@@ -24,7 +24,7 @@ const TEXT = {
   bn: {
     capital: "পরিশোধিত মূলধন",
     crore: "কোটি",
-    coin: "প্রতিটি কয়েন ৳{v} কোটি",
+    coin: "প্রতিটি দাগ ৳{v} কোটি",
     source: "সূত্র",
     houses: "মালিক ব্রোকারেজ হাউস",
     parents: "মূল প্রতিষ্ঠান",
@@ -36,16 +36,15 @@ const TEXT = {
   },
 };
 
-const MAX_COINS = 40;
-const PER_STACK = 10;
+const MAX_COINS = 60;
 const CYCLE_MS = 4800;
 
 /**
  * Who owns Xpert, in 3D (Admin → Home highlights → Who owns Xpert, and Admin →
  * Organizations → Owned by):
- *  - the paid-up capital as gold coins dropping into stacks while the figure counts up;
- *  - the owner houses as blocks standing on one platform per basis (banks, insurers,
- *    corporate groups…), each platform's count floating above it. One basis is lit at a
+ *  - the paid-up capital as a meter: one fine mark per crore, lit in turn round a ring while the figure counts up;
+ *  - the owner houses as a unit chart, one logo tile per house grouped by basis (banks,
+ *    insurers, corporate groups…), each group's count above it. One basis is lit at a
  *    time (by itself, or the one chosen) and its houses are listed with their parents;
  *  - beside the capital, the owners in figures and as one bar of their mix (synced with the platforms).
  * The board's size is told under Key strengths (governance), not repeated here.
@@ -88,7 +87,7 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
     return () => io.disconnect();
   }, []);
 
-  // The capital counts up while the coins drop in.
+  // The capital counts up while the marks light round the ring.
   useEffect(() => {
     if (!cap || !capNum.current) return;
     if (reduce) {
@@ -101,7 +100,7 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
     }
     let raf = 0;
     const start = performance.now() + 300;
-    const length = 500 + coins * 55;
+    const length = 400 + coins * 35;
     const tick = (now: number) => {
       const k = Math.max(0, Math.min(1, (now - start) / length));
       if (capNum.current) capNum.current.textContent = nf(Math.round(cap.crore * (1 - Math.pow(1 - k, 2)) * 10) / 10, 1);
@@ -123,36 +122,7 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
     return () => clearTimeout(id);
   }, [active, held, reduce, visible, n]);
 
-  const lean = (e: PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== "mouse") return;
-    const r = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--px", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
-    e.currentTarget.style.setProperty("--py", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
-  };
-  const rest = (e: PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.style.setProperty("--px", "0");
-    e.currentTarget.style.setProperty("--py", "0");
-  };
-
   const group = data.groups[Math.min(active, Math.max(0, n - 1))];
-  // Platforms along the floor's diagonal (reads left to right); blocks two abreast.
-  const W = 2.4;
-  const gap = 0.5;
-  const plat = data.groups.map((g) => {
-    const rows = Math.ceil(g.houses.length / 2);
-    return { w: 2 * W + gap + 1.4, d: rows * (W + gap) - gap + 1.4, rows };
-  });
-  const spacing = 11;
-  const span = (n - 1) * spacing;
-  const at = (i: number) => (n === 1 ? 0 : -span / 2 + i * spacing) / Math.SQRT2;
-  const stacks = Math.ceil(coins / PER_STACK);
-  const stackAt = (s: number) => {
-    // A small cluster: two rows of stacks.
-    const col = s % 2;
-    const row = Math.floor(s / 2);
-    return { x: (col - 0.5) * 5.4 + row * 1.4, y: row * 5.2 - (Math.ceil(stacks / 2) - 1) * 2.6 };
-  };
-
   return (
     <div ref={root} className={cn("ow flex flex-col gap-6", on && "is-on")}>
       <div className="flex flex-col gap-3">
@@ -168,44 +138,31 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
         <div className="flex flex-col gap-4">
         {cap && (
           <div className="relative flex flex-1 flex-col overflow-hidden rounded-[2rem] border border-gold/25 bg-navy-900/70">
-            <div className="relative z-10 flex flex-col gap-1 px-6 pt-6 md:px-7 md:pt-7">
-              <p className="text-sm font-semibold text-text-secondary">{t.capital}</p>
-              <p className="flex items-baseline gap-2 font-display leading-none font-semibold" aria-label={`${t.capital}: ৳${nf(cap.crore)} ${t.crore}`}>
-                <span aria-hidden="true" className="stat3d text-6xl tracking-[-0.03em] tabular-nums md:text-7xl">
+            <p className="px-6 pt-6 text-sm font-semibold text-text-secondary md:px-7 md:pt-7">{t.capital}</p>
+            {/* A capital meter: one fine mark per unit, lit in turn around the ring; the figure in the centre. */}
+            <div className="relative mx-auto my-auto w-full max-w-[16rem] px-6 py-4" aria-hidden="true">
+              <svg viewBox="0 0 200 200" className="block w-full">
+                <circle cx="100" cy="100" r="70" className="cap-ring" />
+                {Array.from({ length: coins }, (_, i) => {
+                  const a = ((i / coins) * 360 - 90) * (Math.PI / 180);
+                  const x1 = 100 + Math.cos(a) * 80;
+                  const y1 = 100 + Math.sin(a) * 80;
+                  const x2 = 100 + Math.cos(a) * 94;
+                  const y2 = 100 + Math.sin(a) * 94;
+                  return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} className="cap-mark" style={{ "--i": i } as CSSProperties} />;
+                })}
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="font-display text-5xl leading-none font-semibold tracking-[-0.03em] text-text-primary tabular-nums md:text-6xl">
                   ৳<span ref={capNum}>{nf(cap.crore)}</span>
                 </span>
-                <span aria-hidden="true" className="text-2xl text-gold">{t.crore}</span>
-              </p>
-            </div>
-            <div className="x3 oc3 my-auto" onPointerMove={lean} onPointerLeave={rest} aria-hidden="true">
-              <div className="x3-world">
-                <div className="oc3-floor" />
-                {Array.from({ length: stacks }, (_, s) => {
-                  const p = stackAt(s);
-                  const count = Math.min(PER_STACK, coins - s * PER_STACK);
-                  return (
-                    <div key={s}>
-                      <div className="oc3-shadow" style={{ "--x": `${p.x}em`, "--y": `${p.y}em` } as CSSProperties} />
-                      {Array.from({ length: count }, (_, k) => {
-                        const i = s * PER_STACK + k;
-                        return (
-                          <div key={k} className="oc3-coin" style={{ "--x": `${p.x}em`, "--y": `${p.y}em`, "--z": `${k * 0.62}em`, "--i": i, "--r": `${((i * 47) % 11) - 5}deg` } as CSSProperties}>
-                            <i className="l0" />
-                            <i className="l1" />
-                            <i className="l2" />
-                            <i className="l3" />
-                            <i className="top" />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
+                <span className="mt-1 text-sm font-semibold text-gold">{t.crore}</span>
               </div>
             </div>
+            <span className="sr-only">{`${t.capital}: ৳${nf(cap.crore)} ${t.crore}`}</span>
             <div className="relative z-10 mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-fg/[0.08] px-6 py-4 text-xs text-text-secondary md:px-7">
               <span className="inline-flex items-center gap-2">
-                <span aria-hidden="true" className="size-3 rounded-full bg-gradient-to-br from-[#f6d995] to-gold" />
+                <span aria-hidden="true" className="h-3 w-0.5 rounded-full bg-gold" />
                 {t.coin.replace("{v}", nf(perCoin))}
               </span>
               {cap.source && (
@@ -228,7 +185,7 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
                 .filter((x): x is { v: string; l: string } => Boolean(x))
                 .map((x) => (
                   <div key={x.l} className="flex flex-col gap-1">
-                    <dd className="order-1 stat3d font-display text-4xl leading-none font-semibold tabular-nums">{x.v}</dd>
+                    <dd className="order-1 font-display text-4xl text-text-primary leading-none font-semibold tabular-nums">{x.v}</dd>
                     <dt className="order-2 text-sm leading-snug text-text-secondary">{x.l}</dt>
                   </div>
                 ))}
@@ -274,48 +231,43 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
             onFocusCapture={() => setHeld(true)}
             onBlurCapture={() => setHeld(false)}
           >
-            <div className="x3 ow3" onPointerMove={lean} onPointerLeave={rest} aria-hidden="true">
-              <div className="x3-world">
-                <div className="ow3-floor" />
-                {data.groups.map((g, gi) => {
-                  const cx = at(gi);
-                  const cy = -at(gi);
-                  const P = plat[gi]!;
-                  const lit = gi === active;
-                  return (
-                    <div key={g.basis} className={cn("ow3-group", `is-${g.basis.toLowerCase()}`, lit && "is-lit")} style={{ "--gi": gi } as CSSProperties}>
-                      <div className="x3-box ow3-plat" style={{ "--x": `${cx}em`, "--y": `${cy}em`, "--w": `${P.w}em`, "--d": `${P.d}em`, "--h": "0.5em" } as CSSProperties}>
-                        <i className="t" />
-                        <i className="s" />
-                        <i className="e" />
-                      </div>
-                      {g.houses.map((h, hi) => {
-                        const col = hi % 2;
-                        const row = Math.floor(hi / 2);
-                        const bx = cx - (W + gap) / 2 + col * (W + gap);
-                        const by = cy - (P.d - 1.4) / 2 + W / 2 + row * (W + gap);
-                        return (
-                          <div
-                            key={h.name}
-                            className="x3-box ow3-block"
-                            style={{ "--x": `${bx}em`, "--y": `${by}em`, "--w": `${W}em`, "--d": `${W}em`, "--h": "2.8em", "--z": "0.5em", "--k": gi * 3 + hi } as CSSProperties}
-                          >
-                            <i className="t" />
-                            <i className="s" />
-                            <i className="e" />
-                          </div>
-                        );
-                      })}
-                      <div className="x3-bill ow3-label" style={{ "--x": `${cx}em`, "--y": `${cy}em`, "--z": `${4.8 + (lit ? 1 : 0)}em` } as CSSProperties}>
-                        <span className="flex flex-col items-center leading-none">
-                          <b className="ow3-count">{digits(g.houses.length, bn)}</b>
-                          <span className="ow3-name">{g.label}</span>
+            {/* The owners as a unit chart: one tile per house, grouped by basis; the chosen basis is lit. */}
+            <div className="flex flex-wrap gap-x-5 gap-y-6 p-5 md:p-6" aria-hidden="true">
+              {data.groups.map((g, gi) => {
+                const lit = gi === active;
+                return (
+                  <button
+                    key={g.basis}
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => {
+                      setActive(gi);
+                      setHeld(true);
+                    }}
+                    onMouseEnter={() => setActive(gi)}
+                    className={cn("ow-unit flex min-w-[8.5rem] flex-col gap-2.5 text-left", `is-${g.basis.toLowerCase()}`, lit && "is-lit")}
+                    style={{ flex: `${Math.max(1, Math.ceil(g.houses.length / 2))} 1 0` }}
+                  >
+                    <span className="flex items-baseline gap-2">
+                      <b className="ow-unit-count font-display text-3xl leading-none font-semibold tabular-nums">{digits(g.houses.length, bn)}</b>
+                      <span className="text-xs leading-tight font-semibold text-text-secondary">{g.label}</span>
+                    </span>
+                    <span className="grid grid-cols-[repeat(auto-fill,minmax(3.6rem,1fr))] gap-1.5">
+                      {g.houses.map((h, hi) => (
+                        <span key={h.name} className="ow-tile flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-white p-1.5" style={{ "--k": gi * 4 + hi } as CSSProperties}>
+                          {h.logo ? (
+                            <Image src={h.logo.url} alt="" width={h.logo.width ?? 96} height={h.logo.height ?? 72} className="h-full w-full object-contain" />
+                          ) : (
+                            <span className="font-display text-[11px] font-semibold text-[#0b1c31]">
+                              {h.name.replace(/[^A-Za-z0-9 ]/g, "").split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("")}
+                            </span>
+                          )}
                         </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                      ))}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Choose a basis */}

@@ -5,7 +5,7 @@
  * so every person, card and crop keeps working with no re-upload.
  */
 export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
-  "aminul-islam": "46d0aa5730c65fbba9e749371bedd7722d9a7e30349ce6c7f2de198a2464e8e1",
+  "aminul-islam": ["46d0aa5730c65fbba9e749371bedd7722d9a7e30349ce6c7f2de198a2464e8e1", "3ca2782be379c32419f168c078e5fc3f38d74b2a526d96de135b341aa1d1011a"], // new photo supplied 20 Oct 2026
   "bishnu-pada-kunda": ["5e3185c1c06dacef9997e5e1f0e21d704b52d3c481575717f9e3b1f5355a572b", "a754c94f7248585f1c24bcc12b618efac790f744a4a06fa37fdc851277112c2e", "6f94c3d351c334b8529e868711c81d0cb2377e5fddb3fa880ad4b506c7ae177e"], // new photo supplied 19 Oct 2026
   "dilip-kajuri": "00e8925b6282c40615911568d0f9d529b75be9ad7e7528eecb1428fb29f86399",
   "eshan-barua": ["ef8a4de53dfb73cdff3768faede53fe8a49499304ad9a5eeb23a05cc4c247bc9", "592c6f7de22b2854b9bc97879d477ec7f3a1de54185d7ca3b9ff99c77fa6892c", "ab05054fc2d587d49822668c67a6d38f8084d559af50cbd61d4186a97a267e98", "c0f8b0b46eae9c92be56a95a684297f87b0ef8110b6747e358a735fc785c01ef"], // new photo supplied 19 Oct 2026
@@ -16,7 +16,7 @@ export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "md-abul-moshad-chowdhury": ["ccf90da0a0baad51bd85bcb17559d775e32d404160ab42ede9530e094d46d55a", "9d5b5c66dbd0f0efb2f73c1cdabf10a36589e67350b23b7667d971d894ffd7a2"], // new photo supplied 19 Oct 2026
   "md-hasan-uddin": ["213d2b8fe237f222274e92a300db69df4aeb62735ec633f1f20f2fa3d0e4adb7", "71b99f407f10eb6f67a72a6160ec08fdcbb3af8780705a9681268c974235c38b"], // new photo supplied 19 Oct 2026
   "md-hefaj-uddin": ["bf5de074508615a0b00a38173e69c5f94998c53189a714c76ee78b557dba12b1", "7c8dc7a0a561a2388a8a463e0bf862d7799b248e0c9eaea904653dd3e7ee1c22"], // new photo supplied 19 Oct 2026
-  "md-refat-hossen": "9930199f57a309d6263cc50d5519e114045b06fa66777733b4d16456c24b5b18",
+  "md-refat-hossen": ["9930199f57a309d6263cc50d5519e114045b06fa66777733b4d16456c24b5b18", "40fc8776ec02ac5e86f7133e8d331d2781a7d567a4e91450d4d469c2f5a0f6c0"], // new photo supplied 20 Oct 2026
   "md-shahinur-rahman": ["ce8165221bbef631a90533e2ce21d9c339f6ecf2861a51c70b1fa1f14d194c88", "71fe61342016209a69afd06593fb3515b8ab087437764fc66b30d85559307676"], // new photo supplied 19 Oct 2026
   "md-sirajul-islam": ["900db2e75d64718c2fa72c0521e7c9065a58fa663aa47758e0ea57acf3415a87", "b730f8f1787136a28435e90a232b3b2da7224067193d15a4c5ab6d55f1165840"], // new photo supplied 19 Oct 2026
   "md-yeasin-hossain": ["b27e9a55acb7f1d2ab71aabb76be1428c3605124f88ac154f01147523c6d58e9", "26f056caad95b25753b10e5d8a1102b1eb6dc79f815c660626dab1c7705d7f6c"], // new photo supplied 19 Oct 2026

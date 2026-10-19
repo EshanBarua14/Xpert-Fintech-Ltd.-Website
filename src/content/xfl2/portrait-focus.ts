@@ -30,7 +30,7 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "mohammad-ashiqur-rahman-bhuiyan": { x: 0.5, y: 0.36 }, // new photo 19 Oct 2026
   "mohammad-erfanul-islam": { x: 0.51, y: 0.36 }, // new photo 19 Oct 2026
   "mohammad-mehrabul-ferdous": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
-  "mohammed-rahmat-pasha": { x: 0.52, y: 0.46 },
+  "mohammed-rahmat-pasha": { x: 0.5, y: 0.38 }, // new photo 20 Oct 2026
   "mohd-shaahed-imran": { x: 0.49, y: 0.4 }, // photo confirmed by XFL 20 Oct 2026
   "muhammad-shamsul-maruf": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
   "nafis-hasan-khan": { x: 0.506, y: 0.426, zoom: 1.06 },

@@ -1353,7 +1353,7 @@ async function seedRmsInOms() {
 
 /**
  * Product screenshots supplied by XFL, in prisma/seed-media/products as
- * <product key>-<web|tablet|phone>.(png|jpg|webp). Each file is added once to
+ * <product key>-<web|tablet|phone>[-<name>].(png|jpg|webp). Each file is added once to
  * that product's screens (Admin → Products → Screens and demo video), after
  * any screens already there; removing it in the admin keeps it removed.
  * Personal details visible in a screenshot are blurred before it is added here.
@@ -1363,13 +1363,38 @@ const PRODUCT_SHOTS: Record<string, { en: string; bn: string }> = {
     en: "Xpert Trading OMS: order entry, portfolio, market depth, order list and order summary on one dealer desk",
     bn: "এক্সপার্ট ট্রেডিং ওএমএস: একই ডিলার ডেস্কে অর্ডার প্রদান, পোর্টফোলিও, মার্কেট ডেপথ, অর্ডার তালিকা ও অর্ডার সারাংশ",
   },
+  // Mobile app screens supplied by XFL (19 Oct 2026); the first three fill the home page's floating phones.
+  "trading-platform-phone-market": {
+    en: "Mobile app: market overview — gainers and losers by change %, and a market map by sector",
+    bn: "মোবাইল অ্যাপ: বাজারের সারসংক্ষেপ — পরিবর্তনের হার অনুযায়ী দরবৃদ্ধি ও দরপতন, এবং খাতভিত্তিক মার্কেট ম্যাপ",
+  },
+  "trading-platform-phone-trade": {
+    en: "Mobile app: buy and sell on DSE or CSE with live bid/ask depth, purchase power and order quantity, rate and drip quantity",
+    bn: "মোবাইল অ্যাপ: ডিএসই বা সিএসই-তে কেনা-বেচা — লাইভ বিড/আস্ক ডেপথ, ক্রয়ক্ষমতা, অর্ডারের পরিমাণ, দর ও ড্রিপ পরিমাণ",
+  },
+  "trading-platform-phone-watchlist": {
+    en: "Mobile app: watchlists per exchange, with price, change, trades and value for each instrument",
+    bn: "মোবাইল অ্যাপ: এক্সচেঞ্জভিত্তিক ওয়াচলিস্ট — প্রতিটি শেয়ারের দর, পরিবর্তন, লেনদেন সংখ্যা ও মূল্য",
+  },
+  "trading-platform-phone-chart": {
+    en: "Mobile app: instrument details with an intraday candlestick chart, moving averages and volume",
+    bn: "মোবাইল অ্যাপ: শেয়ারের বিস্তারিত — ইন্ট্রাডে ক্যান্ডেলস্টিক চার্ট, মুভিং অ্যাভারেজ ও ভলিউম",
+  },
+  "trading-platform-phone-time-sales": {
+    en: "Mobile app: time and sales — every trade in an instrument with time, side, quantity and price",
+    bn: "মোবাইল অ্যাপ: টাইম অ্যান্ড সেলস — একটি শেয়ারের প্রতিটি লেনদেনের সময়, দিক, পরিমাণ ও দর",
+  },
+  "trading-platform-phone-portfolio": {
+    en: "Mobile app: purchase power, day and unrealised gain, and featured lists — top gainers, losers and value",
+    bn: "মোবাইল অ্যাপ: ক্রয়ক্ষমতা, দিনের ও অনাদায়ী লাভ, এবং ফিচার্ড তালিকা — শীর্ষ দরবৃদ্ধি, দরপতন ও মূল্য",
+  },
 };
 async function seedProductScreens() {
   let added = 0;
   for (const [file, caption] of Object.entries(PRODUCT_SHOTS)) {
     const mark = `seed.product-shot.${file}`;
     if (await db.siteSetting.findUnique({ where: { key: mark } })) continue;
-    const key = file.replace(/-(web|tablet|phone)$/, "");
+    const key = file.replace(/-(web|tablet|phone)(-[a-z0-9-]+)?$/, "");
     const offering = await db.offering.findUnique({ where: { key } });
     if (!offering) continue;
     const mediaId = await seedImage("products", file, caption.en, ["product", "screenshot"]);
@@ -1381,7 +1406,7 @@ async function seedProductScreens() {
           offeringId: offering.id,
           kind: "SCREENSHOT",
           mediaId,
-          device: file.match(/-(web|tablet|phone)$/)?.[1]?.toUpperCase() ?? null,
+          device: file.match(/-(web|tablet|phone)(-[a-z0-9-]+)?$/)?.[1]?.toUpperCase() ?? null,
           sortOrder: (last?.sortOrder ?? -1) + 1,
           translations: { create: [{ locale: EN, caption: caption.en }, { locale: BN, caption: caption.bn }] },
         },

@@ -97,7 +97,7 @@ export function CoreStrengths({ items, locale, label }: { items: StrengthCard[];
               {current.title}
             </p>
             {current.body && (
-              <p key={`b-${active}`} className={cn("cn-swap text-[0.8125rem] leading-relaxed text-text-secondary xl:text-sm", current.stat ? "line-clamp-4" : "line-clamp-5")}>
+              <p key={`b-${active}`} className={cn("cn-swap text-[0.8125rem] leading-relaxed text-text-secondary xl:text-sm", current.stat ? "line-clamp-3" : "line-clamp-5")}>
                 {current.body}
               </p>
             )}

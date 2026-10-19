@@ -2696,6 +2696,41 @@ async function seedLeadershipFilter() {
 }
 
 /**
+ * Once (XFL, 19 Oct 2026): "Who owns Xpert" now shows the capital, the owner houses by
+ * basis and their parents, so Key strengths no longer repeats them: the capital, bank,
+ * insurer, corporate and parent-institution cards are removed (matched by their seeded
+ * titles), and the strengths are told as qualities, in this order: built by brokers,
+ * governance, compliance, security, infrastructure (other cards keep their place after).
+ */
+async function seedStrengthsDedup() {
+  const MARK = "seed.strengths-dedup-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const row = await db.siteSetting.findUnique({ where: { key: "home.strengths" } });
+  const v = row?.value as { items?: { titleEn: string }[]; introEn?: string; introBn?: string } | undefined;
+  if (row && v?.items) {
+    const drop = new Set(["Owned by the country's leading institutions", "Bank subsidiaries", "Insurance companies", "Corporate companies", "Backed by top institutions"]);
+    const order = ["Built by the market's top brokers", "Institutional governance", "Compliance built into every order", "Enterprise-grade security", "Institutional-grade infrastructure"];
+    const kept = v.items.filter((i) => !drop.has(i.titleEn));
+    const rank = (t: string) => (order.includes(t) ? order.indexOf(t) : order.length);
+    const items = kept.map((i, k) => ({ i, k })).sort((a, b) => rank(a.i.titleEn) - rank(b.i.titleEn) || a.k - b.k).map((x) => x.i);
+    const intro =
+      v.introEn === "Who stands behind Xpert, in numbers, and why its owners run their business on it."
+        ? { introEn: "Why the brokerage houses that own Xpert also run their business on it.", introBn: "যে ব্রোকারেজ হাউসগুলো এক্সপার্টের মালিক, তারাই কেন এতে তাদের ব্যবসা চালায়।" }
+        : {};
+    await db.siteSetting.update({ where: { key: "home.strengths" }, data: { value: { ...v, ...intro, items } } });
+    console.log(`• Core strengths: ${v.items.length - items.length} card(s) now shown in "Who owns Xpert" removed; ${items.length} left`);
+  }
+  // The capital is told in "Who owns Xpert"; the copy added to Admin → Figures earlier today goes.
+  const fig = await db.siteSetting.findUnique({ where: { key: "site.figures" } });
+  if (Array.isArray(fig?.value)) {
+    const list = fig!.value as { value?: string; labelEn?: string; source?: string }[];
+    const next = list.filter((f) => !(f.labelEn === "Paid-up capital" && f.value === "৳33 crore" && f.source === "Xpert Fintech Ltd."));
+    if (next.length !== list.length) await db.siteSetting.update({ where: { key: "site.figures" }, data: { value: next } });
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
+/**
  * Once (XFL, 19 Oct 2026): sharper headlines for the core strengths and the cost savings
  * graphic, where the admin still has the earlier wording (anything edited is kept).
  */
@@ -3155,6 +3190,7 @@ async function main() {
   await seedJourney();
   await seedOwnership();
   await seedLeadershipFilter();
+  await seedStrengthsDedup();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

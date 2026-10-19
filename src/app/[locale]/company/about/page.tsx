@@ -20,6 +20,8 @@ import { CoreStrengths } from "@/components/flagship/CoreStrengths";
 import { getStrengths } from "@/lib/content/highlights";
 import { getHeadlineShare } from "@/lib/content/leaders";
 import { ShareCoin3D } from "@/components/market/ShareCoin3D";
+import { OwnershipShowcase } from "@/components/flagship/OwnershipShowcase";
+import { getOwnership } from "@/lib/public/ownership";
 import { plain } from "@/components/ui/Emph";
 import { digits } from "@/lib/i18n/digits";
 import { blockContext, buildMetadata } from "@/lib/public/seo";
@@ -60,7 +62,7 @@ export default async function AboutPage({ params }: Props) {
     getFlagshipData(loc),
     getPageByPath(loc, "company/about"),
   ]);
-  const [chairman, md, strengths, headline] = await Promise.all([getLeaderMessage("chairman", loc), getLeaderMessage("md", loc), getStrengths(loc), getHeadlineShare()]);
+  const [chairman, md, strengths, headline, ownership] = await Promise.all([getLeaderMessage("chairman", loc), getLeaderMessage("md", loc), getStrengths(loc), getHeadlineShare(), getOwnership(loc)]);
   const contact = { linkedin: t.linkedinProfile, email: t.emailPerson, linkedinSearch: t.linkedinSearch, emailMissing: t.emailMissing, website: loc === "bn" ? "ওয়েবসাইট" : "Website" };
   const sections = page ? toSections(page, loc) : [];
   const ctx = sections.length ? await blockContext(loc, mediaIdsOf(sections)) : null;
@@ -146,6 +148,13 @@ export default async function AboutPage({ params }: Props) {
               </dl>
             )}
           </div>
+        </Shell>
+      )}
+
+      {/* Who owns Xpert (Admin → Home highlights → Who owns Xpert, and Organizations → Owned by) */}
+      {ownership && (
+        <Shell className="pb-10 md:pb-12">
+          <OwnershipShowcase data={ownership} locale={loc === "bn" ? "bn" : "en"} />
         </Shell>
       )}
 

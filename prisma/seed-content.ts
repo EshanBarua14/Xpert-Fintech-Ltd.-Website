@@ -2632,6 +2632,54 @@ async function seedJourney() {
 }
 
 /**
+ * Once (XFL, 19 Oct 2026): "Who owns Xpert" on Home and About.
+ *  - Paid-up capital ৳33 crore (stated by XFL), published.
+ *  - Each consortium house's parent (Admin → Organizations → Owned by), where not set;
+ *    sources as in seedInstitutionStrengths. Mika Securities and Remons Investment are
+ *    left "not stated" (shown as other owner houses) until their ownership is confirmed.
+ */
+const OWNER_PARENTS: { key: string; type: "BANK" | "INSURANCE" | "CORPORATE"; en: string; bn: string }[] = [
+  { key: "bank-asia-securities", type: "BANK", en: "Bank Asia PLC", bn: "ব্যাংক এশিয়া পিএলসি" },
+  { key: "ebl-securities", type: "BANK", en: "Eastern Bank PLC", bn: "ইস্টার্ন ব্যাংক পিএলসি" },
+  { key: "islami-bank-securities", type: "BANK", en: "Islami Bank Bangladesh PLC", bn: "ইসলামী ব্যাংক বাংলাদেশ পিএলসি" },
+  { key: "one-securities", type: "BANK", en: "ONE Bank PLC", bn: "ওয়ান ব্যাংক পিএলসি" },
+  { key: "sjibl-securities", type: "BANK", en: "Shahjalal Islami Bank PLC", bn: "শাহজালাল ইসলামী ব্যাংক পিএলসি" },
+  { key: "ucb-stock-brokerage", type: "BANK", en: "United Commercial Bank PLC", bn: "ইউনাইটেড কমার্শিয়াল ব্যাংক পিএলসি" },
+  { key: "ab-securities", type: "BANK", en: "AB Bank PLC", bn: "এবি ব্যাংক পিএলসি" },
+  { key: "green-delta-securities", type: "INSURANCE", en: "Green Delta Insurance PLC", bn: "গ্রিন ডেল্টা ইন্স্যুরেন্স পিএলসি" },
+  { key: "nli-securities", type: "INSURANCE", en: "National Life Insurance PLC", bn: "ন্যাশনাল লাইফ ইন্স্যুরেন্স পিএলসি" },
+  { key: "apex-investments", type: "CORPORATE", en: "the Apex group", bn: "অ্যাপেক্স গ্রুপ" },
+];
+async function seedOwnership() {
+  const MARK = "seed.ownership-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  let set = 0;
+  for (const p of OWNER_PARENTS) {
+    const r = await db.organization.updateMany({ where: { key: p.key, parentType: null }, data: { parentType: p.type, parentName: p.en, parentNameBn: p.bn } });
+    set += r.count;
+  }
+  if (!(await db.siteSetting.findUnique({ where: { key: "home.ownership" } }))) {
+    await db.siteSetting.create({
+      data: {
+        key: "home.ownership",
+        value: {
+          published: true,
+          titleEn: "Who owns *Xpert*",
+          titleBn: "এক্সপার্টের *মালিক* কারা",
+          introEn: "The capital behind the platform and the institutions that own it, house by house.",
+          introBn: "প্ল্যাটফর্মের পেছনের মূলধন এবং এর মালিক প্রতিষ্ঠানগুলো, হাউস ধরে ধরে।",
+          capitalCrore: 33,
+          capitalSource: "Xpert Fintech Ltd.",
+          capitalAsOf: "",
+        },
+      },
+    });
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log(`• Who owns Xpert: ৳33 crore paid-up capital published; parent institution set for ${set} house(s)`);
+}
+
+/**
  * Once (XFL, 19 Oct 2026): sharper headlines for the core strengths and the cost savings
  * graphic, where the admin still has the earlier wording (anything edited is kept).
  */
@@ -3089,6 +3137,7 @@ async function main() {
   await seedSharperHeadlines();
   await seedInstitutionStrengths();
   await seedJourney();
+  await seedOwnership();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

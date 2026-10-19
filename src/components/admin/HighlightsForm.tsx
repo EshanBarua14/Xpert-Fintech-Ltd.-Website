@@ -5,7 +5,7 @@ import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
 import { Select, TextArea, TextInput } from "@/components/ui/Field";
 import { ClearRowButton } from "./ClearRowButton";
-import type { SavingsSetting, StrengthsSetting, WhatsAppSetting } from "@/lib/content/highlights";
+import type { OwnershipSetting, SavingsSetting, StrengthsSetting, WhatsAppSetting } from "@/lib/content/highlights";
 
 function Group({ title, hint, children }: { title: string; hint?: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -20,12 +20,14 @@ function Group({ title, hint, children }: { title: string; hint?: React.ReactNod
 const pair = "grid gap-4 md:grid-cols-2";
 
 export function HighlightsForm({
+  ownership,
   strengths,
   savings,
   whatsapp,
   icons,
   max,
 }: {
+  ownership: OwnershipSetting;
   strengths: StrengthsSetting;
   savings: SavingsSetting;
   whatsapp: WhatsAppSetting;
@@ -41,6 +43,24 @@ export function HighlightsForm({
   return (
     <form onSubmit={onSubmit} className="flex max-w-5xl flex-col gap-8" noValidate>
       <FormMessage message={state.message} isError={!state.ok && Boolean(state.errors)} />
+
+      <Group
+        title="Who owns Xpert (paid-up capital and owners)"
+        hint="Shown above the core strengths on the home and About pages: a 3D stack of coins for the paid-up capital, and the consortium houses grouped by who owns them. The groups, counts and parent names come from Admin → Organizations → Owned by; the board count from Admin → People."
+      >
+        <label className="flex items-center gap-2 text-sm font-semibold">
+          <input type="checkbox" name="oPublished" value="1" defaultChecked={ownership.published} className="size-4 accent-brand-royal" /> Published (show on the live site)
+        </label>
+        <div className={pair}>
+          <TextInput id="oTitleEn" label="Title (English)" hint="*word* = highlighted" defaultValue={ownership.titleEn} error={e.oTitleEn} />
+          <TextInput id="oTitleBn" label="Title (বাংলা)" lang="bn" defaultValue={ownership.titleBn} error={e.oTitleBn} />
+          <TextArea id="oIntroEn" label="Lead line (English)" rows={2} defaultValue={ownership.introEn} error={e.oIntroEn} />
+          <TextArea id="oIntroBn" label="Lead line (বাংলা)" lang="bn" rows={2} defaultValue={ownership.introBn} error={e.oIntroBn} />
+          <TextInput id="oCapital" label="Paid-up capital (crore taka)" inputMode="decimal" placeholder="33" defaultValue={ownership.capitalCrore === null ? "" : String(ownership.capitalCrore)} error={e.oCapital} />
+          <TextInput id="oCapitalSource" label="Source of the capital figure" placeholder="Xpert Fintech Ltd." defaultValue={ownership.capitalSource} error={e.oCapitalSource} />
+          <TextInput id="oCapitalAsOf" type="date" label="As of (optional)" defaultValue={ownership.capitalAsOf} error={e.oCapitalAsOf} />
+        </div>
+      </Group>
 
       <Group title="Core strengths" hint="Cards shown right after the client logos on the home page. Leave a row empty to drop it. Switch the section off in Design → Home page.">
         <div className={pair}>

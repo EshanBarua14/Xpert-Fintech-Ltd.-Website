@@ -2,14 +2,14 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { HighlightsForm } from "@/components/admin/HighlightsForm";
 import { ICON_NAMES } from "@/components/ui/Icon";
-import { getSavingsSetting, getStrengthsSetting, getWhatsAppSetting, MAX_STRENGTHS } from "@/lib/content/highlights";
+import { getOwnershipSetting, getSavingsSetting, getStrengthsSetting, getWhatsAppSetting, MAX_STRENGTHS } from "@/lib/content/highlights";
 
 export const metadata = { title: "Home highlights" };
 
 /** Admin → Home highlights: core strengths, the cost-savings graphic and the WhatsApp button. */
 export default async function HighlightsPage() {
   await requireAdmin();
-  const [strengths, savings, whatsapp] = await Promise.all([getStrengthsSetting(), getSavingsSetting(), getWhatsAppSetting()]);
+  const [strengths, savings, whatsapp, ownership] = await Promise.all([getStrengthsSetting(), getSavingsSetting(), getWhatsAppSetting(), getOwnershipSetting()]);
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -23,7 +23,7 @@ export default async function HighlightsPage() {
           .
         </p>
       </div>
-      <HighlightsForm strengths={strengths} savings={savings} whatsapp={whatsapp} icons={ICON_NAMES} max={MAX_STRENGTHS} />
+      <HighlightsForm ownership={ownership} strengths={strengths} savings={savings} whatsapp={whatsapp} icons={ICON_NAMES} max={MAX_STRENGTHS} />
     </div>
   );
 }

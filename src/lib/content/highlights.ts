@@ -12,6 +12,30 @@ import type { AppLocale } from "@/lib/i18n/config";
 export const STRENGTHS_KEY = "home.strengths";
 export const SAVINGS_KEY = "home.savings";
 export const WHATSAPP_KEY = "site.whatsapp";
+export const OWNERSHIP_KEY = "home.ownership";
+
+/** "Who owns Xpert": paid-up capital and the owner houses by basis (bases from Admin → Organizations → Owned by). */
+export type OwnershipSetting = {
+  published: boolean;
+  titleEn: string;
+  titleBn: string;
+  introEn: string;
+  introBn: string;
+  /** Paid-up capital in crore taka (e.g. 33); null hides the capital. */
+  capitalCrore: number | null;
+  capitalSource: string;
+  capitalAsOf: string;
+};
+export const DEFAULT_OWNERSHIP: OwnershipSetting = {
+  published: false,
+  titleEn: "Who owns *Xpert*",
+  titleBn: "এক্সপার্টের *মালিক* কারা",
+  introEn: "The capital behind the platform and the institutions that own it, house by house.",
+  introBn: "প্ল্যাটফর্মের পেছনের মূলধন এবং এর মালিক প্রতিষ্ঠানগুলো, হাউস ধরে ধরে।",
+  capitalCrore: null,
+  capitalSource: "",
+  capitalAsOf: "",
+};
 export const MAX_STRENGTHS = 10;
 
 /** `statEn`/`statBn`: an optional figure shown large on the card (e.g. "৳33 cr", "7"); only real, sourced numbers. */
@@ -156,6 +180,23 @@ export function readStrengths(value: unknown): StrengthsSetting {
   return { titleEn: str(v.titleEn), titleBn: str(v.titleBn), introEn: str(v.introEn), introBn: str(v.introBn), items: items.slice(0, MAX_STRENGTHS) };
 }
 
+export function readOwnership(value: unknown): OwnershipSetting {
+  if (value === undefined || value === null) return DEFAULT_OWNERSHIP;
+  const v = obj(value);
+  const d = DEFAULT_OWNERSHIP;
+  const cap = num(v.capitalCrore);
+  return {
+    published: v.published === true,
+    titleEn: str(v.titleEn, d.titleEn),
+    titleBn: str(v.titleBn, d.titleBn),
+    introEn: str(v.introEn, d.introEn),
+    introBn: str(v.introBn, d.introBn),
+    capitalCrore: cap !== null && cap > 0 ? cap : null,
+    capitalSource: str(v.capitalSource),
+    capitalAsOf: /^\d{4}-\d{2}-\d{2}$/.test(str(v.capitalAsOf)) ? str(v.capitalAsOf) : "",
+  };
+}
+
 export function readSavings(value: unknown): SavingsSetting {
   if (value === undefined || value === null) return DEFAULT_SAVINGS;
   const v = obj(value);
@@ -206,6 +247,7 @@ async function setting(key: string) {
 export const getStrengthsSetting = cache(async () => readStrengths(await setting(STRENGTHS_KEY)));
 export const getSavingsSetting = cache(async () => readSavings(await setting(SAVINGS_KEY)));
 export const getWhatsAppSetting = cache(async () => readWhatsApp(await setting(WHATSAPP_KEY)));
+export const getOwnershipSetting = cache(async () => readOwnership(await setting(OWNERSHIP_KEY)));
 
 const pick = (locale: AppLocale, en: string, bn: string) => (locale === "bn" && bn.trim() ? bn : en);
 

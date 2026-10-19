@@ -5,11 +5,11 @@ import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage, PublishFields } from "@/components/admin/EditorParts";
 import { ImagePicker } from "@/components/admin/ImagePicker";
 import { TranslatedFieldset, type FieldSpec } from "@/components/admin/TranslatedFieldset";
-import { TextInput } from "@/components/ui/Field";
+import { TextArea, TextInput } from "@/components/ui/Field";
 import type { ImageOption } from "@/lib/admin/media";
 
 type Text = { title: string; slug: string; summary: string; challenge: string; solution: string; outcome: string };
-export type CaseStudyFormValues = { id?: string; status: "DRAFT" | "PUBLISHED"; publishAt: string; sortOrder: number; coverMediaId: string; sourceName: string; sourceUrl: string; en: Text; bn: Text };
+export type CaseStudyFormValues = { id?: string; status: "DRAFT" | "PUBLISHED"; publishAt: string; sortOrder: number; coverMediaId: string; sourceName: string; sourceUrl: string; results: string; en: Text; bn: Text };
 
 const FIELDS: FieldSpec[] = [
   { name: "Title", label: "Title" },
@@ -35,6 +35,17 @@ export function CaseStudyForm({ values, images }: { values: CaseStudyFormValues;
           <legend className="px-2 text-sm font-semibold">Publishing</legend>
           <PublishFields status={values.status} publishAt={values.publishAt} error={e.publishAt} />
           <SubmitButton pending={pending}>Save</SubmitButton>
+        </fieldset>
+        <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
+          <legend className="px-2 text-sm font-semibold">Key results</legend>
+          <TextArea
+            id="results"
+            label="Figures shown large (up to 4)"
+            rows={5}
+            hint="One per line: value | English label | বাংলা label, e.g. 3× | faster order entry | দ্রুত অর্ডার. Only figures the client agreed to share."
+            defaultValue={values.results}
+            error={e.results}
+          />
         </fieldset>
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Media</legend>

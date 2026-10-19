@@ -32,7 +32,7 @@ export default async function CaseStudyPage({ params }: Props) {
   const { locale, slug } = await params;
   const found = await load(locale, slug);
   if (!found) notFound();
-  const { tr, cover } = found;
+  const { tr, cover, results } = found;
   const loc = found.locale;
   const t = getMessages(loc);
   const url = `${SITE_URL}/${loc}/success-stories/${tr.slug}`;
@@ -70,7 +70,18 @@ export default async function CaseStudyPage({ params }: Props) {
               : "Draft — not on the live site. Confirm the bracketed facts with the client, get their approval, then publish."}
           </p>
         )}
-        <ol className="mx-auto flex max-w-4xl flex-col gap-6">
+        {/* Results first, large: the figures the client agreed to share. */}
+        {results.length > 0 && (
+          <div data-reveal className="results3d mx-auto mb-10 grid max-w-4xl gap-4" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${results.length > 2 ? "11rem" : "14rem"}, 1fr))` }}>
+            {results.map((r, i) => (
+              <div key={r.label} className="results3d-tile flex flex-col gap-2 rounded-3xl border border-fg/10 bg-navy-900/70 p-6" style={{ "--i": i } as CSSProperties}>
+                <span className="stat3d font-display text-5xl leading-none font-semibold tracking-[-0.03em]">{r.value}</span>
+                <span className="text-sm leading-snug text-text-secondary">{r.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <ol className="cs-flow relative mx-auto flex max-w-4xl flex-col gap-6">
           {parts.map((p, i) => (
             <li key={p.n} data-reveal style={{ "--d": i } as CSSProperties} className="glass grid gap-4 rounded-3xl p-7 md:grid-cols-[8rem_1fr] md:p-10">
               <span className="flex flex-col gap-1">

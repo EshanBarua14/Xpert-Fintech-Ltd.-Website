@@ -231,8 +231,8 @@
   font-size: 0.8em;
   font-weight: 600;
 }
-.sh3.is-sm > .x3-world { top: 66%; }
-.sh3.is-sm { height: 15em; --r: 6.4em; font-size: clamp(8px, 2.2vw, 12px); }
+.sh3.is-sm > .x3-world { top: 71%; }
+.sh3.is-sm { height: 17em; --r: 6.4em; font-size: clamp(8px, 2.2vw, 12px); }
 .sh3.is-sm .sh3-num { font-size: 2.4em; }
 
 /* ── Cost savings: two towers of twenty slabs; the saved slabs lift off and turn to gold glass ── */
@@ -424,3 +424,120 @@
 @media (prefers-reduced-motion: reduce) {
   .tube3d-grow .tube3d-fill { transition: none; }
 }
+
+/* A figure on a strength card, extruded in gold (CoreStrengths). */
+.stat3d {
+  color: var(--color-gold);
+  text-shadow:
+    0 1px 0 color-mix(in oklab, var(--color-gold) 80%, #000),
+    0 2px 0 color-mix(in oklab, var(--color-gold) 68%, #000),
+    0 3px 0 color-mix(in oklab, var(--color-gold) 56%, #000),
+    0 8px 14px rgb(0 0 0 / 0.35);
+}
+.stat3d.is-dim { color: color-mix(in oklab, var(--color-gold) 75%, var(--color-text-secondary)); text-shadow: 0 1px 0 color-mix(in oklab, var(--color-gold) 50%, #000); }
+[data-theme="light"] .stat3d { text-shadow: 0 1px 0 #5e3f06, 0 2px 0 #4f3505, 0 6px 10px rgb(10 20 40 / 0.18); }
+
+/* ── Growth journey (Journey3D): milestones as bars that grow to their number, on a lit floor ── */
+@property --g {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+.jr3 {
+  --base-turn: 38deg;
+  --tilt: 60deg;
+  width: 100%;
+  height: 32em;
+  font-size: clamp(7px, 1.5vw, 12px);
+}
+.jr3 > .x3-world { top: 79%; }
+.jr3-floor {
+  position: absolute;
+  left: -24em;
+  top: -24em;
+  width: 48em;
+  height: 48em;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2.4em, color-mix(in oklab, var(--color-brand-sky) 16%, transparent) 2.4em calc(2.4em + 1px)),
+    repeating-linear-gradient(90deg, transparent 0 2.4em, color-mix(in oklab, var(--color-brand-sky) 16%, transparent) 2.4em calc(2.4em + 1px)),
+    radial-gradient(circle, color-mix(in oklab, var(--color-brand-sky) 14%, transparent), transparent 60%);
+  -webkit-mask: radial-gradient(circle, #000 22%, transparent 66%);
+  mask: radial-gradient(circle, #000 22%, transparent 66%);
+}
+/* The road the milestones stand on. */
+.jr3-path {
+  position: absolute;
+  left: calc(var(--len) / -2);
+  top: -0.35em;
+  width: var(--len);
+  height: 0.7em;
+  border-radius: 1em;
+  transform: rotateZ(-45deg) translateZ(0.02em);
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-brand-sky) 55%, transparent) 15%, color-mix(in oklab, var(--color-gold) 60%, transparent) 85%, transparent);
+  box-shadow: 0 0 1.5em color-mix(in oklab, var(--color-brand-sky) 40%, transparent);
+}
+.jr3-pad {
+  position: absolute;
+  left: calc(var(--x) - 3.5em);
+  top: calc(var(--y) - 3.5em);
+  width: 7em;
+  height: 7em;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(0 0 0 / 0.45), transparent 65%);
+}
+[data-theme="light"] .jr3-pad { background: radial-gradient(circle, rgb(10 20 40 / 0.18), transparent 65%); }
+.jr3-bar {
+  --h: calc(var(--hmax) * var(--g));
+  transition: --g 1.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(0.3s + var(--i) * 0.25s);
+}
+.js .jr3-wrap:not(.is-on) .jr3-bar { --g: 0.04; }
+.jr3-bar > .t { background: linear-gradient(135deg, #8fe3fa, var(--color-brand-sky)); box-shadow: 0 0 2em -0.3em color-mix(in oklab, var(--color-brand-sky) 80%, transparent); }
+.jr3-bar > .s { background: linear-gradient(0deg, color-mix(in oklab, var(--color-brand-royal) 85%, #000), var(--color-brand-sky)); }
+.jr3-bar > .e { background: linear-gradient(0deg, color-mix(in oklab, var(--color-brand-royal) 60%, #000), var(--color-brand-royal)); }
+/* The last bar is where Xpert is today: gold. */
+.jr3-bar.is-now > .t { background: linear-gradient(135deg, #f6d995, var(--color-gold)); }
+.jr3-gem > i { border: 1px solid color-mix(in oklab, var(--color-gold) 80%, transparent); background: color-mix(in oklab, var(--color-gold) 22%, transparent); }
+.jr3-gem > .t { box-shadow: 0 0 1.6em -0.2em var(--color-gold); }
+.jr3-gem { animation: jr3-bob 4s ease-in-out infinite; animation-delay: calc(var(--i) * -0.7s); }
+@keyframes jr3-bob { 50% { transform: translateZ(0.8em); } }
+.jr3-label { transition: opacity 0.6s ease; transition-delay: calc(0.9s + var(--i) * 0.25s); }
+.js .jr3-wrap:not(.is-on) .jr3-label { opacity: 0; }
+.jr3-num {
+  font-family: var(--font-display);
+  font-size: 3em;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary, var(--color-fg));
+  text-shadow: 0 1px 0 color-mix(in oklab, var(--color-brand-sky) 60%, #000), 0 2px 0 color-mix(in oklab, var(--color-brand-sky) 45%, #000), 0 3px 0 color-mix(in oklab, var(--color-brand-royal) 50%, #000), 0 10px 18px rgb(0 0 0 / 0.4);
+}
+[data-theme="light"] .jr3-num { text-shadow: 0 1px 0 #9fc2e0, 0 2px 0 #86b0d6, 0 8px 14px rgb(10 20 40 / 0.15); }
+.jr3-year { margin-top: 0.35em; font-size: 1.15em; font-weight: 600; color: var(--color-text-secondary); }
+.jr3-idx { margin-top: 0.3em; font-family: var(--font-mono, ui-monospace); font-size: 0.95em; color: var(--color-gold); }
+@media (prefers-reduced-motion: reduce) {
+  .jr3-bar, .jr3-label { transition: none; }
+  .jr3-gem { animation: none; }
+}
+
+/* Success story: result tiles lean back in 3D and come forward when pointed at. */
+.results3d { perspective: 60em; }
+.results3d-tile {
+  transform: rotateX(10deg) rotateY(calc((var(--i) - 1) * -6deg));
+  transform-origin: center bottom;
+  box-shadow: 0 1.6em 2.4em -1.6em rgb(0 0 0 / 0.6), inset 0 1px 0 color-mix(in oklab, var(--color-fg) 10%, transparent);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.results3d-tile:hover { transform: rotateX(0) rotateY(0) translateY(-0.3em); }
+/* What → How → Results joined by a line of light. */
+.cs-flow::before {
+  content: "";
+  position: absolute;
+  left: 2.1rem;
+  top: 2rem;
+  bottom: 2rem;
+  width: 2px;
+  background: linear-gradient(var(--color-brand-sky), var(--color-gold));
+  opacity: 0.45;
+}
+@media (max-width: 767px) { .cs-flow::before { display: none; } }
+@media (prefers-reduced-motion: reduce) { .results3d-tile { transition: none; } }

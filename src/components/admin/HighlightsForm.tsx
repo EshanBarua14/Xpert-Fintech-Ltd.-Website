@@ -34,7 +34,7 @@ export function HighlightsForm({
 }) {
   const { state, pending, onSubmit } = useActionForm<HighlightsState>(saveHighlights, {});
   const e = state.errors ?? {};
-  const rows = Array.from({ length: max }, (_, i) => strengths.items[i] ?? { icon: "check", titleEn: "", titleBn: "", bodyEn: "", bodyBn: "" });
+  const rows = Array.from({ length: max }, (_, i) => strengths.items[i] ?? { icon: "check", titleEn: "", titleBn: "", bodyEn: "", bodyBn: "", statEn: "", statBn: "" });
   const iconOptions = icons.map((n) => ({ value: n, label: n }));
   const n = (v: number | null) => (v === null ? "" : String(v));
 
@@ -55,6 +55,9 @@ export function HighlightsForm({
               <Select id={`icon_${i}`} label={`Card ${i + 1}: icon`} defaultValue={r.icon} options={iconOptions} />
               <TextInput id={`titleEn_${i}`} label="Title (English)" defaultValue={r.titleEn} error={e[`titleEn_${i}`]} />
               <TextInput id={`titleBn_${i}`} label="Title (বাংলা)" lang="bn" defaultValue={r.titleBn} error={e[`titleBn_${i}`]} />
+              <span className="hidden md:block" />
+              <TextInput id={`statEn_${i}`} label="Figure, optional (English), e.g. ৳33 cr or 7" defaultValue={r.statEn ?? ""} error={e[`statEn_${i}`]} />
+              <TextInput id={`statBn_${i}`} label="Figure (বাংলা)" lang="bn" defaultValue={r.statBn ?? ""} error={e[`statBn_${i}`]} />
               <span className="hidden md:block" />
               <TextArea id={`bodyEn_${i}`} label="Text (English)" rows={2} defaultValue={r.bodyEn} error={e[`bodyEn_${i}`]} />
               <TextArea id={`bodyBn_${i}`} label="Text (বাংলা)" lang="bn" rows={2} defaultValue={r.bodyBn} error={e[`bodyBn_${i}`]} />

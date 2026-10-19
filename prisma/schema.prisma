@@ -901,6 +901,8 @@ model CaseStudy {
   /// Where the facts come from (e.g. the app's store page or a news report).
   sourceName   String?
   sourceUrl    String?
+  /// Key results shown large on the story: [{ value, labelEn, labelBn }] (only figures the client agreed to share).
+  results      Json?
   status       ContentStatus @default(DRAFT)
   publishAt    DateTime?
   sortOrder    Int           @default(0)

@@ -1,4 +1,5 @@
 import "server-only";
+import { readResults } from "@/lib/content/results";
 import { contentSlots } from "@/lib/env/hints";
 import { cache } from "react";
 import { db } from "@/lib/db/client";
@@ -454,6 +455,9 @@ export const getResources = cache(async (locale: AppLocale): Promise<ResourceCar
 /** Outside the live site, draft case studies are shown too (marked), so editors can review them before publishing. */
 const caseWhere = () => (contentSlots() ? { deletedAt: null } : publishedWhere());
 
+/** A story's key results in the visitor's language (Bangla label falls back to English). */
+const localResults = (v: unknown, locale: AppLocale) => readResults(v).map((r) => ({ value: r.value, label: (locale === "bn" && r.labelBn) || r.labelEn }));
+
 export const getCaseStudies = cache(async (locale: AppLocale) => {
   const rows = await db.caseStudy.findMany({ where: caseWhere(), orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }], include: { translations: true } });
   const covers = await mediaMap(rows.map((r) => r.coverMediaId), locale);
@@ -462,7 +466,15 @@ export const getCaseStudies = cache(async (locale: AppLocale) => {
       const tr = pick(c.translations, locale);
       if (!tr) return null;
       const own = c.translations.find((x) => x.locale === locale);
-      return { id: c.id, title: tr.title, summary: tr.summary, href: `/${own ? locale : "en"}/success-stories/${(own ?? tr).slug}`, cover: covers.get(c.coverMediaId ?? "") ?? null, draft: c.status !== "PUBLISHED" };
+      return {
+        id: c.id,
+        title: tr.title,
+        summary: tr.summary,
+        href: `/${own ? locale : "en"}/success-stories/${(own ?? tr).slug}`,
+        cover: covers.get(c.coverMediaId ?? "") ?? null,
+        draft: c.status !== "PUBLISHED",
+        results: localResults(c.results, locale),
+      };
     })
     .filter((c): c is NonNullable<typeof c> => c !== null);
 });
@@ -471,7 +483,7 @@ export const getCaseStudyBySlug = cache(async (locale: AppLocale, slug: string) 
   const c = await db.caseStudy.findFirst({ where: { ...caseWhere(), translations: { some: { locale, slug } } }, include: { translations: true } });
   if (!c) return null;
   const covers = await mediaMap([c.coverMediaId], locale);
-  return { caseStudy: c, tr: pick(c.translations, locale)!, cover: covers.get(c.coverMediaId ?? "") ?? null };
+  return { caseStudy: c, tr: pick(c.translations, locale)!, cover: covers.get(c.coverMediaId ?? "") ?? null, results: localResults(c.results, locale) };
 });
 
 export type TimelineEvent = {

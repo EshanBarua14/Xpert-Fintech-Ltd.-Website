@@ -2380,6 +2380,257 @@ async function seedWhatsAppNumber() {
   if (changed) console.log("• WhatsApp button: +880 1684-810100 (Admin → Home highlights)");
 }
 
+/** Copy of DEFAULT_STRENGTHS (src/lib/content/highlights.ts is server-only). */
+const DEFAULT_STRENGTHS_SEED = {
+  titleEn: "Built by brokers. *Trusted* by brokers.",
+  titleBn: "ব্রোকারদের হাতে গড়া। ব্রোকারদের *আস্থায়*।",
+  introEn: "Five reasons the houses that own Xpert also run their business on it.",
+  introBn: "যে হাউসগুলো এক্সপার্টের মালিক, তারাই কেন এতে তাদের ব্যবসা চালায়: পাঁচটি কারণ।",
+  items: [
+    {
+      icon: "users",
+      titleEn: "Built by the market's top brokers",
+      titleBn: "বাজারের শীর্ষ ব্রোকারদের হাতে গড়া",
+      bodyEn: "Designed with the brokerage houses that own Xpert and trade on it every day, so every screen follows how a dealing desk really works.",
+      bodyBn: "এক্সপার্টের মালিক ও প্রতিদিন এতে লেনদেনকারী ব্রোকারেজ হাউসগুলোর সঙ্গে মিলে তৈরি, তাই প্রতিটি স্ক্রিন ডিলিং ডেস্কের বাস্তব কাজের ধারা মেনে চলে।",
+    },
+    {
+      icon: "shield",
+      titleEn: "Enterprise-grade security",
+      titleBn: "এন্টারপ্রাইজ-মানের নিরাপত্তা",
+      bodyEn: "Access controls on every desk, encrypted connections and pre-trade risk checks protect each account and every order.",
+      bodyBn: "প্রতিটি ডেস্কে প্রবেশাধিকার নিয়ন্ত্রণ, এনক্রিপ্টেড সংযোগ ও লেনদেনের আগে ঝুঁকি যাচাই প্রতিটি অ্যাকাউন্ট ও অর্ডার সুরক্ষিত রাখে।",
+    },
+    {
+      icon: "network",
+      titleEn: "High-availability network",
+      titleBn: "উচ্চ প্রাপ্যতার নেটওয়ার্ক",
+      bodyEn: "A redundant network built to keep orders flowing to DSE and CSE through the busiest hours of the trading day.",
+      bodyBn: "লেনদেনের সবচেয়ে ব্যস্ত সময়েও ডিএসই ও সিএসইতে অর্ডার পৌঁছে দিতে তৈরি রিডানড্যান্ট নেটওয়ার্ক।",
+    },
+    {
+      icon: "briefcase",
+      titleEn: "Owned by leading institutions",
+      titleBn: "শীর্ষস্থানীয় প্রতিষ্ঠানের মালিকানাধীন",
+      bodyEn: "A capital-market fintech owned by a consortium of the country's leading bank-backed and independent brokerage houses.",
+      bodyBn: "দেশের শীর্ষস্থানীয় ব্যাংক-সমর্থিত ও স্বতন্ত্র ব্রোকারেজ হাউসগুলোর একটি কনসোর্টিয়ামের মালিকানাধীন পুঁজিবাজার ফিনটেক।",
+    },
+    {
+      icon: "cloud",
+      titleEn: "Institutional-grade infrastructure",
+      titleBn: "প্রাতিষ্ঠানিক মানের অবকাঠামো",
+      bodyEn: "Data-centre hosting, monitoring and backups built for regulated institutions, not for a single office.",
+      bodyBn: "একটি অফিসের জন্য নয়, নিয়ন্ত্রিত প্রতিষ্ঠানের জন্য তৈরি ডেটা সেন্টার হোস্টিং, পর্যবেক্ষণ ও ব্যাকআপ।",
+    },
+  ],
+};
+
+/**
+ * Once (XFL, 19 Oct 2026): core strengths led by who owns Xpert, with real numbers.
+ * Paid-up capital ৳33 crore as stated by XFL. The 12 owner houses, by parent
+ * (checked 19 Oct 2026; src/content/xfl2/member-profiles.ts and parents' own pages):
+ *  - banks (7): Bank Asia (Bank Asia Securities), Eastern Bank (EBL Securities, fully owned),
+ *    Islami Bank Bangladesh (Islami Bank Securities), ONE Bank (ONE Securities; ONE Bank annual
+ *    report 2016), Shahjalal Islami Bank (SJIBSL, sole subsidiary since 2011, its own site),
+ *    United Commercial Bank (UCB Stock Brokerage), AB Bank (AB Securities; AB Bank's listing);
+ *  - insurers (2): Green Delta Insurance (Green Delta Securities, fully owned; green-delta.com),
+ *    National Life Insurance (NLI Securities; nlibd.com);
+ *  - corporate group (1): Apex group (Apex Investments).
+ *  Mika Securities and Remons Investment are not counted under any parent (none confirmed).
+ *  Board: nine directors, each a senior executive of an owner house (Admin → People).
+ * Placed first; existing cards are kept after them (edits included), the old "Owned by
+ * leading institutions" card is replaced, and the two infrastructure cards are merged
+ * while they still have their original text. At most 10 cards (Admin → Home highlights).
+ * Also adds "৳33 crore paid-up capital" to Admin → Figures when there is room.
+ */
+async function seedInstitutionStrengths() {
+  const MARK = "seed.institution-strengths-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  type Item = { icon: string; titleEn: string; titleBn: string; bodyEn: string; bodyBn: string; statEn?: string; statBn?: string };
+  const row = await db.siteSetting.findUnique({ where: { key: "home.strengths" } });
+  const cur = (row?.value as { items?: Item[]; introEn?: string; introBn?: string } | undefined) ?? undefined;
+  const existing: Item[] = cur?.items ?? [];
+  const lead: Item[] = [
+    {
+      icon: "building",
+      titleEn: "Owned by the country's leading institutions",
+      titleBn: "দেশের শীর্ষস্থানীয় প্রতিষ্ঠানগুলোর মালিকানাধীন",
+      statEn: "৳33 cr",
+      statBn: "৳৩৩ কোটি",
+      bodyEn: "A capital-market fintech with ৳33 crore paid-up capital, owned by 12 brokerage houses backed by the country's banks, insurers and corporate groups.",
+      bodyBn: "৳৩৩ কোটি পরিশোধিত মূলধনের পুঁজিবাজার ফিনটেক, যার মালিক দেশের ব্যাংক, বিমা প্রতিষ্ঠান ও করপোরেট গ্রুপ-সমর্থিত ১২টি ব্রোকারেজ হাউস।",
+    },
+    {
+      icon: "landmark",
+      titleEn: "Bank subsidiaries",
+      titleBn: "ব্যাংকের সাবসিডিয়ারি",
+      statEn: "7",
+      statBn: "৭",
+      bodyEn: "Seven owners are brokerage subsidiaries of banks: Bank Asia, Eastern Bank, Islami Bank Bangladesh, ONE Bank, Shahjalal Islami Bank, United Commercial Bank and AB Bank.",
+      bodyBn: "সাতটি মালিক প্রতিষ্ঠান ব্যাংকের ব্রোকারেজ সাবসিডিয়ারি: ব্যাংক এশিয়া, ইস্টার্ন ব্যাংক, ইসলামী ব্যাংক বাংলাদেশ, ওয়ান ব্যাংক, শাহজালাল ইসলামী ব্যাংক, ইউনাইটেড কমার্শিয়াল ব্যাংক ও এবি ব্যাংক।",
+    },
+    {
+      icon: "shield",
+      titleEn: "Insurance companies",
+      titleBn: "বিমা প্রতিষ্ঠান",
+      statEn: "2",
+      statBn: "২",
+      bodyEn: "Green Delta Securities and NLI Securities, the brokerage subsidiaries of Green Delta Insurance and National Life Insurance, are among the owners.",
+      bodyBn: "গ্রিন ডেল্টা ইন্স্যুরেন্স ও ন্যাশনাল লাইফ ইন্স্যুরেন্সের ব্রোকারেজ সাবসিডিয়ারি গ্রিন ডেল্টা সিকিউরিটিজ ও এনএলআই সিকিউরিটিজ মালিকদের মধ্যে রয়েছে।",
+    },
+    {
+      icon: "briefcase",
+      titleEn: "Corporate companies",
+      titleBn: "করপোরেট প্রতিষ্ঠান",
+      bodyEn: "Apex Investments, the brokerage house of the Apex group, a Syed Manzur Elahi enterprise, is an owner, alongside independent brokerage houses.",
+      bodyBn: "সৈয়দ মঞ্জুর এলাহীর প্রতিষ্ঠান অ্যাপেক্স গ্রুপের ব্রোকারেজ হাউস অ্যাপেক্স ইনভেস্টমেন্টস স্বতন্ত্র ব্রোকারেজ হাউসগুলোর পাশাপাশি একজন মালিক।",
+    },
+    {
+      icon: "users",
+      titleEn: "Institutional governance",
+      titleBn: "প্রাতিষ্ঠানিক সুশাসন",
+      statEn: "9",
+      statBn: "৯",
+      bodyEn: "A nine-member board, each director a chief executive or senior leader of an owner house, so the institutions that trade on Xpert set its direction.",
+      bodyBn: "নয় সদস্যের পরিচালনা পর্ষদ, প্রত্যেক পরিচালক একটি মালিক হাউসের প্রধান নির্বাহী বা জ্যেষ্ঠ কর্মকর্তা; তাই এক্সপার্টে লেনদেনকারী প্রতিষ্ঠানগুলোই এর দিকনির্দেশনা ঠিক করে।",
+    },
+    {
+      icon: "award",
+      titleEn: "Backed by top institutions",
+      titleBn: "শীর্ষ প্রতিষ্ঠানগুলোর সমর্থনপুষ্ট",
+      statEn: "10",
+      statBn: "১০",
+      bodyEn: "Behind the owner houses stand ten parent institutions: seven banks, two insurers and the Apex group.",
+      bodyBn: "মালিক হাউসগুলোর পেছনে রয়েছে দশটি মূল প্রতিষ্ঠান: সাতটি ব্যাংক, দুটি বিমা প্রতিষ্ঠান ও অ্যাপেক্স গ্রুপ।",
+    },
+    {
+      icon: "check",
+      titleEn: "Compliance built into every order",
+      titleBn: "প্রতিটি অর্ডারে কমপ্লায়েন্স",
+      bodyEn: "Every order passes pre-trade checks before it leaves the brokerage: no short selling, buying power and margin limits, value and quantity caps, and the price band.",
+      bodyBn: "ব্রোকারেজ থেকে বের হওয়ার আগে প্রতিটি অর্ডার যাচাই হয়: শর্ট সেল প্রতিরোধ, ক্রয়ক্ষমতা ও মার্জিন সীমা, মূল্য ও পরিমাণের সীমা এবং প্রাইস ব্যান্ড।",
+    },
+  ];
+  const D = DEFAULT_STRENGTHS_SEED;
+  const same = (a: Item | undefined, b: Item | undefined) => !!a && !!b && a.titleEn === b.titleEn && a.bodyEn === b.bodyEn;
+  let rest = (existing.length ? existing : D.items).filter((i) => i.titleEn !== "Owned by leading institutions" && !lead.some((l) => l.titleEn === i.titleEn));
+  const net = rest.find((i) => same(i, D.items[2]));
+  const infra = rest.find((i) => same(i, D.items[4]));
+  if (net && infra) {
+    rest = rest
+      .filter((i) => i !== net)
+      .map((i) =>
+        i === infra
+          ? {
+              ...i,
+              bodyEn: "Data-centre hosting, a redundant network to DSE and CSE, monitoring and backups, built for regulated institutions and the busiest trading hours.",
+              bodyBn: "ডেটা সেন্টার হোস্টিং, ডিএসই ও সিএসই পর্যন্ত রিডানড্যান্ট নেটওয়ার্ক, পর্যবেক্ষণ ও ব্যাকআপ; নিয়ন্ত্রিত প্রতিষ্ঠান ও সবচেয়ে ব্যস্ত লেনদেনের সময়ের জন্য তৈরি।",
+            }
+          : i,
+      );
+  }
+  const items = [...lead, ...rest].slice(0, 10);
+  const dropped = [...lead, ...rest].slice(10).map((i) => i.titleEn);
+  const intro =
+    !cur?.introEn || cur.introEn.startsWith("Five reasons")
+      ? { introEn: "Who stands behind Xpert, in numbers, and why its owners run their business on it.", introBn: "এক্সপার্টের পেছনে কারা, সংখ্যায়, আর কেন এর মালিকরাই এতে তাদের ব্যবসা চালায়।" }
+      : {};
+  const value = { titleEn: D.titleEn, titleBn: D.titleBn, introEn: D.introEn, introBn: D.introBn, ...(cur ?? {}), ...intro, items };
+  await db.siteSetting.upsert({ where: { key: "home.strengths" }, update: { value }, create: { key: "home.strengths", value } });
+  // Paid-up capital among the figures, with its source.
+  const fig = await db.siteSetting.findUnique({ where: { key: "site.figures" } });
+  const figures = Array.isArray(fig?.value) ? (fig!.value as { value?: string; labelEn?: string }[]) : [];
+  let figNote = "";
+  if (!figures.some((f) => /paid-up capital/i.test(f.labelEn ?? "")) && figures.length < 6) {
+    const next = [...figures, { value: "৳33 crore", labelEn: "Paid-up capital", labelBn: "পরিশোধিত মূলধন", source: "Xpert Fintech Ltd.", asOf: null }];
+    await db.siteSetting.upsert({ where: { key: "site.figures" }, update: { value: next }, create: { key: "site.figures", value: next } });
+    figNote = "; paid-up capital added to Figures";
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), dropped } } });
+  console.log(`• Core strengths: ${items.length} cards, led by ownership (৳33 cr capital, 7 bank and 2 insurer subsidiaries, 9-member board)${figNote}${dropped.length ? `; over the limit, not added: ${dropped.join(", ")}` : ""}`);
+}
+
+/**
+ * Once (XFL, 19 Oct 2026): the growth journey on the success stories page, each
+ * milestone from a press report already on the site (src/content/xfl2/press.ts):
+ * founded 2021 and 16 houses on the OMS (Arthosuchak, 20 Aug 2026), ten houses
+ * building their own OMS (The Financial Express, 25 Aug 2023), EcoSoftBD acquired
+ * (The New Nation, 11 May 2025), 12 owners and 17 houses (Arthosuchak, 21 Sep 2026).
+ * Kept as edited afterwards in Admin → Success stories → Growth journey.
+ */
+async function seedJourney() {
+  const MARK = "seed.journey-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  if (!(await db.siteSetting.findUnique({ where: { key: "stories.journey" } }))) {
+    const url = (slug: string) => PRESS_STORIES.find((p) => p.slug.en === slug)?.sourceUrl ?? "";
+    const seminar = url("xpert-fintech-one-stop-service-capital-market");
+    const dayout = url("stakeholders-dayout-2026");
+    const value = {
+      titleEn: "How Xpert grew, milestone by milestone",
+      titleBn: "এক্সপার্ট যেভাবে বেড়েছে, ধাপে ধাপে",
+      introEn: "From a consortium of ten brokerage houses to the OMS behind almost half of DSE's turnover, each step as it was reported.",
+      introBn: "দশটি ব্রোকারেজ হাউসের কনসোর্টিয়াম থেকে ডিএসইর লেনদেনের প্রায় অর্ধেকের পেছনের ওএমএস পর্যন্ত, প্রতিটি ধাপ যেমন প্রকাশিত হয়েছে।",
+      metricEn: "Brokerage houses on Xpert",
+      metricBn: "এক্সপার্টে ব্রোকারেজ হাউস",
+      steps: [
+        {
+          date: "2021",
+          value: null,
+          titleEn: "Founded by DSE's leading brokerage houses",
+          titleBn: "ডিএসইর শীর্ষ ব্রোকারেজ হাউসগুলোর উদ্যোগে প্রতিষ্ঠা",
+          bodyEn: "Xpert Fintech Ltd. is set up by leading brokerage houses of the Dhaka Stock Exchange.",
+          bodyBn: "ঢাকা স্টক এক্সচেঞ্জের শীর্ষ ব্রোকারেজ হাউসগুলোর উদ্যোগে এক্সপার্ট ফিনটেক লিমিটেড গঠিত হয়।",
+          source: "Arthosuchak",
+          sourceUrl: seminar,
+        },
+        {
+          date: "2023-08-25",
+          value: 10,
+          titleEn: "Ten brokerage houses build their own OMS",
+          titleBn: "দশটি ব্রোকারেজ হাউসের নিজস্ব ওএমএস",
+          bodyEn: "Through Xpert, ten brokerage houses set out to give their clients direct access to trading on DSE and CSE.",
+          bodyBn: "এক্সপার্টের মাধ্যমে দশটি ব্রোকারেজ হাউস গ্রাহকদের ডিএসই ও সিএসইতে সরাসরি লেনদেনের সুযোগ দিতে উদ্যোগ নেয়।",
+          source: "The Financial Express",
+          sourceUrl: url("ten-brokers-consortium-own-trading-platform"),
+        },
+        {
+          date: "2025-04-22",
+          value: null,
+          titleEn: "EcoSoftBD IT acquired",
+          titleBn: "ইকোসফটবিডি আইটি অধিগ্রহণ",
+          bodyEn: "Xpert acquires EcoSoftBD IT Ltd., an order management system vendor already serving brokerages.",
+          bodyBn: "ব্রোকারেজ হাউসে আগে থেকেই সেবা দেওয়া ওএমএস নির্মাতা ইকোসফটবিডি আইটি লিমিটেড অধিগ্রহণ করে এক্সপার্ট।",
+          source: "The New Nation",
+          sourceUrl: url("xpert-fintech-acquires-ecosoftbd-new-nation"),
+        },
+        {
+          date: "2026-08-19",
+          value: 16,
+          titleEn: "OMS live at 16 brokerage houses",
+          titleBn: "১৬টি ব্রোকারেজ হাউসে ওএমএস",
+          bodyEn: "45–47% of DSE's turnover passes through Xpert's OMS, up to 57% at its peak (company figures).",
+          bodyBn: "ডিএসইর লেনদেনের ৪৫–৪৭% এক্সপার্টের ওএমএসের মাধ্যমে হয়, সর্বোচ্চ ৫৭% পর্যন্ত (প্রতিষ্ঠানের তথ্য)।",
+          source: "Arthosuchak",
+          sourceUrl: seminar,
+        },
+        {
+          date: "2026-09-21",
+          value: 17,
+          titleEn: "Twelve owners, seventeen houses",
+          titleBn: "বারো মালিক, সতেরো হাউস",
+          bodyEn: "Owners grew from ten to twelve, and seventeen of the country's leading brokerage houses now use the OMS.",
+          bodyBn: "মালিক প্রতিষ্ঠান দশ থেকে বারোতে উন্নীত, আর দেশের শীর্ষ সতেরোটি ব্রোকারেজ হাউস এখন ওএমএস ব্যবহার করছে।",
+          source: "Arthosuchak",
+          sourceUrl: dayout,
+        },
+      ],
+    };
+    await db.siteSetting.create({ data: { key: "stories.journey", value } });
+    console.log("• Success stories: growth journey added (5 sourced milestones)");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
 /**
  * Once (XFL, 19 Oct 2026): sharper headlines for the core strengths and the cost savings
  * graphic, where the admin still has the earlier wording (anything edited is kept).
@@ -2836,6 +3087,8 @@ async function main() {
   await showForEditing();
   await seedWhatsAppNumber();
   await seedSharperHeadlines();
+  await seedInstitutionStrengths();
+  await seedJourney();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

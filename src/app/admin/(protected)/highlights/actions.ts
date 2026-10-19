@@ -22,12 +22,13 @@ export async function saveHighlights(_prev: HighlightsState, formData: FormData)
   // Core strengths
   const items: StrengthsSetting["items"] = [];
   for (let i = 0; i < MAX_STRENGTHS; i++) {
-    const row = { icon: g(`icon_${i}`), titleEn: g(`titleEn_${i}`), titleBn: g(`titleBn_${i}`), bodyEn: g(`bodyEn_${i}`), bodyBn: g(`bodyBn_${i}`) };
+    const row = { icon: g(`icon_${i}`), titleEn: g(`titleEn_${i}`), titleBn: g(`titleBn_${i}`), bodyEn: g(`bodyEn_${i}`), bodyBn: g(`bodyBn_${i}`), statEn: g(`statEn_${i}`), statBn: g(`statBn_${i}`) };
     if (!row.titleEn && !row.titleBn && !row.bodyEn && !row.bodyBn) continue;
     if (!row.titleEn) errors[`titleEn_${i}`] = "Give the strength an English title.";
     if (!ICON_NAMES.includes(row.icon)) row.icon = "check";
     for (const k of ["titleEn", "titleBn"]) long(`${k}_${i}`, 90);
     for (const k of ["bodyEn", "bodyBn"]) long(`${k}_${i}`, 300);
+    for (const k of ["statEn", "statBn"]) long(`${k}_${i}`, 16);
     items.push(row);
   }
   const strengths: StrengthsSetting = { titleEn: g("sTitleEn"), titleBn: g("sTitleBn"), introEn: g("sIntroEn"), introBn: g("sIntroBn"), items };

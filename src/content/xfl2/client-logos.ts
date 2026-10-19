@@ -32,6 +32,9 @@ export const CLIENT_LOGOS: ClientLogo[] = [
   { key: "wifang-securities", name: "Wifang Securities Limited" },
   // Confirmed by XFL as a client (18 Oct 2026); name as on DSE's TREC holder list.
   { key: "thia-securities", name: "Thea Securities Ltd." },
+  // Confirmed by XFL as clients (19 Oct 2026); logos taken from their own websites at seed time.
+  { key: "bluechip-securities", name: "Bluechip Securities Ltd." },
+  { key: "square-securities", name: "Square Securities Management Ltd." },
 ];
 
 /**

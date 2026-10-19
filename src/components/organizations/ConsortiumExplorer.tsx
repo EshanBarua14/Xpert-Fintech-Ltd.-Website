@@ -28,6 +28,8 @@ export type ConsortiumLabels = {
   noRep: string;
   /** Placeholder card when a house has no representative on file: "Representative to be announced". */
   repPending?: string;
+  /** Gold line under a representative with no seat at Xpert ("Representative"). */
+  representative?: string;
   website: string;
   /** LinkedIn and email icons beside each representative. */
   contact?: ContactLabels;
@@ -377,10 +379,9 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                   <ul className="flex flex-col gap-3">
                     {m.reps.map((r) => (
                       <li key={r.name} className="flex flex-wrap items-center gap-3 rounded-2xl border border-fg/10 p-2.5 pr-3 transition-colors hover:border-gold/60 sm:flex-nowrap">
-                        <Link
-                          href={r.group === "BOARD" ? labels.boardHref : labels.consultantsHref}
-                          className="group flex min-w-0 flex-1 items-center gap-3"
-                        >
+                        {r.group === "REPRESENTATIVE" ? (
+                          // Representative only: no seat at Xpert, so no profile page to link to.
+                          <div className="group flex min-w-0 flex-1 items-center gap-3">
                           <span className="relative aspect-[4/5] w-12 shrink-0 overflow-hidden rounded-xl bg-navy-800">
                             {r.photo ? (
                               <Image src={r.photo} alt="" fill sizes="3rem" quality={90} className="object-cover object-top" style={r.photoStyle} />
@@ -390,10 +391,34 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                           </span>
                           <span className="flex min-w-0 flex-col">
                             <span className="font-semibold text-text-primary group-hover:text-gold">{r.name}</span>
-                            <span className="text-xs text-gold">{(labels.roleAtXpert ?? "{title}").replace("{title}", r.group === "BOARD" ? r.title ?? labels.boardSeat : r.title ?? labels.consultant)}</span>
+                            <span className="text-xs text-gold">
+                              {r.group === "REPRESENTATIVE"
+                                ? (labels.representative ?? "Representative")
+                                : (labels.roleAtXpert ?? "{title}").replace("{title}", r.group === "BOARD" ? r.title ?? labels.boardSeat : r.title ?? labels.consultant)}
+                            </span>
                             {r.position && <span className="line-clamp-2 text-xs text-text-secondary">{r.position}</span>}
                           </span>
-                        </Link>
+                          </div>
+                        ) : (
+                          <Link href={r.group === "BOARD" ? labels.boardHref : labels.consultantsHref} className="group flex min-w-0 flex-1 items-center gap-3">
+                          <span className="relative aspect-[4/5] w-12 shrink-0 overflow-hidden rounded-xl bg-navy-800">
+                            {r.photo ? (
+                              <Image src={r.photo} alt="" fill sizes="3rem" quality={90} className="object-cover object-top" style={r.photoStyle} />
+                            ) : (
+                              <span className="flex h-full items-center justify-center font-display text-sm text-text-secondary">{monogram(r.name)}</span>
+                            )}
+                          </span>
+                          <span className="flex min-w-0 flex-col">
+                            <span className="font-semibold text-text-primary group-hover:text-gold">{r.name}</span>
+                            <span className="text-xs text-gold">
+                              {r.group === "REPRESENTATIVE"
+                                ? (labels.representative ?? "Representative")
+                                : (labels.roleAtXpert ?? "{title}").replace("{title}", r.group === "BOARD" ? r.title ?? labels.boardSeat : r.title ?? labels.consultant)}
+                            </span>
+                            {r.position && <span className="line-clamp-2 text-xs text-text-secondary">{r.position}</span>}
+                          </span>
+                          </Link>
+                        )}
                         {/* LinkedIn, email, and the house's website */}
                         <span className="flex shrink-0 items-center gap-1.5">
                           {labels.contact && (

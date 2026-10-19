@@ -165,7 +165,7 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
           </div>
 
           {/* Goal and the two exchanges */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col justify-center gap-6">
             {goal && (
               <div className="flex flex-col gap-3">
                 <GoalMeter

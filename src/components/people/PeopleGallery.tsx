@@ -66,10 +66,9 @@ const PLACEHOLDER_PHOTO = "/placeholders/person.svg";
 
 /** One card's width: 1, 2, 3 or 4 across with 1.25rem gaps. */
 const COLUMN = "w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-3.75rem)/4)]";
-/** Wide screens: as many per row as avoids one card alone on the last row (5 → one row of 5, 9 → 3 + 3 + 3). */
-const COLUMN_5 = "w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-5rem)/5)]";
+/** Wide screens: as many per row as avoids one card alone on the last row (5 → 3 + 2, 9 → 3 + 3 + 3). */
 const COLUMN_3 = "w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)]";
-const columnFor = (n: number) => (n === 5 ? COLUMN_5 : n % 4 === 1 && n % 3 !== 1 ? COLUMN_3 : COLUMN);
+const columnFor = (n: number) => (n % 4 === 1 && n % 3 !== 1 ? COLUMN_3 : COLUMN);
 
 /** With editor hints on: a missing email or LinkedIn, as a dashed icon that opens the place to add it. */
 function ContactSlot({ kind, name }: { kind: "email" | "linkedin"; name: string }) {
@@ -246,7 +245,7 @@ function PersonCard({
             </p>
           )
         )}
-        <div className="mt-auto flex items-center gap-1.5 border-t border-fg/[0.08] pt-4">
+        <div className="mt-auto flex flex-wrap items-center gap-1.5 gap-y-2 border-t border-fg/[0.08] pt-4">
           {!p.email && showPlaceholderBadge ? <ContactSlot kind="email" name={p.name} /> : <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} size="size-8" />}
           {!p.linkedinUrl && showPlaceholderBadge ? (
             <ContactSlot kind="linkedin" name={p.name} />
@@ -277,6 +276,7 @@ export function PeopleGallery({
   groupLabel,
   company,
   featureFirst = false,
+  leadCount = 1,
   tone = "management",
 }: {
   people: GalleryPerson[];
@@ -289,6 +289,8 @@ export function PeopleGallery({
   company?: string;
   /** Board and management: the first person (Chairman, MD) sits alone on the top row, same card size, centred. */
   featureFirst?: boolean;
+  /** How many lead cards share the top row (management: the MD and the CFO). */
+  leadCount?: number;
   /** Accent colour of the cards and profile: board gold, management blue, consultant teal. */
   tone?: "board" | "management" | "consultant" | "team";
 }) {
@@ -318,17 +320,19 @@ export function PeopleGallery({
 
   return (
     <div className={`people-tone-${tone}`}>
-      {featureFirst && people.length > 2 && (
-        <ul className="mb-5 flex justify-center">
-          {/* Exactly one grid column wide, so the lead card matches the others. */}
-          <li data-reveal className={COLUMN}>
-            <PersonCard p={people[0]!} labels={labels} groupLabel={groupLabel} company={company} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(people[0]!, t)} />
-          </li>
+      {/* The lead card(s) on their own row, each exactly one column wide, so they match the cards below. */}
+      {featureFirst && people.length > leadCount + 1 && (
+        <ul className="mb-5 flex flex-wrap justify-center gap-5">
+          {people.slice(0, leadCount).map((p) => (
+            <li key={p.id} data-reveal className={COLUMN}>
+              <PersonCard p={p} labels={labels} groupLabel={groupLabel} company={company} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(p, t)} />
+            </li>
+          ))}
         </ul>
       )}
-      {/* Centred rows, so a short last row (e.g. three managers under the MD) sits in the middle. */}
+      {/* Centred rows, so a short last row sits in the middle. */}
       <ul className="flex flex-wrap justify-center gap-5">
-        {(featureFirst && people.length > 2 ? people.slice(1) : people).map((p, i, rest) => (
+        {(featureFirst && people.length > leadCount + 1 ? people.slice(leadCount) : people).map((p, i, rest) => (
           <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className={columnFor(rest.length)}>
             <PersonCard p={p} labels={labels} groupLabel={groupLabel} company={company} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(p, t)} />
           </li>

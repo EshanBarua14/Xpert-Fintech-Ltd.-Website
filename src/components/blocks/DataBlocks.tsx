@@ -118,6 +118,8 @@ export async function PeopleGrid({
       company={group === "BOARD" || group === "CONSULTANT" ? (locale === "bn" ? "এক্সপার্ট ফিনটেক লিমিটেড" : "Xpert Fintech Ltd.") : undefined}
       showPlaceholderBadge={editorHints()}
       featureFirst={group === "BOARD" || group === "MANAGEMENT" || group === "CONSULTANT"}
+      // Management: the MD and the CFO side by side, the rest in rows below.
+      leadCount={group === "MANAGEMENT" ? 2 : 1}
       tone={group === "BOARD" ? "board" : group === "MANAGEMENT" ? "management" : group === "CONSULTANT" ? "consultant" : "team"}
       labels={{
         viewProfile: t.viewProfile,

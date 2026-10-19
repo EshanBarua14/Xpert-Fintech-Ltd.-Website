@@ -633,11 +633,13 @@
   mask: radial-gradient(circle, #000 18%, transparent 60%);
 }
 .ow3-group { --c1: #c9d4e3; --c2: #8d9bb0; --c3: #5f6d82; }
-.ow3-group.is-bank, .ow-tab.is-bank { --c1: #7fdcf7; --c2: #23a6dd; --c3: #2a5fae; }
-.ow3-group.is-insurance, .ow-tab.is-insurance { --c1: #86f0cd; --c2: #22b98a; --c3: #15805f; }
-.ow3-group.is-corporate, .ow-tab.is-corporate { --c1: #f6d995; --c2: #d9a640; --c3: #a3741f; }
-.ow3-group.is-independent, .ow-tab.is-independent { --c1: #d7c2f5; --c2: #9b7fd0; --c3: #6a52a3; }
-.ow-tab { --c1: #c9d4e3; --c2: #8d9bb0; }
+.ow3-group.is-bank, .ow-tab.is-bank, .ow-seg.is-bank { --c1: #7fdcf7; --c2: #23a6dd; --c3: #2a5fae; }
+.ow3-group.is-insurance, .ow-tab.is-insurance, .ow-seg.is-insurance { --c1: #86f0cd; --c2: #22b98a; --c3: #15805f; }
+.ow3-group.is-corporate, .ow-tab.is-corporate, .ow-seg.is-corporate { --c1: #f6d995; --c2: #d9a640; --c3: #a3741f; }
+.ow3-group.is-independent, .ow-tab.is-independent, .ow-seg.is-independent { --c1: #d7c2f5; --c2: #9b7fd0; --c3: #6a52a3; }
+.ow-tab, .ow-seg { --c1: #c9d4e3; --c2: #8d9bb0; }
+.ow-seg { background: linear-gradient(90deg, var(--c1), var(--c2)); }
+.ow-seg.is-lit { box-shadow: 0 0 0.8rem color-mix(in oklab, var(--c2) 70%, transparent); }
 .ow-tab .ow-dot { background: linear-gradient(135deg, var(--c1), var(--c2)); }
 .ow-tab[aria-selected="true"] { background: color-mix(in oklab, var(--c2) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c2) 70%, transparent); }
 .ow3-plat > i { background-color: color-mix(in oklab, var(--color-navy-800) 80%, var(--c2)); border: 1px solid color-mix(in oklab, var(--c2) 35%, transparent); transition: background-color 0.6s ease, box-shadow 0.6s ease; }

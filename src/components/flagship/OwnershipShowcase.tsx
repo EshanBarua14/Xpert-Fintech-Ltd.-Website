@@ -47,7 +47,8 @@ const CYCLE_MS = 4800;
  *  - the owner houses as blocks standing on one platform per basis (banks, insurers,
  *    corporate groups…), each platform's count floating above it. One basis is lit at a
  *    time (by itself, or the one chosen) and its houses are listed with their parents;
- *  - the totals underneath: houses, parent institutions, board directors, capital.
+ *  - beside the capital, the owners in figures and as one bar of their mix (synced with the platforms).
+ * The board's size is told under Key strengths (governance), not repeated here.
  * Everything comes from the admin; nothing is drawn that is not entered there.
  * Reduced motion: the final state, no cycling.
  */
@@ -161,10 +162,12 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
         {data.intro && <p className="max-w-2xl leading-relaxed text-text-secondary">{data.intro}</p>}
       </div>
 
-      <div className={cn("grid gap-5", cap && n ? "lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.6fr)]" : "")}>
-        {/* Paid-up capital */}
+      <div className={cn("grid gap-5", (cap || n) && n ? "lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.6fr)]" : "")}>
+        {/* Left: the paid-up capital, then the owners in figures and as one bar (the same colours as the platforms). */}
+        {(cap || n > 0) && (
+        <div className="flex flex-col gap-4">
         {cap && (
-          <div className="relative flex flex-col overflow-hidden rounded-[2rem] border border-gold/25 bg-navy-900/70">
+          <div className="relative flex flex-1 flex-col overflow-hidden rounded-[2rem] border border-gold/25 bg-navy-900/70">
             <div className="relative z-10 flex flex-col gap-1 px-6 pt-6 md:px-7 md:pt-7">
               <p className="text-sm font-semibold text-text-secondary">{t.capital}</p>
               <p className="flex items-baseline gap-2 font-display leading-none font-semibold" aria-label={`${t.capital}: ৳${nf(cap.crore)} ${t.crore}`}>
@@ -174,7 +177,7 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
                 <span aria-hidden="true" className="text-2xl text-gold">{t.crore}</span>
               </p>
             </div>
-            <div className="x3 oc3" onPointerMove={lean} onPointerLeave={rest} aria-hidden="true">
+            <div className="x3 oc3 my-auto" onPointerMove={lean} onPointerLeave={rest} aria-hidden="true">
               <div className="x3-world">
                 <div className="oc3-floor" />
                 {Array.from({ length: stacks }, (_, s) => {
@@ -214,6 +217,52 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
               )}
             </div>
           </div>
+        )}
+        {n > 0 && (
+          <div className="flex flex-col gap-4 rounded-[2rem] border border-fg/10 bg-navy-900/70 p-5 md:p-6">
+            <dl className="grid grid-cols-2 gap-4">
+              {[
+                { v: digits(data.houses, bn), l: t.houses },
+                data.parents > 0 && { v: digits(data.parents, bn), l: t.parents },
+              ]
+                .filter((x): x is { v: string; l: string } => Boolean(x))
+                .map((x) => (
+                  <div key={x.l} className="flex flex-col gap-1">
+                    <dd className="order-1 stat3d font-display text-4xl leading-none font-semibold tabular-nums">{x.v}</dd>
+                    <dt className="order-2 text-sm leading-snug text-text-secondary">{x.l}</dt>
+                  </div>
+                ))}
+            </dl>
+            {/* The mix of owners: one segment per basis, in step with the platforms and tabs. */}
+            <div className="flex flex-col gap-2">
+              <div className="ow-mix flex h-3 gap-1 overflow-hidden rounded-full" aria-hidden="true">
+                {data.groups.map((g, gi) => (
+                  <button
+                    key={g.basis}
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => {
+                      setActive(gi);
+                      setHeld(true);
+                    }}
+                    onMouseEnter={() => setActive(gi)}
+                    className={cn("ow-seg h-full rounded-full transition-[opacity,transform] duration-500", `is-${g.basis.toLowerCase()}`, gi === active ? "is-lit" : "opacity-45")}
+                    style={{ flex: g.houses.length }}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-text-secondary">
+                {data.groups.map((g, gi) => (
+                  <span key={g.basis} className={cn("mr-3 inline-flex items-center gap-1.5", gi === active && "font-semibold text-text-primary")}>
+                    <span aria-hidden="true" className={cn("ow-seg size-2 rounded-full", `is-${g.basis.toLowerCase()}`)} />
+                    {digits(g.houses.length, bn)} {g.label}
+                  </span>
+                ))}
+              </p>
+            </div>
+          </div>
+        )}
+        </div>
         )}
 
         {/* The owners, by basis */}
@@ -331,22 +380,6 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
         )}
       </div>
 
-      {/* The totals */}
-      <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {[
-          data.houses > 0 && { v: digits(data.houses, bn), l: t.houses },
-          data.parents > 0 && { v: digits(data.parents, bn), l: t.parents },
-          data.board > 0 && { v: digits(data.board, bn), l: t.board },
-          cap && { v: `৳${nf(cap.crore)} ${t.crore}`, l: t.capital },
-        ]
-          .filter((x): x is { v: string; l: string } => Boolean(x))
-          .map((x, i) => (
-            <div key={x.l} data-reveal style={{ "--d": i } as CSSProperties} className="ow-stat flex flex-col gap-1 rounded-2xl border border-fg/10 bg-navy-900/60 px-5 py-4">
-              <dd className="order-1 stat3d font-display text-3xl leading-none font-semibold tabular-nums md:text-4xl">{x.v}</dd>
-              <dt className="order-2 text-sm text-text-secondary">{x.l}</dt>
-            </div>
-          ))}
-      </dl>
     </div>
   );
 }

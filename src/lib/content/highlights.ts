@@ -12,9 +12,10 @@ import type { AppLocale } from "@/lib/i18n/config";
 export const STRENGTHS_KEY = "home.strengths";
 export const SAVINGS_KEY = "home.savings";
 export const WHATSAPP_KEY = "site.whatsapp";
-export const MAX_STRENGTHS = 8;
+export const MAX_STRENGTHS = 10;
 
-export type Strength = { icon: string; titleEn: string; titleBn: string; bodyEn: string; bodyBn: string };
+/** `statEn`/`statBn`: an optional figure shown large on the card (e.g. "৳33 cr", "7"); only real, sourced numbers. */
+export type Strength = { icon: string; titleEn: string; titleBn: string; bodyEn: string; bodyBn: string; statEn?: string; statBn?: string };
 export type StrengthsSetting = { titleEn: string; titleBn: string; introEn: string; introBn: string; items: Strength[] };
 
 export type SavingsSetting = {
@@ -148,6 +149,8 @@ export function readStrengths(value: unknown): StrengthsSetting {
       titleBn: str(x.titleBn),
       bodyEn: str(x.bodyEn),
       bodyBn: str(x.bodyBn),
+      statEn: str(x.statEn),
+      statBn: str(x.statBn),
     }))
     .filter((x) => x.titleEn);
   return { titleEn: str(v.titleEn), titleBn: str(v.titleBn), introEn: str(v.introEn), introBn: str(v.introBn), items: items.slice(0, MAX_STRENGTHS) };
@@ -212,7 +215,7 @@ export async function getStrengths(locale: AppLocale) {
   return {
     title: pick(locale, s.titleEn, s.titleBn),
     intro: pick(locale, s.introEn, s.introBn),
-    items: s.items.map((i) => ({ icon: i.icon, title: pick(locale, i.titleEn, i.titleBn), body: pick(locale, i.bodyEn, i.bodyBn) })),
+    items: s.items.map((i) => ({ icon: i.icon, title: pick(locale, i.titleEn, i.titleBn), body: pick(locale, i.bodyEn, i.bodyBn), stat: pick(locale, i.statEn ?? "", i.statBn ?? "") })),
   };
 }
 

@@ -3,6 +3,8 @@ import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/admin/AdminUi";
 import { AdminList, formatDhaka, Notice } from "@/components/admin/AdminList";
+import { JourneyForm } from "@/components/admin/JourneyForm";
+import { getJourneySetting } from "@/lib/content/journey";
 
 type Search = { q?: string; view?: string; trashed?: string; deleted?: string };
 
@@ -19,7 +21,9 @@ export default async function ListPage({ searchParams }: { searchParams: Promise
     db.caseStudy.findMany({ where, orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }], include: { translations: true } }),
     db.caseStudy.count({ where: { deletedAt: { not: null } } }),
   ]);
+  const journey = inTrash ? null : await getJourneySetting();
   return (
+    <div className="flex flex-col gap-10">
     <AdminList
       title="Success stories"
       intro="Client stories: challenge, what we did and the outcome. Publish only with the client's agreement."
@@ -43,6 +47,8 @@ export default async function ListPage({ searchParams }: { searchParams: Promise
         cells: [<StatusBadge key="s" status={r.status} publishAt={r.publishAt} deletedAt={r.deletedAt} />, formatDhaka(r.updatedAt)],
       }))}
     />
+    {journey && <JourneyForm journey={journey} />}
+    </div>
   );
 }
 

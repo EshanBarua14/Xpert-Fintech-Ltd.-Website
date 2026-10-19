@@ -156,16 +156,16 @@ export default async function AboutPage({ params }: Props) {
             <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
               <SectionHeader title={strengths.title} body={strengths.intro || null} />
               {share !== null && (
-                <div data-reveal className="glow-track flex shrink-0 items-center gap-2 rounded-3xl border border-gold/30 bg-gold/[0.06] py-2 pr-6 pl-2">
+                <div data-reveal className="glow-track flex shrink-0 flex-col items-center gap-1 rounded-3xl border border-gold/30 bg-gold/[0.06] px-5 pt-3 pb-5 text-center sm:flex-row sm:gap-3 sm:pr-7 sm:pl-3 sm:text-left">
                   {/* The share as a small 3D pie, its figure on the label. */}
                   <ShareCoin3D
                     pct={share}
                     size="sm"
                     locale={loc === "bn" ? "bn" : "en"}
                     label={`${digits(share, loc === "bn")}% ${loc === "bn" ? `${shareEx === "DSE" ? "ডিএসইর" : "সিএসইর"} লেনদেন এক্সপার্টের মাধ্যমে` : `of ${shareEx} turnover runs through Xpert`}`}
-                    className="w-[14rem] shrink-0"
+                    className="w-[15rem] max-w-full shrink-0"
                   />
-                  <span className="max-w-[12rem] text-sm leading-snug text-text-secondary">
+                  <span className="max-w-[15rem] text-sm leading-snug text-balance text-text-secondary">
                     {loc === "bn" ? `${shareEx === "DSE" ? "ডিএসইর" : "সিএসইর"} লেনদেন এক্সপার্টের মাধ্যমে` : `of ${shareEx} turnover runs through Xpert`}
                     {headline?.source && <span className="mt-1 block text-xs opacity-80">{loc === "bn" ? "সূত্র" : "Source"}: {headline.source}</span>}
                   </span>

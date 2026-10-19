@@ -23,6 +23,9 @@ const PATHS: Record<string, string> = {
   video: "M3 6h12v12H3zM15 10l6-3v10l-6-3",
   briefcase: "M3 8h18v12H3zM8 8V5h8v3M3 13h18",
   book: "M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h11",
+  building: "M4 21V5l8-3v19M12 21V9l8 3v9M2 21h20M7 8h2M7 12h2M7 16h2M15 14h2M15 17h2",
+  landmark: "M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18M3 18h18",
+  award: "M12 15a6 6 0 100-12 6 6 0 000 12zM8.5 14l-1.5 8 5-3 5 3-1.5-8",
 };
 
 export const ICON_NAMES = Object.keys(PATHS);

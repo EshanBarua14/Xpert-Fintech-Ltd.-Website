@@ -9,6 +9,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { formInput } from "@/lib/admin/forms";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { purgeCaseStudy } from "@/lib/admin/purge";
+import { parseResultsText } from "@/lib/content/results";
 import { optionalHttpsUrl, optionalId, optionalText, parseLocalDateTime, slugField, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 
 export type CaseStudyState = { errors?: FieldErrors; message?: string };
@@ -21,6 +22,7 @@ const schema = z.object({
   coverMediaId: optionalId,
   sourceName: optionalText(120),
   sourceUrl: optionalHttpsUrl,
+  results: optionalText(2000),
   enTitle: z.string().trim().min(1, "English title is required.").max(200),
   enSlug: slugField,
   enSummary: optionalText(800),
@@ -47,7 +49,18 @@ export async function saveCaseStudy(_prev: CaseStudyState, formData: FormData): 
   const enSlug = v.enSlug || slugify(v.enTitle);
   if (!enSlug) return { errors: { enSlug: "Enter a URL slug using English letters." } };
   const bnSlug = v.bnSlug || enSlug;
-  const data = { status: v.status, publishAt: parseLocalDateTime(v.publishAt), sortOrder: v.sortOrder, coverMediaId: v.coverMediaId, sourceName: v.sourceName ?? null, sourceUrl: v.sourceUrl, updatedById: admin.id };
+  const parsedResults = parseResultsText(v.results ?? "");
+  if (parsedResults.error) return { errors: { results: parsedResults.error }, message: "Please fix the highlighted fields." };
+  const data = {
+    status: v.status,
+    publishAt: parseLocalDateTime(v.publishAt),
+    sortOrder: v.sortOrder,
+    coverMediaId: v.coverMediaId,
+    sourceName: v.sourceName ?? null,
+    sourceUrl: v.sourceUrl,
+    results: parsedResults.results.length ? parsedResults.results : Prisma.DbNull,
+    updatedById: admin.id,
+  };
   const text = (l: "en" | "bn") => ({
     slug: l === "en" ? enSlug : bnSlug,
     title: l === "en" ? v.enTitle : v.bnTitle,

@@ -11,6 +11,8 @@ import { getOrgLogos, orgForText } from "@/lib/public/flagship";
 import { buildMetadata } from "@/lib/public/seo";
 import { contentSlots } from "@/lib/env/hints";
 import { ContentSlot } from "@/components/ui/ContentSlot";
+import { Journey3D } from "@/components/insights/Journey3D";
+import { getJourney } from "@/lib/content/journey";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -26,10 +28,16 @@ export default async function CaseStudiesPage({ params }: Props) {
   if (!isLocale(locale)) notFound();
   const loc = locale as AppLocale;
   const t = getMessages(loc);
-  const [items, orgLogos] = await Promise.all([getCaseStudies(loc), getOrgLogos(loc)]);
+  const [items, orgLogos, journey] = await Promise.all([getCaseStudies(loc), getOrgLogos(loc), getJourney(loc)]);
   return (
     <>
       <PageHero eyebrow={t.insightsEyebrow} title={t.caseStudiesTitle} body={t.caseStudiesBody} />
+      {/* The company's growth, milestone by milestone (Admin → Success stories → Growth journey). */}
+      {journey && (
+        <Shell className="pb-12 md:pb-16">
+          <Journey3D data={journey} locale={loc} sourceLabel={t.source} />
+        </Shell>
+      )}
       <Shell className="pb-16 md:pb-20">
         {items.length === 0 ? (
           contentSlots() ? (
@@ -80,6 +88,17 @@ export default async function CaseStudiesPage({ params }: Props) {
                     )}
                     <span className="font-display text-2xl leading-snug font-semibold tracking-tight text-balance">{c.title}</span>
                     {c.summary && <span className="line-clamp-3 text-text-secondary">{c.summary}</span>}
+                    {/* Key results, large (Admin → Success stories → Key results). */}
+                    {c.results.length > 0 && (
+                      <span className="grid grid-cols-2 gap-3 pt-1 sm:grid-cols-3">
+                        {c.results.slice(0, 3).map((r) => (
+                          <span key={r.label} className="flex flex-col gap-1 rounded-2xl border border-fg/10 bg-fg/[0.03] p-3">
+                            <span className="stat3d font-display text-2xl leading-none font-semibold">{r.value}</span>
+                            <span className="text-xs leading-snug text-text-secondary">{r.label}</span>
+                          </span>
+                        ))}
+                      </span>
+                    )}
                     <span className="mt-auto pt-2 text-sm font-semibold text-brand-sky">{t.readCaseStudy}</span>
                   </span>
                 </Link>

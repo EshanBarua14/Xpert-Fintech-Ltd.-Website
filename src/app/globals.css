@@ -1745,6 +1745,10 @@ html:has(.whatsapp-fab) .back-to-top {
 }
 @keyframes scroll-progress { to { transform: scaleX(1); } }
 
+/* Room under the line between sections, for sections that set only their bottom padding. */
+.shell + .shell:not([class*="py-"]):not([class*="pt-"]) { padding-top: 2.5rem; }
+@media (min-width: 768px) { .shell + .shell:not([class*="py-"]):not([class*="pt-"]) { padding-top: 3rem; } }
+
 /* A fine gradient line between consecutive sections. */
 .shell + .shell::before {
   content: "";

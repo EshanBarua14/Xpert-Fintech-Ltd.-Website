@@ -24,29 +24,29 @@ export const TONE_FIELDS = [
   { key: "team", label: "Team leadership" },
 ] as const;
 /**
- * Home page sections, in their default order: proof first (clients, market share),
- * then the product (showcase, phones, live apps), the benefit (cost), how it works
- * (by desk, order flow, risk checks), trust (owners, strengths, reviews, consortium,
- * principles), then today's market, added sections and news. Admin → Design → Home
+ * Home page sections, in their default order (as before the 19 Oct reorder): clients,
+ * then the company's strength (who owns Xpert, core strengths), then the products
+ * (phones, savings, market share, showcase, desks), reviews, apps, how it works,
+ * consortium, principles, added sections and news. Admin → Design → Home
  * page hides sections and changes the order. `toggle: false`: shown by its own setting.
  */
 export const HOME_SECTIONS = [
   { key: "clients", label: "Client logos" },
+  { key: "ownership", label: "Who owns Xpert (Admin → Home highlights)" },
+  { key: "strengths", label: "Core strengths (Admin → Home highlights)" },
+  { key: "phones", label: "Floating phones (product screens on mobile)" },
+  { key: "savings", label: "Cost savings graphic (Admin → Home highlights)" },
   { key: "reach", label: "Market share and client base" },
   { key: "figures", label: "Xpert in numbers (Admin → Figures)" },
   { key: "showcase", label: "Product showcase" },
-  { key: "phones", label: "Floating phones (product screens on mobile)" },
-  { key: "apps", label: "Live branded apps" },
-  { key: "savings", label: "Cost savings graphic (Admin → Home highlights)" },
   { key: "roles", label: "Built for every desk (products by role)" },
+  { key: "testimonials", label: "Client reviews" },
+  { key: "market", label: "Today on DSE and CSE (switched on under DSE · CSE prices)", toggle: false },
+  { key: "apps", label: "Live branded apps" },
   { key: "flow", label: "Order flow" },
   { key: "rms", label: "Risk checks (RMS, built into the OMS)" },
-  { key: "ownership", label: "Who owns Xpert (Admin → Home highlights)" },
-  { key: "strengths", label: "Core strengths (Admin → Home highlights)" },
-  { key: "testimonials", label: "Client reviews" },
   { key: "consortium", label: "Consortium logos" },
   { key: "principles", label: "Principles" },
-  { key: "market", label: "Today on DSE and CSE (switched on under DSE · CSE prices)", toggle: false },
   { key: "custom", label: "Sections added in Admin → Pages → Home", toggle: false },
   { key: "events", label: "Events" },
 ] as const;

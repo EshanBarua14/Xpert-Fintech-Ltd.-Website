@@ -66,6 +66,10 @@ const PLACEHOLDER_PHOTO = "/placeholders/person.svg";
 
 /** One card's width: 1, 2, 3 or 4 across with 1.25rem gaps. */
 const COLUMN = "w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-3.75rem)/4)]";
+/** Wide screens: as many per row as avoids one card alone on the last row (5 → one row of 5, 9 → 3 + 3 + 3). */
+const COLUMN_5 = "w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-5rem)/5)]";
+const COLUMN_3 = "w-full sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-2.5rem)/3)]";
+const columnFor = (n: number) => (n === 5 ? COLUMN_5 : n % 4 === 1 && n % 3 !== 1 ? COLUMN_3 : COLUMN);
 
 /** With editor hints on: a missing email or LinkedIn, as a dashed icon that opens the place to add it. */
 function ContactSlot({ kind, name }: { kind: "email" | "linkedin"; name: string }) {
@@ -324,8 +328,8 @@ export function PeopleGallery({
       )}
       {/* Centred rows, so a short last row (e.g. three managers under the MD) sits in the middle. */}
       <ul className="flex flex-wrap justify-center gap-5">
-        {(featureFirst && people.length > 2 ? people.slice(1) : people).map((p, i) => (
-          <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className={COLUMN}>
+        {(featureFirst && people.length > 2 ? people.slice(1) : people).map((p, i, rest) => (
+          <li key={p.id} data-reveal style={{ "--d": i % 4 } as CSSProperties} className={columnFor(rest.length)}>
             <PersonCard p={p} labels={labels} groupLabel={groupLabel} company={company} showPlaceholderBadge={showPlaceholderBadge} featured={false} onOpen={(t) => show(p, t)} />
           </li>
         ))}

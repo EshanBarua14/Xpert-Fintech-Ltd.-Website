@@ -34,7 +34,7 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "mohd-shaahed-imran": { x: 0.509, y: 0.349, zoom: 1.12 },
   "muhammad-shamsul-maruf": { x: 0.477, y: 0.507 },
   "nafis-hasan-khan": { x: 0.506, y: 0.426, zoom: 1.06 },
-  "najmul-hasan-rifat": { x: 0.476, y: 0.406 },
+  "najmul-hasan-rifat": { x: 0.53, y: 0.43 }, // new photo 19 Oct 2026
   "saikat-biswas": { x: 0.51, y: 0.42 },
   "shaleh-akram": { x: 0.487, y: 0.56 }, // new photo 19 Oct 2026
   "shamsher-morshed": { x: 0.49, y: 0.43 },

@@ -2741,6 +2741,80 @@ async function seedStrengthsDedup() {
 }
 
 /**
+ * Once (19 Oct 2026): a short FAQ at the end of the home page (Admin → Pages → Home),
+ * answered only with facts already on the site and their sources: owners and founding
+ * (Arthosuchak, Aug and Sep 2026), DSE and CSE, the published products, branded apps
+ * (Admin → Deployments) and market share (Arthosuchak, Sep 2026, company figures).
+ */
+const HOME_FAQ: { q: [string, string]; a: [string, string] }[] = [
+  {
+    q: ["Who owns Xpert Fintech?", "এক্সপার্ট ফিনটেকের মালিক কারা?"],
+    a: [
+      "Twelve brokerage houses of the Dhaka Stock Exchange, most of them the brokerage arms of banks and insurers. Leading DSE brokerage houses set the company up in 2021.",
+      "ঢাকা স্টক এক্সচেঞ্জের বারোটি ব্রোকারেজ হাউস, যাদের বেশির ভাগ ব্যাংক ও বিমা প্রতিষ্ঠানের ব্রোকারেজ প্রতিষ্ঠান। ডিএসইর শীর্ষ ব্রোকারেজ হাউসগুলো ২০২১ সালে প্রতিষ্ঠানটি গঠন করে।",
+    ],
+  },
+  {
+    q: ["Which exchanges does the platform connect to?", "প্ল্যাটফর্মটি কোন কোন এক্সচেঞ্জে যুক্ত?"],
+    a: ["Both of Bangladesh's stock exchanges: the Dhaka Stock Exchange (DSE) and the Chittagong Stock Exchange (CSE).", "বাংলাদেশের দুই স্টক এক্সচেঞ্জেই: ঢাকা স্টক এক্সচেঞ্জ (ডিএসই) ও চট্টগ্রাম স্টক এক্সচেঞ্জ (সিএসই)।"],
+  },
+  {
+    q: ["What does the platform cover?", "প্ল্যাটফর্মে কী কী আছে?"],
+    a: [
+      "Trading and order management with pre-trade risk checks, online share trading, BO account opening with eKYC, document management and back-office software. Each product has its own page under Products.",
+      "লেনদেনের আগে ঝুঁকি যাচাইসহ ট্রেডিং ও অর্ডার ব্যবস্থাপনা, অনলাইন শেয়ার ট্রেডিং, ই-কেওয়াইসিসহ বিও অ্যাকাউন্ট খোলা, ডকুমেন্ট ব্যবস্থাপনা ও ব্যাক-অফিস সফটওয়্যার। প্রতিটি পণ্যের আলাদা পাতা পণ্য অংশে আছে।",
+    ],
+  },
+  {
+    q: ["Can our brokerage house have its own branded app?", "আমাদের ব্রোকারেজ হাউস কি নিজস্ব ব্র্যান্ডের অ্যাপ পেতে পারে?"],
+    a: [
+      "Yes. Brokerage houses on Xpert run their own branded trading apps on the platform; the live ones are listed, with their store links, on the Consortium page.",
+      "হ্যাঁ। এক্সপার্টের ব্রোকারেজ হাউসগুলো প্ল্যাটফর্মে নিজস্ব ব্র্যান্ডের ট্রেডিং অ্যাপ চালায়; চালু অ্যাপগুলো স্টোর লিংকসহ কনসোর্টিয়াম পাতায় দেওয়া আছে।",
+    ],
+  },
+  {
+    q: ["How much of the market runs through Xpert?", "বাজারের কতটা এক্সপার্টের মাধ্যমে চলে?"],
+    a: [
+      "45–47% of DSE's daily turnover on a typical day and up to 57% on the busiest days, according to company figures reported by Arthosuchak in September 2026.",
+      "অর্থসূচকে সেপ্টেম্বর ২০২৬-এ প্রকাশিত প্রতিষ্ঠানের তথ্য অনুযায়ী, সাধারণ দিনে ডিএসইর দৈনিক লেনদেনের ৪৫–৪৭% এবং সবচেয়ে ব্যস্ত দিনে ৫৭% পর্যন্ত।",
+    ],
+  },
+  {
+    q: ["How do we get started?", "কীভাবে শুরু করব?"],
+    a: [
+      "Request a demo. Our team walks you through the platform, screen by screen, for the way your brokerage house works.",
+      "ডেমোর অনুরোধ করুন। আপনার ব্রোকারেজ হাউসের কাজের ধরন অনুযায়ী আমাদের টিম প্ল্যাটফর্মটি স্ক্রিন ধরে ধরে দেখাবে।",
+    ],
+  },
+];
+async function seedHomeFaq() {
+  const MARK = "seed.home-faq-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const page = await db.page.findUnique({ where: { key: "home" }, include: { sections: { include: { blocks: true } } } });
+  if (page && !page.sections.some((sec) => sec.blocks.some((b) => b.type === "FAQ"))) {
+    const last = page.sections.reduce((m, sec) => Math.max(m, sec.sortOrder), -1);
+    const section = await db.pageSection.create({ data: { pageId: page.id, sortOrder: last + 1 } });
+    const block = await db.contentBlock.create({
+      data: {
+        sectionId: section.id,
+        type: "FAQ",
+        status: "PUBLISHED",
+        sortOrder: 0,
+        props: {},
+        translations: { create: [{ locale: EN, title: "Questions brokerage houses ask" }, { locale: BN, title: "ব্রোকারেজ হাউসগুলো যা জানতে চায়" }] },
+      },
+    });
+    for (const [i, f] of HOME_FAQ.entries()) {
+      await db.blockItem.create({
+        data: { blockId: block.id, sortOrder: i, translations: { create: [{ locale: EN, title: f.q[0], body: f.a[0] }, { locale: BN, title: f.q[1], body: f.a[1] }] } },
+      });
+    }
+    console.log(`• Home page: FAQ with ${HOME_FAQ.length} questions added (Admin → Pages → Home)`);
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), added: Boolean(page) } } });
+}
+
+/**
  * Once (XFL, 19 Oct 2026): sharper headlines for the core strengths and the cost savings
  * graphic, where the admin still has the earlier wording (anything edited is kept).
  */
@@ -3201,6 +3275,7 @@ async function main() {
   await seedOwnership();
   await seedLeadershipFilter();
   await seedStrengthsDedup();
+  await seedHomeFaq();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

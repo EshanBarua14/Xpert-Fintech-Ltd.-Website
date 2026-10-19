@@ -40,7 +40,12 @@ export default async function TeamPage({ params }: Props) {
         id: p.id,
         name: pick(p.translations, locale as AppLocale)?.name ?? "",
         title: pick(p.roles[0]?.translations ?? [], locale as AppLocale)?.title ?? null,
-        department: p.department?.trim() || null,
+        // "Engineering, Leadership": the first colours the card; the person is listed under each.
+        department: p.department?.split(",")[0]?.trim() || null,
+        departments: (p.department ?? "")
+          .split(",")
+          .map((d) => d.trim())
+          .filter(Boolean),
         photo: photo ? { url: photo.url, width: photo.width, height: photo.height, focal: photo.focal ?? null } : null,
         email: p.email,
         linkedinUrl: p.linkedinUrl,

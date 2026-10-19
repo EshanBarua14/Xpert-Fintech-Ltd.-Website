@@ -29,7 +29,7 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "mohammad-ali": { x: 0.5, y: 0.5 },
   "mohammad-ashiqur-rahman-bhuiyan": { x: 0.52, y: 0.43 },
   "mohammad-erfanul-islam": { x: 0.505, y: 0.491 },
-  "mohammad-mehrabul-ferdous": { x: 0.49, y: 0.5 },
+  "mohammad-mehrabul-ferdous": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
   "mohammed-rahmat-pasha": { x: 0.52, y: 0.46 },
   "mohd-shaahed-imran": { x: 0.509, y: 0.349, zoom: 1.12 },
   "muhammad-shamsul-maruf": { x: 0.477, y: 0.507 },

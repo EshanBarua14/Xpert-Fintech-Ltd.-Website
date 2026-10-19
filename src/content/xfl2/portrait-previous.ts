@@ -23,7 +23,7 @@ export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "mohammad-ali": "5ee3b4bc18c7dd32adf3f0ecbc6d1126b2949376841112660125a1cd807b6ed4",
   "mohammad-ashiqur-rahman-bhuiyan": "f7eb7e5233737a6433c6ff9d93d56b851b900a9f1eba2807424b8b3ed2ba0465",
   "mohammad-erfanul-islam": "e7d8270412e2f7463be19a40b49d5825e96b658f88f54a6a5f86d5f6f3908989",
-  "mohammad-mehrabul-ferdous": "dbd5bd4e31b3bba485667b071a4fd222f5ab9d2944dca37d4e275f9caeedbb2c",
+  "mohammad-mehrabul-ferdous": ["dbd5bd4e31b3bba485667b071a4fd222f5ab9d2944dca37d4e275f9caeedbb2c", "d1bfba5ddcd589d8f58e7204115f524f57ae96a3ee168ca977f95c6418fea60b"], // new photo supplied 19 Oct 2026
   "mohammed-rahmat-pasha": "94f55f06c79a4c4888ab81c2206aef1bec9283325e3ca3d32d39c4910f1fa00a",
   "mohd-shaahed-imran": "328ce3b6e8bbae8c804d2c0685cfc5d952e3c4f9ccd5caede039f7ef98bdd0a2",
   "muhammad-shamsul-maruf": "f675c5ad7c278ce296e4c711a71af9bd1009044722085b08f42171fc4d4131c0",

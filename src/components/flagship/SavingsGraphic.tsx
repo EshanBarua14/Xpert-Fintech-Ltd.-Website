@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { Emph } from "@/components/ui/Emph";
 
 export type SavingsData = {
@@ -27,7 +27,7 @@ const TEXT = {
     saved: "saved",
     pay: "What you pay",
     save: "What you save",
-    each: "Each block is 5% of the cost",
+    each: "Each slab is 5% of the cost",
     source: "Source",
     draft: "Draft: only visible outside the live site",
     chart: "Cost before and with Xpert",
@@ -37,28 +37,30 @@ const TEXT = {
     saved: "সাশ্রয়",
     pay: "যা খরচ হয়",
     save: "যা সাশ্রয় হয়",
-    each: "প্রতিটি ঘর খরচের ৫%",
+    each: "প্রতিটি স্তর খরচের ৫%",
     source: "সূত্র",
     draft: "খসড়া: লাইভ সাইটে দেখা যায় না",
     chart: "এক্সপার্টের আগে ও পরে খরচ",
   },
 };
 
-/** The cost drawn as 20 blocks of 5% each. */
+/** The cost drawn as 20 slabs of 5% each. */
 const BLOCKS = 20;
 
 /**
- * Admin → Home highlights → Cost savings. The cost is drawn as twenty blocks:
- * the "before" row stays full, while in the "with Xpert" row the blocks that
- * are no longer paid for lift away one by one and turn into gold outlines,
- * leaving only what is still paid. The headline percentage counts up in step.
- * Figures come only from the admin, with their source. It plays once when
- * scrolled into view; visitors who prefer reduced motion see the final state.
+ * Admin → Home highlights → Cost savings, as two 3D towers of twenty slabs
+ * (5% of the cost each) on a lit floor. Both drop into place when scrolled into
+ * view; then, in the "with Xpert" tower, the slabs no longer paid for lift off,
+ * turn and become gold glass, while the rest turn brand blue. The headline
+ * percentage counts up in step. The scene sways and leans towards the pointer.
+ * Figures come only from the admin, with their source. Reduced-motion visitors
+ * see the final state.
  */
 export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "en" | "bn" }) {
   const t = TEXT[locale];
   const root = useRef<HTMLDivElement>(null);
   const [on, setOn] = useState(false);
+  const [split, setSplit] = useState(false);
   const [count, setCount] = useState(0);
   const kept = Math.max(1, Math.min(BLOCKS - 1, Math.round(((100 - data.pct) / 100) * BLOCKS)));
   const savedBlocks = BLOCKS - kept;
@@ -69,6 +71,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce || !("IntersectionObserver" in window)) {
       setOn(true);
+      setSplit(true);
       setCount(data.pct);
       return;
     }
@@ -85,12 +88,17 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
     return () => io.disconnect();
   }, [data.pct]);
 
-  // The percentage counts up while the blocks lift away (same start and length).
+  // The towers drop in, then split: the percentage counts up while the saved slabs lift off.
   useEffect(() => {
-    if (!on || count === data.pct) return;
+    if (!on || split) return;
+    const id = window.setTimeout(() => setSplit(true), 1500);
+    return () => window.clearTimeout(id);
+  }, [on, split]);
+  useEffect(() => {
+    if (!split || count === data.pct) return;
     let raf = 0;
-    const delay = 700;
-    const length = 600 + savedBlocks * 70;
+    const delay = 0;
+    const length = 700 + savedBlocks * 70;
     const start = performance.now() + delay;
     const tick = (now: number) => {
       const k = Math.max(0, Math.min(1, (now - start) / length));
@@ -100,8 +108,40 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [on, data.pct]);
+  }, [split, data.pct]);
 
+  const onMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--px", ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+    e.currentTarget.style.setProperty("--py", ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+  };
+  const onLeave = (e: PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.style.setProperty("--px", "0");
+    e.currentTarget.style.setProperty("--py", "0");
+  };
+  // Towers on the diagonal that reads left to right; slab --i from the floor up, --j from the top down.
+  const A = 6;
+  const tower = (x: number, y: number, mode: "before" | "with") => (
+    <>
+      <div className="sv3-pad" style={{ "--x": `${x}em`, "--y": `${y}em` } as CSSProperties} />
+      {Array.from({ length: BLOCKS }, (_, i) => {
+        const j = BLOCKS - 1 - i;
+        const kind = mode === "before" ? "" : i >= kept ? "sv3-saved" : "sv3-kept";
+        return (
+          <div
+            key={`${mode}${i}`}
+            className={`x3-box sv3-slab ${kind}`}
+            style={{ "--x": `${x}em`, "--y": `${y}em`, "--z": `${i * 1.2}em`, "--i": i, "--j": j, "--r": `${(j % 2 ? 1 : -1) * (4 + (j % 3) * 3)}deg` } as CSSProperties}
+          >
+            <i className="t" />
+            <i className="s" />
+            <i className="e" />
+          </div>
+        );
+      })}
+    </>
+  );
   const nf = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US", { maximumFractionDigits: 2 });
   const amount = (v: number | null, share: number) => (v !== null ? `${data.prefix}${nf.format(v)}${data.unit ? ` ${data.unit}` : ""}` : `${nf.format(share)}%`);
   const asOf = data.asOf
@@ -117,7 +157,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
       <div className="relative grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         {/* Headline */}
         <div className="flex flex-col gap-5">
-          <p className="sv-figure flex items-baseline gap-1 font-display leading-none font-semibold tabular-nums" aria-label={`${nf.format(data.pct)}% ${t.lower}`}>
+          <p className="sv-figure3 flex items-baseline gap-1 font-display leading-none font-semibold tabular-nums" aria-label={`${nf.format(data.pct)}% ${t.lower}`}>
             <span aria-hidden="true" className="text-[5.5rem] md:text-[7.5rem]">
               {nf.format(count)}
             </span>
@@ -135,43 +175,33 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
 
         {/* The cost in blocks */}
         <figure className="flex flex-col gap-7 rounded-3xl border border-fg/[0.08] bg-gradient-to-br from-brand-sky/[0.06] via-transparent to-gold/[0.06] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.05)] md:p-7" aria-label={t.chart}>
-          <div className="flex flex-col gap-3">
-            <div className="flex items-baseline justify-between gap-4 text-sm">
-              <span className="font-semibold text-text-secondary">{data.beforeLabel}</span>
-              <span className="font-mono font-semibold text-[#ef7a73] tabular-nums">{amount(data.before, 100)}</span>
-            </div>
-            <ol className="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-[3px] md:gap-1" aria-hidden="true">
-              {Array.from({ length: BLOCKS }, (_, i) => (
-                <li key={i} className="sv-block sv-before h-9 rounded-[5px] md:h-11" style={{ "--i": i } as CSSProperties} />
-              ))}
-            </ol>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <div className="flex items-baseline justify-between gap-4 text-sm">
-              <span className="font-semibold text-text-primary">{data.afterLabel}</span>
-              <span className="sv-after-amount font-mono font-semibold text-brand-sky tabular-nums">{amount(data.after, 100 - data.pct)}</span>
-            </div>
-            <ol className="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-[3px] md:gap-1" aria-hidden="true">
-              {Array.from({ length: BLOCKS }, (_, i) => {
-                const saved = i >= kept;
-                // Saved blocks lift away from the far end inwards.
-                return (
-                  <li
-                    key={i}
-                    className={`sv-block h-9 rounded-[5px] md:h-11 ${saved ? "sv-saved" : "sv-kept"}`}
-                    style={{ "--i": i, "--j": BLOCKS - 1 - i } as CSSProperties}
-                  />
-                );
-              })}
-            </ol>
-            {/* A brace over the saved blocks, with the share saved */}
-            <div className="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-[3px] md:gap-1" aria-hidden="true">
-              <div className="sv-brace flex flex-col items-center gap-1.5" style={{ gridColumn: `${kept + 1} / span ${savedBlocks}`, transitionDelay: `${900 + savedBlocks * 70}ms` }}>
-                <span className="h-2 w-full rounded-b-lg border-x border-b border-gold/60" />
-                <span className="font-mono text-sm font-semibold whitespace-nowrap text-gold tabular-nums">
+          <div
+            className={`x3 sv3 -mx-3 md:mx-0 ${on ? "is-on" : ""} ${split ? "is-split" : ""}`}
+            onPointerMove={onMove}
+            onPointerLeave={onLeave}
+            role="img"
+            aria-label={`${data.beforeLabel}: ${amount(data.before, 100)}. ${data.afterLabel}: ${amount(data.after, 100 - data.pct)}. −${nf.format(data.pct)}% ${t.saved}.`}
+          >
+            <div className="x3-world" aria-hidden="true">
+              <div className="sv3-floor" />
+              {tower(-A, A, "before")}
+              {tower(A, -A, "with")}
+              <div className="x3-bill" style={{ "--x": `${-A + 6}em`, "--y": `${A + 6}em`, "--z": "0em" } as CSSProperties}>
+                <div className="sv3-label">
+                  <span>{data.beforeLabel}</span>
+                  <b className="text-[#ef7a73]">{amount(data.before, 100)}</b>
+                </div>
+              </div>
+              <div className="x3-bill" style={{ "--x": `${A + 6}em`, "--y": `${-A + 6}em`, "--z": "0em" } as CSSProperties}>
+                <div className="sv3-label">
+                  <span>{data.afterLabel}</span>
+                  <b className="text-brand-sky">{amount(data.after, 100 - data.pct)}</b>
+                </div>
+              </div>
+              <div className="x3-bill" style={{ "--x": `${A}em`, "--y": `${-A}em`, "--z": `${BLOCKS * 1.2 + 7}em` } as CSSProperties}>
+                <div className="sv3-label sv3-gold">
                   −{nf.format(data.pct)}% {t.saved}
-                </span>
+                </div>
               </div>
             </div>
           </div>

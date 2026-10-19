@@ -2209,29 +2209,46 @@ async function seedBluechipSquare() {
 }
 
 /**
- * Once (XFL, 19 Oct 2026): Wasif Zaman, Deputy Managing Director, Mika Securities Limited,
- * as Mika Securities' representative. No seat at Xpert, so no positions: he shows only on
- * the consortium map (Admin → People, contact details and photo can be added there).
+ * Once each (XFL, 19 Oct 2026): consortium houses' representatives with no seat at
+ * Xpert, so no positions: they show only on the consortium map, under their house
+ * (matched by the position). Contact details and photos can be changed in Admin → People.
+ *  - Wasif Zaman, Deputy Managing Director, Mika Securities Limited.
+ *  - Md. Mofizuddin, Chairman & Managing Director, Remons Investment & Securities Ltd.
+ *    (photo supplied by XFL, unedited: prisma/seed-media/people/md-mofizuddin.jpg).
  */
-async function seedMikaRepresentative() {
-  const MARK = "seed.mika-rep-2026-10-19";
-  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
-  if (!(await db.person.findUnique({ where: { key: "wasif-zaman" } }))) {
-    await db.person.create({
-      data: {
-        key: "wasif-zaman",
-        status: "PUBLISHED",
-        translations: {
-          create: [
-            { locale: EN, name: "Wasif Zaman", affiliation: "Deputy Managing Director, Mika Securities Limited" },
-            { locale: BN, name: "ওয়াসিফ জামান", affiliation: "উপ-ব্যবস্থাপনা পরিচালক, মিকা সিকিউরিটিজ লিমিটেড" },
-          ],
+const REPRESENTATIVES = [
+  { key: "wasif-zaman", mark: "seed.mika-rep-2026-10-19", en: "Wasif Zaman", bn: "ওয়াসিফ জামান", aff: { en: "Deputy Managing Director, Mika Securities Limited", bn: "উপ-ব্যবস্থাপনা পরিচালক, মিকা সিকিউরিটিজ লিমিটেড" } },
+  {
+    key: "md-mofizuddin",
+    mark: "seed.remons-rep-2026-10-19",
+    en: "Md. Mofizuddin",
+    bn: "মো. মফিজউদ্দিন",
+    aff: { en: "Chairman & Managing Director, Remons Investment & Securities Ltd.", bn: "চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক, রেমন্স ইনভেস্টমেন্ট অ্যান্ড সিকিউরিটিজ লিমিটেড" },
+  },
+];
+async function seedRepresentatives() {
+  for (const r of REPRESENTATIVES) {
+    if (await db.siteSetting.findUnique({ where: { key: r.mark } })) continue;
+    if (!(await db.person.findUnique({ where: { key: r.key } }))) {
+      const photo = await seedImage("people", r.key, r.en, ["person", "portrait"]);
+      const person = await db.person.create({
+        data: {
+          key: r.key,
+          status: "PUBLISHED",
+          photoMediaId: photo,
+          translations: {
+            create: [
+              { locale: EN, name: r.en, affiliation: r.aff.en },
+              { locale: BN, name: r.bn, affiliation: r.aff.bn },
+            ],
+          },
         },
-      },
-    });
+      });
+      if (photo) await db.mediaUsage.create({ data: { mediaId: photo, entityType: "PERSON", entityId: person.id, field: "photo" } });
+    }
+    await db.siteSetting.create({ data: { key: r.mark, value: { at: new Date().toISOString() } } });
+    console.log(`• ${r.en} added as representative of ${r.aff.en.split(", ").slice(1).join(", ")} (consortium map)`);
   }
-  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
-  console.log("• Wasif Zaman added as Mika Securities' representative (consortium map)");
 }
 
 /** Once (XFL, 18 Oct 2026): Wifang Securities Ltd.'s website (wifangbd.com, titled "Wifang Securities Ltd."), where the admin has none. */
@@ -2794,7 +2811,7 @@ async function main() {
   await seedInnovaApp();
   await seedTheaClient();
   await seedBluechipSquare();
-  await seedMikaRepresentative();
+  await seedRepresentatives();
   await seedWifangWebsite();
   await seedIdlcLogo();
   await publishReviewCards();

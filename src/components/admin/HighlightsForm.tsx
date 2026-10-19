@@ -56,7 +56,7 @@ export function HighlightsForm({
           <TextInput id="oTitleBn" label="Title (বাংলা)" lang="bn" defaultValue={ownership.titleBn} error={e.oTitleBn} />
           <TextArea id="oIntroEn" label="Lead line (English)" rows={2} defaultValue={ownership.introEn} error={e.oIntroEn} />
           <TextArea id="oIntroBn" label="Lead line (বাংলা)" lang="bn" rows={2} defaultValue={ownership.introBn} error={e.oIntroBn} />
-          <TextInput id="oCapital" label="Paid-up capital (crore taka)" inputMode="decimal" placeholder="33" defaultValue={ownership.capitalCrore === null ? "" : String(ownership.capitalCrore)} error={e.oCapital} />
+          <TextInput id="oCapital" label="Paid-up capital (crore taka)" inputMode="decimal" placeholder="39" defaultValue={ownership.capitalCrore === null ? "" : String(ownership.capitalCrore)} error={e.oCapital} />
           <TextInput id="oCapitalSource" label="Source of the capital figure" placeholder="Xpert Fintech Ltd." defaultValue={ownership.capitalSource} error={e.oCapitalSource} />
           <TextInput id="oCapitalAsOf" type="date" label="As of (optional)" defaultValue={ownership.capitalAsOf} error={e.oCapitalAsOf} />
         </div>
@@ -76,7 +76,7 @@ export function HighlightsForm({
               <TextInput id={`titleEn_${i}`} label="Title (English)" defaultValue={r.titleEn} error={e[`titleEn_${i}`]} />
               <TextInput id={`titleBn_${i}`} label="Title (বাংলা)" lang="bn" defaultValue={r.titleBn} error={e[`titleBn_${i}`]} />
               <span className="hidden md:block" />
-              <TextInput id={`statEn_${i}`} label="Figure, optional (English), e.g. ৳33 cr or 7" defaultValue={r.statEn ?? ""} error={e[`statEn_${i}`]} />
+              <TextInput id={`statEn_${i}`} label="Figure, optional (English), e.g. ৳39 cr or 7" defaultValue={r.statEn ?? ""} error={e[`statEn_${i}`]} />
               <TextInput id={`statBn_${i}`} label="Figure (বাংলা)" lang="bn" defaultValue={r.statBn ?? ""} error={e[`statBn_${i}`]} />
               <span className="hidden md:block" />
               <TextArea id={`bodyEn_${i}`} label="Text (English)" rows={2} defaultValue={r.bodyEn} error={e[`bodyEn_${i}`]} />

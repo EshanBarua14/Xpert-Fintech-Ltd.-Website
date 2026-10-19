@@ -38,7 +38,7 @@ export const DEFAULT_OWNERSHIP: OwnershipSetting = {
 };
 export const MAX_STRENGTHS = 10;
 
-/** `statEn`/`statBn`: an optional figure shown large on the card (e.g. "৳33 cr", "7"); only real, sourced numbers. */
+/** `statEn`/`statBn`: an optional figure shown large on the card (e.g. "৳39 cr", "7"); only real, sourced numbers. */
 export type Strength = { icon: string; titleEn: string; titleBn: string; bodyEn: string; bodyBn: string; statEn?: string; statBn?: string };
 export type StrengthsSetting = { titleEn: string; titleBn: string; introEn: string; introBn: string; items: Strength[] };
 

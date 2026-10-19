@@ -53,29 +53,6 @@ const fill = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
 const dayMonth = (locale: string, d: string) =>
   new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${d}T00:00:00Z`));
 
-/** The goal meter: filled to today's share (when there is one), a gold mark at the goal, 0–100 underneath. */
-function GoalMeter({ now, goal, goalText, label, locale }: { now: number | null; goal: { targetPct: number }; goalText: string; label?: string; locale: "en" | "bn" }) {
-  return (
-    <div role={label ? "img" : undefined} aria-label={label} className="relative pt-8">
-      <span
-        aria-hidden={label ? true : undefined}
-        className={cn("absolute top-0 text-xs font-semibold whitespace-nowrap text-gold", goal.targetPct > 60 ? "-translate-x-full pr-2" : "pl-2")}
-        style={{ left: fill(goal.targetPct) }}
-      >
-        {goalText}
-      </span>
-      <div data-reveal className="tube3d tube3d-grow h-4">
-        {now !== null && <span className="tube3d-fill" style={{ width: fill(now) }} />}
-        <span aria-hidden="true" className="tube3d-goal" style={{ left: fill(goal.targetPct) }} />
-      </div>
-      <div aria-hidden="true" className="mt-2 flex justify-between font-mono text-[11px] text-text-secondary">
-        <span>{fmt(locale, 0, 0)}%</span>
-        <span>{fmt(locale, 100, 0)}%</span>
-      </div>
-    </div>
-  );
-}
-
 /** One exchange as a compact row: its figure and a thin bar against the goal, or "Figure to be published". */
 function ExchangeRow({ f, goal, locale, labels }: { f: ExchangeFigure; goal: Props["goal"]; locale: "en" | "bn"; labels: ReachLabels }) {
   const has = f.pct !== null;
@@ -133,7 +110,6 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
   // Years are written without a thousands separator (2028, ২০২৮).
   const year = goal ? String(goal.year).replace(/\d/g, (d) => (locale === "bn" ? "০১২৩৪৫৬৭৮৯"[Number(d)]! : d)) : "";
   const goalPct = goal ? fmt(locale, goal.targetPct, 0) : "";
-  const goalText = goal ? labels.goal.replace("{pct}", goalPct).replace("{year}", year) : "";
   const meterNow = hero?.pct ?? null;
   const numbers = clientBase.length > 0 || figures.length > 0 || figureSlot;
 
@@ -151,41 +127,50 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
                 <ShareCoin3D
                   pct={hero.pct}
                   caption={hero.caption}
-                  goal={goal ? { pct: goal.targetPct, label: goalText } : null}
+                  goal={goal ? { pct: goal.targetPct, label: "" } : null}
                   label={`${labels.share}: ${fmt(locale, hero.pct, Number.isInteger(hero.pct) ? 0 : 2)}% (${hero.caption})`}
                   locale={locale}
                   className="-mx-2 sm:mx-0"
                 />
-                {headline?.note && <p className="text-sm text-text-secondary">{(locale === "bn" && headline.note.bn) || headline.note.en}</p>}
-                <SourceLink url={headline?.sourceUrl} name={headline?.source} label={labels.source ?? "Source"} className="text-xs text-text-secondary" />
               </>
             ) : (
               goal && <p className="max-w-md font-display text-3xl leading-tight tracking-[-0.015em] text-balance md:text-4xl">{labels.goalLead.replace("{pct}", goalPct).replace("{year}", year)}</p>
             )}
           </div>
 
-          {/* Goal and the two exchanges */}
-          <div className="flex flex-col justify-center gap-6">
+          {/* Right: the goal (told once), then only the exchanges not already in the ring, then where the figure comes from. */}
+          <div className="flex flex-col justify-center gap-7">
             {goal && (
-              <div className="flex flex-col gap-3">
-                <GoalMeter
-                  now={meterNow}
-                  goal={goal}
-                  goalText={goalText}
-                  locale={locale}
-                  label={meterNow !== null ? labels.progress.replace("{now}", fmt(locale, meterNow, 2)).replace("{pct}", goalPct).replace("{year}", year) : undefined}
-                />
-                <p className="text-sm text-text-secondary">
-                  {meterNow !== null && <span className="font-semibold text-text-primary">{(meterNow >= goal.targetPct ? labels.reached : labels.toGo.replace("{pts}", fmt(locale, goal.targetPct - meterNow, 1))) + ". "}</span>}
-                  {goal.note ?? labels.goalNote.replace("{year}", year)}
+              <div className="flex flex-col gap-3 rounded-2xl border border-gold/30 bg-gold/[0.05] p-5 md:p-6">
+                <p className="text-xs font-semibold tracking-wide text-gold uppercase">{locale === "bn" ? "লক্ষ্য" : "Goal"}</p>
+                <p className="flex items-baseline gap-3">
+                  <span className="font-display text-5xl leading-none font-semibold tracking-[-0.03em] text-text-primary tabular-nums">{goalPct}%</span>
+                  <span className="text-sm font-semibold text-text-secondary">{locale === "bn" ? `${year} সালের মধ্যে` : `by ${year}`}</span>
                 </p>
+                {meterNow !== null && (
+                  <p className="text-sm font-semibold text-text-primary">
+                    {meterNow >= goal.targetPct ? labels.reached : labels.toGo.replace("{pts}", fmt(locale, goal.targetPct - meterNow, 1))}
+                  </p>
+                )}
+                <p className="text-sm leading-relaxed text-text-secondary">{goal.note ?? labels.goalNote.replace("{year}", year)}</p>
               </div>
             )}
-            <ul className="divide-y divide-fg/[0.07] border-y border-fg/[0.07]">
-              {perExchange.map((f) => (
-                <ExchangeRow key={f.exchange} f={f} goal={goal} locale={locale} labels={labels} />
-              ))}
-            </ul>
+            {/* Exchanges whose figure is not the one in the ring. */}
+            {perExchange.some((f) => !(hero && f.pct === hero.pct && hero.caption.startsWith(f.exchange))) && (
+              <ul className="divide-y divide-fg/[0.07] border-y border-fg/[0.07]">
+                {perExchange
+                  .filter((f) => !(hero && f.pct === hero.pct && hero.caption.startsWith(f.exchange)))
+                  .map((f) => (
+                    <ExchangeRow key={f.exchange} f={f} goal={goal} locale={locale} labels={labels} />
+                  ))}
+              </ul>
+            )}
+            {hero && (headline?.note || headline?.source) && (
+              <div className="flex flex-col gap-1.5">
+                {headline?.note && <p className="text-sm leading-relaxed text-text-secondary">{(locale === "bn" && headline.note.bn) || headline.note.en}</p>}
+                <SourceLink url={headline?.sourceUrl} name={headline?.source} label={labels.source ?? "Source"} className="text-xs text-text-secondary" />
+              </div>
+            )}
           </div>
         </div>
       </div>

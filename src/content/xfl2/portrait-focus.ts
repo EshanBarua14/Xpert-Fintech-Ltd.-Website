@@ -23,7 +23,7 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "md-hasan-uddin": { x: 0.499, y: 0.463 },
   "md-hefaj-uddin": { x: 0.504, y: 0.467 },
   "md-refat-hossen": { x: 0.52, y: 0.46 },
-  "md-shahinur-rahman": { x: 0.501, y: 0.455 },
+  "md-shahinur-rahman": { x: 0.5, y: 0.44 }, // new photo 19 Oct 2026
   "md-sirajul-islam": { x: 0.505, y: 0.5 },
   "md-yeasin-hossain": { x: 0.508, y: 0.428, zoom: 1.12 },
   "mohammad-ali": { x: 0.5, y: 0.5 },

@@ -19,16 +19,16 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "m-shahryar-faiz": { x: 0.524, y: 0.486 },
   "mahmuda-yasmin-farah": { x: 0.496, y: 0.424, zoom: 1.1 },
   "md-abdur-rahman-rony": { x: 0.49, y: 0.42 }, // new photo 19 Oct 2026
-  "md-abul-moshad-chowdhury": { x: 0.531, y: 0.42, zoom: 1.4 },
-  "md-hasan-uddin": { x: 0.499, y: 0.463 },
-  "md-hefaj-uddin": { x: 0.504, y: 0.467 },
+  "md-abul-moshad-chowdhury": { x: 0.5, y: 0.34 }, // new photo 19 Oct 2026
+  "md-hasan-uddin": { x: 0.5, y: 0.38 }, // new photo 19 Oct 2026
+  "md-hefaj-uddin": { x: 0.5, y: 0.38 }, // new photo 19 Oct 2026
   "md-refat-hossen": { x: 0.52, y: 0.46 },
   "md-shahinur-rahman": { x: 0.5, y: 0.44 }, // new photo 19 Oct 2026
-  "md-sirajul-islam": { x: 0.505, y: 0.5 },
-  "md-yeasin-hossain": { x: 0.508, y: 0.428, zoom: 1.12 },
+  "md-sirajul-islam": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
+  "md-yeasin-hossain": { x: 0.49, y: 0.38 }, // new photo 19 Oct 2026
   "mohammad-ali": { x: 0.5, y: 0.5 },
   "mohammad-ashiqur-rahman-bhuiyan": { x: 0.52, y: 0.43 },
-  "mohammad-erfanul-islam": { x: 0.505, y: 0.491 },
+  "mohammad-erfanul-islam": { x: 0.51, y: 0.36 }, // new photo 19 Oct 2026
   "mohammad-mehrabul-ferdous": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
   "mohammed-rahmat-pasha": { x: 0.52, y: 0.46 },
   "mohd-shaahed-imran": { x: 0.509, y: 0.349, zoom: 1.12 },
@@ -39,6 +39,6 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "shaleh-akram": { x: 0.5, y: 0.45 }, // photo of 19 Oct 2026 (evening)
   "shamsher-morshed": { x: 0.49, y: 0.43 },
   "sumon-das": { x: 0.501, y: 0.409 },
-  "talukder-juhaer-hakim": { x: 0.501, y: 0.434 },
+  "talukder-juhaer-hakim": { x: 0.5, y: 0.38 }, // new photo 19 Oct 2026
   "toha-hossain": { x: 0.49, y: 0.51 },
 };

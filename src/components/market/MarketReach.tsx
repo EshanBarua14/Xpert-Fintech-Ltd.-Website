@@ -139,7 +139,7 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
 
   return (
     <div className="flex flex-col gap-5">
-      <div data-reveal className="relative overflow-hidden rounded-3xl border border-fg/10 bg-navy-900 p-6 sm:p-8 md:p-10">
+      <div data-reveal className="pro-beam pro-mesh relative overflow-hidden rounded-3xl p-6 sm:p-8 md:p-10">
         <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-brand-sky/[0.07] blur-3xl" />
         <div className="relative grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14">
           {/* Headline */}

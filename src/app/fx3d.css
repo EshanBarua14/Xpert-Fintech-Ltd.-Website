@@ -139,3 +139,129 @@
   .cap-mark, .ow-tile, .ow-unit, .svb-bar, .svb-saved, .jrc-col, .jrc-num, .tube3d-grow .tube3d-fill { transition: none !important; }
   .ow-panel .ow-house { animation: none; }
 }
+
+/* ───────────── Modern layer: light, not decoration ───────────── */
+/* A thin beam of light travelling round a card's border (graphic cards only). */
+@property --beam {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.pro-beam {
+  --pro-bg: color-mix(in oklab, var(--color-navy-900) 94%, transparent);
+  border: 1px solid transparent !important;
+  background:
+    linear-gradient(var(--pro-bg), var(--pro-bg)) padding-box,
+    conic-gradient(from var(--beam), transparent 0deg 250deg, color-mix(in oklab, var(--color-brand-sky) 75%, transparent) 300deg, color-mix(in oklab, var(--color-gold) 80%, transparent) 330deg, transparent 360deg) border-box,
+    linear-gradient(color-mix(in oklab, var(--color-fg) 10%, transparent), color-mix(in oklab, var(--color-fg) 10%, transparent)) border-box;
+  animation: pro-beam 9s linear infinite;
+}
+[data-theme="light"] .pro-beam { --pro-bg: #ffffff; }
+@keyframes pro-beam { to { --beam: 360deg; } }
+/* A soft mesh of light inside graphic cards. */
+.pro-mesh { position: relative; isolation: isolate; }
+.pro-mesh::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 100% 0%, color-mix(in oklab, var(--color-brand-sky) 10%, transparent), transparent 70%),
+    radial-gradient(50% 45% at 0% 100%, color-mix(in oklab, var(--color-gold) 7%, transparent), transparent 70%);
+}
+.pro-mesh::after {
+  /* a faint dot grid */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in oklab, var(--color-fg) 9%, transparent) 1px, transparent 1px);
+  background-size: 18px 18px;
+  -webkit-mask: radial-gradient(80% 70% at 50% 40%, #000, transparent);
+  mask: radial-gradient(80% 70% at 50% 40%, #000, transparent);
+}
+
+/* Donut: a glow along the arc and a light at its leading edge. */
+.donut-arc { filter: drop-shadow(0 0 6px color-mix(in oklab, var(--color-brand-sky) 55%, transparent)); }
+.donut-head { fill: #fff; filter: drop-shadow(0 0 6px var(--color-brand-sky)) drop-shadow(0 0 14px var(--color-brand-sky)); }
+.donut-halo { fill: none; stroke: color-mix(in oklab, var(--color-brand-sky) 18%, transparent); stroke-width: 1; stroke-dasharray: 1 5; }
+
+/* Capital meter: a radar sweep passes once as the marks light, lit marks glow. */
+.cap-sweep {
+  position: absolute;
+  inset: 1rem 1.5rem;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0deg 300deg, color-mix(in oklab, var(--color-gold) 30%, transparent) 355deg, transparent 360deg);
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%, #000 72%, transparent 74%);
+  mask: radial-gradient(circle, transparent 58%, #000 60%, #000 72%, transparent 74%);
+  opacity: 0;
+  pointer-events: none;
+}
+.ow.is-on .cap-sweep { animation: cap-sweep 1.8s var(--ease-pro) 0.2s 1 both; }
+@keyframes cap-sweep { 0% { opacity: 1; transform: rotate(0deg); } 85% { opacity: 1; } 100% { opacity: 0; transform: rotate(360deg); } }
+.ow.is-on .cap-mark { filter: drop-shadow(0 0 3px color-mix(in oklab, var(--color-gold) 70%, transparent)); }
+
+/* Light passing across lit tiles and filled bars. */
+.pro-shimmer { position: relative; overflow: hidden; }
+.pro-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.28) 50%, transparent 65%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+.ow-unit.is-lit .ow-tile.pro-shimmer::after { animation: pro-shimmer 1.4s var(--ease-pro) calc(var(--k) * 60ms) 1 both; }
+.svb.is-split .svb-after.pro-shimmer::after { animation: pro-shimmer 1.6s var(--ease-pro) 0.2s 1 both; }
+@keyframes pro-shimmer { to { transform: translateX(120%); } }
+/* The end of the "with Xpert" bar: a lit edge. */
+.svb-after::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  right: -1px;
+  width: 2px;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 0 10px var(--color-brand-sky), 0 0 22px var(--color-brand-sky);
+}
+.svb-saved {
+  background-image: repeating-linear-gradient(135deg, color-mix(in oklab, var(--color-gold) 9%, transparent) 0 6px, transparent 6px 12px);
+}
+
+/* Growth journey: glass columns with a lit top edge, and a trend line drawn through them. */
+.jrc-col {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--color-brand-sky) 55%, transparent), color-mix(in oklab, var(--color-brand-royal) 18%, transparent)) !important;
+  box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 55%, transparent), inset 0 0 0 1px color-mix(in oklab, var(--color-brand-sky) 35%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.jrc-col::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-brand-sky);
+  box-shadow: 0 0 12px var(--color-brand-sky);
+}
+.jrc-col.is-now { background: linear-gradient(180deg, color-mix(in oklab, var(--color-gold) 55%, transparent), color-mix(in oklab, var(--color-gold) 12%, transparent)) !important; box-shadow: inset 0 1px 0 color-mix(in oklab, #fff 55%, transparent), inset 0 0 0 1px color-mix(in oklab, var(--color-gold) 40%, transparent); }
+.jrc-col.is-now::before { background: var(--color-gold); box-shadow: 0 0 12px var(--color-gold); }
+.jrc-line { fill: none; stroke: url(#jrc-grad); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 4px color-mix(in oklab, var(--color-brand-sky) 60%, transparent)); }
+/* The trend line is revealed left to right after the columns rise. */
+.jrc-trend { clip-path: inset(-10% 100% -10% 0); transition: clip-path 1.4s var(--ease-pro) 0.7s; }
+.jr3-wrap.is-on .jrc-trend { clip-path: inset(-10% 0 -10% 0); }
+.jrc-dot { fill: #fff; stroke: var(--color-brand-sky); stroke-width: 2; vector-effect: non-scaling-stroke; opacity: 0; transition: opacity 0.4s var(--ease-pro); transition-delay: calc(1s + var(--i) * 0.15s); }
+.jr3-wrap.is-on .jrc-dot { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pro-beam { animation: none; }
+  .ow.is-on .cap-sweep, .pro-shimmer::after { animation: none !important; }
+  .jrc-trend { transition: none; clip-path: none; }
+  .jrc-dot { transition: none; opacity: 1; }
+}

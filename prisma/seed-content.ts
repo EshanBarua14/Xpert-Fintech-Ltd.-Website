@@ -2814,6 +2814,21 @@ async function seedHomeFaq() {
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), added: Boolean(page) } } });
 }
 
+/** Once (XFL, 19 Oct 2026): back to the earlier home order; an order saved in Admin → Design before now is cleared so the default applies. */
+async function seedHomeOrderReset() {
+  const MARK = "seed.home-order-reset-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const row = await db.siteSetting.findUnique({ where: { key: "site.design" } });
+  const v = row?.value as Record<string, unknown> | undefined;
+  if (row && v && "order" in v) {
+    const rest = { ...v };
+    delete rest.order;
+    await db.siteSetting.update({ where: { key: "site.design" }, data: { value: rest as object } });
+    console.log("• Home page: section order back to the default");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
 /**
  * Once (XFL, 19 Oct 2026): sharper headlines for the core strengths and the cost savings
  * graphic, where the admin still has the earlier wording (anything edited is kept).
@@ -3276,6 +3291,7 @@ async function main() {
   await seedLeadershipFilter();
   await seedStrengthsDedup();
   await seedHomeFaq();
+  await seedHomeOrderReset();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

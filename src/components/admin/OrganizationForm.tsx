@@ -105,7 +105,7 @@ export function OrganizationForm({ values, images }: { values: OrgFormValues; im
             <TextInput id="parentName" label="Parent institution" placeholder="Bank Asia PLC" defaultValue={values.parentName} error={e.parentName} />
             <TextInput id="parentNameBn" label="Parent (বাংলা)" lang="bn" defaultValue={values.parentNameBn} error={e.parentNameBn} />
           </div>
-          <p className="-mt-2 text-xs text-text-secondary">Counts and names on the home page's &ldquo;Who owns Xpert&rdquo; come from these fields.</p>
+          <p className="-mt-2 text-xs text-text-secondary">Counts and names on the home page&rsquo;s &ldquo;Who owns Xpert&rdquo; come from these fields.</p>
           <ImagePicker name="logoMediaId" label="Logo" options={images} defaultValue={values.logoMediaId} error={e.logoMediaId} />
           <label className="flex items-start gap-3 text-sm">
             <input type="checkbox" name="logoPermission" defaultChecked={values.logoPermission} className="mt-0.5 h-4 w-4 accent-brand-royal" />

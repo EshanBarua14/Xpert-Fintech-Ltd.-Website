@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { type CSSProperties, type ReactNode } from "react";
+import { ShareCoin3D } from "./ShareCoin3D";
 import { CountUp } from "@/components/motion/CountUp";
 import { SourceLink } from "@/components/insights/SourceLink";
 import type { ShareFigure } from "@/lib/market/types";
@@ -46,35 +47,6 @@ type Props = {
 const fmt = (locale: string, v: number, digits: number) =>
   new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(v);
 
-/** Counts a percentage up from zero once it is on screen (the real figure is in the server HTML). */
-function useCountUp(target: number) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(target);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    setShown(0);
-    let raf = 0;
-    const io = new IntersectionObserver(([e]) => {
-      if (!e?.isIntersecting) return;
-      io.disconnect();
-      const start = performance.now();
-      const tick = (now: number) => {
-        const p = Math.min(1, (now - start) / 1600);
-        setShown(target * (1 - Math.pow(1 - p, 4)));
-        if (p < 1) raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    });
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      cancelAnimationFrame(raf);
-    };
-  }, [target]);
-  return { ref, shown };
-}
-
 type ExchangeFigure = { exchange: "DSE" | "CSE"; pct: number | null; date: string | null };
 
 const fill = (v: number) => `${Math.max(0, Math.min(100, v))}%`;
@@ -92,13 +64,9 @@ function GoalMeter({ now, goal, goalText, label, locale }: { now: number | null;
       >
         {goalText}
       </span>
-      <div className="relative h-3 rounded-full bg-brand-sky/[0.12]">
-        {now !== null && (
-          <div className="bar-grow absolute inset-0" data-reveal>
-            <span className="absolute inset-y-0 left-0 block rounded-full bg-gradient-to-r from-brand-royal to-brand-sky" style={{ width: fill(now) }} />
-          </div>
-        )}
-        <span aria-hidden="true" className="absolute -top-1.5 -bottom-1.5 w-0.5 rounded-full bg-gold" style={{ left: fill(goal.targetPct) }} />
+      <div data-reveal className="tube3d tube3d-grow h-4">
+        {now !== null && <span className="tube3d-fill" style={{ width: fill(now) }} />}
+        <span aria-hidden="true" className="tube3d-goal" style={{ left: fill(goal.targetPct) }} />
       </div>
       <div aria-hidden="true" className="mt-2 flex justify-between font-mono text-[11px] text-text-secondary">
         <span>{fmt(locale, 0, 0)}%</span>
@@ -115,9 +83,9 @@ function ExchangeRow({ f, goal, locale, labels }: { f: ExchangeFigure; goal: Pro
     <li className="grid grid-cols-[3.25rem_minmax(0,1fr)_auto] items-center gap-3 py-3">
       <span className="rounded-md bg-brand-sky/15 px-2 py-1 text-center font-mono text-xs font-semibold tracking-wide text-brand-sky">{f.exchange}</span>
       {has ? (
-        <div aria-hidden="true" className="relative h-1.5 rounded-full bg-brand-sky/[0.12]">
-          <span className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-brand-royal to-brand-sky" style={{ width: fill(f.pct!) }} />
-          {goal && <span className="absolute -top-1 -bottom-1 w-px bg-gold" style={{ left: fill(goal.targetPct) }} />}
+        <div aria-hidden="true" data-reveal className="tube3d tube3d-grow h-2.5">
+          <span className="tube3d-fill" style={{ width: fill(f.pct!) }} />
+          {goal && <span className="tube3d-goal" style={{ left: fill(goal.targetPct) }} />}
         </div>
       ) : (
         <span className="text-sm text-text-secondary">{labels.pending ?? "—"}</span>
@@ -162,7 +130,6 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
       : known.length === 1
         ? { pct: known[0]!.pct!, caption: `${known[0]!.exchange}${known[0]!.date ? ` · ${dayMonth(locale, known[0]!.date)}` : ""}` }
         : null;
-  const { ref, shown } = useCountUp(hero?.pct ?? 0);
   // Years are written without a thousands separator (2028, ২০২৮).
   const year = goal ? String(goal.year).replace(/\d/g, (d) => (locale === "bn" ? "০১২৩৪৫৬৭৮৯"[Number(d)]! : d)) : "";
   const goalPct = goal ? fmt(locale, goal.targetPct, 0) : "";
@@ -172,7 +139,7 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
 
   return (
     <div className="flex flex-col gap-5">
-      <div ref={ref} data-reveal className="relative overflow-hidden rounded-3xl border border-fg/10 bg-navy-900 p-6 sm:p-8 md:p-10">
+      <div data-reveal className="relative overflow-hidden rounded-3xl border border-fg/10 bg-navy-900 p-6 sm:p-8 md:p-10">
         <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-brand-sky/[0.07] blur-3xl" />
         <div className="relative grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-14">
           {/* Headline */}
@@ -180,11 +147,15 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
             <p className="text-sm font-medium text-text-secondary">{labels.share}</p>
             {hero ? (
               <>
-                <p className="font-display text-7xl leading-none tracking-[-0.03em] text-text-primary md:text-8xl">
-                  {fmt(locale, shown, Number.isInteger(hero.pct) ? 0 : 2)}
-                  <span className="ml-1 text-[0.45em] text-text-secondary">%</span>
-                </p>
-                <p className="text-sm text-text-secondary">{hero.caption}</p>
+                {/* The share as a 3D pie instead of a big printed number; the figure rides on its label. */}
+                <ShareCoin3D
+                  pct={hero.pct}
+                  caption={hero.caption}
+                  goal={goal ? { pct: goal.targetPct, label: goalText } : null}
+                  label={`${labels.share}: ${fmt(locale, hero.pct, Number.isInteger(hero.pct) ? 0 : 2)}% (${hero.caption})`}
+                  locale={locale}
+                  className="-mx-2 sm:mx-0"
+                />
                 {headline?.note && <p className="text-sm text-text-secondary">{(locale === "bn" && headline.note.bn) || headline.note.en}</p>}
                 <SourceLink url={headline?.sourceUrl} name={headline?.source} label={labels.source ?? "Source"} className="text-xs text-text-secondary" />
               </>

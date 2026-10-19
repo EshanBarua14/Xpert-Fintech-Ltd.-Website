@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./fx3d.css";
 
 /* `dark:` / `light:` variants follow the site theme switch, not only the OS setting. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));

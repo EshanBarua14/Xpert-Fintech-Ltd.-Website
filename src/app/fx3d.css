@@ -1,0 +1,426 @@
+/*
+ * 3D figures drawn with CSS transforms (no WebGL): the market-share pie on Home
+ * and About (ShareCoin3D), the cost-savings towers (SavingsGraphic) and the
+ * glossy tubes under the goal and per-exchange figures (MarketReach).
+ * --sway turns the scene slowly; --px/--py follow the pointer. Billboards undo
+ * the scene's turn so their text always faces the reader.
+ */
+@property --sway {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+.x3 {
+  --px: 0;
+  --py: 0;
+  --tilt: 58deg;
+  --turn: calc(var(--base-turn, 0deg) + var(--sway) + var(--px) * 16deg);
+  position: relative;
+  perspective: 95em;
+  perspective-origin: 50% 20%;
+  animation: x3-sway 14s ease-in-out infinite alternate;
+}
+@keyframes x3-sway {
+  from { --sway: -7deg; }
+  to { --sway: 7deg; }
+}
+.x3 *,
+.x3 *::before,
+.x3 *::after { box-sizing: border-box; }
+.x3-world {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(calc(var(--tilt) - var(--py) * 8deg)) rotateZ(var(--turn));
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.x3-world * { transform-style: preserve-3d; }
+/* Faces the reader whatever the scene's turn: put it at --x/--y/--z, bottom centre on that point. */
+.x3-bill {
+  position: absolute;
+  pointer-events: none;
+  left: 0;
+  top: 0;
+  transform: translate3d(var(--x, 0), var(--y, 0), var(--z, 0)) rotateZ(calc(-1 * var(--turn))) rotateX(calc(-1 * (var(--tilt) - var(--py) * 8deg))) translate(-50%, -100%);
+  white-space: nowrap;
+  backface-visibility: hidden;
+}
+
+/* A box standing on the floor: --w × --d footprint, --h tall, lifted by --z. Top, south and east faces. */
+.x3-box {
+  position: absolute;
+  left: calc(var(--x, 0em) - var(--w) / 2);
+  top: calc(var(--y, 0em) - var(--d) / 2);
+  width: var(--w);
+  height: var(--d);
+  transform: translateZ(var(--z, 0));
+}
+.x3-box > i {
+  position: absolute;
+  display: block;
+}
+.x3-box > .t { inset: 0; transform: translateZ(var(--h)); }
+.x3-box > .s { left: 0; width: 100%; height: var(--h); top: calc(var(--d) - var(--h)); transform-origin: 50% 100%; transform: rotateX(-90deg); }
+.x3-box > .e { top: 0; height: 100%; width: var(--h); left: calc(var(--w) - var(--h)); transform-origin: 100% 50%; transform: rotateY(90deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .x3 { animation: none; }
+  .x3-world { transition: none; }
+}
+
+/* ── Market share: an extruded pie; the share's wedge opens to its figure and rises out of the disc ── */
+.sh3 {
+  --base-turn: -32deg;
+  --tilt: 54deg;
+  --r: 9.5em;
+  --rise: 1;
+  --p: 0;
+  --from: calc(180deg - var(--p) * 1.8deg);
+  width: 100%;
+  height: 24em;
+  font-size: clamp(9px, 2.6vw, 15px);
+}
+.sh3 > .x3-world { top: 60%; }
+.sh3-floor {
+  position: absolute;
+  left: calc(var(--r) * -1.7);
+  top: calc(var(--r) * -1.7);
+  width: calc(var(--r) * 3.4);
+  height: calc(var(--r) * 3.4);
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, transparent 0 1.6em, color-mix(in oklab, var(--color-brand-sky) 14%, transparent) 1.6em calc(1.6em + 1px)),
+    radial-gradient(circle, color-mix(in oklab, var(--color-brand-sky) 22%, transparent), transparent 62%);
+  -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%);
+  mask: radial-gradient(circle, #000 30%, transparent 70%);
+  transform: translateZ(-0.05em);
+}
+.sh3-shadow {
+  position: absolute;
+  left: calc(var(--r) * -1.05);
+  top: calc(var(--r) * -1.05);
+  width: calc(var(--r) * 2.1);
+  height: calc(var(--r) * 2.1);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(0 0 0 / 0.55), transparent 68%);
+  filter: blur(6px);
+  transform: translate3d(0.6em, 1.2em, 0);
+}
+[data-theme="light"] .sh3-shadow { background: radial-gradient(circle, rgb(10 20 40 / 0.22), transparent 68%); }
+.sh3-l {
+  position: absolute;
+  left: calc(var(--r) * -1);
+  top: calc(var(--r) * -1);
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  border-radius: 50%;
+}
+/* The rest of the turnover: a glassy disc, everything but the wedge. */
+.sh3-base {
+  transform: translateZ(calc(var(--i) * 0.13em));
+  background: conic-gradient(from var(--from), transparent 0 calc(var(--p) * 3.6deg + 1.5deg), color-mix(in oklab, var(--color-navy-800) 62%, var(--color-brand-sky)) 0 calc(360deg - 1.5deg), transparent 0);
+}
+.sh3-base.is-top {
+  background:
+    radial-gradient(circle, transparent 0 calc(var(--r) * 0.86), color-mix(in oklab, var(--color-brand-sky) 40%, transparent) calc(var(--r) * 0.86 + 1px) calc(var(--r) * 0.86 + 2px), transparent 0),
+    repeating-conic-gradient(from var(--from), color-mix(in oklab, var(--color-fg) 32%, transparent) 0 0.35deg, transparent 0.35deg 3.6deg),
+    radial-gradient(circle at 35% 30%, color-mix(in oklab, var(--color-fg) 16%, transparent), transparent 55%),
+    linear-gradient(160deg, color-mix(in oklab, var(--color-navy-800) 80%, var(--color-brand-sky)), var(--color-navy-900));
+  -webkit-mask: conic-gradient(from var(--from), transparent 0 calc(var(--p) * 3.6deg + 1.5deg), #000 0 calc(360deg - 1.5deg), transparent 0);
+  mask: conic-gradient(from var(--from), transparent 0 calc(var(--p) * 3.6deg + 1.5deg), #000 0 calc(360deg - 1.5deg), transparent 0);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-fg) 10%, transparent);
+}
+[data-theme="light"] .sh3-base { background: conic-gradient(from var(--from), transparent 0 calc(var(--p) * 3.6deg + 1.5deg), #c9d6e8 0 calc(360deg - 1.5deg), transparent 0); }
+[data-theme="light"] .sh3-base.is-top {
+  background:
+    radial-gradient(circle, transparent 0 calc(var(--r) * 0.86), color-mix(in oklab, var(--color-brand-sky) 45%, transparent) calc(var(--r) * 0.86 + 1px) calc(var(--r) * 0.86 + 2px), transparent 0),
+    repeating-conic-gradient(from var(--from), rgb(10 20 40 / 0.22) 0 0.35deg, transparent 0.35deg 3.6deg),
+    linear-gradient(160deg, #ffffff, #e4ecf6);
+}
+/* The share: a wedge pulled slightly out towards the reader and raised. */
+.sh3-wedge {
+  transform: translate3d(0, calc(var(--rise) * 1.5em), calc(1.56em + var(--i) * 0.13em * var(--rise)));
+  background: conic-gradient(from var(--from), color-mix(in oklab, var(--color-brand-royal) 80%, #000) 0 calc(var(--p) * 3.6deg), transparent 0);
+}
+.sh3-wedge:nth-child(odd) { background: conic-gradient(from var(--from), color-mix(in oklab, var(--color-brand-royal) 92%, var(--color-brand-sky)) 0 calc(var(--p) * 3.6deg), transparent 0); }
+.sh3-wedge.is-top {
+  background:
+    radial-gradient(circle at 50% 78%, color-mix(in oklab, #ffffff 45%, transparent), transparent 45%),
+    conic-gradient(from var(--from), var(--color-brand-sky), color-mix(in oklab, var(--color-brand-sky) 50%, var(--color-brand-royal)) calc(var(--p) * 1.8deg), var(--color-brand-sky) calc(var(--p) * 3.6deg), transparent 0);
+  -webkit-mask: conic-gradient(from var(--from), #000 0 calc(var(--p) * 3.6deg), transparent 0);
+  mask: conic-gradient(from var(--from), #000 0 calc(var(--p) * 3.6deg), transparent 0);
+  box-shadow: 0 0 2.5em -0.4em color-mix(in oklab, var(--color-brand-sky) 80%, transparent);
+}
+/* Goal: a gold dot on the rim at the goal's angle, with its label standing above on a gold line. */
+.sh3-pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: rotateZ(var(--a)) translate3d(0, calc(var(--r) * -0.93), 1.5em);
+}
+.sh3-pin > b {
+  position: absolute;
+  left: -0.6em;
+  top: -0.6em;
+  width: 1.2em;
+  height: 1.2em;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--color-gold) 0 30%, color-mix(in oklab, var(--color-gold) 35%, transparent) 31% 60%, transparent 61%);
+}
+.sh3-goalwrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.sh3-goalwrap::after {
+  content: "";
+  width: 0.16em;
+  height: 3.4em;
+  border-radius: 1em;
+  background: linear-gradient(var(--color-gold), color-mix(in oklab, var(--color-gold) 30%, transparent));
+  box-shadow: 0 0 0.8em color-mix(in oklab, var(--color-gold) 70%, transparent);
+}
+.sh3-tag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+  padding: 0.55em 0.9em 0.6em;
+  border-radius: 1em;
+  border: 1px solid color-mix(in oklab, var(--color-brand-sky) 45%, transparent);
+  background: color-mix(in oklab, var(--color-navy-900) 72%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1.2em 2.4em -1.2em rgb(0 0 0 / 0.7), inset 0 1px 0 color-mix(in oklab, var(--color-fg) 14%, transparent);
+  transition: opacity 0.6s ease;
+}
+.sh3-tag::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: 2.2em;
+  background: linear-gradient(var(--color-brand-sky), transparent);
+}
+.sh3-num {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 3.1em;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(120deg, #ffffff, var(--color-brand-sky));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-theme="light"] .sh3-num { background-image: linear-gradient(120deg, var(--color-brand-royal), var(--color-brand-sky)); }
+.sh3-num small { font-size: 0.45em; margin-left: 0.05em; }
+.sh3-cap { font-size: 0.85em; color: var(--color-text-secondary); }
+.sh3-goal {
+  padding: 0.25em 0.6em;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--color-gold) 55%, transparent);
+  background: color-mix(in oklab, var(--color-navy-900) 70%, transparent);
+  color: var(--color-gold);
+  font-size: 0.8em;
+  font-weight: 600;
+}
+.sh3.is-sm > .x3-world { top: 66%; }
+.sh3.is-sm { height: 15em; --r: 6.4em; font-size: clamp(8px, 2.2vw, 12px); }
+.sh3.is-sm .sh3-num { font-size: 2.4em; }
+
+/* ── Cost savings: two towers of twenty slabs; the saved slabs lift off and turn to gold glass ── */
+.sv3 {
+  --base-turn: 38deg;
+  --w: 7.4em;
+  --d: 7.4em;
+  --h: 0.9em;
+  --step: 1.2em;
+  width: 100%;
+  height: 41em;
+  font-size: clamp(7.5px, 1.9vw, 11px);
+}
+.sv3 > .x3-world { top: 80%; }
+.sv3-floor {
+  position: absolute;
+  left: -19em;
+  top: -19em;
+  width: 38em;
+  height: 38em;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2.4em, color-mix(in oklab, var(--color-brand-sky) 18%, transparent) 2.4em calc(2.4em + 1px)),
+    repeating-linear-gradient(90deg, transparent 0 2.4em, color-mix(in oklab, var(--color-brand-sky) 18%, transparent) 2.4em calc(2.4em + 1px)),
+    radial-gradient(circle, color-mix(in oklab, var(--color-brand-sky) 16%, transparent), transparent 60%);
+  -webkit-mask: radial-gradient(circle, #000 25%, transparent 68%);
+  mask: radial-gradient(circle, #000 25%, transparent 68%);
+}
+.sv3-pad {
+  position: absolute;
+  left: calc(var(--x) - var(--w) * 0.75);
+  top: calc(var(--y) - var(--d) * 0.75);
+  width: calc(var(--w) * 1.5);
+  height: calc(var(--d) * 1.5);
+  border-radius: 1.2em;
+  background: radial-gradient(circle, rgb(0 0 0 / 0.5), transparent 70%);
+  filter: blur(4px);
+}
+[data-theme="light"] .sv3-pad { background: radial-gradient(circle, rgb(10 20 40 / 0.2), transparent 70%); }
+.sv3-slab > i {
+  transition:
+    background-color 0.7s ease,
+    border-color 0.7s ease,
+    box-shadow 0.7s ease,
+    opacity 0.7s ease;
+}
+.sv3-slab {
+  --top: #f08a83;
+  --south: #d4574f;
+  --east: #a8403a;
+  transition:
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.5s ease;
+  transition-delay: calc(var(--i) * 35ms);
+}
+.sv3-slab > .t { background-color: var(--top); box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18); }
+.sv3-slab > .s { background-color: var(--south); }
+.sv3-slab > .e { background-color: var(--east); }
+.js .sv3:not(.is-on) .sv3-slab {
+  opacity: 0;
+  transform: translateZ(calc(var(--z) + 26em));
+}
+/* What is still paid turns brand blue. */
+.sv3.is-split .sv3-kept {
+  --top: #7fdcf7;
+  --south: #23a6dd;
+  --east: #2a5fae;
+}
+.sv3.is-split .sv3-kept > i { transition-delay: calc(var(--i) * 40ms); }
+.sv3.is-split .sv3-kept > .t { box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35), 0 0 1.4em -0.2em color-mix(in oklab, var(--color-brand-sky) 70%, transparent); }
+/* What is saved lifts off, turns slightly and becomes gold glass. */
+.sv3.is-split .sv3-saved {
+  transform: translateZ(calc(var(--z) + 4.5em + var(--j) * 0.25em)) rotateZ(var(--r));
+  transition-duration: 1.2s;
+  transition-delay: calc(var(--j) * 70ms);
+}
+.sv3.is-split .sv3-saved > i {
+  background-color: color-mix(in oklab, var(--color-gold) 16%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-gold) 75%, transparent);
+  box-shadow: inset 0 0 1em -0.3em color-mix(in oklab, var(--color-gold) 70%, transparent);
+  transition-delay: calc(var(--j) * 70ms);
+}
+.sv3.is-split .sv3-saved > .t { box-shadow: 0 0 1.6em -0.4em var(--color-gold), inset 0 0 1em -0.3em color-mix(in oklab, var(--color-gold) 70%, transparent); }
+[data-theme="light"] .sv3.is-split .sv3-saved > i {
+  background-color: rgb(224 178 82 / 0.22);
+  border-color: rgb(196 146 48 / 0.85);
+}
+.sv3-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1em;
+  padding: 0.5em 0.85em;
+  border-radius: 0.9em;
+  border: 1px solid color-mix(in oklab, var(--color-fg) 14%, transparent);
+  background: color-mix(in oklab, var(--color-navy-900) 75%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  font-size: 1.15em;
+  line-height: 1.25;
+  text-align: center;
+  box-shadow: 0 1em 2em -1em rgb(0 0 0 / 0.6);
+}
+.sv3-label b { font-family: var(--font-mono, ui-monospace); font-variant-numeric: tabular-nums; font-size: 1.2em; }
+.sv3-label span { color: var(--color-text-secondary); font-size: 0.85em; font-weight: 600; }
+.sv3-gold {
+  border-color: color-mix(in oklab, var(--color-gold) 60%, transparent);
+  color: var(--color-gold);
+  font-weight: 700;
+  font-size: 1.3em;
+  transition: opacity 0.6s ease, translate 0.6s ease;
+}
+.js .sv3:not(.is-split) .sv3-gold {
+  opacity: 0;
+  translate: 0 0.6em;
+}
+.sv3.is-split .sv3-gold { transition-delay: 1.4s; }
+/* The headline percentage, extruded. */
+.sv-figure3 {
+  color: var(--color-brand-sky);
+  text-shadow:
+    0 1px 0 color-mix(in oklab, var(--color-brand-sky) 80%, #000),
+    0 2px 0 color-mix(in oklab, var(--color-brand-sky) 70%, #000),
+    0 3px 0 color-mix(in oklab, var(--color-brand-royal) 80%, #000),
+    0 4px 0 color-mix(in oklab, var(--color-brand-royal) 70%, #000),
+    0 5px 0 color-mix(in oklab, var(--color-brand-royal) 60%, #000),
+    0 6px 0 color-mix(in oklab, var(--color-brand-royal) 50%, #000),
+    0 18px 26px rgb(0 0 0 / 0.45);
+  transform: perspective(40em) rotateX(14deg) rotateY(-12deg);
+  transform-origin: left bottom;
+}
+.sv-figure3 .gold { color: var(--color-gold); text-shadow: 0 1px 0 #b98a2f, 0 2px 0 #a67a26, 0 3px 0 #8f681e, 0 4px 0 #7a5818, 0 5px 0 #664812, 0 14px 22px rgb(0 0 0 / 0.4); }
+[data-theme="light"] .sv-figure3 { text-shadow: 0 1px 0 #1f8fc0, 0 2px 0 #1b7fae, 0 3px 0 #2a5fae, 0 4px 0 #24528f, 0 5px 0 #1f4679, 0 14px 22px rgb(10 20 40 / 0.2); }
+@media (prefers-reduced-motion: reduce) {
+  .sv3-slab,
+  .sv3-slab > i,
+  .sv3-gold { transition: none !important; }
+}
+
+/* ── Glossy 3D tubes (goal meter and per-exchange bars) ── */
+.tube3d {
+  position: relative;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgb(0 0 0 / 0.35), rgb(255 255 255 / 0.05) 70%, rgb(255 255 255 / 0.1)),
+    color-mix(in oklab, var(--color-brand-sky) 10%, var(--color-navy-900));
+  box-shadow:
+    inset 0 2px 4px rgb(0 0 0 / 0.5),
+    inset 0 -1px 0 rgb(255 255 255 / 0.08),
+    0 0.9em 1.2em -0.8em rgb(0 0 0 / 0.7);
+}
+[data-theme="light"] .tube3d {
+  background: linear-gradient(180deg, rgb(10 20 40 / 0.12), rgb(255 255 255 / 0.6)), #dde6f2;
+  box-shadow: inset 0 2px 3px rgb(10 20 40 / 0.18), 0 0.8em 1em -0.8em rgb(10 20 40 / 0.3);
+}
+.tube3d-fill {
+  position: absolute;
+  inset: 1px auto 1px 1px;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.6) 0%, rgb(255 255 255 / 0.15) 35%, rgb(0 0 0 / 0) 55%, rgb(0 0 0 / 0.25) 100%),
+    linear-gradient(90deg, var(--color-brand-royal), var(--color-brand-sky));
+  box-shadow: 0 0 1.2em -0.2em color-mix(in oklab, var(--color-brand-sky) 70%, transparent);
+  transform-origin: left center;
+}
+.tube3d-fill::after {
+  content: "";
+  position: absolute;
+  right: -0.15em;
+  top: 50%;
+  width: 0.9em;
+  height: 0.9em;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff, color-mix(in oklab, var(--color-brand-sky) 60%, transparent) 45%, transparent 70%);
+  filter: blur(1px);
+}
+.js .tube3d-grow:not(.is-in) .tube3d-fill { transform: scaleX(0); }
+.tube3d-grow .tube3d-fill { transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.2s; }
+.tube3d-goal {
+  position: absolute;
+  top: -0.45em;
+  bottom: -0.45em;
+  width: 0.22em;
+  translate: -50% 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f6d48a, var(--color-gold));
+  box-shadow: 0 0 0.8em var(--color-gold);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tube3d-grow .tube3d-fill { transition: none; }
+}

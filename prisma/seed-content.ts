@@ -2214,6 +2214,7 @@ async function seedBluechipSquare() {
  * (matched by the position). Contact details and photos can be changed in Admin → People.
  *  - Wasif Zaman, Deputy Managing Director, Mika Securities Limited.
  *  - Md. Mofizuddin, Chairman & Managing Director, Remons Investment & Securities Ltd.
+ *  - Asaduzzaman, Chief Executive Officer, AB Securities Limited.
  *  Photos supplied by XFL, unedited: prisma/seed-media/people/<key>.jpg.
  */
 const REPRESENTATIVES = [
@@ -2224,6 +2225,13 @@ const REPRESENTATIVES = [
     en: "Md. Mofizuddin",
     bn: "মো. মফিজউদ্দিন",
     aff: { en: "Chairman & Managing Director, Remons Investment & Securities Ltd.", bn: "চেয়ারম্যান ও ব্যবস্থাপনা পরিচালক, রেমন্স ইনভেস্টমেন্ট অ্যান্ড সিকিউরিটিজ লিমিটেড" },
+  },
+  {
+    key: "asaduzzaman",
+    mark: "seed.ab-rep-2026-10-19",
+    en: "Asaduzzaman",
+    bn: "আসাদুজ্জামান",
+    aff: { en: "Chief Executive Officer, AB Securities Limited", bn: "প্রধান নির্বাহী কর্মকর্তা, এবি সিকিউরিটিজ লিমিটেড" },
   },
 ];
 async function seedRepresentatives() {

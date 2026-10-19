@@ -49,7 +49,7 @@ export async function SiteHeader({ locale }: { locale: AppLocale }) {
       locale={locale}
       items={items}
       labels={{ menu: t.menu, closeMenu: t.closeMenu, mainNavigation: t.mainNavigation, language: t.language, overview: t.overview, toLight: t.themeToLight, toDark: t.themeToDark, search: searchLabels(t) }}
-      logo={<BrandLockup text="roomy" priority name={info.companyName} tagline={t.brandTagline} />}
+      logo={<BrandLockup size="header" text="roomy" priority name={info.companyName} tagline={t.brandTagline} />}
       ticker={ticker}
       // Admin → Design → DSE · CSE prices: on every page, or only on the market pages.
       tickerEverywhere={design.ticker === "all"}

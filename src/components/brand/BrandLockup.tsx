@@ -21,17 +21,19 @@ export function BrandLockup({
   name = BRAND_NAME,
   tagline = BRAND_TAGLINE,
 }: {
-  size?: "md" | "lg";
+  /** "header": the menu bar's size (a little larger than md). */
+  size?: "md" | "header" | "lg";
   text?: "always" | "roomy";
   priority?: boolean;
   name?: string;
   tagline?: string;
 }) {
   const lg = size === "lg";
+  const header = size === "header";
   return (
     <span className="flex items-center gap-3">
       <span className="logo-spin inline-flex shrink-0">
-        <Logo height={lg ? 56 : 40} priority={priority} />
+        <Logo height={lg ? 56 : header ? 46 : 40} priority={priority} />
       </span>
       <span
         className={cn(
@@ -39,8 +41,8 @@ export function BrandLockup({
           text === "always" ? "flex" : "hidden min-[400px]:max-sm:flex min-[580px]:max-lg:flex xl:flex",
         )}
       >
-        <span className={cn("font-display font-medium tracking-[-0.01em] whitespace-nowrap text-text-primary", lg ? "text-2xl" : "text-[1.0625rem]")}>{name}</span>
-        <span className={cn("brand-tagline mt-1 font-medium whitespace-nowrap text-brand-sky", lg ? "text-sm" : "text-[0.6875rem]")}>{tagline}</span>
+        <span className={cn("font-display font-medium tracking-[-0.01em] whitespace-nowrap text-text-primary", lg ? "text-2xl" : header ? "text-[1.25rem]" : "text-[1.0625rem]")}>{name}</span>
+        <span className={cn("brand-tagline mt-1 font-medium whitespace-nowrap text-brand-sky", lg ? "text-sm" : header ? "text-[0.75rem]" : "text-[0.6875rem]")}>{tagline}</span>
       </span>
     </span>
   );

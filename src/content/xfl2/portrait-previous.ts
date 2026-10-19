@@ -30,7 +30,7 @@ export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "nafis-hasan-khan": "7a3dcdc1a93c250600213a33cfb4dcbc17cff001597e119f4adf12aca1f91a90",
   "najmul-hasan-rifat": "6d373c6142d32b1ce72d469811df5ba390a190cc389d76359dab978a5aa9f21c",
   "saikat-biswas": "70cbfc7652e1540fe4df8fafb61c80bf6781209d1e5ce23e66473880529ca12d",
-  "shaleh-akram": "c39aa7072c8ed2e91df8404a4e3c3a0becbaf108a938c373788ac501dd511c93",
+  "shaleh-akram": ["c39aa7072c8ed2e91df8404a4e3c3a0becbaf108a938c373788ac501dd511c93", "9ca628b8c3083baa2fefb4dc3c9feb87e807bc08a102e15710a48f8afe471da0"], // new photo supplied 19 Oct 2026
   "shamsher-morshed": "bd3dfe193a6927eb94a0de31363707ba756b13d13f0d57ff0deeaf0b8cdedc24",
   "sumon-das": "72302ea3945c72f68a2eb2b6c485e9cb1161ddcab6eacdc65417c64902e4a0ab",
   "talukder-juhaer-hakim": "1632c794d1dfcc2da9463c5105fa34067529e9a17f9ecfcc00ca082d2f588c87",

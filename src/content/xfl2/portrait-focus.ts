@@ -8,6 +8,9 @@
  */
 export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: number }> = {
   "aminul-islam": { x: 0.484, y: 0.378 },
+  // Representatives (19 Oct 2026): Wasif Zaman's photo is half-length, so his face is brought in.
+  "wasif-zaman": { x: 0.43, y: 0.52, zoom: 1.35 },
+  "md-mofizuddin": { x: 0.5, y: 0.46 },
   "bishnu-pada-kunda": { x: 0.537, y: 0.35 },
   "dilip-kajuri": { x: 0.484, y: 0.352, zoom: 1.08 },
   "eshan-barua": { x: 0.49, y: 0.47 },

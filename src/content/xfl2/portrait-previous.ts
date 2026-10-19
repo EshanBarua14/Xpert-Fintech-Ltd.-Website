@@ -12,7 +12,7 @@ export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "fakruddin-ali-ahmed-rajib": ["afbeed2fb055b9ec42099f5a7702b6537b22149dc91a3a092d76b47ccda2736a", "42302e473195d88c011a23b8b7f0b4c33382a46ca90bd3f6455bed8315e3e241"],
   "m-shahryar-faiz": ["ea342932942d2df4cf78bae73c1df35717fe8388aa55c965cb3943a31b094129", "7c1e96915b8651bfa445080db6baaf0901d6af6ff5b252c954f4b1b17ec31ce4"],
   "mahmuda-yasmin-farah": "d2d40dafb59a8b942c045c72a7e451743e98d2770bdd6ec087f6b7e76f34b3de",
-  "md-abdur-rahman-rony": "522481ca12d0a2f3e4e4566865118f7f72ad3e115400a370a13aa4a11f943014",
+  "md-abdur-rahman-rony": ["522481ca12d0a2f3e4e4566865118f7f72ad3e115400a370a13aa4a11f943014", "52472168a54ddfafa3e9391c446f07440ab4ba5dde2fd837726c160504eba409"], // new photo supplied 19 Oct 2026
   "md-abul-moshad-chowdhury": "ccf90da0a0baad51bd85bcb17559d775e32d404160ab42ede9530e094d46d55a",
   "md-hasan-uddin": "213d2b8fe237f222274e92a300db69df4aeb62735ec633f1f20f2fa3d0e4adb7",
   "md-hefaj-uddin": "bf5de074508615a0b00a38173e69c5f94998c53189a714c76ee78b557dba12b1",

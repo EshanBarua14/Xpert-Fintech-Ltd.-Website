@@ -392,9 +392,7 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                           <span className="flex min-w-0 flex-col">
                             <span className="font-semibold text-text-primary group-hover:text-gold">{r.name}</span>
                             <span className="text-xs text-gold">
-                              {r.group === "REPRESENTATIVE"
-                                ? (labels.representative ?? "Representative")
-                                : (labels.roleAtXpert ?? "{title}").replace("{title}", r.group === "BOARD" ? r.title ?? labels.boardSeat : r.title ?? labels.consultant)}
+                              {labels.representative ?? "Representative"}
                             </span>
                             {r.position && <span className="line-clamp-2 text-xs text-text-secondary">{r.position}</span>}
                           </span>
@@ -411,9 +409,7 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                           <span className="flex min-w-0 flex-col">
                             <span className="font-semibold text-text-primary group-hover:text-gold">{r.name}</span>
                             <span className="text-xs text-gold">
-                              {r.group === "REPRESENTATIVE"
-                                ? (labels.representative ?? "Representative")
-                                : (labels.roleAtXpert ?? "{title}").replace("{title}", r.group === "BOARD" ? r.title ?? labels.boardSeat : r.title ?? labels.consultant)}
+                              {(labels.roleAtXpert ?? "{title}").replace("{title}", r.group === "BOARD" ? r.title ?? labels.boardSeat : r.title ?? labels.consultant)}
                             </span>
                             {r.position && <span className="line-clamp-2 text-xs text-text-secondary">{r.position}</span>}
                           </span>

@@ -46,6 +46,8 @@ import { HeroIndices } from "@/components/market/HeroIndices";
 import { CoreStrengths } from "@/components/flagship/CoreStrengths";
 import { SavingsGraphic } from "@/components/flagship/SavingsGraphic";
 import { PhoneStage } from "@/components/flagship/PhoneStage";
+import { OwnershipShowcase } from "@/components/flagship/OwnershipShowcase";
+import { getOwnership } from "@/lib/public/ownership";
 import { getSavings, getStrengths } from "@/lib/content/highlights";
 import { exchangeLogos } from "@/components/market/ExchangeMark";
 import { CredentialsInline } from "@/components/blocks/CredentialsBand";
@@ -98,7 +100,7 @@ export default async function HomePage({ params }: Props) {
     Promise.all([getFlagshipData(locale), getEvents(3), getMarketPayload(), getShowcase(locale), getCredentials(locale)]),
     Promise.all([getLiveApps(locale), getEcosystem(locale), ecosystemInDatabase(), getTestimonials(locale), getMarketGoal(), getFlowProducts(locale), getHeadlineShare(), getDesign(), getReviewSeconds(), getFigures(), getRiskPageHref(locale)]),
   ]);
-  const [otherClients, strengths, savings] = await Promise.all([getOtherClients(locale), getStrengths(locale), getSavings(locale, { drafts: editorHints() })]);
+  const [otherClients, strengths, savings, ownership] = await Promise.all([getOtherClients(locale), getStrengths(locale), getSavings(locale, { drafts: editorHints() }), getOwnership(locale)]);
   const proof = [
     { value: data.members.length, label: t.proofMembers },
     { value: data.clients.length, label: t.proofClients },
@@ -144,6 +146,13 @@ export default async function HomePage({ params }: Props) {
           </div>
           <ClientMarquee clients={data.clients} label={t.clientsEyebrow} />
         </section>
+      )}
+
+      {/* Who owns Xpert: paid-up capital and the owner houses by basis (Admin → Home highlights, Organizations). */}
+      {show("strengths") && ownership && (
+        <Shell id="ownership" className="py-12 md:py-16">
+          <OwnershipShowcase data={ownership} locale={locale} />
+        </Shell>
       )}
 
       {show("strengths") && strengths.items.length > 0 && (

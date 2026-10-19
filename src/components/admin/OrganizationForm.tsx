@@ -21,6 +21,9 @@ export type OrgFormValues = {
   rankAsOf: string;
   rankSource: string;
   cseTrec: string;
+  parentType: string;
+  parentName: string;
+  parentNameBn: string;
   logoMediaId: string;
   logoPermission: boolean;
   en: { name: string; shortName: string; description: string };
@@ -85,6 +88,24 @@ export function OrganizationForm({ values, images }: { values: OrgFormValues; im
             <TextInput id="rankAsOf" label="Ranking as of" placeholder="September 2026" defaultValue={values.rankAsOf} error={e.rankAsOf} />
             <TextInput id="rankSource" label="Ranking source" placeholder="DSE monthly top 20 TREC holders" defaultValue={values.rankSource} error={e.rankSource} />
           </div>
+          <Select
+            id="parentType"
+            label="Owned by (consortium members)"
+            defaultValue={values.parentType}
+            options={[
+              { value: "", label: "Not stated" },
+              { value: "BANK", label: "A bank" },
+              { value: "INSURANCE", label: "An insurance company" },
+              { value: "CORPORATE", label: "A corporate group" },
+              { value: "INDEPENDENT", label: "Independent" },
+            ]}
+            error={e.parentType}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <TextInput id="parentName" label="Parent institution" placeholder="Bank Asia PLC" defaultValue={values.parentName} error={e.parentName} />
+            <TextInput id="parentNameBn" label="Parent (বাংলা)" lang="bn" defaultValue={values.parentNameBn} error={e.parentNameBn} />
+          </div>
+          <p className="-mt-2 text-xs text-text-secondary">Counts and names on the home page's &ldquo;Who owns Xpert&rdquo; come from these fields.</p>
           <ImagePicker name="logoMediaId" label="Logo" options={images} defaultValue={values.logoMediaId} error={e.logoMediaId} />
           <label className="flex items-start gap-3 text-sm">
             <input type="checkbox" name="logoPermission" defaultChecked={values.logoPermission} className="mt-0.5 h-4 w-4 accent-brand-royal" />

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { ICON_NAMES } from "@/components/ui/Icon";
-import { MAX_STRENGTHS, SAVINGS_KEY, STRENGTHS_KEY, WHATSAPP_KEY, savingPct, type SavingsSetting, type StrengthsSetting, type WhatsAppSetting } from "@/lib/content/highlights";
+import { MAX_STRENGTHS, OWNERSHIP_KEY, SAVINGS_KEY, STRENGTHS_KEY, WHATSAPP_KEY, savingPct, type OwnershipSetting, type SavingsSetting, type StrengthsSetting, type WhatsAppSetting } from "@/lib/content/highlights";
 
 export type HighlightsState = { ok?: boolean; message?: string; errors?: Record<string, string>; savedAt?: number };
 
@@ -98,6 +98,24 @@ export async function saveHighlights(_prev: HighlightsState, formData: FormData)
   for (const k of ["waLabelEn", "waLabelBn"]) long(k, 40);
   for (const k of ["waMessageEn", "waMessageBn", "waGreetingEn", "waGreetingBn"]) long(k, 300);
 
+  // Who owns Xpert
+  const capRaw = g("oCapital").replace(/,/g, "");
+  const cap = capRaw ? Number(capRaw) : null;
+  if (capRaw && (!Number.isFinite(cap) || cap! <= 0 || cap! > 100000)) errors.oCapital = "Enter the capital in crore, e.g. 33.";
+  const ownership: OwnershipSetting = {
+    published: g("oPublished") === "1",
+    titleEn: g("oTitleEn"),
+    titleBn: g("oTitleBn"),
+    introEn: g("oIntroEn"),
+    introBn: g("oIntroBn"),
+    capitalCrore: capRaw && Number.isFinite(cap) ? cap : null,
+    capitalSource: g("oCapitalSource"),
+    capitalAsOf: /^\d{4}-\d{2}-\d{2}$/.test(g("oCapitalAsOf")) ? g("oCapitalAsOf") : "",
+  };
+  for (const k of ["oTitleEn", "oTitleBn", "oCapitalSource"]) long(k, 120);
+  for (const k of ["oIntroEn", "oIntroBn"]) long(k, 300);
+  if (ownership.capitalCrore !== null && !ownership.capitalSource) errors.oCapitalSource = "Say where the capital figure comes from.";
+
   if (Object.keys(errors).length) return { errors, message: "Please fix the highlighted fields." };
 
   await db.$transaction(async (tx) => {
@@ -106,6 +124,7 @@ export async function saveHighlights(_prev: HighlightsState, formData: FormData)
     await put(STRENGTHS_KEY, strengths);
     await put(SAVINGS_KEY, savings);
     await put(WHATSAPP_KEY, whatsapp);
+    await put(OWNERSHIP_KEY, ownership);
   });
   revalidatePath("/", "layout");
   revalidatePath("/admin/highlights");

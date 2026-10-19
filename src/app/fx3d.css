@@ -80,7 +80,6 @@
   --rise: 1;
   --p: 0;
   --from: calc(180deg - var(--p) * 1.8deg);
-  width: 100%;
   height: 24em;
   font-size: clamp(9px, 2.6vw, 15px);
 }
@@ -242,7 +241,6 @@
   --d: 7.4em;
   --h: 0.9em;
   --step: 1.2em;
-  width: 100%;
   height: 41em;
   font-size: clamp(7.5px, 1.9vw, 11px);
 }
@@ -446,7 +444,6 @@
 .jr3 {
   --base-turn: 38deg;
   --tilt: 60deg;
-  width: 100%;
   height: 32em;
   font-size: clamp(7px, 1.5vw, 12px);
 }
@@ -541,3 +538,140 @@
 }
 @media (max-width: 767px) { .cs-flow::before { display: none; } }
 @media (prefers-reduced-motion: reduce) { .results3d-tile { transition: none; } }
+
+/* ── Who owns Xpert (OwnershipShowcase) ── */
+/* Paid-up capital: gold coins drop into stacks. */
+.oc3 {
+  --base-turn: 30deg;
+  --tilt: 60deg;
+  height: 19em;
+  font-size: clamp(8px, 1.5vw, 12px);
+}
+.oc3 > .x3-world { top: 62%; }
+.oc3-floor {
+  position: absolute;
+  left: -14em;
+  top: -14em;
+  width: 28em;
+  height: 28em;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, transparent 0 1.8em, color-mix(in oklab, var(--color-gold) 16%, transparent) 1.8em calc(1.8em + 1px)),
+    radial-gradient(circle, color-mix(in oklab, var(--color-gold) 18%, transparent), transparent 62%);
+  -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%);
+  mask: radial-gradient(circle, #000 30%, transparent 70%);
+}
+.oc3-shadow {
+  position: absolute;
+  left: calc(var(--x) - 3em);
+  top: calc(var(--y) - 3em);
+  width: 6em;
+  height: 6em;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(0 0 0 / 0.5), transparent 68%);
+}
+[data-theme="light"] .oc3-shadow { background: radial-gradient(circle, rgb(10 20 40 / 0.22), transparent 68%); }
+.oc3-coin {
+  position: absolute;
+  left: calc(var(--x) - 2.1em);
+  top: calc(var(--y) - 2.1em);
+  width: 4.2em;
+  height: 4.2em;
+  transform: translateZ(var(--z)) rotateZ(var(--r));
+  transition: transform 0.7s cubic-bezier(0.34, 1.25, 0.64, 1);
+  transition-delay: calc(0.3s + var(--i) * 55ms);
+}
+.oc3-coin > i {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transition: opacity 0.3s ease;
+  transition-delay: calc(0.3s + var(--i) * 55ms);
+}
+.oc3-coin > .l0 { background: #7a5818; transform: translateZ(0); }
+.oc3-coin > .l1 { background: #946c1e; transform: translateZ(0.12em); }
+.oc3-coin > .l2 { background: #ad8126; transform: translateZ(0.24em); }
+.oc3-coin > .l3 { background: #c4952e; transform: translateZ(0.36em); }
+.oc3-coin > .top {
+  transform: translateZ(0.48em);
+  background:
+    radial-gradient(circle at 38% 32%, rgb(255 255 255 / 0.55), transparent 38%),
+    radial-gradient(circle, transparent 0 62%, rgb(122 88 24 / 0.55) 63% 66%, transparent 67%),
+    radial-gradient(circle, #f9df9e, var(--color-gold) 70%, #b98a2f);
+  box-shadow: 0 0 1.2em -0.3em color-mix(in oklab, #e0b252 80%, transparent);
+}
+.oc3-coin > .top::after {
+  content: "৳";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 700 1.5em/1 var(--font-display, serif);
+  color: rgb(122 88 24 / 0.75);
+}
+.js .ow:not(.is-on) .oc3-coin { transform: translateZ(calc(var(--z) + 16em)) rotateZ(calc(var(--r) + 90deg)); }
+.js .ow:not(.is-on) .oc3-coin > i { opacity: 0; }
+
+/* Owners: one platform per basis, a block per house. */
+.ow3 {
+  --base-turn: 38deg;
+  --tilt: 58deg;
+  height: 25em;
+  font-size: clamp(7px, 1.35vw, 14px);
+}
+.ow3 > .x3-world { top: 62%; left: 55%; }
+.ow3-floor {
+  position: absolute;
+  left: -26em;
+  top: -26em;
+  width: 52em;
+  height: 52em;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2.4em, color-mix(in oklab, var(--color-brand-sky) 14%, transparent) 2.4em calc(2.4em + 1px)),
+    repeating-linear-gradient(90deg, transparent 0 2.4em, color-mix(in oklab, var(--color-brand-sky) 14%, transparent) 2.4em calc(2.4em + 1px));
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 60%);
+  mask: radial-gradient(circle, #000 18%, transparent 60%);
+}
+.ow3-group { --c1: #c9d4e3; --c2: #8d9bb0; --c3: #5f6d82; }
+.ow3-group.is-bank, .ow-tab.is-bank { --c1: #7fdcf7; --c2: #23a6dd; --c3: #2a5fae; }
+.ow3-group.is-insurance, .ow-tab.is-insurance { --c1: #86f0cd; --c2: #22b98a; --c3: #15805f; }
+.ow3-group.is-corporate, .ow-tab.is-corporate { --c1: #f6d995; --c2: #d9a640; --c3: #a3741f; }
+.ow3-group.is-independent, .ow-tab.is-independent { --c1: #d7c2f5; --c2: #9b7fd0; --c3: #6a52a3; }
+.ow-tab { --c1: #c9d4e3; --c2: #8d9bb0; }
+.ow-tab .ow-dot { background: linear-gradient(135deg, var(--c1), var(--c2)); }
+.ow-tab[aria-selected="true"] { background: color-mix(in oklab, var(--c2) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--c2) 70%, transparent); }
+.ow3-plat > i { background-color: color-mix(in oklab, var(--color-navy-800) 80%, var(--c2)); border: 1px solid color-mix(in oklab, var(--c2) 35%, transparent); transition: background-color 0.6s ease, box-shadow 0.6s ease; }
+.ow3-group.is-lit .ow3-plat > .t { background-color: color-mix(in oklab, var(--color-navy-800) 55%, var(--c2)); box-shadow: 0 0 2.4em -0.4em var(--c2); }
+.ow3-block {
+  transition: transform 0.8s cubic-bezier(0.34, 1.3, 0.64, 1);
+  transition-delay: calc(0.2s + var(--k) * 60ms);
+}
+.ow3-group.is-lit .ow3-block { transform: translateZ(calc(var(--z) + 0.9em)); transition-delay: 0s; }
+.ow3-block > i { transition: background-color 0.6s ease, opacity 0.4s ease, box-shadow 0.6s ease; transition-delay: calc(0.2s + var(--k) * 60ms), calc(0.2s + var(--k) * 60ms), 0s; }
+.ow3-block > .t { background-color: color-mix(in oklab, var(--c1) 45%, var(--color-navy-800)); }
+.ow3-block > .s { background-color: color-mix(in oklab, var(--c2) 45%, var(--color-navy-800)); }
+.ow3-block > .e { background-color: color-mix(in oklab, var(--c3) 45%, var(--color-navy-800)); }
+.ow3-group.is-lit .ow3-block > .t { background-color: var(--c1); box-shadow: 0 0 1.6em -0.2em var(--c2), inset 0 0 0 1px rgb(255 255 255 / 0.35); }
+.ow3-group.is-lit .ow3-block > .s { background-color: var(--c2); }
+.ow3-group.is-lit .ow3-block > .e { background-color: var(--c3); }
+.js .ow:not(.is-on) .ow3-block { transform: translateZ(calc(var(--z) + 14em)); }
+.js .ow:not(.is-on) .ow3-block > i { opacity: 0; }
+.ow3-label { transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease; }
+.js .ow:not(.is-on) .ow3-label { opacity: 0; }
+.ow3-count {
+  font-family: var(--font-display);
+  font-size: 3.2em;
+  font-weight: 600;
+  color: var(--c1);
+  text-shadow: 0 1px 0 var(--c2), 0 2px 0 var(--c3), 0 3px 0 color-mix(in oklab, var(--c3) 70%, #000), 0 10px 16px rgb(0 0 0 / 0.45);
+}
+.ow3-group:not(.is-lit) .ow3-count { color: color-mix(in oklab, var(--c1) 55%, var(--color-text-secondary)); }
+[data-theme="light"] .ow3-count { color: var(--c3); text-shadow: 0 1px 0 var(--c2), 0 6px 10px rgb(10 20 40 / 0.18); }
+.ow3-name { margin-top: 0.35em; max-width: 8.5em; white-space: normal; text-align: center; font-size: 1.1em; line-height: 1.15; font-weight: 600; color: var(--color-text-secondary); }
+.ow3-group.is-lit .ow3-name { color: var(--color-text-primary, var(--color-fg)); }
+.ow-panel .ow-house { animation: ow-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(var(--i) * 60ms); }
+@keyframes ow-in { from { opacity: 0; transform: translateY(0.5rem); } }
+@media (prefers-reduced-motion: reduce) {
+  .oc3-coin, .oc3-coin > i, .ow3-block, .ow3-block > i, .ow3-label { transition: none !important; }
+  .ow-panel .ow-house { animation: none; }
+}

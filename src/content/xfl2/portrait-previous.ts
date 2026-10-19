@@ -28,7 +28,7 @@ export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "mohd-shaahed-imran": "328ce3b6e8bbae8c804d2c0685cfc5d952e3c4f9ccd5caede039f7ef98bdd0a2",
   "muhammad-shamsul-maruf": "f675c5ad7c278ce296e4c711a71af9bd1009044722085b08f42171fc4d4131c0",
   "nafis-hasan-khan": "7a3dcdc1a93c250600213a33cfb4dcbc17cff001597e119f4adf12aca1f91a90",
-  "najmul-hasan-rifat": "6d373c6142d32b1ce72d469811df5ba390a190cc389d76359dab978a5aa9f21c",
+  "najmul-hasan-rifat": ["6d373c6142d32b1ce72d469811df5ba390a190cc389d76359dab978a5aa9f21c", "59c78c3e937db1266a0dc355e227f8f682a400cc419621a3c6cc9bde764a45d9"], // new photo supplied 19 Oct 2026
   "saikat-biswas": "70cbfc7652e1540fe4df8fafb61c80bf6781209d1e5ce23e66473880529ca12d",
   "shaleh-akram": ["c39aa7072c8ed2e91df8404a4e3c3a0becbaf108a938c373788ac501dd511c93", "9ca628b8c3083baa2fefb4dc3c9feb87e807bc08a102e15710a48f8afe471da0"], // new photo supplied 19 Oct 2026
   "shamsher-morshed": "bd3dfe193a6927eb94a0de31363707ba756b13d13f0d57ff0deeaf0b8cdedc24",

@@ -2437,7 +2437,7 @@ const DEFAULT_STRENGTHS_SEED = {
 
 /**
  * Once (XFL, 19 Oct 2026): core strengths led by who owns Xpert, with real numbers.
- * Paid-up capital ৳33 crore as stated by XFL. The 12 owner houses, by parent
+ * Paid-up capital as stated by XFL (৳39 crore; first given as ৳33 crore, corrected 19 Oct 2026). The 12 owner houses, by parent
  * (checked 19 Oct 2026; src/content/xfl2/member-profiles.ts and parents' own pages):
  *  - banks (7): Bank Asia (Bank Asia Securities), Eastern Bank (EBL Securities, fully owned),
  *    Islami Bank Bangladesh (Islami Bank Securities), ONE Bank (ONE Securities; ONE Bank annual
@@ -2451,7 +2451,7 @@ const DEFAULT_STRENGTHS_SEED = {
  * Placed first; existing cards are kept after them (edits included), the old "Owned by
  * leading institutions" card is replaced, and the two infrastructure cards are merged
  * while they still have their original text. At most 10 cards (Admin → Home highlights).
- * Also adds "৳33 crore paid-up capital" to Admin → Figures when there is room.
+ * Also adds "৳39 crore paid-up capital" to Admin → Figures when there is room.
  */
 async function seedInstitutionStrengths() {
   const MARK = "seed.institution-strengths-2026-10-19";
@@ -2465,10 +2465,10 @@ async function seedInstitutionStrengths() {
       icon: "building",
       titleEn: "Owned by the country's leading institutions",
       titleBn: "দেশের শীর্ষস্থানীয় প্রতিষ্ঠানগুলোর মালিকানাধীন",
-      statEn: "৳33 cr",
-      statBn: "৳৩৩ কোটি",
-      bodyEn: "A capital-market fintech with ৳33 crore paid-up capital, owned by 12 brokerage houses backed by the country's banks, insurers and corporate groups.",
-      bodyBn: "৳৩৩ কোটি পরিশোধিত মূলধনের পুঁজিবাজার ফিনটেক, যার মালিক দেশের ব্যাংক, বিমা প্রতিষ্ঠান ও করপোরেট গ্রুপ-সমর্থিত ১২টি ব্রোকারেজ হাউস।",
+      statEn: "৳39 cr",
+      statBn: "৳৩৯ কোটি",
+      bodyEn: "A capital-market fintech with ৳39 crore paid-up capital, owned by 12 brokerage houses backed by the country's banks, insurers and corporate groups.",
+      bodyBn: "৳৩৯ কোটি পরিশোধিত মূলধনের পুঁজিবাজার ফিনটেক, যার মালিক দেশের ব্যাংক, বিমা প্রতিষ্ঠান ও করপোরেট গ্রুপ-সমর্থিত ১২টি ব্রোকারেজ হাউস।",
     },
     {
       icon: "landmark",
@@ -2552,12 +2552,12 @@ async function seedInstitutionStrengths() {
   const figures = Array.isArray(fig?.value) ? (fig!.value as { value?: string; labelEn?: string }[]) : [];
   let figNote = "";
   if (!figures.some((f) => /paid-up capital/i.test(f.labelEn ?? "")) && figures.length < 6) {
-    const next = [...figures, { value: "৳33 crore", labelEn: "Paid-up capital", labelBn: "পরিশোধিত মূলধন", source: "Xpert Fintech Ltd.", asOf: null }];
+    const next = [...figures, { value: "৳39 crore", labelEn: "Paid-up capital", labelBn: "পরিশোধিত মূলধন", source: "Xpert Fintech Ltd.", asOf: null }];
     await db.siteSetting.upsert({ where: { key: "site.figures" }, update: { value: next }, create: { key: "site.figures", value: next } });
     figNote = "; paid-up capital added to Figures";
   }
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), dropped } } });
-  console.log(`• Core strengths: ${items.length} cards, led by ownership (৳33 cr capital, 7 bank and 2 insurer subsidiaries, 9-member board)${figNote}${dropped.length ? `; over the limit, not added: ${dropped.join(", ")}` : ""}`);
+  console.log(`• Core strengths: ${items.length} cards, led by ownership (৳39 cr capital, 7 bank and 2 insurer subsidiaries, 9-member board)${figNote}${dropped.length ? `; over the limit, not added: ${dropped.join(", ")}` : ""}`);
 }
 
 /**
@@ -2643,7 +2643,7 @@ async function seedJourney() {
 
 /**
  * Once (XFL, 19 Oct 2026): "Who owns Xpert" on Home and About.
- *  - Paid-up capital ৳33 crore (stated by XFL), published.
+ *  - Paid-up capital ৳39 crore (stated by XFL), published.
  *  - Each consortium house's parent (Admin → Organizations → Owned by), where not set;
  *    sources as in seedInstitutionStrengths. Mika Securities and Remons Investment are
  *    left "not stated" (shown as other owner houses) until their ownership is confirmed.
@@ -2678,7 +2678,7 @@ async function seedOwnership() {
           titleBn: "এক্সপার্টের *মালিক* কারা",
           introEn: "The capital behind the platform and the institutions that own it, house by house.",
           introBn: "প্ল্যাটফর্মের পেছনের মূলধন এবং এর মালিক প্রতিষ্ঠানগুলো, হাউস ধরে ধরে।",
-          capitalCrore: 33,
+          capitalCrore: 39,
           capitalSource: "Xpert Fintech Ltd.",
           capitalAsOf: "",
         },
@@ -2686,7 +2686,7 @@ async function seedOwnership() {
     });
   }
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
-  console.log(`• Who owns Xpert: ৳33 crore paid-up capital published; parent institution set for ${set} house(s)`);
+  console.log(`• Who owns Xpert: ৳39 crore paid-up capital published; parent institution set for ${set} house(s)`);
 }
 
 /**
@@ -2734,7 +2734,7 @@ async function seedStrengthsDedup() {
   const fig = await db.siteSetting.findUnique({ where: { key: "site.figures" } });
   if (Array.isArray(fig?.value)) {
     const list = fig!.value as { value?: string; labelEn?: string; source?: string }[];
-    const next = list.filter((f) => !(f.labelEn === "Paid-up capital" && f.value === "৳33 crore" && f.source === "Xpert Fintech Ltd."));
+    const next = list.filter((f) => !(f.labelEn === "Paid-up capital" && f.value === "৳39 crore" && f.source === "Xpert Fintech Ltd."));
     if (next.length !== list.length) await db.siteSetting.update({ where: { key: "site.figures" }, data: { value: next } });
   }
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
@@ -2825,6 +2825,19 @@ async function seedHomeOrderReset() {
     delete rest.order;
     await db.siteSetting.update({ where: { key: "site.design" }, data: { value: rest as object } });
     console.log("• Home page: section order back to the default");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
+/** Once (XFL, 19 Oct 2026): paid-up capital is ৳39 crore (earlier seeded as ৳33 crore); a figure edited in the admin to something else is kept. */
+async function seedCapital39() {
+  const MARK = "seed.capital-39-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const row = await db.siteSetting.findUnique({ where: { key: "home.ownership" } });
+  const v = row?.value as Record<string, unknown> | undefined;
+  if (row && v && v.capitalCrore === 33) {
+    await db.siteSetting.update({ where: { key: "home.ownership" }, data: { value: { ...v, capitalCrore: 39 } } });
+    console.log("• Who owns Xpert: paid-up capital updated to ৳39 crore");
   }
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
 }
@@ -3292,6 +3305,7 @@ async function main() {
   await seedStrengthsDedup();
   await seedHomeFaq();
   await seedHomeOrderReset();
+  await seedCapital39();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

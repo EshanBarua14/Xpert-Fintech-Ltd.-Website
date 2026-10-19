@@ -54,10 +54,30 @@ export function Journey3D({ data, locale, sourceLabel }: { data: JourneyView; lo
         {data.intro && <p className="max-w-2xl leading-relaxed text-text-secondary">{data.intro}</p>}
       </div>
 
-      <div className="relative overflow-hidden rounded-[2rem] border border-fg/10 bg-navy-900/70">
+      <div className="pro-beam pro-mesh relative overflow-hidden rounded-[2rem]">
+        {/* The trend through the columns' tops (milestones with a number only). */}
+        {(() => {
+          const pts = steps
+            .map((s, i) => (s.value !== null ? { x: ((i + 0.5) / n) * 100, y: 100 - (18 + (s.value / max) * 82) } : null))
+            .filter((p): p is { x: number; y: number } => p !== null);
+          if (pts.length < 2) return null;
+          return (
+            <div className="jrc-trend pointer-events-none absolute inset-x-5 top-14 z-10 h-44 md:inset-x-8 md:h-56" aria-hidden="true">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="block h-full w-full overflow-visible">
+              <defs>
+                <linearGradient id="jrc-grad" x1="0" x2="1" y1="0" y2="0">
+                  <stop offset="0" stopColor="var(--color-brand-sky)" />
+                  <stop offset="1" stopColor="var(--color-gold)" />
+                </linearGradient>
+              </defs>
+              <polyline points={pts.map((p) => `${p.x},${p.y}`).join(" ")} className="jrc-line" />
+            </svg>
+            </div>
+          );
+        })()}
         {/* A column timeline: milestones in order on one baseline; those with a number rise to it. */}
         <div
-          className="jrc grid items-end gap-3 px-5 pt-14 pb-5 md:gap-5 md:px-8"
+          className="jrc relative grid items-end px-5 pt-14 pb-5 md:px-8"
           style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}
           role="img"
           aria-label={`${data.metric}: ${steps
@@ -68,10 +88,10 @@ export function Journey3D({ data, locale, sourceLabel }: { data: JourneyView; lo
           {steps.map((s, i) => {
             const h = s.value !== null ? 18 + (s.value / max) * 82 : 0;
             return (
-              <div key={i} className="flex flex-col items-center gap-2" aria-hidden="true" style={{ "--i": i } as CSSProperties}>
+              <div key={i} className="flex flex-col items-center gap-2 px-1.5 md:px-2.5" aria-hidden="true" style={{ "--i": i } as CSSProperties}>
                 <div className="relative flex h-44 w-full items-end justify-center md:h-56">
                   {s.value !== null ? (
-                    <div className={cn("jrc-col relative w-full max-w-[4.5rem] rounded-t-md", i === now && "is-now")} style={{ height: `${h}%` }}>
+                    <div className={cn("jrc-col relative w-full max-w-[4.5rem] rounded-t-lg", i === now && "is-now")} style={{ height: `${h}%` }}>
                       <span className="jrc-num absolute inset-x-0 -top-8 text-center font-display text-2xl leading-none font-semibold text-text-primary tabular-nums md:text-3xl">
                         {num(s.value)}
                       </span>

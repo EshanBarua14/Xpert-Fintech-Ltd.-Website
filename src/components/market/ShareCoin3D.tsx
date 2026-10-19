@@ -35,6 +35,7 @@ export function ShareCoin3D({ pct, caption, goal, label, locale, size = "md", cl
   const root = useRef<HTMLDivElement>(null);
   const arc = useRef<SVGCircleElement>(null);
   const num = useRef<HTMLSpanElement>(null);
+  const head = useRef<SVGCircleElement>(null);
   const p = Math.max(0, Math.min(100, pct));
   const digits = Number.isInteger(p) ? 0 : 2;
 
@@ -42,6 +43,10 @@ export function ShareCoin3D({ pct, caption, goal, label, locale, size = "md", cl
     const el = root.current;
     const set = (k: number) => {
       arc.current?.setAttribute("stroke-dasharray", `${(C * p * k) / 100} ${C}`);
+      // The light at the arc's leading edge.
+      const a = (((p * k) / 100) * 360 - 90) * (Math.PI / 180);
+      head.current?.setAttribute("cx", String(100 + Math.cos(a) * R));
+      head.current?.setAttribute("cy", String(100 + Math.sin(a) * R));
       if (num.current) num.current.textContent = fmt(locale, p * k, digits);
     };
     if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
@@ -94,6 +99,7 @@ export function ShareCoin3D({ pct, caption, goal, label, locale, size = "md", cl
             const b = at(i * 10, 95);
             return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} className="donut-tick" />;
           })}
+          <circle cx="100" cy="100" r="68" className="donut-halo" />
           <circle cx="100" cy="100" r={R} className="donut-track" />
           <circle
             ref={arc}
@@ -105,6 +111,7 @@ export function ShareCoin3D({ pct, caption, goal, label, locale, size = "md", cl
             strokeDasharray={`${(C * p) / 100} ${C}`}
             transform="rotate(-90 100 100)"
           />
+          <circle ref={head} r="4" className="donut-head" cx={100 + Math.cos(((p / 100) * 360 - 90) * (Math.PI / 180)) * R} cy={100 + Math.sin(((p / 100) * 360 - 90) * (Math.PI / 180)) * R} />
           {g !== null && (
             <g className="donut-goal">
               <line x1={at(g, R - 11).x} y1={at(g, R - 11).y} x2={at(g, R + 11).x} y2={at(g, R + 11).y} />

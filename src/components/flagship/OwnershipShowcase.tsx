@@ -137,10 +137,11 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
         {(cap || n > 0) && (
         <div className="flex flex-col gap-4">
         {cap && (
-          <div className="relative flex flex-1 flex-col overflow-hidden rounded-[2rem] border border-gold/25 bg-navy-900/70">
+          <div className="pro-beam pro-mesh relative flex flex-1 flex-col overflow-hidden rounded-[2rem]">
             <p className="px-6 pt-6 text-sm font-semibold text-text-secondary md:px-7 md:pt-7">{t.capital}</p>
             {/* A capital meter: one fine mark per unit, lit in turn around the ring; the figure in the centre. */}
             <div className="relative mx-auto my-auto w-full max-w-[16rem] px-6 py-4" aria-hidden="true">
+              <span className="cap-sweep" />
               <svg viewBox="0 0 200 200" className="block w-full">
                 <circle cx="100" cy="100" r="70" className="cap-ring" />
                 {Array.from({ length: coins }, (_, i) => {
@@ -225,7 +226,7 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
         {/* The owners, by basis */}
         {n > 0 && group && (
           <div
-            className="relative flex flex-col overflow-hidden rounded-[2rem] border border-fg/10 bg-navy-900/70"
+            className="pro-mesh relative flex flex-col overflow-hidden rounded-[2rem] border border-fg/10 bg-navy-900/70"
             onMouseEnter={() => setHeld(true)}
             onMouseLeave={() => setHeld(false)}
             onFocusCapture={() => setHeld(true)}
@@ -254,7 +255,7 @@ export function OwnershipShowcase({ data, locale }: { data: OwnershipView; local
                     </span>
                     <span className="grid grid-cols-[repeat(auto-fill,minmax(3.6rem,1fr))] gap-1.5">
                       {g.houses.map((h, hi) => (
-                        <span key={h.name} className="ow-tile flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-white p-1.5" style={{ "--k": gi * 4 + hi } as CSSProperties}>
+                        <span key={h.name} className="ow-tile pro-shimmer flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-white p-1.5" style={{ "--k": gi * 4 + hi } as CSSProperties}>
                           {h.logo ? (
                             <Image src={h.logo.url} alt="" width={h.logo.width ?? 96} height={h.logo.height ?? 72} className="h-full w-full object-contain" />
                           ) : (

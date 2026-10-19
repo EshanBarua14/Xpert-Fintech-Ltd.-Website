@@ -136,7 +136,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
         </div>
 
         {/* The cost in blocks */}
-        <figure className="flex flex-col gap-7 rounded-3xl border border-fg/[0.08] bg-gradient-to-br from-brand-sky/[0.06] via-transparent to-gold/[0.06] p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.05)] md:p-7" aria-label={t.chart}>
+        <figure className="pro-beam pro-mesh flex flex-col gap-7 rounded-3xl p-5 md:p-7" aria-label={t.chart}>
           {/* Two bars to scale: the cost before, and with Xpert, where the part no longer paid is outlined in gold. */}
           <div className={`svb flex flex-col gap-6 ${on ? "is-on" : ""} ${split ? "is-split" : ""}`} role="img" aria-label={`${data.beforeLabel}: ${amount(data.before, 100)}. ${data.afterLabel}: ${amount(data.after, 100 - data.pct)}. −${nf.format(data.pct)}% ${t.saved}.`}>
             <div className="flex flex-col gap-2.5" aria-hidden="true">
@@ -154,7 +154,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
                 <span className="font-mono font-semibold text-brand-sky tabular-nums">{amount(data.after, 100 - data.pct)}</span>
               </div>
               <div className="svb-track">
-                <span className="svb-bar svb-after" style={{ "--w": `${100 - data.pct}%` } as CSSProperties} />
+                <span className="svb-bar svb-after pro-shimmer" style={{ "--w": `${100 - data.pct}%` } as CSSProperties} />
                 <span className="svb-saved" style={{ left: `${100 - data.pct}%`, width: `${data.pct}%` } as CSSProperties}>
                   <span className="svb-saved-label">−{nf.format(data.pct)}% {t.saved}</span>
                 </span>

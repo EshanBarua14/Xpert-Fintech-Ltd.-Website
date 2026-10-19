@@ -11,7 +11,7 @@ export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "eshan-barua": ["ef8a4de53dfb73cdff3768faede53fe8a49499304ad9a5eeb23a05cc4c247bc9", "592c6f7de22b2854b9bc97879d477ec7f3a1de54185d7ca3b9ff99c77fa6892c", "ab05054fc2d587d49822668c67a6d38f8084d559af50cbd61d4186a97a267e98", "c0f8b0b46eae9c92be56a95a684297f87b0ef8110b6747e358a735fc785c01ef"], // new photo supplied 19 Oct 2026
   "fakruddin-ali-ahmed-rajib": ["afbeed2fb055b9ec42099f5a7702b6537b22149dc91a3a092d76b47ccda2736a", "42302e473195d88c011a23b8b7f0b4c33382a46ca90bd3f6455bed8315e3e241"],
   "m-shahryar-faiz": ["ea342932942d2df4cf78bae73c1df35717fe8388aa55c965cb3943a31b094129", "7c1e96915b8651bfa445080db6baaf0901d6af6ff5b252c954f4b1b17ec31ce4", "6e52ec01057018a15e07fb08d5768c24b78a5f5690b2f1c1dcc45ef4cdadc0d7"], // new photo supplied 19 Oct 2026
-  "mahmuda-yasmin-farah": "d2d40dafb59a8b942c045c72a7e451743e98d2770bdd6ec087f6b7e76f34b3de",
+  "mahmuda-yasmin-farah": ["d2d40dafb59a8b942c045c72a7e451743e98d2770bdd6ec087f6b7e76f34b3de", "0bf034554fa724ddbf5adc5231d362f3de619963440dbc74e202d88021d59cd4"], // new photo supplied 20 Oct 2026
   "md-abdur-rahman-rony": ["522481ca12d0a2f3e4e4566865118f7f72ad3e115400a370a13aa4a11f943014", "52472168a54ddfafa3e9391c446f07440ab4ba5dde2fd837726c160504eba409"], // new photo supplied 19 Oct 2026
   "md-abul-moshad-chowdhury": ["ccf90da0a0baad51bd85bcb17559d775e32d404160ab42ede9530e094d46d55a", "9d5b5c66dbd0f0efb2f73c1cdabf10a36589e67350b23b7667d971d894ffd7a2"], // new photo supplied 19 Oct 2026
   "md-hasan-uddin": ["213d2b8fe237f222274e92a300db69df4aeb62735ec633f1f20f2fa3d0e4adb7", "71b99f407f10eb6f67a72a6160ec08fdcbb3af8780705a9681268c974235c38b"], // new photo supplied 19 Oct 2026

@@ -18,7 +18,7 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "fakruddin-ali-ahmed-rajib": { x: 0.53, y: 0.45 }, // re-framed 15 Oct to head and shoulders like the others (plain background extended above)
   "m-shahryar-faiz": { x: 0.524, y: 0.486 },
   "mahmuda-yasmin-farah": { x: 0.496, y: 0.424, zoom: 1.1 },
-  "md-abdur-rahman-rony": { x: 0.491, y: 0.491 },
+  "md-abdur-rahman-rony": { x: 0.49, y: 0.42 }, // new photo 19 Oct 2026
   "md-abul-moshad-chowdhury": { x: 0.531, y: 0.42, zoom: 1.4 },
   "md-hasan-uddin": { x: 0.499, y: 0.463 },
   "md-hefaj-uddin": { x: 0.504, y: 0.467 },

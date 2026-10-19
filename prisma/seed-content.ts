@@ -2214,7 +2214,7 @@ async function seedBluechipSquare() {
  * (matched by the position). Contact details and photos can be changed in Admin → People.
  *  - Wasif Zaman, Deputy Managing Director, Mika Securities Limited.
  *  - Md. Mofizuddin, Chairman & Managing Director, Remons Investment & Securities Ltd.
- *    (photo supplied by XFL, unedited: prisma/seed-media/people/md-mofizuddin.jpg).
+ *  Photos supplied by XFL, unedited: prisma/seed-media/people/<key>.jpg.
  */
 const REPRESENTATIVES = [
   { key: "wasif-zaman", mark: "seed.mika-rep-2026-10-19", en: "Wasif Zaman", bn: "ওয়াসিফ জামান", aff: { en: "Deputy Managing Director, Mika Securities Limited", bn: "উপ-ব্যবস্থাপনা পরিচালক, মিকা সিকিউরিটিজ লিমিটেড" } },
@@ -2228,8 +2228,18 @@ const REPRESENTATIVES = [
 ];
 async function seedRepresentatives() {
   for (const r of REPRESENTATIVES) {
+    // A photo supplied after the person was added is attached once, unless one was set in the admin.
+    const existing = await db.person.findUnique({ where: { key: r.key }, select: { id: true, photoMediaId: true } });
+    if (existing && !existing.photoMediaId) {
+      const photo = await seedImage("people", r.key, r.en, ["person", "portrait"]);
+      if (photo) {
+        await db.person.update({ where: { id: existing.id }, data: { photoMediaId: photo } });
+        await db.mediaUsage.create({ data: { mediaId: photo, entityType: "PERSON", entityId: existing.id, field: "photo" } });
+        console.log(`• ${r.en}: photo added`);
+      }
+    }
     if (await db.siteSetting.findUnique({ where: { key: r.mark } })) continue;
-    if (!(await db.person.findUnique({ where: { key: r.key } }))) {
+    if (!existing) {
       const photo = await seedImage("people", r.key, r.en, ["person", "portrait"]);
       const person = await db.person.create({
         data: {
@@ -2766,6 +2776,7 @@ async function main() {
   await seedRoster();
   await saikatBeforeMaruf();
   await sowkotFirst();
+  await seedRepresentatives();
   await seedPortraitFocus();
   await seedMessagesAndGoal();
   await seedLegalDrafts();
@@ -2811,7 +2822,6 @@ async function main() {
   await seedInnovaApp();
   await seedTheaClient();
   await seedBluechipSquare();
-  await seedRepresentatives();
   await seedWifangWebsite();
   await seedIdlcLogo();
   await publishReviewCards();

@@ -23,21 +23,31 @@ export const TONE_FIELDS = [
   { key: "consultant", label: "Consultants" },
   { key: "team", label: "Team leadership" },
 ] as const;
+/**
+ * Home page sections, in their default order: proof first (clients, market share),
+ * then the product (showcase, phones, live apps), the benefit (cost), how it works
+ * (by desk, order flow, risk checks), trust (owners, strengths, reviews, consortium,
+ * principles), then today's market, added sections and news. Admin → Design → Home
+ * page hides sections and changes the order. `toggle: false`: shown by its own setting.
+ */
 export const HOME_SECTIONS = [
   { key: "clients", label: "Client logos" },
-  { key: "strengths", label: "Core strengths (Admin → Home highlights)" },
-  { key: "savings", label: "Cost savings graphic (Admin → Home highlights)" },
-  { key: "phones", label: "Floating phones (product screens on mobile)" },
   { key: "reach", label: "Market share and client base" },
   { key: "figures", label: "Xpert in numbers (Admin → Figures)" },
   { key: "showcase", label: "Product showcase" },
-  { key: "roles", label: "Built for every desk (products by role)" },
-  { key: "testimonials", label: "Client reviews" },
+  { key: "phones", label: "Floating phones (product screens on mobile)" },
   { key: "apps", label: "Live branded apps" },
+  { key: "savings", label: "Cost savings graphic (Admin → Home highlights)" },
+  { key: "roles", label: "Built for every desk (products by role)" },
   { key: "flow", label: "Order flow" },
   { key: "rms", label: "Risk checks (RMS, built into the OMS)" },
+  { key: "ownership", label: "Who owns Xpert (Admin → Home highlights)" },
+  { key: "strengths", label: "Core strengths (Admin → Home highlights)" },
+  { key: "testimonials", label: "Client reviews" },
   { key: "consortium", label: "Consortium logos" },
   { key: "principles", label: "Principles" },
+  { key: "market", label: "Today on DSE and CSE (switched on under DSE · CSE prices)", toggle: false },
+  { key: "custom", label: "Sections added in Admin → Pages → Home", toggle: false },
   { key: "events", label: "Events" },
 ] as const;
 export type HomeSection = (typeof HOME_SECTIONS)[number]["key"];
@@ -57,6 +67,8 @@ export type Design = {
   products: Record<string, ProductLook>;
   navIcons: Record<string, string>;
   hidden: HomeSection[];
+  /** Home sections in the order shown (every key, defaults filling any missing). */
+  order: HomeSection[];
   ticker: TickerPlace;
   /** DSE and CSE index tiles in the home page hero. */
   heroIndices: boolean;
@@ -69,6 +81,21 @@ const hex = (v: unknown) => (typeof v === "string" && HEX.test(v.trim()) ? v.tri
 const icon = (v: unknown) => (typeof v === "string" && ICON_NAMES.includes(v) ? v : undefined);
 const obj = (v: unknown) => (v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {});
 const clean = <T extends Record<string, unknown>>(o: T) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T;
+
+/** A stored order, cleaned: known keys once each, and any section it lacks put back at its default place. */
+function readOrder(v: unknown): HomeSection[] {
+  const keys = HOME_SECTIONS.map((s) => s.key) as HomeSection[];
+  const given = (Array.isArray(v) ? v : []).filter((x, i, a): x is HomeSection => keys.includes(x as HomeSection) && a.indexOf(x) === i);
+  if (!given.length) return keys;
+  const out = [...given];
+  keys.forEach((k, i) => {
+    if (out.includes(k)) return;
+    // After the nearest section that comes before it by default.
+    const prev = keys.slice(0, i).reverse().find((p) => out.includes(p));
+    out.splice(prev ? out.indexOf(prev) + 1 : 0, 0, k);
+  });
+  return out;
+}
 
 export function readDesign(value: unknown): Design {
   const v = obj(value);
@@ -84,6 +111,7 @@ export function readDesign(value: unknown): Design {
     ),
     navIcons: Object.fromEntries(Object.entries(obj(v.navIcons)).flatMap(([k, i]) => (icon(i) ? [[k, icon(i)!]] : []))),
     hidden: (Array.isArray(v.hidden) ? v.hidden : []).filter((x): x is HomeSection => HOME_SECTIONS.some((s) => s.key === x)),
+    order: readOrder(v.order),
     ticker: TICKER_PLACES.some((t) => t.value === v.ticker) ? (v.ticker as TickerPlace) : "markets",
     heroIndices: v.heroIndices === true,
     homeMarket: v.homeMarket === true,

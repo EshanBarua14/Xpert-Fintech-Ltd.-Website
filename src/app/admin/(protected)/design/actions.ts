@@ -35,10 +35,14 @@ export async function saveDesign(_prev: DesignState, formData: FormData): Promis
     const icon = String(formData.get(`nav.${path}`) ?? "");
     if (icon) navIcons[path] = icon;
   }
-  const hidden = HOME_SECTIONS.filter((s) => formData.get(`home.${s.key}`) !== "on").map((s) => s.key);
+  const hidden = HOME_SECTIONS.filter((s) => !("toggle" in s) && formData.get(`home.${s.key}`) !== "on").map((s) => s.key);
+  // Positions typed per section (1 = first); ties keep the default order.
+  const order = HOME_SECTIONS.map((s, i) => ({ key: s.key, at: Number(formData.get(`order.${s.key}`)) || i + 1, i }))
+    .sort((a, b) => a.at - b.at || a.i - b.i)
+    .map((x) => x.key);
   if (Object.keys(errors).length) return { errors, message: "Please fix the highlighted colour codes." };
   // Read back through the validator, so only known keys, valid colours and real icons are stored.
-  const value = readDesign({ colors, tones, products, navIcons, hidden, ticker: String(formData.get("ticker") ?? ""), heroIndices: formData.get("heroIndices") === "on", homeMarket: formData.get("homeMarket") === "on" });
+  const value = readDesign({ colors, tones, products, navIcons, hidden, order, ticker: String(formData.get("ticker") ?? ""), heroIndices: formData.get("heroIndices") === "on", homeMarket: formData.get("homeMarket") === "on" });
   await db.siteSetting.upsert({ where: { key: DESIGN_KEY }, update: { value, updatedById: admin.id }, create: { key: DESIGN_KEY, value, updatedById: admin.id } });
   revalidatePath("/", "layout");
   return { ok: true, savedAt: Date.now(), message: "Saved. The website uses the new design at once." };

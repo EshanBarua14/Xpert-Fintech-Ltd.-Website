@@ -197,8 +197,17 @@ export function TimelineBlock({ block, ctx }: { block: BlockData; ctx: BlockCont
 }
 
 export function FaqBlock({ block }: { block: BlockData }) {
+  // FAQPage structured data, so search engines can show the answers.
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: block.items
+      .filter((i) => i.title && i.body)
+      .map((i) => ({ "@type": "Question", name: i.title, acceptedAnswer: { "@type": "Answer", text: i.body } })),
+  };
   return (
     <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+      {ld.mainEntity.length > 0 && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, "\\u003c") }} />}
       <BlockHeading text={block.text} />
       <div className="flex flex-col gap-3">
         {block.items.map((item, i) => (

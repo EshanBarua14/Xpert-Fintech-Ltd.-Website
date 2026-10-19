@@ -12,7 +12,7 @@ export type DesignFormValues = {
   tones: Field[];
   products: { key: string; name: string; from: string; to: string; icon: string; defaults: { from: string; to: string; icon: string } }[];
   nav: { path: string; label: string; depth: number; icon: string; auto: string }[];
-  home: { key: string; label: string; shown: boolean }[];
+  home: { key: string; label: string; shown: boolean; toggle: boolean }[];
   ticker: string;
   tickerPlaces: { value: string; label: string }[];
   heroIndices: boolean;
@@ -148,18 +148,31 @@ export function DesignForm({ values }: { values: DesignFormValues }) {
       <section className={box}>
         <div>
           <h2 className="font-display text-xl font-semibold">Home page sections</h2>
-          <p className="mt-1 text-sm text-text-secondary">Untick a section to hide it. Its content stays in the admin.</p>
+          <p className="mt-1 text-sm text-text-secondary">Untick a section to hide it (its content stays in the admin). Change the numbers to reorder: 1 comes first, right after the hero; the closing band always ends the page.</p>
         </div>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {values.home.map((h) => (
-            <li key={h.key}>
-              <label className="flex items-center gap-3 rounded-xl border border-fg/[0.08] px-4 py-3 text-sm">
-                <input type="checkbox" name={`home.${h.key}`} defaultChecked={h.shown} className="h-4 w-4 accent-brand-royal" />
-                {h.label}
-              </label>
+        <ol className="grid gap-2">
+          {values.home.map((h, i) => (
+            <li key={h.key} className="flex items-center gap-3 rounded-xl border border-fg/[0.08] px-3 py-2 text-sm">
+              <input
+                type="number"
+                name={`order.${h.key}`}
+                min={1}
+                max={99}
+                defaultValue={i + 1}
+                aria-label={`Position of ${h.label}`}
+                className="h-9 w-16 rounded-lg border border-fg/15 bg-transparent px-2 text-center tabular-nums"
+              />
+              {h.toggle ? (
+                <label className="flex flex-1 items-center gap-3">
+                  <input type="checkbox" name={`home.${h.key}`} defaultChecked={h.shown} className="h-4 w-4 accent-brand-royal" />
+                  {h.label}
+                </label>
+              ) : (
+                <span className="flex-1 text-text-secondary">{h.label}</span>
+              )}
             </li>
           ))}
-        </ul>
+        </ol>
       </section>
 
       <section className={box}>

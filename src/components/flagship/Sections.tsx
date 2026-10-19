@@ -23,9 +23,10 @@ import { digits } from "@/lib/i18n/digits";
 
 const delay = (d: number) => ({ "--d": d }) as CSSProperties;
 
-export function Shell({ children, className, id }: { children: ReactNode; className?: string; id?: string }) {
+/** `nav`: a short name for the home page's "on this page" navigator (HomeSectionNav). */
+export function Shell({ children, className, id, nav }: { children: ReactNode; className?: string; id?: string; nav?: string }) {
   return (
-    <section id={id} className={cn("shell relative scroll-mt-28", className)}>
+    <section id={id} data-nav={nav} className={cn("shell relative scroll-mt-28", className)}>
       <div className="mx-auto w-full max-w-7xl px-4 md:px-8">{children}</div>
     </section>
   );

@@ -65,7 +65,10 @@ export default async function DesignPage() {
               return { key: o.key!, name: o.translations[0]?.name ?? o.key!, from: p.from ?? "", to: p.to ?? "", icon: p.icon ?? "", defaults: { from: d.from, to: d.to, icon: d.icon } };
             }),
           nav,
-          home: HOME_SECTIONS.map((h) => ({ key: h.key, label: h.label, shown: !design.hidden.includes(h.key) })),
+          home: design.order.map((k) => {
+            const h = HOME_SECTIONS.find((x) => x.key === k)!;
+            return { key: h.key, label: h.label, shown: !design.hidden.includes(h.key), toggle: !("toggle" in h) };
+          }),
           ticker: design.ticker,
           tickerPlaces: TICKER_PLACES.map((t) => ({ value: t.value, label: t.label })),
           heroIndices: design.heroIndices,

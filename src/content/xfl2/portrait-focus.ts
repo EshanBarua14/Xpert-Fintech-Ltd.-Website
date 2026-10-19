@@ -32,10 +32,10 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "mohammad-mehrabul-ferdous": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
   "mohammed-rahmat-pasha": { x: 0.52, y: 0.46 },
   "mohd-shaahed-imran": { x: 0.509, y: 0.349, zoom: 1.12 },
-  "muhammad-shamsul-maruf": { x: 0.477, y: 0.507 },
+  "muhammad-shamsul-maruf": { x: 0.5, y: 0.4 }, // new photo 19 Oct 2026
   "nafis-hasan-khan": { x: 0.506, y: 0.426, zoom: 1.06 },
   "najmul-hasan-rifat": { x: 0.53, y: 0.43 }, // new photo 19 Oct 2026
-  "saikat-biswas": { x: 0.51, y: 0.42 },
+  "saikat-biswas": { x: 0.5, y: 0.37 }, // new photo 19 Oct 2026
   "shaleh-akram": { x: 0.487, y: 0.56 }, // new photo 19 Oct 2026
   "shamsher-morshed": { x: 0.49, y: 0.43 },
   "sumon-das": { x: 0.501, y: 0.409 },

@@ -12,6 +12,8 @@ export type TeamMember = {
   name: string;
   title: string | null;
   department: string | null;
+  /** Every department the person shows under (Admin → People, comma-separated); the first colours the card. */
+  departments?: string[];
   photo: { url: string; width?: number | null; height?: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
   email: string | null;
   linkedinUrl: string | null;
@@ -38,14 +40,16 @@ function initials(name: string) {
  * department name. The chips filter by department; "Everyone" keeps the
  * full order.
  */
+const deptsOf = (p: TeamMember) => p.departments ?? (p.department ? [p.department] : []);
+
 export function TeamDirectory({ people, locale, labels }: { people: TeamMember[]; locale: string; labels: TeamLabels }) {
   const departments = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const p of people) if (p.department) counts.set(p.department, (counts.get(p.department) ?? 0) + 1);
+    for (const p of people) for (const d of deptsOf(p)) counts.set(d, (counts.get(d) ?? 0) + 1);
     return [...counts.entries()].sort((a, b) => departmentRank(a[0]) - departmentRank(b[0]) || a[0].localeCompare(b[0]));
   }, [people]);
   const [active, setActive] = useState<string | null>(null);
-  const shown = active ? people.filter((p) => p.department === active) : people;
+  const shown = active ? people.filter((p) => deptsOf(p).includes(active)) : people;
   const nf = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US");
 
   return (

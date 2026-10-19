@@ -87,7 +87,7 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
             label="Department"
             list="department-options"
             placeholder="Engineering"
-            hint="Optional. Colours the card and sets the filter on the Team page. Pick one or type a new one."
+            hint="Optional. Colours the card and sets the filter on the Team page. Pick one or type a new one; for more than one, separate with commas (e.g. Engineering, Leadership): the first colours the card."
             defaultValue={values.department}
             error={e.department}
             autoComplete="off"

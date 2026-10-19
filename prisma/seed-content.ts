@@ -2680,6 +2680,22 @@ async function seedOwnership() {
 }
 
 /**
+ * Once (XFL, 19 Oct 2026): Moshad, Saikat, Maruf and Mehrabul also show under Leadership
+ * in the Team page's department filter ("Engineering, Leadership"; Engineering still
+ * colours their cards). Only where the department is still the seeded "Engineering".
+ */
+async function seedLeadershipFilter() {
+  const MARK = "seed.leadership-filter-2026-10-19";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const r = await db.person.updateMany({
+    where: { key: { in: ["md-abul-moshad-chowdhury", "saikat-biswas", "muhammad-shamsul-maruf", "mohammad-mehrabul-ferdous"] }, department: "Engineering" },
+    data: { department: "Engineering, Leadership" },
+  });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), count: r.count } } });
+  if (r.count) console.log(`• Team page: ${r.count} engineering lead(s) also listed under Leadership`);
+}
+
+/**
  * Once (XFL, 19 Oct 2026): sharper headlines for the core strengths and the cost savings
  * graphic, where the admin still has the earlier wording (anything edited is kept).
  */
@@ -3138,6 +3154,7 @@ async function main() {
   await seedInstitutionStrengths();
   await seedJourney();
   await seedOwnership();
+  await seedLeadershipFilter();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

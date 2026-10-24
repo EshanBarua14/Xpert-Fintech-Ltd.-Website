@@ -38,6 +38,13 @@ const EXTRA: Record<string, (page: Page) => Promise<void>> = {
     await page.locator(`[id="role.${group}.enTitle"]`).fill("E2E Title");
   },
   resources: async (page) => page.locator("#externalUrl").fill("https://example.com/e2e.pdf"),
+  // Key results are parsed from "value | English | বাংলা" lines.
+  "case-studies": async (page) => page.locator("#results").fill("3× | faster order entry | দ্রুত অর্ডার\n99% | uptime"),
+  // Who owns the house (Who owns Xpert on the home page).
+  organizations: async (page) => {
+    await page.locator("#parentType").selectOption("BANK");
+    await page.locator("#parentName").fill("E2E Bank PLC");
+  },
   testimonials: async (page) => {
     for (const t of await page.locator("main form textarea:visible").all()) if (!(await t.inputValue())) await t.fill("E2E test quote, written for the end-to-end check.");
   },
@@ -65,6 +72,7 @@ const PAGES = [
   "/admin/ecosystem",
   "/admin/events",
   "/admin/figures",
+  "/admin/highlights",
   "/admin/history",
   "/admin/leads",
   "/admin/leads/new",
@@ -111,7 +119,7 @@ const CRUD = [
 ];
 
 /** Single-page forms that should save as they are. */
-const SETTINGS = ["/admin/settings", "/admin/design", "/admin/figures", "/admin/credentials", "/admin/market", "/admin/site-text"];
+const SETTINGS = ["/admin/settings", "/admin/design", "/admin/figures", "/admin/credentials", "/admin/market", "/admin/site-text", "/admin/highlights"];
 
 const ERROR_TEXT = /Application error|Internal Server Error|Something went wrong|This page could not be found|Unhandled Runtime Error/i;
 
@@ -493,5 +501,92 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
     expect(r.status()).toBe(200);
     const inbox = (await r.json()) as { leads: number; applications: number };
     expect(typeof inbox.leads).toBe("number");
+  });
+});
+
+
+/** The newer admin features: values typed in the admin come back after a reload and show on the site. */
+test.describe("Admin console: home highlights, order, journey", () => {
+  test.skip(!hasAdmin, "Set E2E_ADMIN_EMAIL and E2E_ADMIN_PASSWORD (see docs/TESTING.md)");
+  test.use({ storageState: STATE });
+  test.beforeAll(async ({ browser }) => {
+    await ensureSession(browser);
+  });
+
+  test("/admin/highlights: paid-up capital is kept and shown on the home page", async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto("/admin/highlights");
+    const cap = page.locator("#oCapital");
+    const before = await cap.inputValue();
+    const published = page.locator('input[name="oPublished"]');
+    const wasPublished = await published.isChecked();
+    await cap.fill("41");
+    await page.locator("#oCapitalSource").fill("E2E source");
+    await published.check();
+    await page.getByRole("button", { name: "Save home highlights" }).click();
+    await expect(page.locator("[role='status']").filter({ hasText: /Saved/ })).toBeVisible({ timeout: 20_000 });
+    await page.reload();
+    await expect(page.locator("#oCapital")).toHaveValue("41");
+    await page.goto("/en");
+    await expect(page.locator("#ownership")).toContainText("41");
+    // Put it back.
+    await page.goto("/admin/highlights");
+    await page.locator("#oCapital").fill(before);
+    if (!wasPublished) await page.locator('input[name="oPublished"]').uncheck();
+    await page.getByRole("button", { name: "Save home highlights" }).click();
+    await expect(page.locator("[role='status']").filter({ hasText: /Saved/ })).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("/admin/design: home section order is kept", async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto("/admin/design");
+    const pos = page.locator('input[name="order.events"]');
+    const before = await pos.inputValue();
+    await pos.fill("1");
+    await page.getByRole("button", { name: "Save design" }).click();
+    await expect(page.locator("[role='status']").filter({ hasText: /Saved/ })).toBeVisible({ timeout: 20_000 });
+    await page.reload();
+    // Events moved to the top of the list.
+    await expect(page.locator('main ol input[name^="order."]').first()).toHaveAttribute("name", "order.events");
+    await page.locator('input[name="order.events"]').fill(before === "1" ? "99" : String(Number(before) + 1));
+    await page.getByRole("button", { name: "Save design" }).click();
+    await expect(page.locator("[role='status']").filter({ hasText: /Saved/ })).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("/admin/case-studies: growth journey saves and shows on Success stories", async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto("/admin/case-studies");
+    const title = page.locator("#jTitle");
+    const before = await title.inputValue();
+    const t = `E2E journey ${STAMP}`;
+    await title.fill(t);
+    // A milestone needs a date, title and source; fill the first empty row if there is no milestone yet.
+    const date = page.locator("#jDate_0");
+    if (!(await date.inputValue())) {
+      await date.fill("2024");
+      await page.locator("#jTitleEn_0").fill("E2E milestone");
+      await page.locator("#jSource_0").fill("E2E source");
+      await page.locator("#jValue_0").fill("5");
+    }
+    await page.getByRole("button", { name: "Save journey" }).click();
+    await expect(page.locator("[role='status']").filter({ hasText: /Saved/ })).toBeVisible({ timeout: 20_000 });
+    await page.goto("/en/success-stories");
+    await expect(page.getByRole("heading", { name: t })).toBeVisible();
+    await page.goto("/admin/case-studies");
+    await page.locator("#jTitle").fill(before || "How Xpert grew, milestone by milestone");
+    await page.getByRole("button", { name: "Save journey" }).click();
+    await expect(page.locator("[role='status']").filter({ hasText: /Saved/ })).toBeVisible({ timeout: 20_000 });
+  });
+
+  test("bad input is refused with a message, not saved", async ({ page }) => {
+    await page.goto("/admin/highlights");
+    await page.locator("#oCapital").fill("-5");
+    await page.getByRole("button", { name: "Save home highlights" }).click();
+    await expect(page.locator("[role='alert']").first()).toBeVisible({ timeout: 20_000 });
+    await page.goto("/admin/case-studies");
+    await page.locator("#jDate_7").fill("not-a-date");
+    await page.locator("#jTitleEn_7").fill("x");
+    await page.getByRole("button", { name: "Save journey" }).click();
+    await expect(page.getByText("Use YYYY, YYYY-MM or YYYY-MM-DD.")).toBeVisible({ timeout: 20_000 });
   });
 });

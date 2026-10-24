@@ -9,10 +9,13 @@ test.describe("Demo request", () => {
     const name = `E2E Tester ${stamp}`;
 
     await page.goto("/en/request-demo");
+    // The demo form has three steps: organisation, interest, contact.
+    await page.getByLabel(/^Organization/).fill("E2E Securities Ltd.");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByLabel("What do you need?").fill("Automated test — please ignore.");
+    await page.getByRole("button", { name: "Continue" }).click();
     await page.getByLabel("Full name").fill(name);
     await page.getByLabel("Work email").fill(email);
-    await page.getByLabel(/^Organization/).fill("E2E Securities Ltd.");
-    await page.getByLabel("What do you need?").fill("Automated test — please ignore.");
     await page.getByLabel(/I agree/).check();
     // Forms sent faster than a person could type are ignored as spam.
     await page.waitForTimeout(3000);

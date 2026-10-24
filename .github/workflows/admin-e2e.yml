@@ -58,6 +58,7 @@ jobs:
           # Each failure's message and the lines after it, as one annotation (readable without the raw log).
           awk '/Error:/{n=14} n>0{printf "%s%%0A", $0; n--; if(n==0) print ""}' e2e.log | head -12 | sed 's/^/::warning::/' || true
           echo "::notice::database errors in server log: $(grep -c 'prisma:error' server.log 2>/dev/null || echo 0)"
+          grep -E "\[leads\]" server.log | head -10 | sed 's/^/::warning::server: /' || true
       # The test step above always finishes (to print the log); this one fails the run when any test failed.
       - name: Fail on test failures
         if: always()

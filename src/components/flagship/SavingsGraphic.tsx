@@ -119,7 +119,8 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
       <div className="relative grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         {/* Headline */}
         <div className="flex flex-col gap-5">
-          <p className="sv-figure flex items-baseline gap-1 font-display leading-none font-semibold tabular-nums" aria-label={`${nf.format(data.pct)}% ${t.lower}`}>
+          <p className="sv-figure flex items-baseline gap-1 font-display leading-none font-semibold tabular-nums">
+            <span className="sr-only">{`${nf.format(data.pct)}% ${t.lower}`}</span>
             <span aria-hidden="true" className="text-[5.5rem] md:text-[7.5rem]">
               {nf.format(count)}
             </span>

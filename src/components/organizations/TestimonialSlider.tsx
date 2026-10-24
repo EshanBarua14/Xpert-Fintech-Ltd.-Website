@@ -31,7 +31,7 @@ function initials(name: string) {
  */
 export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: { items: TestimonialCard[]; labels: Labels; seconds?: number }) {
   const AUTO_MS = Math.max(2, seconds) * 1000;
-  const track = useRef<HTMLUListElement>(null);
+  const track = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [stops, setStops] = useState(items.length);
   const [paused, setPaused] = useState(false);
@@ -104,9 +104,9 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
       onFocusCapture={() => setHover(true)}
       onBlurCapture={() => setHover(false)}
     >
-      <ul ref={track} className="testimonial-track -mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-4 px-4 pb-2 md:mx-0 md:scroll-px-0 md:px-0">
+      <div ref={track} className="testimonial-track -mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-4 px-4 pb-2 md:mx-0 md:scroll-px-0 md:px-0">
         {items.map((t, i) => (
-          <li
+          <div
             key={t.id}
             role="group"
             aria-roledescription="slide"
@@ -200,9 +200,9 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
                 </div>
               )}
             </figure>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
 
       {stops > 1 && (
         <div className="mt-8 flex items-center gap-4">

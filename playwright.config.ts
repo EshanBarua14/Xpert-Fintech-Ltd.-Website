@@ -25,7 +25,7 @@ export default defineConfig({
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "mobile", use: { ...devices["Pixel 7"] }, testMatch: /home|switching/ },
+    { name: "mobile", use: { ...devices["Pixel 7"] }, testMatch: /home|switching|a11y/ },
   ],
   webServer: {
     command: "npm run dev",

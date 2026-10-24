@@ -55,12 +55,12 @@ jobs:
         if: always()
         run: |
           set +e
-          BASE_URL=http://localhost:3000 npx playwright test e2e/home.spec.ts e2e/switching.spec.ts e2e/a11y.spec.ts --project=desktop --retries=0 --reporter=list > public.log 2>&1
+          BASE_URL=http://localhost:3000 npx playwright test e2e/home.spec.ts e2e/switching.spec.ts e2e/a11y.spec.ts --project=desktop --project=mobile --retries=0 --reporter=list > public.log 2>&1
           echo "exit $?" >> public.log
           tail -60 public.log
           grep -E "passed|failed|skipped|^exit" public.log | sed 's/^/::notice::public: /' || true
-          grep -E "✘" public.log | head -20 | sed 's/^/::error::public: /' || true
-          awk '/Error:/{n=10} n>0{printf "%s%%0A", $0; n--; if(n==0) print ""}' public.log | head -12 | sed 's/^/::warning::public: /' || true
+          grep -E "✘" public.log | head -40 | sed 's/^/::error::public: /' || true
+          awk '/Error:/{n=10} n>0{printf "%s%%0A", $0; n--; if(n==0) print ""}' public.log | head -40 | sed 's/^/::warning::public: /' || true
       - name: Results summary
         if: always()
         run: |

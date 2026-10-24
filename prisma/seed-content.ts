@@ -2152,7 +2152,7 @@ async function seedTheaClient() {
 const NEW_CLIENT_LOGO_SOURCES: { key: string; site: string; logo?: string; alts?: string[] }[] = [
   { key: "bluechip-securities", site: "https://bluechipsecuritiesltd.com/", logo: "https://bluechipsecuritiesltd.com/wp-content/uploads/2020/01/Logo-Bluechip-Final.jpg" },
   // Its site redirects HTTPS to HTTP, so the plain-HTTP addresses are tried too.
-  { key: "square-securities", site: "https://www.ssml.com.bd/", logo: "https://www.ssml.com.bd/Asset/SquareLogowithFrame2.png", alts: ["https://ssml.com.bd/", "http://www.ssml.com.bd/", "http://ssml.com.bd/"] },
+  { key: "square-securities", site: "https://www.ssml.com.bd/", alts: ["https://ssml.com.bd/", "http://www.ssml.com.bd/", "http://ssml.com.bd/"] },
 ];
 async function fetchNewClientLogos() {
   const dir = path.join(process.cwd(), "prisma", "seed-media", "logos");
@@ -2166,11 +2166,13 @@ async function fetchNewClientLogos() {
         // The first image on the home page whose address or alt text says "logo" (each address tried in turn).
         for (const site of [c.site, ...(c.alts ?? [])]) {
           try {
-            const html = await (await fetch(site, { signal: AbortSignal.timeout(15000), redirect: "follow" })).text();
+            const page = await fetch(site, { signal: AbortSignal.timeout(15000), redirect: "follow" });
+            const html = await page.text();
             const img = [...html.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]).find((tag) => /logo/i.test(tag));
             const src = img?.match(/\bsrc=["']([^"']+)["']/i)?.[1];
             if (src) {
-              url = new URL(src, site).toString();
+              // Relative to the page actually served (the site may redirect, e.g. to /square/).
+              url = new URL(src, page.url || site).toString();
               break;
             }
           } catch {

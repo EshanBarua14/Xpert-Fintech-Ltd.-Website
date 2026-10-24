@@ -53,17 +53,17 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
   }, [step]);
 
   // Filled in the browser: when the form appeared, which page, and any campaign tags.
+  // Kept in state and rendered as values: a hidden input's value is its attribute, so
+  // writing it directly was wiped by the next render (e.g. moving between demo steps),
+  // and the request was then taken for a bot and quietly dropped.
+  const [meta, setMeta] = useState<Record<string, string>>({});
   useEffect(() => {
-    const form = formRef.current;
-    if (!form) return;
-    const set = (name: string, value: string) => {
-      const input = form.elements.namedItem(name);
-      if (input instanceof HTMLInputElement) input.value = value;
-    };
-    set("started_at", String(Date.now()));
-    set("page_path", window.location.pathname + window.location.search);
     const params = new URLSearchParams(window.location.search);
-    for (const key of UTM_KEYS) set(key, params.get(key) ?? "");
+    setMeta({
+      started_at: String(Date.now()),
+      page_path: window.location.pathname + window.location.search,
+      ...Object.fromEntries(UTM_KEYS.map((key) => [key, params.get(key) ?? ""])),
+    });
   }, []);
 
   useEffect(() => {
@@ -260,10 +260,10 @@ export function LeadForm({ mode, locale, t, offerings, defaultOfferingId, turnst
     <form ref={formRef} onSubmit={onSubmit} noValidate className="flex flex-col gap-6" aria-busy={pending}>
       <input type="hidden" name="mode" value={mode} />
       <input type="hidden" name="locale" value={locale} />
-      <input type="hidden" name="started_at" defaultValue="" />
-      <input type="hidden" name="page_path" defaultValue="" />
+      <input type="hidden" name="started_at" value={meta.started_at ?? ""} readOnly />
+      <input type="hidden" name="page_path" value={meta.page_path ?? ""} readOnly />
       {UTM_KEYS.map((k) => (
-        <input key={k} type="hidden" name={k} defaultValue="" />
+        <input key={k} type="hidden" name={k} value={meta[k] ?? ""} readOnly />
       ))}
       {/* Honeypot: invisible to people and screen readers; bots tend to fill it. */}
       <div aria-hidden="true" className="absolute -left-[10000px] h-px w-px overflow-hidden">

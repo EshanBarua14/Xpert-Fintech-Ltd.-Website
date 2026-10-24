@@ -2,7 +2,12 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 /** Automated accessibility scan (WCAG 2.2 A/AA) of the main pages in both themes. */
-const PAGES = ["/en", "/bn", "/en/platform", "/en/products", "/en/consortium", "/en/events", "/en/request-demo", "/en/contact", "/en/this-page-does-not-exist", "/admin/login"];
+const PAGES = [
+  "/en", "/bn", "/en/platform", "/en/products", "/en/products/trading-platform", "/bn/products/rms", "/en/consortium",
+  "/en/company/about", "/en/company/board", "/en/company/management", "/en/company/consultants", "/en/company/team",
+  "/en/success-stories", "/en/markets", "/en/news", "/en/events", "/en/gallery", "/en/careers", "/en/resources",
+  "/en/search?q=trading", "/en/request-demo", "/en/contact", "/bn/contact", "/en/this-page-does-not-exist", "/admin/login",
+];
 
 for (const theme of ["dark", "light"] as const) {
   test.describe(`Accessibility (${theme})`, () => {

@@ -39,11 +39,15 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
   const { ip, userAgent } = await requestMeta();
 
   // 1. Honeypot: hidden from people, often filled by bots.
-  if (str(formData.get("company_website"))) return { status: "success" };
+  if (str(formData.get("company_website"))) {
+    console.warn("[leads] ignored: honeypot filled");
+    return { status: "success" };
+  }
 
   // 2. Too fast to be a person.
   const startedAt = Number(str(formData.get("started_at")));
   if (!Number.isFinite(startedAt) || startedAt <= 0 || Date.now() - startedAt < MIN_FILL_MS) {
+    console.warn(`[leads] ignored: sent too fast or without a start time (${Number.isFinite(startedAt) && startedAt > 0 ? `${Date.now() - startedAt} ms` : "none"})`);
     return { status: "success" };
   }
 
@@ -103,7 +107,10 @@ export async function submitLead(_prev: LeadFormState, formData: FormData): Prom
       },
       select: { id: true },
     });
-    if (recent) return { status: "success" };
+    if (recent) {
+      console.warn("[leads] ignored: same request within 10 minutes");
+      return { status: "success" };
+    }
 
     const utm: Record<string, string> = {};
     for (const key of UTM_KEYS) {

@@ -2152,7 +2152,7 @@ async function seedTheaClient() {
 const NEW_CLIENT_LOGO_SOURCES: { key: string; site: string; logo?: string; alts?: string[] }[] = [
   { key: "bluechip-securities", site: "https://bluechipsecuritiesltd.com/", logo: "https://bluechipsecuritiesltd.com/wp-content/uploads/2020/01/Logo-Bluechip-Final.jpg" },
   // Its site redirects HTTPS to HTTP, so the plain-HTTP addresses are tried too.
-  { key: "square-securities", site: "https://www.ssml.com.bd/", alts: ["https://ssml.com.bd/", "http://www.ssml.com.bd/", "http://ssml.com.bd/"] },
+  { key: "square-securities", site: "https://www.ssml.com.bd/", logo: "https://www.ssml.com.bd/Asset/SquareLogowithFrame2.png", alts: ["https://ssml.com.bd/", "http://www.ssml.com.bd/", "http://ssml.com.bd/"] },
 ];
 async function fetchNewClientLogos() {
   const dir = path.join(process.cwd(), "prisma", "seed-media", "logos");
@@ -2179,9 +2179,28 @@ async function fetchNewClientLogos() {
         }
       }
       if (!url) throw new Error("no logo found on the home page");
-      const data = Buffer.from(await (await fetch(url, { signal: AbortSignal.timeout(15000) })).arrayBuffer());
-      const type = sniff(data);
-      if (!type || type.kind !== "IMAGE" || type.ext === "gif") throw new Error(`not a PNG, JPEG or WebP image: ${url}`);
+      // The image itself, trying the other scheme and host spelling too (some sites answer only one of them).
+      const variants = [url, url.replace(/^http:/, "https:"), url.replace(/^https:/, "http:"), url.replace("://www.", "://"), url.replace(/^(https?:\/\/)(?!www\.)/, "$1www.")].filter((u, i, a) => a.indexOf(u) === i);
+      let data: Buffer | null = null;
+      let type: ReturnType<typeof sniff> = null;
+      let seen = "";
+      for (const u of variants) {
+        try {
+          const res = await fetch(u, { signal: AbortSignal.timeout(15000), redirect: "follow", headers: { Accept: "image/avif,image/webp,image/png,image/jpeg,*/*" } });
+          const buf = Buffer.from(await res.arrayBuffer());
+          const t = sniff(buf);
+          seen = `${res.status} ${res.headers.get("content-type") ?? "?"}`;
+          if (t && t.kind === "IMAGE" && t.ext !== "gif") {
+            data = buf;
+            type = t;
+            url = u;
+            break;
+          }
+        } catch {
+          // try the next spelling
+        }
+      }
+      if (!data || !type) throw new Error(`not a PNG, JPEG or WebP image (${seen}): ${url}`);
       await mkdir(dir, { recursive: true });
       await writeFile(path.join(dir, `${c.key}.${type.ext}`), data);
       console.log(`• ${c.key}: logo taken from ${url} — check it in Admin → Organizations`);

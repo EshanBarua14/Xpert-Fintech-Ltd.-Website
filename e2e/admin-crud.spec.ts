@@ -204,7 +204,7 @@ function saveButton(page: Page) {
 }
 
 async function formProblems(page: Page) {
-  const alerts = await page.locator("[role='alert']").allInnerTexts();
+  const alerts = await page.locator("main [role='alert']").allInnerTexts();
   const invalid = await page.locator("main form :invalid").evaluateAll((els) => els.map((e) => (e as HTMLInputElement).name || e.id).filter(Boolean));
   return `alerts: ${JSON.stringify(alerts)}; invalid fields: ${JSON.stringify(invalid)}`;
 }
@@ -326,7 +326,8 @@ test.describe("Admin console", () => {
       if (!(await btn.count())) test.skip(true, "no save button");
       await btn.click();
       await page.waitForLoadState("networkidle");
-      const alerts = (await page.locator("[role='alert']").allInnerTexts()).filter((t) => t.trim());
+      // The router's page-title announcer is also role=alert; only the page's own alerts count.
+      const alerts = (await page.locator("main [role='alert'], form [role='alert']").allInnerTexts()).filter((t) => t.trim());
       expect(alerts, `save showed an error: ${alerts.join(" | ")}`).toEqual([]);
       await expect(page.locator("body")).not.toContainText(ERROR_TEXT);
     });
@@ -474,7 +475,8 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
       if (!(await btn.count())) test.skip(true, "no save button on this page");
       await btn.click();
       await page.waitForLoadState("networkidle");
-      const alerts = (await page.locator("[role='alert']").allInnerTexts()).filter((t) => t.trim());
+      // The router's page-title announcer is also role=alert; only the page's own alerts count.
+      const alerts = (await page.locator("main [role='alert'], form [role='alert']").allInnerTexts()).filter((t) => t.trim());
       expect(alerts, `save showed an error: ${alerts.join(" | ")}`).toEqual([]);
     });
   }
@@ -491,11 +493,11 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
     // A bad address is refused with a message.
     await page.locator("#careerEmails").fill("not-an-email");
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page.locator("[role='alert']").first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("main [role='alert']").first()).toBeVisible({ timeout: 15_000 });
     // No mail server on the test machine: the test email says so instead of failing silently.
     await page.goto("/admin/notifications");
     await page.getByRole("button", { name: "Send test email" }).click();
-    await expect(page.locator("[role='alert']").filter({ hasText: /mail server|Could not send/i }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.locator("main [role='alert']").filter({ hasText: /mail server|Could not send/i }).first()).toBeVisible({ timeout: 30_000 });
     // The live counts behind the menu badges.
     const r = await page.request.get("/api/admin/inbox");
     expect(r.status()).toBe(200);
@@ -587,7 +589,7 @@ test.describe("Admin console: home highlights, order, journey", () => {
     await page.goto("/admin/highlights");
     await page.locator("#oCapital").fill("-5");
     await page.getByRole("button", { name: "Save home highlights" }).click();
-    await expect(page.locator("[role='alert']").first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator("main [role='alert']").first()).toBeVisible({ timeout: 20_000 });
     await page.goto("/admin/case-studies");
     await page.locator("#jDate_7").fill("not-a-date");
     await page.locator("#jTitleEn_7").fill("x");

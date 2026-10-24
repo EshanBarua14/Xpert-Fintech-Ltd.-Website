@@ -542,13 +542,18 @@ test.describe("Admin console: home highlights, order, journey", () => {
     await page.goto("/admin/design");
     const pos = page.locator('input[name="order.events"]');
     const before = await pos.inputValue();
+    const first = page.locator('input[name="order.clients"]');
+    const firstBefore = await first.inputValue();
+    // Events to the top: 1, and client logos one place down.
     await pos.fill("1");
+    await first.fill("2");
     await page.getByRole("button", { name: "Save design" }).click();
     await expect(page.locator("[role='status']").filter({ hasText: /Saved/ })).toBeVisible({ timeout: 20_000 });
     await page.reload();
     // Events moved to the top of the list.
     await expect(page.locator('main ol input[name^="order."]').first()).toHaveAttribute("name", "order.events");
-    await page.locator('input[name="order.events"]').fill(before === "1" ? "99" : String(Number(before) + 1));
+    await page.locator('input[name="order.events"]').fill(String(Number(before) + 1));
+    await page.locator('input[name="order.clients"]').fill(firstBefore);
     await page.getByRole("button", { name: "Save design" }).click();
     await expect(page.locator("[role='status']").filter({ hasText: /Saved/ })).toBeVisible({ timeout: 20_000 });
   });

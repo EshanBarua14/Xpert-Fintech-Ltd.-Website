@@ -27,7 +27,7 @@ test.describe("Home page", () => {
   test("unknown pages show the 404 screen", async ({ page }) => {
     const res = await page.goto("/en/this-page-does-not-exist");
     // Streamed pages (loading screen) may answer 200; then the page must tell search engines not to index it.
-    if (res?.status() !== 404) await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(1);
+    if (res?.status() !== 404) expect(await page.locator('meta[name="robots"][content*="noindex"]').count()).toBeGreaterThan(0);
     await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
   });
 

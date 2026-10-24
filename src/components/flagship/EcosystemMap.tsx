@@ -464,7 +464,7 @@ export function EcosystemMap({
       }}
     >
       <div className="relative">
-        <svg ref={svgRef} viewBox="0 0 800 580" role="img" aria-labelledby={titleId} className="h-auto w-full overflow-visible">
+        <svg ref={svgRef} viewBox="0 0 800 580" role="group" aria-labelledby={titleId} className="h-auto w-full overflow-visible">
           <title id={titleId}>{labels.aria}</title>
           <defs>
             <radialGradient id="eco-glow">

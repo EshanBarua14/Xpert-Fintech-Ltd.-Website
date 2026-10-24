@@ -73,7 +73,7 @@ jobs:
       # The test step above always finishes (to print the log); this one fails the run when any test failed.
       - name: Fail on test failures
         if: always()
-        run: grep -q "^exit 0" e2e.log
+        run: grep -q "^exit 0" e2e.log && grep -q "^exit 0" public.log
       - name: Remove the temporary results branch
         if: always()
         run: git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" --delete tmp/dse-pages || true

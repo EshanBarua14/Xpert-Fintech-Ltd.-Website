@@ -54,7 +54,9 @@ export function CountUp({ value, suffix = "", locale = "en" }: { value: number; 
 
   const text = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(shown);
   return (
-    <span ref={ref} aria-label={`${new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(value)}${suffix}`}>
+    <span ref={ref}>
+      {/* Screen readers get the final figure once; the counting digits are hidden from them. */}
+      <span className="sr-only">{`${new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US").format(value)}${suffix}`}</span>
       <span aria-hidden="true">
         {text}
         {suffix}

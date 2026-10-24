@@ -3,7 +3,10 @@ import { expect, test } from "@playwright/test";
 test.describe("Language and theme", () => {
   test("switching to বাংলা keeps the page and is remembered", async ({ page }) => {
     await page.goto("/en/platform");
-    await page.getByRole("navigation", { name: "Language" }).first().getByRole("link", { name: "বাংলা" }).click();
+    // On phones the switch lives in the menu.
+    const menu = page.getByRole("button", { name: "Menu", exact: true });
+    if (await menu.isVisible()) await menu.click();
+    await page.getByRole("navigation", { name: "Language" }).getByRole("link", { name: "বাংলা" }).locator("visible=true").first().click();
     await expect(page).toHaveURL(/\/bn\/platform$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "bn");
     // The choice is remembered: the root address now opens Bangla.

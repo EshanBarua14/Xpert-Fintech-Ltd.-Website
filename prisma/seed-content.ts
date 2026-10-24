@@ -39,6 +39,7 @@ import { CASE_STUDY_DRAFTS, CLIENT_STORY_DRAFTS } from "../src/content/xfl2/case
 import { CAREER_SEED } from "../src/content/xfl2/careers";
 import { MEMBER_PROFILES } from "../src/content/xfl2/member-profiles";
 import { PORTRAIT_FOCUS } from "../src/content/xfl2/portrait-focus";
+import { BANGLA_POLISH } from "../src/content/xfl2/bangla-polish";
 import { PREVIOUS_PORTRAITS } from "../src/content/xfl2/portrait-previous";
 import { PRESS_CATEGORY, PRESS_EVENTS, PRESS_STORIES } from "../src/content/xfl2/press";
 import { BLOCK_BN, EVENT_BN, ITEM_BN, LEGAL_BN, NAV_BN, NODE_BN, OFFERING_BN, OFFICE_BN, ORG_BN, PAGE_BN, PERSON_BN } from "../src/content/xfl2/bangla";
@@ -2347,7 +2348,7 @@ async function showForEditing() {
       published: true,
       pct: 80,
       titleEn: "{pct}% lower technology cost",
-      titleBn: "প্রযুক্তি ব্যয় {pct}% কম",
+      titleBn: "প্রযুক্তি খরচ {pct}% কম",
       bodyEn: "Brokerage houses on Xpert share one platform instead of each paying for its own systems.",
       bodyBn: "এক্সপার্টে থাকা ব্রোকারেজ হাউসগুলো প্রত্যেকে আলাদা সিস্টেমের খরচ না দিয়ে একটি প্ল্যাটফর্ম ভাগ করে নেয়।",
       beforeLabelEn: "Before Xpert",
@@ -2393,30 +2394,30 @@ async function seedWhatsAppNumber() {
 /** Copy of DEFAULT_STRENGTHS (src/lib/content/highlights.ts is server-only). */
 const DEFAULT_STRENGTHS_SEED = {
   titleEn: "Built by brokers. *Trusted* by brokers.",
-  titleBn: "ব্রোকারদের হাতে গড়া। ব্রোকারদের *আস্থায়*।",
+  titleBn: "ব্রোকারদের গড়া। ব্রোকারদের *ভরসা*।",
   introEn: "Five reasons the houses that own Xpert also run their business on it.",
-  introBn: "যে হাউসগুলো এক্সপার্টের মালিক, তারাই কেন এতে তাদের ব্যবসা চালায়: পাঁচটি কারণ।",
+  introBn: "যে হাউসগুলো এক্সপার্টের মালিক, নিজেদের ব্যবসাও কেন তারা এতেই চালায় — পাঁচটি কারণ।",
   items: [
     {
       icon: "users",
       titleEn: "Built by the market's top brokers",
-      titleBn: "বাজারের শীর্ষ ব্রোকারদের হাতে গড়া",
+      titleBn: "বাজারের শীর্ষ ব্রোকারদের গড়া",
       bodyEn: "Designed with the brokerage houses that own Xpert and trade on it every day, so every screen follows how a dealing desk really works.",
-      bodyBn: "এক্সপার্টের মালিক ও প্রতিদিন এতে লেনদেনকারী ব্রোকারেজ হাউসগুলোর সঙ্গে মিলে তৈরি, তাই প্রতিটি স্ক্রিন ডিলিং ডেস্কের বাস্তব কাজের ধারা মেনে চলে।",
+      bodyBn: "যে ব্রোকারেজ হাউসগুলো এক্সপার্টের মালিক এবং প্রতিদিন এতে লেনদেন করে, তাদের সঙ্গে বসেই তৈরি — তাই প্রতিটি স্ক্রিন চলে ডিলিং ডেস্কের আসল কাজের ছন্দে।",
     },
     {
       icon: "shield",
       titleEn: "Enterprise-grade security",
       titleBn: "এন্টারপ্রাইজ-মানের নিরাপত্তা",
       bodyEn: "Access controls on every desk, encrypted connections and pre-trade risk checks protect each account and every order.",
-      bodyBn: "প্রতিটি ডেস্কে প্রবেশাধিকার নিয়ন্ত্রণ, এনক্রিপ্টেড সংযোগ ও লেনদেনের আগে ঝুঁকি যাচাই প্রতিটি অ্যাকাউন্ট ও অর্ডার সুরক্ষিত রাখে।",
+      bodyBn: "প্রতিটি ডেস্কে নিয়ন্ত্রিত প্রবেশাধিকার, এনক্রিপ্টেড সংযোগ আর লেনদেনের আগেই ঝুঁকি যাচাই — প্রতিটি অ্যাকাউন্ট ও অর্ডার থাকে সুরক্ষিত।",
     },
     {
       icon: "network",
       titleEn: "High-availability network",
-      titleBn: "উচ্চ প্রাপ্যতার নেটওয়ার্ক",
+      titleBn: "সবসময় সচল নেটওয়ার্ক",
       bodyEn: "A redundant network built to keep orders flowing to DSE and CSE through the busiest hours of the trading day.",
-      bodyBn: "লেনদেনের সবচেয়ে ব্যস্ত সময়েও ডিএসই ও সিএসইতে অর্ডার পৌঁছে দিতে তৈরি রিডানড্যান্ট নেটওয়ার্ক।",
+      bodyBn: "বাজারের সবচেয়ে ব্যস্ত মুহূর্তেও ডিএসই ও সিএসইতে অর্ডার পৌঁছে দিতে বিকল্পসহ নেটওয়ার্ক।",
     },
     {
       icon: "briefcase",
@@ -2430,7 +2431,7 @@ const DEFAULT_STRENGTHS_SEED = {
       titleEn: "Institutional-grade infrastructure",
       titleBn: "প্রাতিষ্ঠানিক মানের অবকাঠামো",
       bodyEn: "Data-centre hosting, monitoring and backups built for regulated institutions, not for a single office.",
-      bodyBn: "একটি অফিসের জন্য নয়, নিয়ন্ত্রিত প্রতিষ্ঠানের জন্য তৈরি ডেটা সেন্টার হোস্টিং, পর্যবেক্ষণ ও ব্যাকআপ।",
+      bodyBn: "একটি অফিস নয়, নিয়ন্ত্রিত প্রতিষ্ঠানের কথা ভেবে তৈরি — ডেটা সেন্টারে হোস্টিং, সার্বক্ষণিক পর্যবেক্ষণ ও ব্যাকআপ।",
     },
   ],
 };
@@ -2502,7 +2503,7 @@ async function seedInstitutionStrengths() {
       statEn: "9",
       statBn: "৯",
       bodyEn: "A nine-member board, each director a chief executive or senior leader of an owner house, so the institutions that trade on Xpert set its direction.",
-      bodyBn: "নয় সদস্যের পরিচালনা পর্ষদ, প্রত্যেক পরিচালক একটি মালিক হাউসের প্রধান নির্বাহী বা জ্যেষ্ঠ কর্মকর্তা; তাই এক্সপার্টে লেনদেনকারী প্রতিষ্ঠানগুলোই এর দিকনির্দেশনা ঠিক করে।",
+      bodyBn: "নয় সদস্যের পরিচালনা পর্ষদ, প্রত্যেকেই কোনো মালিক হাউসের প্রধান নির্বাহী বা জ্যেষ্ঠ কর্মকর্তা — এক্সপার্টের পথ ঠিক করে সেই প্রতিষ্ঠানগুলোই, যারা প্রতিদিন এতে লেনদেন করে।",
     },
     {
       icon: "award",
@@ -2518,7 +2519,7 @@ async function seedInstitutionStrengths() {
       titleEn: "Compliance built into every order",
       titleBn: "প্রতিটি অর্ডারে কমপ্লায়েন্স",
       bodyEn: "Every order passes pre-trade checks before it leaves the brokerage: no short selling, buying power and margin limits, value and quantity caps, and the price band.",
-      bodyBn: "ব্রোকারেজ থেকে বের হওয়ার আগে প্রতিটি অর্ডার যাচাই হয়: শর্ট সেল প্রতিরোধ, ক্রয়ক্ষমতা ও মার্জিন সীমা, মূল্য ও পরিমাণের সীমা এবং প্রাইস ব্যান্ড।",
+      bodyBn: "ব্রোকারেজ ছাড়ার আগেই প্রতিটি অর্ডারের যাচাই: শর্ট সেল প্রতিরোধ, ক্রয়ক্ষমতা ও মার্জিন সীমা, মূল্য ও পরিমাণের সীমা এবং প্রাইস ব্যান্ড।",
     },
   ];
   const D = DEFAULT_STRENGTHS_SEED;
@@ -2534,7 +2535,7 @@ async function seedInstitutionStrengths() {
           ? {
               ...i,
               bodyEn: "Data-centre hosting, a redundant network to DSE and CSE, monitoring and backups, built for regulated institutions and the busiest trading hours.",
-              bodyBn: "ডেটা সেন্টার হোস্টিং, ডিএসই ও সিএসই পর্যন্ত রিডানড্যান্ট নেটওয়ার্ক, পর্যবেক্ষণ ও ব্যাকআপ; নিয়ন্ত্রিত প্রতিষ্ঠান ও সবচেয়ে ব্যস্ত লেনদেনের সময়ের জন্য তৈরি।",
+              bodyBn: "ডেটা সেন্টারে হোস্টিং, ডিএসই ও সিএসই পর্যন্ত বিকল্পসহ নেটওয়ার্ক, সার্বক্ষণিক পর্যবেক্ষণ ও ব্যাকআপ — নিয়ন্ত্রিত প্রতিষ্ঠান আর বাজারের সবচেয়ে ব্যস্ত সময়ের কথা ভেবেই তৈরি।",
             }
           : i,
       );
@@ -2543,7 +2544,7 @@ async function seedInstitutionStrengths() {
   const dropped = [...lead, ...rest].slice(10).map((i) => i.titleEn);
   const intro =
     !cur?.introEn || cur.introEn.startsWith("Five reasons")
-      ? { introEn: "Who stands behind Xpert, in numbers, and why its owners run their business on it.", introBn: "এক্সপার্টের পেছনে কারা, সংখ্যায়, আর কেন এর মালিকরাই এতে তাদের ব্যবসা চালায়।" }
+      ? { introEn: "Who stands behind Xpert, in numbers, and why its owners run their business on it.", introBn: "এক্সপার্টের পেছনে কারা — সংখ্যায় — আর মালিকরা কেন নিজেদের ব্যবসাও এতেই চালায়।" }
       : {};
   const value = { titleEn: D.titleEn, titleBn: D.titleBn, introEn: D.introEn, introBn: D.introBn, ...(cur ?? {}), ...intro, items };
   await db.siteSetting.upsert({ where: { key: "home.strengths" }, update: { value }, create: { key: "home.strengths", value } });
@@ -2577,9 +2578,9 @@ async function seedJourney() {
     const dayout = url("stakeholders-dayout-2026");
     const value = {
       titleEn: "How Xpert grew, milestone by milestone",
-      titleBn: "এক্সপার্ট যেভাবে বেড়েছে, ধাপে ধাপে",
+      titleBn: "এক্সপার্টের পথচলা, ধাপে ধাপে",
       introEn: "From a consortium of ten brokerage houses to the OMS behind almost half of DSE's turnover, each step as it was reported.",
-      introBn: "দশটি ব্রোকারেজ হাউসের কনসোর্টিয়াম থেকে ডিএসইর লেনদেনের প্রায় অর্ধেকের পেছনের ওএমএস পর্যন্ত, প্রতিটি ধাপ যেমন প্রকাশিত হয়েছে।",
+      introBn: "দশটি ব্রোকারেজ হাউসের কনসোর্টিয়াম থেকে আজ ডিএসইর লেনদেনের প্রায় অর্ধেকের পেছনের ওএমএস — প্রতিটি ধাপ, সংবাদমাধ্যমে যেমন এসেছে।",
       metricEn: "Brokerage houses on Xpert",
       metricBn: "এক্সপার্টে ব্রোকারেজ হাউস",
       steps: [
@@ -2587,9 +2588,9 @@ async function seedJourney() {
           date: "2021",
           value: null,
           titleEn: "Founded by DSE's leading brokerage houses",
-          titleBn: "ডিএসইর শীর্ষ ব্রোকারেজ হাউসগুলোর উদ্যোগে প্রতিষ্ঠা",
+          titleBn: "ডিএসইর শীর্ষ ব্রোকারেজ হাউসগুলোর হাতে যাত্রা শুরু",
           bodyEn: "Xpert Fintech Ltd. is set up by leading brokerage houses of the Dhaka Stock Exchange.",
-          bodyBn: "ঢাকা স্টক এক্সচেঞ্জের শীর্ষ ব্রোকারেজ হাউসগুলোর উদ্যোগে এক্সপার্ট ফিনটেক লিমিটেড গঠিত হয়।",
+          bodyBn: "ঢাকা স্টক এক্সচেঞ্জের শীর্ষ ব্রোকারেজ হাউসগুলো মিলে গড়ে তোলে এক্সপার্ট ফিনটেক লিমিটেড।",
           source: "Arthosuchak",
           sourceUrl: seminar,
         },
@@ -2597,9 +2598,9 @@ async function seedJourney() {
           date: "2023-08-25",
           value: 10,
           titleEn: "Ten brokerage houses build their own OMS",
-          titleBn: "দশটি ব্রোকারেজ হাউসের নিজস্ব ওএমএস",
+          titleBn: "দশ হাউসের নিজস্ব ওএমএস",
           bodyEn: "Through Xpert, ten brokerage houses set out to give their clients direct access to trading on DSE and CSE.",
-          bodyBn: "এক্সপার্টের মাধ্যমে দশটি ব্রোকারেজ হাউস গ্রাহকদের ডিএসই ও সিএসইতে সরাসরি লেনদেনের সুযোগ দিতে উদ্যোগ নেয়।",
+          bodyBn: "গ্রাহকদের ডিএসই ও সিএসইতে সরাসরি লেনদেনের সুযোগ দিতে এক্সপার্টের মাধ্যমে একজোট হয় দশটি ব্রোকারেজ হাউস।",
           source: "The Financial Express",
           sourceUrl: url("ten-brokers-consortium-own-trading-platform"),
         },
@@ -2609,7 +2610,7 @@ async function seedJourney() {
           titleEn: "EcoSoftBD IT acquired",
           titleBn: "ইকোসফটবিডি আইটি অধিগ্রহণ",
           bodyEn: "Xpert acquires EcoSoftBD IT Ltd., an order management system vendor already serving brokerages.",
-          bodyBn: "ব্রোকারেজ হাউসে আগে থেকেই সেবা দেওয়া ওএমএস নির্মাতা ইকোসফটবিডি আইটি লিমিটেড অধিগ্রহণ করে এক্সপার্ট।",
+          bodyBn: "ব্রোকারেজ হাউসে আগে থেকেই সেবা দিয়ে আসা ওএমএস নির্মাতা ইকোসফটবিডি আইটি লিমিটেডকে অধিগ্রহণ করে এক্সপার্ট।",
           source: "The New Nation",
           sourceUrl: url("xpert-fintech-acquires-ecosoftbd-new-nation"),
         },
@@ -2617,9 +2618,9 @@ async function seedJourney() {
           date: "2026-08-19",
           value: 16,
           titleEn: "OMS live at 16 brokerage houses",
-          titleBn: "১৬টি ব্রোকারেজ হাউসে ওএমএস",
+          titleBn: "১৬টি ব্রোকারেজ হাউসে ওএমএস চালু",
           bodyEn: "45–47% of DSE's turnover passes through Xpert's OMS, up to 57% at its peak (company figures).",
-          bodyBn: "ডিএসইর লেনদেনের ৪৫–৪৭% এক্সপার্টের ওএমএসের মাধ্যমে হয়, সর্বোচ্চ ৫৭% পর্যন্ত (প্রতিষ্ঠানের তথ্য)।",
+          bodyBn: "ডিএসইর লেনদেনের ৪৫–৪৭% হয় এক্সপার্টের ওএমএসে, সবচেয়ে ব্যস্ত দিনে ৫৭% পর্যন্ত (প্রতিষ্ঠানের তথ্য)।",
           source: "Arthosuchak",
           sourceUrl: seminar,
         },
@@ -2629,7 +2630,7 @@ async function seedJourney() {
           titleEn: "Twelve owners, seventeen houses",
           titleBn: "বারো মালিক, সতেরো হাউস",
           bodyEn: "Owners grew from ten to twelve, and seventeen of the country's leading brokerage houses now use the OMS.",
-          bodyBn: "মালিক প্রতিষ্ঠান দশ থেকে বারোতে উন্নীত, আর দেশের শীর্ষ সতেরোটি ব্রোকারেজ হাউস এখন ওএমএস ব্যবহার করছে।",
+          bodyBn: "মালিক প্রতিষ্ঠান দশ থেকে বেড়ে বারো, আর দেশের শীর্ষ সতেরোটি ব্রোকারেজ হাউস এখন এই ওএমএসে লেনদেন করছে।",
           source: "Arthosuchak",
           sourceUrl: dayout,
         },
@@ -2677,7 +2678,7 @@ async function seedOwnership() {
           titleEn: "Who owns *Xpert*",
           titleBn: "এক্সপার্টের *মালিক* কারা",
           introEn: "The capital behind the platform and the institutions that own it, house by house.",
-          introBn: "প্ল্যাটফর্মের পেছনের মূলধন এবং এর মালিক প্রতিষ্ঠানগুলো, হাউস ধরে ধরে।",
+          introBn: "প্ল্যাটফর্মের পেছনের মূলধন আর এর মালিক প্রতিষ্ঠান — হাউস ধরে ধরে।",
           capitalCrore: 39,
           capitalSource: "Xpert Fintech Ltd.",
           capitalAsOf: "",
@@ -2725,7 +2726,7 @@ async function seedStrengthsDedup() {
     const items = kept.map((i, k) => ({ i, k })).sort((a, b) => rank(a.i.titleEn) - rank(b.i.titleEn) || a.k - b.k).map((x) => x.i);
     const intro =
       v.introEn === "Who stands behind Xpert, in numbers, and why its owners run their business on it."
-        ? { introEn: "Why the brokerage houses that own Xpert also run their business on it.", introBn: "যে ব্রোকারেজ হাউসগুলো এক্সপার্টের মালিক, তারাই কেন এতে তাদের ব্যবসা চালায়।" }
+        ? { introEn: "Why the brokerage houses that own Xpert also run their business on it.", introBn: "যে ব্রোকারেজ হাউসগুলো এক্সপার্টের মালিক, নিজেদের ব্যবসাও কেন তারা এতেই চালায়।" }
         : {};
     await db.siteSetting.update({ where: { key: "home.strengths" }, data: { value: { ...v, ...intro, items } } });
     console.log(`• Core strengths: ${v.items.length - items.length} card(s) now shown in "Who owns Xpert" removed; ${items.length} left`);
@@ -2751,39 +2752,39 @@ const HOME_FAQ: { q: [string, string]; a: [string, string] }[] = [
     q: ["Who owns Xpert Fintech?", "এক্সপার্ট ফিনটেকের মালিক কারা?"],
     a: [
       "Twelve brokerage houses of the Dhaka Stock Exchange, most of them the brokerage arms of banks and insurers. Leading DSE brokerage houses set the company up in 2021.",
-      "ঢাকা স্টক এক্সচেঞ্জের বারোটি ব্রোকারেজ হাউস, যাদের বেশির ভাগ ব্যাংক ও বিমা প্রতিষ্ঠানের ব্রোকারেজ প্রতিষ্ঠান। ডিএসইর শীর্ষ ব্রোকারেজ হাউসগুলো ২০২১ সালে প্রতিষ্ঠানটি গঠন করে।",
+      "ঢাকা স্টক এক্সচেঞ্জের বারোটি ব্রোকারেজ হাউস, যাদের বেশির ভাগই ব্যাংক ও বিমা প্রতিষ্ঠানের ব্রোকারেজ শাখা। ডিএসইর শীর্ষ ব্রোকারেজ হাউসগুলো ২০২১ সালে প্রতিষ্ঠানটি গড়ে তোলে।",
     ],
   },
   {
-    q: ["Which exchanges does the platform connect to?", "প্ল্যাটফর্মটি কোন কোন এক্সচেঞ্জে যুক্ত?"],
-    a: ["Both of Bangladesh's stock exchanges: the Dhaka Stock Exchange (DSE) and the Chittagong Stock Exchange (CSE).", "বাংলাদেশের দুই স্টক এক্সচেঞ্জেই: ঢাকা স্টক এক্সচেঞ্জ (ডিএসই) ও চট্টগ্রাম স্টক এক্সচেঞ্জ (সিএসই)।"],
+    q: ["Which exchanges does the platform connect to?", "প্ল্যাটফর্মটি কোন কোন এক্সচেঞ্জের সঙ্গে যুক্ত?"],
+    a: ["Both of Bangladesh's stock exchanges: the Dhaka Stock Exchange (DSE) and the Chittagong Stock Exchange (CSE).", "দেশের দুটি স্টক এক্সচেঞ্জের সঙ্গেই — ঢাকা স্টক এক্সচেঞ্জ (ডিএসই) ও চট্টগ্রাম স্টক এক্সচেঞ্জ (সিএসই)।"],
   },
   {
     q: ["What does the platform cover?", "প্ল্যাটফর্মে কী কী আছে?"],
     a: [
       "Trading and order management with pre-trade risk checks, online share trading, BO account opening with eKYC, document management and back-office software. Each product has its own page under Products.",
-      "লেনদেনের আগে ঝুঁকি যাচাইসহ ট্রেডিং ও অর্ডার ব্যবস্থাপনা, অনলাইন শেয়ার ট্রেডিং, ই-কেওয়াইসিসহ বিও অ্যাকাউন্ট খোলা, ডকুমেন্ট ব্যবস্থাপনা ও ব্যাক-অফিস সফটওয়্যার। প্রতিটি পণ্যের আলাদা পাতা পণ্য অংশে আছে।",
+      "লেনদেনের আগে ঝুঁকি যাচাইসহ ট্রেডিং ও অর্ডার ব্যবস্থাপনা, অনলাইন শেয়ার ট্রেডিং, ই-কেওয়াইসিসহ বিও অ্যাকাউন্ট খোলা, নথি ব্যবস্থাপনা ও ব্যাক অফিস সফটওয়্যার — প্রতিটি পণ্যের বিস্তারিত পণ্য পাতায়।",
     ],
   },
   {
-    q: ["Can our brokerage house have its own branded app?", "আমাদের ব্রোকারেজ হাউস কি নিজস্ব ব্র্যান্ডের অ্যাপ পেতে পারে?"],
+    q: ["Can our brokerage house have its own branded app?", "আমাদের হাউসের নিজস্ব ব্র্যান্ডের অ্যাপ পাওয়া যাবে কি?"],
     a: [
       "Yes. Brokerage houses on Xpert run their own branded trading apps on the platform; the live ones are listed, with their store links, on the Consortium page.",
-      "হ্যাঁ। এক্সপার্টের ব্রোকারেজ হাউসগুলো প্ল্যাটফর্মে নিজস্ব ব্র্যান্ডের ট্রেডিং অ্যাপ চালায়; চালু অ্যাপগুলো স্টোর লিংকসহ কনসোর্টিয়াম পাতায় দেওয়া আছে।",
+      "হ্যাঁ। এক্সপার্টের ব্রোকারেজ হাউসগুলো এই প্ল্যাটফর্মেই নিজেদের নামে ট্রেডিং অ্যাপ চালায়; চালু অ্যাপগুলো স্টোর লিংকসহ কনসোর্টিয়াম পাতায় দেখুন।",
     ],
   },
   {
-    q: ["How much of the market runs through Xpert?", "বাজারের কতটা এক্সপার্টের মাধ্যমে চলে?"],
+    q: ["How much of the market runs through Xpert?", "বাজারের কতটা লেনদেন এক্সপার্টের মাধ্যমে হয়?"],
     a: [
       "45–47% of DSE's daily turnover on a typical day and up to 57% on the busiest days, according to company figures reported by Arthosuchak in September 2026.",
-      "অর্থসূচকে সেপ্টেম্বর ২০২৬-এ প্রকাশিত প্রতিষ্ঠানের তথ্য অনুযায়ী, সাধারণ দিনে ডিএসইর দৈনিক লেনদেনের ৪৫–৪৭% এবং সবচেয়ে ব্যস্ত দিনে ৫৭% পর্যন্ত।",
+      "অর্থসূচকে সেপ্টেম্বর ২০২৬-এ প্রকাশিত প্রতিষ্ঠানের তথ্য অনুযায়ী, সাধারণ দিনে ডিএসইর দৈনিক লেনদেনের ৪৫–৪৭%, সবচেয়ে ব্যস্ত দিনে ৫৭% পর্যন্ত।",
     ],
   },
   {
     q: ["How do we get started?", "কীভাবে শুরু করব?"],
     a: [
       "Request a demo. Our team walks you through the platform, screen by screen, for the way your brokerage house works.",
-      "ডেমোর অনুরোধ করুন। আপনার ব্রোকারেজ হাউসের কাজের ধরন অনুযায়ী আমাদের টিম প্ল্যাটফর্মটি স্ক্রিন ধরে ধরে দেখাবে।",
+      "একটি ডেমোর অনুরোধ জানান। আপনার হাউসের কাজের ধরন বুঝে আমাদের টিম স্ক্রিন ধরে ধরে প্ল্যাটফর্মটি দেখাবে।",
     ],
   },
 ];
@@ -2801,7 +2802,7 @@ async function seedHomeFaq() {
         status: "PUBLISHED",
         sortOrder: 0,
         props: {},
-        translations: { create: [{ locale: EN, title: "Questions brokerage houses ask" }, { locale: BN, title: "ব্রোকারেজ হাউসগুলো যা জানতে চায়" }] },
+        translations: { create: [{ locale: EN, title: "Questions brokerage houses ask" }, { locale: BN, title: "ব্রোকারেজ হাউসগুলোর সাধারণ প্রশ্ন" }] },
       },
     });
     for (const [i, f] of HOME_FAQ.entries()) {
@@ -2843,6 +2844,55 @@ async function seedCapital39() {
 }
 
 /**
+ * Once (XFL, 24 Oct 2026): Bangla text kept in the database rewritten as natural Bangla
+ * (src/content/xfl2/bangla-polish.ts): core strengths, Who owns Xpert, cost savings, the
+ * growth journey, the WhatsApp panel and the home FAQ. Only values still exactly as first
+ * seeded are replaced; anything edited in the admin stays as it is.
+ */
+async function seedBanglaPolish() {
+  const MARK = "seed.bangla-polish-2026-10-24";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  let changed = 0;
+  const swap = (v: unknown): unknown => {
+    if (typeof v === "string" && BANGLA_POLISH[v] && BANGLA_POLISH[v] !== v) {
+      changed++;
+      return BANGLA_POLISH[v];
+    }
+    if (Array.isArray(v)) return v.map(swap);
+    if (v && typeof v === "object") return Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([k, x]) => [k, swap(x)]));
+    return v;
+  };
+  for (const key of ["home.strengths", "home.ownership", "home.savings", "stories.journey", "site.whatsapp"]) {
+    const row = await db.siteSetting.findUnique({ where: { key } });
+    if (!row) continue;
+    const before = changed;
+    const value = swap(row.value);
+    if (changed > before) await db.siteSetting.update({ where: { key }, data: { value: value as object } });
+  }
+  // Page blocks (the home FAQ and any others still carrying the seeded wording), Bangla only.
+  for (const t of await db.contentBlockTranslation.findMany({ where: { locale: BN }, select: { id: true, title: true, subtitle: true } })) {
+    const data: { title?: string; subtitle?: string } = {};
+    if (t.title && BANGLA_POLISH[t.title] && BANGLA_POLISH[t.title] !== t.title) data.title = BANGLA_POLISH[t.title];
+    if (t.subtitle && BANGLA_POLISH[t.subtitle] && BANGLA_POLISH[t.subtitle] !== t.subtitle) data.subtitle = BANGLA_POLISH[t.subtitle];
+    if (Object.keys(data).length) {
+      await db.contentBlockTranslation.update({ where: { id: t.id }, data });
+      changed += Object.keys(data).length;
+    }
+  }
+  for (const t of await db.blockItemTranslation.findMany({ where: { locale: BN }, select: { id: true, title: true, body: true } })) {
+    const data: { title?: string; body?: string } = {};
+    if (t.title && BANGLA_POLISH[t.title] && BANGLA_POLISH[t.title] !== t.title) data.title = BANGLA_POLISH[t.title];
+    if (t.body && BANGLA_POLISH[t.body] && BANGLA_POLISH[t.body] !== t.body) data.body = BANGLA_POLISH[t.body];
+    if (Object.keys(data).length) {
+      await db.blockItemTranslation.update({ where: { id: t.id }, data });
+      changed += Object.keys(data).length;
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), changed } } });
+  if (changed) console.log(`• Bangla copy: ${changed} text(s) rewritten in natural Bangla (strengths, owners, savings, journey, FAQ, WhatsApp)`);
+}
+
+/**
  * Once (XFL, 19 Oct 2026): sharper headlines for the core strengths and the cost savings
  * graphic, where the admin still has the earlier wording (anything edited is kept).
  */
@@ -2859,9 +2909,9 @@ async function seedSharperHeadlines() {
         value: {
           ...sv,
           titleEn: "Built by brokers. *Trusted* by brokers.",
-          titleBn: "ব্রোকারদের হাতে গড়া। ব্রোকারদের *আস্থায়*।",
+          titleBn: "ব্রোকারদের গড়া। ব্রোকারদের *ভরসা*।",
           introEn: "Five reasons the houses that own Xpert also run their business on it.",
-          introBn: "যে হাউসগুলো এক্সপার্টের মালিক, তারাই কেন এতে তাদের ব্যবসা চালায়: পাঁচটি কারণ।",
+          introBn: "যে হাউসগুলো এক্সপার্টের মালিক, নিজেদের ব্যবসাও কেন তারা এতেই চালায় — পাঁচটি কারণ।",
         },
       },
     });
@@ -2876,9 +2926,9 @@ async function seedSharperHeadlines() {
         value: {
           ...av,
           titleEn: "Same market. *{pct}% less* to run it.",
-          titleBn: "একই বাজার। চালাতে খরচ *{pct}% কম*।",
+          titleBn: "একই বাজার। খরচ *{pct}% কম*।",
           bodyEn: "Instead of every brokerage paying for its own systems, the houses on Xpert share one platform and split the bill.",
-          bodyBn: "প্রতিটি ব্রোকারেজ আলাদা সিস্টেমের খরচ না দিয়ে, এক্সপার্টের হাউসগুলো একটি প্ল্যাটফর্ম ভাগ করে নেয়, খরচও ভাগ হয়ে যায়।",
+          bodyBn: "প্রতিটি ব্রোকারেজকে আর আলাদা সিস্টেমের পুরো খরচ বইতে হয় না — এক্সপার্টের হাউসগুলো একটি প্ল্যাটফর্ম ভাগ করে নেয়, খরচও ভাগ হয়ে যায়।",
         },
       },
     });
@@ -3306,6 +3356,7 @@ async function main() {
   await seedHomeFaq();
   await seedHomeOrderReset();
   await seedCapital39();
+  await seedBanglaPolish();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

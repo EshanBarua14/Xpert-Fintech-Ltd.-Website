@@ -31,7 +31,7 @@ export const DEFAULT_OWNERSHIP: OwnershipSetting = {
   titleEn: "Who owns *Xpert*",
   titleBn: "এক্সপার্টের *মালিক* কারা",
   introEn: "The capital behind the platform and the institutions that own it, house by house.",
-  introBn: "প্ল্যাটফর্মের পেছনের মূলধন এবং এর মালিক প্রতিষ্ঠানগুলো, হাউস ধরে ধরে।",
+  introBn: "প্ল্যাটফর্মের পেছনের মূলধন আর এর মালিক প্রতিষ্ঠান — হাউস ধরে ধরে।",
   capitalCrore: null,
   capitalSource: "",
   capitalAsOf: "",
@@ -83,30 +83,30 @@ export type WhatsAppSetting = {
 
 export const DEFAULT_STRENGTHS: StrengthsSetting = {
   titleEn: "Built by brokers. *Trusted* by brokers.",
-  titleBn: "ব্রোকারদের হাতে গড়া। ব্রোকারদের *আস্থায়*।",
+  titleBn: "ব্রোকারদের গড়া। ব্রোকারদের *ভরসা*।",
   introEn: "Five reasons the houses that own Xpert also run their business on it.",
-  introBn: "যে হাউসগুলো এক্সপার্টের মালিক, তারাই কেন এতে তাদের ব্যবসা চালায়: পাঁচটি কারণ।",
+  introBn: "যে হাউসগুলো এক্সপার্টের মালিক, নিজেদের ব্যবসাও কেন তারা এতেই চালায় — পাঁচটি কারণ।",
   items: [
     {
       icon: "users",
       titleEn: "Built by the market's top brokers",
-      titleBn: "বাজারের শীর্ষ ব্রোকারদের হাতে গড়া",
+      titleBn: "বাজারের শীর্ষ ব্রোকারদের গড়া",
       bodyEn: "Designed with the brokerage houses that own Xpert and trade on it every day, so every screen follows how a dealing desk really works.",
-      bodyBn: "এক্সপার্টের মালিক ও প্রতিদিন এতে লেনদেনকারী ব্রোকারেজ হাউসগুলোর সঙ্গে মিলে তৈরি, তাই প্রতিটি স্ক্রিন ডিলিং ডেস্কের বাস্তব কাজের ধারা মেনে চলে।",
+      bodyBn: "যে ব্রোকারেজ হাউসগুলো এক্সপার্টের মালিক এবং প্রতিদিন এতে লেনদেন করে, তাদের সঙ্গে বসেই তৈরি — তাই প্রতিটি স্ক্রিন চলে ডিলিং ডেস্কের আসল কাজের ছন্দে।",
     },
     {
       icon: "shield",
       titleEn: "Enterprise-grade security",
       titleBn: "এন্টারপ্রাইজ-মানের নিরাপত্তা",
       bodyEn: "Access controls on every desk, encrypted connections and pre-trade risk checks protect each account and every order.",
-      bodyBn: "প্রতিটি ডেস্কে প্রবেশাধিকার নিয়ন্ত্রণ, এনক্রিপ্টেড সংযোগ ও লেনদেনের আগে ঝুঁকি যাচাই প্রতিটি অ্যাকাউন্ট ও অর্ডার সুরক্ষিত রাখে।",
+      bodyBn: "প্রতিটি ডেস্কে নিয়ন্ত্রিত প্রবেশাধিকার, এনক্রিপ্টেড সংযোগ আর লেনদেনের আগেই ঝুঁকি যাচাই — প্রতিটি অ্যাকাউন্ট ও অর্ডার থাকে সুরক্ষিত।",
     },
     {
       icon: "network",
       titleEn: "High-availability network",
-      titleBn: "উচ্চ প্রাপ্যতার নেটওয়ার্ক",
+      titleBn: "সবসময় সচল নেটওয়ার্ক",
       bodyEn: "A redundant network built to keep orders flowing to DSE and CSE through the busiest hours of the trading day.",
-      bodyBn: "লেনদেনের সবচেয়ে ব্যস্ত সময়েও ডিএসই ও সিএসইতে অর্ডার পৌঁছে দিতে তৈরি রিডানড্যান্ট নেটওয়ার্ক।",
+      bodyBn: "বাজারের সবচেয়ে ব্যস্ত মুহূর্তেও ডিএসই ও সিএসইতে অর্ডার পৌঁছে দিতে বিকল্পসহ নেটওয়ার্ক।",
     },
     {
       icon: "briefcase",
@@ -120,7 +120,7 @@ export const DEFAULT_STRENGTHS: StrengthsSetting = {
       titleEn: "Institutional-grade infrastructure",
       titleBn: "প্রাতিষ্ঠানিক মানের অবকাঠামো",
       bodyEn: "Data-centre hosting, monitoring and backups built for regulated institutions, not for a single office.",
-      bodyBn: "একটি অফিসের জন্য নয়, নিয়ন্ত্রিত প্রতিষ্ঠানের জন্য তৈরি ডেটা সেন্টার হোস্টিং, পর্যবেক্ষণ ও ব্যাকআপ।",
+      bodyBn: "একটি অফিস নয়, নিয়ন্ত্রিত প্রতিষ্ঠানের কথা ভেবে তৈরি — ডেটা সেন্টারে হোস্টিং, সার্বক্ষণিক পর্যবেক্ষণ ও ব্যাকআপ।",
     },
   ],
 };
@@ -128,9 +128,9 @@ export const DEFAULT_STRENGTHS: StrengthsSetting = {
 export const DEFAULT_SAVINGS: SavingsSetting = {
   published: false,
   titleEn: "Same market. *{pct}% less* to run it.",
-  titleBn: "একই বাজার। চালাতে খরচ *{pct}% কম*।",
+  titleBn: "একই বাজার। খরচ *{pct}% কম*।",
   bodyEn: "Instead of every brokerage paying for its own systems, the houses on Xpert share one platform and split the bill.",
-  bodyBn: "প্রতিটি ব্রোকারেজ আলাদা সিস্টেমের খরচ না দিয়ে, এক্সপার্টের হাউসগুলো একটি প্ল্যাটফর্ম ভাগ করে নেয়, খরচও ভাগ হয়ে যায়।",
+  bodyBn: "প্রতিটি ব্রোকারেজকে আর আলাদা সিস্টেমের পুরো খরচ বইতে হয় না — এক্সপার্টের হাউসগুলো একটি প্ল্যাটফর্ম ভাগ করে নেয়, খরচও ভাগ হয়ে যায়।",
   before: null,
   after: null,
   pct: null,
@@ -155,7 +155,7 @@ export const DEFAULT_WHATSAPP: WhatsAppSetting = {
   messageEn: "Hello Xpert Fintech, I would like to request a demo of your brokerage platform. Please let me know a convenient time.",
   messageBn: "হ্যালো এক্সপার্ট ফিনটেক, আমি আপনাদের ব্রোকারেজ প্ল্যাটফর্মের একটি ডেমো দেখতে চাই। অনুগ্রহ করে সুবিধাজনক সময় জানাবেন।",
   greetingEn: "Hi there! Want to see Xpert in action? Chat with our team on WhatsApp or give us a call, and we'll set up your demo.",
-  greetingBn: "স্বাগতম! এক্সপার্ট কীভাবে কাজ করে দেখতে চান? হোয়াটসঅ্যাপে আমাদের টিমের সঙ্গে কথা বলুন বা কল করুন, আমরা আপনার ডেমোর ব্যবস্থা করব।",
+  greetingBn: "স্বাগতম! এক্সপার্ট কীভাবে কাজ করে, নিজের চোখে দেখতে চান? হোয়াটসঅ্যাপে লিখুন বা কল করুন — আমরা আপনার জন্য ডেমো সাজিয়ে দেব।",
 };
 
 const obj = (v: unknown) => (v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {});

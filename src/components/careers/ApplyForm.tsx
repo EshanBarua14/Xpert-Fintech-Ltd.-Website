@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { applyForJob, type ApplyState } from "@/app/[locale]/career-actions";
 import { useActionForm } from "@/components/forms/useActionForm";
 import { TextArea, TextInput } from "@/components/ui/Field";
@@ -11,9 +11,10 @@ import type { Messages } from "@/lib/i18n/messages";
 /** Application form: name, email, phone, CV (PDF), cover letter, consent. */
 export function ApplyForm({ careerId, t, locale, turnstileSiteKey }: { careerId: string; t: Messages; locale: AppLocale; turnstileSiteKey: string | null }) {
   const { state, pending, onSubmit } = useActionForm<ApplyState>(applyForJob, {});
-  const startedRef = useRef<HTMLInputElement>(null);
+  // In state, not written into the input: a re-render would wipe a hidden input's value (see LeadForm).
+  const [startedAt, setStartedAt] = useState("");
   useEffect(() => {
-    if (startedRef.current) startedRef.current.value = String(Date.now());
+    setStartedAt(String(Date.now()));
   }, []);
   useEffect(() => {
     if (state.status === "error") (window as unknown as { turnstile?: { reset: () => void } }).turnstile?.reset();
@@ -39,7 +40,7 @@ export function ApplyForm({ careerId, t, locale, turnstileSiteKey }: { careerId:
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate encType="multipart/form-data">
       <input type="hidden" name="careerId" value={careerId} />
-      <input ref={startedRef} type="hidden" name="started_at" defaultValue="" />
+      <input type="hidden" name="started_at" value={startedAt} readOnly />
       <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
         <label htmlFor="company_website">Website</label>
         <input id="company_website" name="company_website" type="text" tabIndex={-1} autoComplete="off" />

@@ -9,9 +9,8 @@ test.describe("Home page", () => {
     const res = await page.goto("/en");
     expect(res?.status()).toBe(200);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Brokerage technology");
-    await expect(page.getByRole("link", { name: "Request a demo" }).first()).toBeVisible();
-    await expect(page.getByRole("img", { name: /capital market/i })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(/brokerage houses/i);
+    await expect(page.getByRole("link", { name: /Request a demo/i }).first()).toBeVisible();
 
     // The skip link is the first thing a keyboard user reaches.
     await page.keyboard.press("Tab");

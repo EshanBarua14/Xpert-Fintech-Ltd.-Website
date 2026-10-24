@@ -57,6 +57,8 @@ export const SECTION: Record<string, { label: string; edit?: (id: string) => str
 const SETTING_LABEL: [RegExp, string, string][] = [
   [/^site\.design/, "Design", "/admin/design"],
   [/^site\.figures/, "Figures", "/admin/figures"],
+  [/^home\.(strengths|savings|ownership)|^site\.whatsapp/, "Home highlights", "/admin/highlights"],
+  [/^stories\.journey/, "Growth journey", "/admin/case-studies"],
   [/^message\./, "Leader message", "/admin/messages"],
   [/^market\./, "Market data setting", "/admin/market"],
   [/^text\.|^i18n\.|overrides/, "Site text", "/admin/site-text"],

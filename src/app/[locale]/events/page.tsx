@@ -22,7 +22,7 @@ export default async function EventsPage({ params }: Props) {
   const events = await getEventTimeline(locale);
   return (
     <>
-      <PageHero eyebrow={t.latestEyebrow} title={t.events} />
+      <PageHero eyebrow={t.latestEyebrow} title={t.eventsHero} body={t.eventsHeroBody} />
       <Shell className="pb-12">
         {events.length ? <EventTimeline events={events} locale={locale} labels={{ photos: t.eventsPhotos, with: t.eventsWith, open: t.eventsOpen }} /> : <p className="text-text-secondary">{t.noItems}</p>}
       </Shell>

@@ -55,7 +55,7 @@ export default async function CareersPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.companyEyebrow} title={t.careersTitle} body={t.careersBody} />
+      <PageHero eyebrow={t.companyEyebrow} title={t.careersHero} body={t.careersBody} />
       <Shell className="pb-14 md:pb-16">
         <ul className="grid gap-4 md:grid-cols-3">
           {why.map((w, i) => (

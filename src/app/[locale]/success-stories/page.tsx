@@ -31,7 +31,7 @@ export default async function CaseStudiesPage({ params }: Props) {
   const [items, orgLogos, journey] = await Promise.all([getCaseStudies(loc), getOrgLogos(loc), getJourney(loc)]);
   return (
     <>
-      <PageHero eyebrow={t.insightsEyebrow} title={t.caseStudiesTitle} body={t.caseStudiesBody} />
+      <PageHero eyebrow={t.insightsEyebrow} title={t.successHero} body={t.caseStudiesBody} />
       {/* The company's growth, milestone by milestone (Admin → Success stories → Growth journey). */}
       {journey && (
         <Shell className="pb-12 md:pb-16">

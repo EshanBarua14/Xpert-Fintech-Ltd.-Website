@@ -37,7 +37,7 @@ export default async function NewsPage({ params, searchParams }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.insightsEyebrow} title={t.newsTitle} body={t.newsBody} />
+      <PageHero eyebrow={t.insightsEyebrow} title={t.newsHero} body={t.newsBody} />
       <Shell className="pb-16 md:pb-20">
         <div className="flex flex-col gap-12">
           {categories.length > 0 && (

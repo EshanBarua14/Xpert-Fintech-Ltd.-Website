@@ -56,7 +56,7 @@ export default async function TeamPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.companyEyebrow} title={t.teamTitle} body={t.teamBody} />
+      <PageHero eyebrow={t.companyEyebrow} title={t.teamHero} body={t.teamBody} />
 
       {leadership.length > 0 && (
         <Shell className="pb-12 md:pb-16">

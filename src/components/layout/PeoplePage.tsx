@@ -26,7 +26,11 @@ export function peoplePage(group: PersonGroup, path: string, titleKey: "board" |
     const photos = await mediaMap(people.map((p) => p.photoMediaId), locale as AppLocale);
     return (
       <>
-        <PageHero eyebrow={t.companyEyebrow} title={t[titleKey]} />
+        <PageHero
+          eyebrow={t.companyEyebrow}
+          title={t[`${titleKey}Hero`]}
+          body={titleKey === "consultants" ? t.consultantsLinkBody : t[`${titleKey}HeroBody`]}
+        />
         <Shell className="pb-16">
           {people.length ? (
             <PeopleGrid people={people} photos={photos} locale={locale as AppLocale} group={group} />

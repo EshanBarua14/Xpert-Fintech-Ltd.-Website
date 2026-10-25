@@ -47,7 +47,7 @@ jobs:
       - name: Admin end-to-end
         run: |
           set +e
-          PLAYWRIGHT_JSON_OUTPUT_NAME=results.json BASE_URL=http://localhost:3000 npx playwright test e2e/admin-crud.spec.ts e2e/lead.spec.ts --project=desktop --retries=0 --reporter=list,json > e2e.log 2>&1
+          PLAYWRIGHT_JSON_OUTPUT_NAME=results.json BASE_URL=http://localhost:3000 npx playwright test e2e/admin-crud.spec.ts e2e/lead.spec.ts e2e/workflows.spec.ts --project=desktop --retries=0 --reporter=list,json > e2e.log 2>&1
           echo "exit $?" >> e2e.log
           tail -150 e2e.log
       # Public pages: home, language and theme, and an accessibility scan (WCAG 2.2 AA) in both themes.
@@ -55,9 +55,11 @@ jobs:
         if: always()
         run: |
           set +e
-          BASE_URL=http://localhost:3000 npx playwright test e2e/home.spec.ts e2e/switching.spec.ts e2e/a11y.spec.ts --project=desktop --project=mobile --retries=0 --reporter=list > public.log 2>&1
+          BASE_URL=http://localhost:3000 npx playwright test e2e/home.spec.ts e2e/switching.spec.ts e2e/a11y.spec.ts e2e/crawl.spec.ts --project=desktop --project=mobile --retries=0 --reporter=list > public.log 2>&1
           echo "exit $?" >> public.log
           tail -60 public.log
+          grep -E '^\s+\+\s+"' public.log | sort -u | head -80 | sed 's/^/::warning::problem: /' || true
+          grep -E "crawled [0-9]+ pages" public.log | sed 's/^/::notice::/' || true
           grep -E "passed|failed|skipped|^exit" public.log | sed 's/^/::notice::public: /' || true
           grep -E "✘" public.log | head -40 | sed 's/^/::error::public: /' || true
           awk '/Error:/{n=10} n>0{printf "%s%%0A", $0; n--; if(n==0) print ""}' public.log | head -40 | sed 's/^/::warning::public: /' || true

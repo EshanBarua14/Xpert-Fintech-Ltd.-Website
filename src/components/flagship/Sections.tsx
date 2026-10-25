@@ -485,10 +485,10 @@ export function FlowStory({
                 )}
                 <span className="absolute -top-2 -right-2 flex size-7 items-center justify-center rounded-full bg-brand-royal font-mono text-xs text-white">{digits(i + 1, /[\u0980-\u09FF]/.test(t.home))}</span>
               </span>
-              <span className="flex flex-col items-center gap-0.5">
+              <span className="flex flex-col items-center gap-1">
                 {s.exchanges && !s.items.length && <span className="text-sm font-semibold leading-snug text-gold">DSE · CSE</span>}
                 {s.items.map((p) => (
-                  <Link key={p.href} href={p.href} className="inline-flex min-h-6 items-center text-sm font-semibold leading-snug text-gold underline-offset-4 hover:underline">
+                  <Link key={p.href} href={p.href} className="inline-flex min-h-7 min-w-7 items-center justify-center px-1 text-sm font-semibold leading-snug text-gold underline-offset-4 hover:underline">
                     {p.name}
                   </Link>
                 ))}

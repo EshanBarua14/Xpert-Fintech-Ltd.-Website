@@ -20,7 +20,8 @@ for (const theme of ["dark", "light"] as const) {
         const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
         const serious = results.violations.filter((v) => v.impact === "serious" || v.impact === "critical");
         const summary = serious.map((v) => `${v.id}: ${v.help} (${v.nodes.length}×) at ${path}: ${v.nodes.slice(0, 3).map((n) => n.target.join(" ") + " " + n.html.slice(0, 120)).join(" ; ")}`).join("\n");
-        expect(serious, summary).toEqual([]);
+        if (summary) console.log(summary.split("\n").map((l) => `A11Y ${l}`).join("\n"));
+        expect(serious.map((v) => v.id), summary).toEqual([]);
       });
     }
   });

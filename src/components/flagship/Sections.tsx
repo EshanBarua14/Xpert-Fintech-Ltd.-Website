@@ -488,14 +488,14 @@ export function FlowStory({
               <span className="flex flex-col items-center gap-0.5">
                 {s.exchanges && !s.items.length && <span className="text-sm font-semibold leading-snug text-gold">DSE · CSE</span>}
                 {s.items.map((p) => (
-                  <Link key={p.href} href={p.href} className="text-sm font-semibold leading-snug text-gold underline-offset-4 hover:underline">
+                  <Link key={p.href} href={p.href} className="inline-flex min-h-6 items-center text-sm font-semibold leading-snug text-gold underline-offset-4 hover:underline">
                     {p.name}
                   </Link>
                 ))}
                 {s.rms && s.items[0] && (
                   <Link
                     href={riskHref ?? `${s.items[0].href}#rms`}
-                    className="mt-1 inline-flex items-center gap-1 rounded-full border border-brand-sky/30 bg-brand-sky/10 px-2 py-0.5 text-xs font-semibold text-brand-sky transition-colors hover:border-brand-sky/60"
+                    className="mt-1 inline-flex min-h-6 items-center gap-1 rounded-full border border-brand-sky/30 bg-brand-sky/10 px-2.5 py-1 text-xs font-semibold text-brand-sky transition-colors hover:border-brand-sky/60"
                   >
                     <Icon name="shield" className="size-3" />
                     {t.rmsChip}

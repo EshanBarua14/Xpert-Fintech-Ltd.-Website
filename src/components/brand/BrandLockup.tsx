@@ -31,9 +31,9 @@ export function BrandLockup({
   const lg = size === "lg";
   const header = size === "header";
   return (
-    <span className="flex items-center gap-3">
+    <span className={cn("flex items-center", header ? "gap-2.5 md:gap-3" : "gap-3")}>
       <span className="logo-spin inline-flex shrink-0">
-        <Logo height={lg ? 56 : header ? 46 : 40} priority={priority} />
+        <Logo height={lg ? 56 : header ? 44 : 40} priority={priority} />
       </span>
       <span
         className={cn(

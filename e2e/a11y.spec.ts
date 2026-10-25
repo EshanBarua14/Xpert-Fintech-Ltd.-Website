@@ -11,7 +11,8 @@ const PAGES = [
 
 for (const theme of ["dark", "light"] as const) {
   test.describe(`Accessibility (${theme})`, () => {
-    test.use({ colorScheme: theme });
+    // Reduced motion: colours are checked as they end up, not half-way through a fade-in.
+    test.use({ colorScheme: theme, reducedMotion: "reduce" });
     for (const path of PAGES) {
       test(`${path} has no serious or critical issues`, async ({ page }) => {
         await page.goto(path);

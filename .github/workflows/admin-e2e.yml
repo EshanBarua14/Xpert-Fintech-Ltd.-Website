@@ -58,6 +58,7 @@ jobs:
           BASE_URL=http://localhost:3000 npx playwright test e2e/home.spec.ts e2e/switching.spec.ts e2e/a11y.spec.ts e2e/crawl.spec.ts --project=desktop --project=mobile --retries=0 --reporter=list > public.log 2>&1
           echo "exit $?" >> public.log
           tail -60 public.log
+          grep -E '^A11Y ' public.log | sort -u | head -9 | sed 's/^/::error::/' || true
           grep -E '^\s+\+\s+"' public.log | sort -u | head -80 | sed 's/^/::warning::problem: /' || true
           grep -E "crawled [0-9]+ pages" public.log | sed 's/^/::notice::/' || true
           grep -E "passed|failed|skipped|^exit" public.log | sed 's/^/::notice::public: /' || true

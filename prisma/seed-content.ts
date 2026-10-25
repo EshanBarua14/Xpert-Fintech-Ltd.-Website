@@ -2870,6 +2870,23 @@ async function seedCapital39() {
  * growth journey, the WhatsApp panel and the home FAQ. Only values still exactly as first
  * seeded are replaced; anything edited in the admin stays as it is.
  */
+// ── 26 Oct: About page headline in the new voice (only while it still has the seeded wording) ──
+async function seedAboutHeadline() {
+  const MARK = "seed.about-headline-2026-10-26";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const page = await db.page.findUnique({ where: { key: "about" }, select: { id: true } });
+  if (page) {
+    const NEW = { en: "Market technology, built by the brokerages *that use it*", bn: "যারা ব্যবহার করে, *তাদেরই গড়া* পুঁজিবাজার প্রযুক্তি" } as const;
+    const OLD: Record<string, string[]> = { en: ["About Xpert Fintech", "About us", "About"], bn: ["এক্সপার্ট ফিনটেক সম্পর্কে", "আমাদের সম্পর্কে", "এক্সপার্ট ফিনটেক পরিচিতি"] };
+    for (const t of await db.pageTranslation.findMany({ where: { pageId: page.id } })) {
+      const loc = t.locale === BN ? "bn" : "en";
+      if (OLD[loc]!.includes(t.title.trim())) await db.pageTranslation.update({ where: { id: t.id }, data: { title: NEW[loc] } });
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log("  About page headline updated");
+}
+
 async function seedBanglaPolish() {
   const MARK = "seed.bangla-polish-2026-10-24";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
@@ -3378,6 +3395,7 @@ async function main() {
   await seedHomeOrderReset();
   await seedCapital39();
   await seedBanglaPolish();
+  await seedAboutHeadline();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

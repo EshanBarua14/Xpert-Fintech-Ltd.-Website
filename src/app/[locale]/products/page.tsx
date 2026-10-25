@@ -30,7 +30,7 @@ export default async function ProductsPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.platformEyebrow} title={t.products} body={t.platformPageBody} />
+      <PageHero eyebrow={t.platformEyebrow} title={t.productsHero} body={t.productsHeroBody} />
       {showcase.length > 0 && (
         <Shell className="pb-10 md:pb-12">
           <ProductShowcase products={showcase} labels={showcaseLabels(t)} />

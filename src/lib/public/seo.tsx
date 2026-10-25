@@ -38,6 +38,8 @@ export async function buildMetadata({
   noindex?: boolean;
   type?: "website" | "article";
 }): Promise<Metadata> {
+  // Headlines mark their emphasis with *stars*; titles for search and sharing are plain.
+  title = title.replace(/\*/g, "").replace(/\s+/g, " ").trim();
   const url = (l: AppLocale) => `${SITE_URL}/${l}${paths[l] ? `/${paths[l]}` : ""}`;
   const languages: Record<string, string> = {};
   if (paths.en !== undefined) languages.en = url("en");

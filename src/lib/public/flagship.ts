@@ -69,10 +69,10 @@ export const getFlagshipData = cache(async (locale: AppLocale) => {
   const memberCards = members.map(toMember).filter((m) => m.name);
   return {
     members: memberCards,
-    /** For the ecosystem map: institution logos, and the brokerages running Xpert. */
+    /** For the ecosystem map: institution logos, and every client (members first) shown in turn in the hub. */
     logos: {
       parties,
-      members: memberCards.filter((m) => m.logo).map((m) => ({ ...m.logo!, name: m.name })),
+      members: clients.map(toMember).filter((m) => m.name && m.logo).map((m) => ({ ...m.logo!, name: m.name })),
     },
     exchanges: exchanges.map(toMember).filter((e) => e.name),
     clients: clients.map(toMember).filter((c) => c.name),

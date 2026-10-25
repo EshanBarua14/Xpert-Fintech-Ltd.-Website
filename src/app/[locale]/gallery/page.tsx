@@ -132,7 +132,7 @@ export default async function GalleryPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.insightsEyebrow} title={t.galleryTitle} body={t.galleryBody} />
+      <PageHero eyebrow={t.insightsEyebrow} title={t.galleryHero} body={t.galleryBody} />
       <Shell className="pb-14 md:pb-16">
         {albums.length === 0 && items.length === 0 ? (
           empty(t.galleryEmptyTitle, t.galleryEmptyBody)

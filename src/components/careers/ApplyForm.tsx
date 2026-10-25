@@ -56,10 +56,21 @@ export function ApplyForm({ careerId, t, locale, turnstileSiteKey }: { careerId:
       <TextInput id="cv" type="file" accept="application/pdf,.pdf" label={t.cvLabel} hint={t.cvHint} required error={err("cv")} className="pt-3 file:mr-3 file:rounded-full file:border-0 file:bg-brand-royal file:px-4 file:py-1.5 file:text-sm file:font-semibold file:text-white" />
       <TextArea id="coverLetter" label={t.coverLetter} rows={5} error={err("coverLetter")} />
       <label className="flex items-start gap-3 text-sm">
-        <input type="checkbox" name="consent" className="mt-0.5 h-4 w-4 accent-brand-royal" />
+        <input
+          type="checkbox"
+          name="consent"
+          required
+          aria-invalid={err("consent") ? true : undefined}
+          aria-describedby={err("consent") ? "apply-consent-error" : undefined}
+          className="mt-0.5 h-4 w-4 accent-brand-royal"
+        />
         <span>
           {t.applyConsent}
-          {err("consent") && <span className="mt-1 block text-xs text-market-down">{err("consent")}</span>}
+          {err("consent") && (
+            <span id="apply-consent-error" role="alert" className="mt-1 block text-xs text-market-down">
+              {err("consent")}
+            </span>
+          )}
         </span>
       </label>
       {turnstileSiteKey && (

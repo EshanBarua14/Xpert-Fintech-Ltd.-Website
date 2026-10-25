@@ -1846,3 +1846,10 @@ html:has(.whatsapp-fab) .back-to-top {
   background: linear-gradient(90deg, var(--color-brand-sky), var(--color-gold));
   opacity: 0.7;
 }
+
+/* Pages with the section rail (HomeSectionNav): on wide screens the rail is the
+   scroll bar, so the browser's own one is hidden (scrolling works as before). */
+@media (min-width: 80rem) {
+  html.has-section-rail { scrollbar-width: none; }
+  html.has-section-rail::-webkit-scrollbar { display: none; }
+}

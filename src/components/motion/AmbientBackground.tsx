@@ -7,25 +7,36 @@ import { SceneCanvas, type SceneName } from "./SceneCanvas";
 
 /**
  * Site-wide backdrop behind all content: soft light from the brand blues and
- * a faint scene that matches the page — a trading board for markets and the
- * trading products, a ledger for the back office, document sheets for DMS,
- * ID cards being verified for eKYC and account opening, a member network for
- * the consortium, a constellation for people, a news wire for insights, soft
- * light for the gallery and a signal for contact pages.
+ * a faint scene drawn from what the page is about (each kind of page has its
+ * own; see SceneCanvas and scenes-pages). The home page keeps the trading board.
  */
 export function sceneFor(pathname: string): SceneName | "market" {
   const path = pathname.replace(/^\/(en|bn)(?=\/|$)/, "") || "/";
-  if (/^\/(consortium|company\/about|platform)(\/|$)/.test(path)) return "network";
-  if (/^\/(company\/(board|management|team|consultants)|careers)(\/|$)/.test(path)) return "people";
-  if (/^\/(news|events|resources|case-studies|success-stories)(\/|$)/.test(path)) return "wire";
-  if (/^\/gallery(\/|$)/.test(path)) return "bokeh";
-  if (/^\/(contact|request-demo)(\/|$)/.test(path)) return "signal";
+  const is = (re: string) => new RegExp(`^/(${re})(/|$)`).test(path);
+  if (is("consortium")) return "network"; // member houses joined into one network
+  if (is("platform")) return "pipeline"; // an order's path through the platform
+  if (path === "/products") return "modules"; // the product line-up
+  if (is("company/about")) return "journey"; // the company's path so far
+  if (is("company/board")) return "table"; // one table
+  if (is("company/management")) return "orgchart";
+  if (is("company/consultants")) return "orbit";
+  if (is("company/team")) return "people";
+  if (is("careers")) return "code";
+  if (is("news")) return "wire";
+  if (is("events")) return "spotlight";
+  if (is("resources")) return "docs";
+  if (is("case-studies|success-stories")) return "growth";
+  if (is("gallery")) return "bokeh";
+  if (is("contact")) return "signal";
+  if (is("request-demo")) return "screens";
+  if (is("search")) return "radar";
   return "market";
 }
 
 /** Product pages: the scene of what the product does (the page marks its product with data-product-key). */
 const PRODUCT_SCENE: Record<string, SceneName | "market"> = {
   "trading-platform": "market",
+  rms: "gate",
   ost: "market",
   "smart-stock": "market",
   "back-office": "ledger",

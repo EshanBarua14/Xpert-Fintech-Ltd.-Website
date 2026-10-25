@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { PAGE_SCENES, type PageScene } from "./scenes-pages";
 
 /**
  * Faint, decorative page backdrops that match what a page is about. Each
@@ -17,7 +18,7 @@ import { useEffect, useRef } from "react";
  *  - docs:    DMS — document sheets drifting up, filed with a gold check
  *  - identity: eKYC and account opening — ID cards scanned by a passing light, then verified
  */
-export type SceneName = "network" | "people" | "wire" | "bokeh" | "signal" | "ledger" | "docs" | "identity";
+export type SceneName = "network" | "people" | "wire" | "bokeh" | "signal" | "ledger" | "docs" | "identity" | PageScene;
 
 type Ctx = CanvasRenderingContext2D;
 type Scene = { draw: (ctx: Ctx, now: number, dt: number, light: boolean, still: boolean) => void };
@@ -374,7 +375,7 @@ function identity(w: number, h: number, rand: Rand): Scene {
   };
 }
 
-const SCENES: Record<SceneName, (w: number, h: number, rand: Rand) => Scene> = { network, people, wire, bokeh, signal, ledger, docs, identity };
+const SCENES: Record<SceneName, (w: number, h: number, rand: Rand) => Scene> = { network, people, wire, bokeh, signal, ledger, docs, identity, ...PAGE_SCENES };
 
 export function SceneCanvas({ scene }: { scene: SceneName }) {
   const ref = useRef<HTMLCanvasElement>(null);

@@ -219,7 +219,7 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
               )}
               {p.tagline && <p className="showcase-rise text-gradient-brand text-lg font-medium" style={{ animationDelay: "80ms" }}>{p.tagline}</p>}
               {p.summary && (
-                <p className="showcase-rise line-clamp-5 leading-relaxed text-text-secondary" style={{ animationDelay: "140ms" }}>
+                <p className="showcase-rise line-clamp-8 leading-relaxed text-text-secondary" style={{ animationDelay: "140ms" }}>
                   {p.summary}
                 </p>
               )}

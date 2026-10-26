@@ -35,7 +35,7 @@ export async function saveShares(tradeDate: string, inputs: ShareInput[], source
     }
     if (f.sharePct != null) f = { ...f, xpertTurnover: Math.round(market * f.sharePct) / 100 };
     if (!(f.xpertTurnover >= 0) || f.xpertTurnover > market) {
-      results.push({ exchange: f.exchange, ok: false, message: `${f.exchange}: Xpert turnover must be between 0 and the market's total.` });
+      results.push({ exchange: f.exchange, ok: false, message: `${f.exchange}: Xpert Fintech turnover must be between 0 and the market's total.` });
       continue;
     }
     const data = { xpertTurnover: f.xpertTurnover.toFixed(2), marketTurnover: market.toFixed(2), sourceNote: note, status: "PUBLISHED" as const };

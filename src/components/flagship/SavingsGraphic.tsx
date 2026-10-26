@@ -30,7 +30,7 @@ const TEXT = {
     each: "Bars drawn to scale",
     source: "Source",
     draft: "Draft: only visible outside the live site",
-    chart: "Cost before and with Xpert",
+    chart: "Cost before and with Xpert Fintech",
   },
   bn: {
     lower: "কম খরচ",
@@ -40,14 +40,14 @@ const TEXT = {
     each: "বারগুলো আনুপাতিক মাপে",
     source: "সূত্র",
     draft: "খসড়া: লাইভ সাইটে দেখা যায় না",
-    chart: "এক্সপার্টের আগে ও পরে খরচ",
+    chart: "এক্সপার্ট ফিনটেকের আগে ও পরে খরচ",
   },
 };
 
 
 /**
  * Admin → Home highlights → Cost savings, as two bars drawn to scale: the cost
- * before Xpert, then the cost with Xpert, where the share no longer paid is
+ * before Xpert Fintech, then the cost with Xpert Fintech, where the share no longer paid is
  * outlined in gold. The bars extend when scrolled into view (one calm ease-out),
  * then the saving is marked and the headline percentage counts up. Figures come
  * only from the admin, with their source; reduced motion shows the final state.
@@ -138,7 +138,7 @@ export function SavingsGraphic({ data, locale }: { data: SavingsData; locale: "e
 
         {/* The cost in blocks */}
         <figure className="pro-beam pro-mesh flex flex-col gap-7 rounded-3xl p-5 md:p-7" aria-label={t.chart}>
-          {/* Two bars to scale: the cost before, and with Xpert, where the part no longer paid is outlined in gold. */}
+          {/* Two bars to scale: the cost before, and with Xpert Fintech, where the part no longer paid is outlined in gold. */}
           <div className={`svb flex flex-col gap-6 ${on ? "is-on" : ""} ${split ? "is-split" : ""}`} role="img" aria-label={`${data.beforeLabel}: ${amount(data.before, 100)}. ${data.afterLabel}: ${amount(data.after, 100 - data.pct)}. −${nf.format(data.pct)}% ${t.saved}.`}>
             <div className="flex flex-col gap-2.5" aria-hidden="true">
               <div className="flex items-baseline justify-between gap-4 text-sm">

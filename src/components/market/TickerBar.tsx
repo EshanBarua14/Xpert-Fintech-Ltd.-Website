@@ -194,7 +194,7 @@ export function TickerBar({ mode, locale, labels, logos, only }: TickerProps & {
   const [paused, setPaused] = useState(false);
 
   const byEx = (ex: Ex) => data.snapshot?.exchanges.find((e) => e.exchange === ex);
-  // Prices only: Xpert's market share is shown in the market section, not in the ticker.
+  // Prices only: Xpert Fintech's market share is shown in the market section, not in the ticker.
   const exchanges: Ex[] = (["DSE", "CSE"] as const).filter((ex) => byEx(ex) && (!only || ex === only));
 
   const combined = exchanges.flatMap((ex) => [

@@ -92,7 +92,7 @@ export const getLiveApps = cache(async (locale: AppLocale) => {
 
 /**
  * Clients and consortium members with no published branded app: shown under the
- * apps with their logo and website, so every client of Xpert is listed there.
+ * apps with their logo and website, so every client of Xpert Fintech is listed there.
  */
 export const getOtherClients = cache(async (locale: AppLocale) => {
   const rows = await db.organization.findMany({

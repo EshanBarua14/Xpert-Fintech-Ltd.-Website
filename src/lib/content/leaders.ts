@@ -100,7 +100,7 @@ export const getMarketGoal = cache(async (): Promise<MarketGoal | null> => {
 });
 
 /**
- * Xpert's overall share of DSE and CSE turnover as XFL states it (e.g. 45%),
+ * Xpert Fintech's overall share of DSE and CSE turnover as XFL states it (e.g. 45%),
  * set in Admin → Market data. When set, the home page leads with it instead
  * of the figure worked out from the daily turnover entries.
  */
@@ -115,6 +115,8 @@ export type HeadlineShare = {
   sourceUrl?: string;
   /** One line under the figures, e.g. the typical range and the peak. */
   note?: { en: string; bn?: string };
+  /** Shown as "at least": 45%+ (the share is above the figure on most days). */
+  plus?: boolean;
 };
 export const HEADLINE_SHARE_KEY = "market.headlineShare";
 
@@ -131,7 +133,7 @@ export function readHeadlineShare(value: unknown): HeadlineShare | null {
   const sourceUrl = typeof o.sourceUrl === "string" && /^https:\/\/\S+$/.test(o.sourceUrl) ? o.sourceUrl : undefined;
   const n = o.note && typeof o.note === "object" ? (o.note as Record<string, unknown>) : null;
   const note = n && typeof n.en === "string" && n.en.trim() ? { en: n.en.trim(), ...(typeof n.bn === "string" && n.bn.trim() && { bn: n.bn.trim() }) } : undefined;
-  return { pct, asOf, ...(dse !== undefined && { dse }), ...(cse !== undefined && { cse }), ...(source && { source }), ...(sourceUrl && { sourceUrl }), ...(note && { note }) };
+  return { pct, asOf, ...(o.plus === true && { plus: true }), ...(dse !== undefined && { dse }), ...(cse !== undefined && { cse }), ...(source && { source }), ...(sourceUrl && { sourceUrl }), ...(note && { note }) };
 }
 
 export const getHeadlineShare = cache(async (): Promise<HeadlineShare | null> => {

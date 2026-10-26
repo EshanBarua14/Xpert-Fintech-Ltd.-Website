@@ -181,6 +181,7 @@ export async function saveHeadlineShare(_prev: MarketState, formData: FormData):
     noteEn: formData.get("headlineNoteEn") ?? "",
     noteBn: formData.get("headlineNoteBn") ?? "",
   });
+  const plus = formData.get("headlinePlus") === "on";
   if (!parsed.success) {
     const e = toFieldErrors(parsed.error);
     return { errors: { headlinePct: e.pct ?? "", headlineAsOf: e.asOf ?? "", avgDse: e.dse ?? "", avgCse: e.cse ?? "", headlineSourceUrl: e.sourceUrl ?? "" }, message: "Please fix the highlighted fields." };
@@ -199,6 +200,7 @@ export async function saveHeadlineShare(_prev: MarketState, formData: FormData):
     ...(source && { source }),
     ...(sourceUrl && { sourceUrl }),
     ...(noteEn && { note: { en: noteEn, ...(noteBn && { bn: noteBn }) } }),
+    ...(plus && { plus: true }),
   };
   await db.siteSetting.upsert({ where: { key: HEADLINE_SHARE_KEY }, update: { value, updatedById: admin.id }, create: { key: HEADLINE_SHARE_KEY, value, updatedById: admin.id } });
   refresh();

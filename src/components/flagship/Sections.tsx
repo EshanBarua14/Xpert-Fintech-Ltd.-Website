@@ -426,13 +426,13 @@ const FLOW: { keys: string[]; icon: string; text: keyof Messages; exchanges?: bo
   { keys: ["ost", "smart-stock"], icon: "globe", text: "flowStepTrade" },
   // RMS runs inside the OMS: the OMS step carries an "RMS built in" chip.
   { keys: ["trading-platform"], icon: "exchange", text: "flowStep2", rms: true },
-  // The exchanges are not an Xpert product: this step always shows, with the DSE and CSE logos.
+  // The exchanges are not an Xpert Fintech product: this step always shows, with the DSE and CSE logos.
   { keys: [], icon: "network", text: "flowStep4", exchanges: true },
   { keys: ["back-office"], icon: "chart", text: "flowStep5" },
 ];
 
 /**
- * An order's journey through every published Xpert product, from account
+ * An order's journey through every published Xpert Fintech product, from account
  * opening to settlement. Each step names (and links to) the products doing
  * it, with the product's logo when one is set; the exchange step shows the
  * DSE and CSE logos. Without product data it falls back to the short

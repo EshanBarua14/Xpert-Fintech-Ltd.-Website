@@ -2871,6 +2871,82 @@ async function seedCapital39() {
  * growth journey, the WhatsApp panel and the home FAQ. Only values still exactly as first
  * seeded are replaced; anything edited in the admin stays as it is.
  */
+// ── 26 Oct: the company is called "Xpert Fintech" everywhere, never just "Xpert" ──
+// Product names (Xpert Trading OMS, Xpert DMS…) keep their own names. People's own
+// words are not changed: client reviews, news articles, biographies and the leaders' messages.
+const XPERT_EN = /\bXpert\b(?! (?:Fintech|Trading|DMS|OMS|Smart|Back|BO|OST|eKYC|RMS|Nexus))/g;
+const XPERT_BN = /এক্সপার্ট(?!\s*(?:ফিনটেক|ট্রেডিং))(ের|কে|ে)?/g;
+const fintechName = (v: string) => v.replace(XPERT_EN, "Xpert Fintech").replace(XPERT_BN, (_m, suffix: string | undefined) => `এক্সপার্ট ফিনটেক${suffix ?? ""}`);
+async function seedXpertFintechName() {
+  const MARK = "seed.xpert-fintech-name-2026-10-26";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  let changed = 0;
+  const walk = (v: unknown): unknown => {
+    if (typeof v === "string") {
+      const n = fintechName(v);
+      if (n !== v) changed++;
+      return n;
+    }
+    if (Array.isArray(v)) return v.map(walk);
+    if (v && typeof v === "object") return Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([k, x]) => [k, walk(x)]));
+    return v;
+  };
+  for (const row of await db.siteSetting.findMany({ where: { NOT: [{ key: { startsWith: "seed." } }, { key: { startsWith: "message." } }] } })) {
+    const before = changed;
+    const value = walk(row.value);
+    if (changed > before) await db.siteSetting.update({ where: { key: row.key }, data: { value: value as object } });
+  }
+  type Delegate = { findMany: (a: object) => Promise<Record<string, unknown>[]>; update: (a: object) => Promise<unknown> };
+  const tables: [string, string[]][] = [
+    ["pageTranslation", ["title", "intro"]],
+    ["contentBlockTranslation", ["eyebrow", "title", "subtitle", "body", "ctaLabel"]],
+    ["blockItemTranslation", ["title", "subtitle", "body", "ctaLabel"]],
+    ["offeringTranslation", ["tagline", "summary", "problem", "solution", "body", "targetCustomers", "ctaLabel"]],
+    ["offeringItemTranslation", ["title", "body"]],
+    ["caseStudyTranslation", ["title", "summary", "challenge", "solution", "outcome"]],
+    ["metricTranslation", ["label"]],
+    ["careerTranslation", ["summary", "about", "responsibilities", "requirements", "benefits"]],
+    ["resourceTranslation", ["title", "summary"]],
+    ["ecosystemNodeTranslation", ["description", "ctaLabel"]],
+    ["ecosystemFlowStepTranslation", ["title", "body"]],
+    ["seoMetadata", ["title", "description", "ogTitle", "ogDescription"]],
+    ["mediaTranslation", ["altText", "caption"]],
+  ];
+  for (const [model, fields] of tables) {
+    const delegate = (db as unknown as Record<string, Delegate>)[model];
+    if (!delegate) continue;
+    const rows = await delegate.findMany({ select: { id: true, ...Object.fromEntries(fields.map((f) => [f, true])) } });
+    for (const r of rows) {
+      const data: Record<string, string> = {};
+      for (const f of fields) {
+        const v = r[f];
+        if (typeof v === "string") {
+          const n = fintechName(v);
+          if (n !== v) data[f] = n;
+        }
+      }
+      if (Object.keys(data).length) {
+        await delegate.update({ where: { id: r.id }, data });
+        changed += Object.keys(data).length;
+      }
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), changed } } });
+  console.log(`  "Xpert" → "Xpert Fintech" in ${changed} text(s)`);
+}
+
+// ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
+async function seedSharePlus() {
+  const MARK = "seed.share-plus-2026-10-26";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const row = await db.siteSetting.findUnique({ where: { key: "market.headlineShare" } });
+  if (row && row.value && typeof row.value === "object" && !Array.isArray(row.value)) {
+    await db.siteSetting.update({ where: { key: row.key }, data: { value: { ...(row.value as Record<string, unknown>), plus: true } } });
+    console.log("  Market share shown as at least (e.g. 45%+)");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
 // ── 26 Oct: About page headline in the new voice (only while it still has the seeded wording) ──
 async function seedAboutHeadline() {
   const MARK = "seed.about-headline-2026-10-26";
@@ -3397,6 +3473,8 @@ async function main() {
   await seedCapital39();
   await seedBanglaPolish();
   await seedAboutHeadline();
+  await seedXpertFintechName();
+  await seedSharePlus();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

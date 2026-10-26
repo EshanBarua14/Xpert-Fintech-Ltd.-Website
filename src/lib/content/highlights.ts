@@ -14,7 +14,7 @@ export const SAVINGS_KEY = "home.savings";
 export const WHATSAPP_KEY = "site.whatsapp";
 export const OWNERSHIP_KEY = "home.ownership";
 
-/** "Who owns Xpert": paid-up capital and the owner houses by basis (bases from Admin → Organizations → Owned by). */
+/** "Who owns Xpert Fintech": paid-up capital and the owner houses by basis (bases from Admin → Organizations → Owned by). */
 export type OwnershipSetting = {
   published: boolean;
   titleEn: string;
@@ -28,8 +28,8 @@ export type OwnershipSetting = {
 };
 export const DEFAULT_OWNERSHIP: OwnershipSetting = {
   published: false,
-  titleEn: "Who owns *Xpert*",
-  titleBn: "এক্সপার্টের *মালিক* কারা",
+  titleEn: "Who owns *Xpert Fintech*",
+  titleBn: "এক্সপার্ট ফিনটেকের *মালিক* কারা",
   introEn: "The capital behind the platform and the institutions that own it, house by house.",
   introBn: "প্ল্যাটফর্মের পেছনের মূলধন আর এর মালিক প্রতিষ্ঠান — হাউস ধরে ধরে।",
   capitalCrore: null,
@@ -49,7 +49,7 @@ export type SavingsSetting = {
   titleBn: string;
   bodyEn: string;
   bodyBn: string;
-  /** What was paid before Xpert, and with Xpert, in the same unit. */
+  /** What was paid before Xpert Fintech, and with Xpert Fintech, in the same unit. */
   before: number | null;
   after: number | null;
   /** The share saved, when only the percentage is known (used when the two figures are not entered). */
@@ -84,15 +84,15 @@ export type WhatsAppSetting = {
 export const DEFAULT_STRENGTHS: StrengthsSetting = {
   titleEn: "Built by brokers. *Trusted* by brokers.",
   titleBn: "ব্রোকারদের গড়া। ব্রোকারদের *ভরসা*।",
-  introEn: "Five reasons the houses that own Xpert also run their business on it.",
-  introBn: "যে হাউসগুলো এক্সপার্টের মালিক, নিজেদের ব্যবসাও কেন তারা এতেই চালায় — পাঁচটি কারণ।",
+  introEn: "Five reasons the houses that own Xpert Fintech also run their business on it.",
+  introBn: "যে হাউসগুলো এক্সপার্ট ফিনটেকের মালিক, নিজেদের ব্যবসাও কেন তারা এতেই চালায় — পাঁচটি কারণ।",
   items: [
     {
       icon: "users",
       titleEn: "Built by the market's top brokers",
       titleBn: "বাজারের শীর্ষ ব্রোকারদের গড়া",
-      bodyEn: "Designed with the brokerage houses that own Xpert and trade on it every day, so every screen follows how a dealing desk really works.",
-      bodyBn: "যে ব্রোকারেজ হাউসগুলো এক্সপার্টের মালিক এবং প্রতিদিন এতে লেনদেন করে, তাদের সঙ্গে বসেই তৈরি — তাই প্রতিটি স্ক্রিন চলে ডিলিং ডেস্কের আসল কাজের ছন্দে।",
+      bodyEn: "Designed with the brokerage houses that own Xpert Fintech and trade on it every day, so every screen follows how a dealing desk really works.",
+      bodyBn: "যে ব্রোকারেজ হাউসগুলো এক্সপার্ট ফিনটেকের মালিক এবং প্রতিদিন এতে লেনদেন করে, তাদের সঙ্গে বসেই তৈরি — তাই প্রতিটি স্ক্রিন চলে ডিলিং ডেস্কের আসল কাজের ছন্দে।",
     },
     {
       icon: "shield",
@@ -129,18 +129,18 @@ export const DEFAULT_SAVINGS: SavingsSetting = {
   published: false,
   titleEn: "Same market. *{pct}% less* to run it.",
   titleBn: "একই বাজার। খরচ *{pct}% কম*।",
-  bodyEn: "Instead of every brokerage paying for its own systems, the houses on Xpert share one platform and split the bill.",
-  bodyBn: "প্রতিটি ব্রোকারেজকে আর আলাদা সিস্টেমের পুরো খরচ বইতে হয় না — এক্সপার্টের হাউসগুলো একটি প্ল্যাটফর্ম ভাগ করে নেয়, খরচও ভাগ হয়ে যায়।",
+  bodyEn: "Instead of every brokerage paying for its own systems, the houses on Xpert Fintech share one platform and split the bill.",
+  bodyBn: "প্রতিটি ব্রোকারেজকে আর আলাদা সিস্টেমের পুরো খরচ বইতে হয় না — এক্সপার্ট ফিনটেকের হাউসগুলো একটি প্ল্যাটফর্ম ভাগ করে নেয়, খরচও ভাগ হয়ে যায়।",
   before: null,
   after: null,
   pct: null,
   prefix: "",
   unitEn: "",
   unitBn: "",
-  beforeLabelEn: "Before Xpert",
-  beforeLabelBn: "এক্সপার্টের আগে",
-  afterLabelEn: "With Xpert",
-  afterLabelBn: "এক্সপার্টের সঙ্গে",
+  beforeLabelEn: "Before Xpert Fintech",
+  beforeLabelBn: "এক্সপার্ট ফিনটেকের আগে",
+  afterLabelEn: "With Xpert Fintech",
+  afterLabelBn: "এক্সপার্ট ফিনটেকের সঙ্গে",
   source: "",
   sourceUrl: "",
   asOf: "",
@@ -154,8 +154,8 @@ export const DEFAULT_WHATSAPP: WhatsAppSetting = {
   labelBn: "হোয়াটসঅ্যাপে কথা বলুন",
   messageEn: "Hello Xpert Fintech, I would like to request a demo of your brokerage platform. Please let me know a convenient time.",
   messageBn: "হ্যালো এক্সপার্ট ফিনটেক, আমি আপনাদের ব্রোকারেজ প্ল্যাটফর্মের একটি ডেমো দেখতে চাই। অনুগ্রহ করে সুবিধাজনক সময় জানাবেন।",
-  greetingEn: "Hi there! Want to see Xpert in action? Chat with our team on WhatsApp or give us a call, and we'll set up your demo.",
-  greetingBn: "স্বাগতম! এক্সপার্ট কীভাবে কাজ করে, নিজের চোখে দেখতে চান? হোয়াটসঅ্যাপে লিখুন বা কল করুন — আমরা আপনার জন্য ডেমো সাজিয়ে দেব।",
+  greetingEn: "Hi there! Want to see Xpert Fintech in action? Chat with our team on WhatsApp or give us a call, and we'll set up your demo.",
+  greetingBn: "স্বাগতম! এক্সপার্ট ফিনটেক কীভাবে কাজ করে, নিজের চোখে দেখতে চান? হোয়াটসঅ্যাপে লিখুন বা কল করুন — আমরা আপনার জন্য ডেমো সাজিয়ে দেব।",
 };
 
 const obj = (v: unknown) => (v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {});

@@ -153,9 +153,9 @@ export const getOrganizations = cache(async (kind: OrganizationKind) => {
 });
 
 /**
- * Institutions running one of Xpert's apps (a published deployment), whatever
+ * Institutions running one of Xpert Fintech's apps (a published deployment), whatever
  * their kind. Used for the client logos until clients are entered as such in
- * Admin → Organizations: an organization with a live Xpert app is a client.
+ * Admin → Organizations: an organization with a live Xpert Fintech app is a client.
  */
 export const getOrganizationsWithLiveApps = cache(async () => {
   const now = new Date();
@@ -310,7 +310,7 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
             : position.institution
               ? position.institution
               : !tr.personTitle && !affiliation && roleOf(r)
-              ? // Only their role at Xpert is known (e.g. "Director"): name the company it is at.
+              ? // Only their role at Xpert Fintech is known (e.g. "Director"): name the company it is at.
                 locale === "bn" ? "এক্সপার্ট ফিনটেক লিমিটেড" : "Xpert Fintech Ltd."
               : null,
           photo: media.get(photoOf(r) ?? "") ?? null,

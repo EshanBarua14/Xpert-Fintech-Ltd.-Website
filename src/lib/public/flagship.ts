@@ -38,9 +38,9 @@ export const getFlagshipData = cache(async (locale: AppLocale) => {
     getOrganizations("CLIENT"),
     getOfferings(),
   ]);
-  // Clients: the consortium brokerages (they run Xpert's platform), the
+  // Clients: the consortium brokerages (they run Xpert Fintech's platform), the
   // organizations entered as "Client" in Admin → Organizations, and any other
-  // institution running a live Xpert app. Each once, members first.
+  // institution running a live Xpert Fintech app. Each once, members first.
   const withApps = await getOrganizationsWithLiveApps();
   const seen = new Set<string>();
   const clients = [...members, ...clientRows, ...withApps].filter((o) => (seen.has(o.id) ? false : (seen.add(o.id), true)));

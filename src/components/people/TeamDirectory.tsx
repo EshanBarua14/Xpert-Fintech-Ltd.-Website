@@ -17,7 +17,7 @@ export type TeamMember = {
   photo: { url: string; width?: number | null; height?: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
   email: string | null;
   linkedinUrl: string | null;
-  /** Their own website; Xpert's home page when empty. */
+  /** Their own website; Xpert Fintech's home page when empty. */
   websiteUrl?: string | null;
   githubUrl?: string | null;
   engineer?: boolean;
@@ -36,7 +36,7 @@ function initials(name: string) {
 }
 
 /**
- * Everyone at Xpert in order of position (Admin → People, "Team" order).
+ * Everyone at Xpert Fintech in order of position (Admin → People, "Team" order).
  * Each card carries its department's colour: a stripe along the top, the
  * avatar behind the initials when there is no photo, and the dot by the
  * department name. The chips filter by department; "Everyone" keeps the

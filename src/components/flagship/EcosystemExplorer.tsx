@@ -29,7 +29,7 @@ const LAYERS: EcoNode["layer"][] = ["MARKET", "XFL", "PRODUCT", "INSTITUTION", "
 
 /**
  * The ecosystem: the stepped, interactive map on every screen; on phones it
- * is followed by a collapsible vertical flow (market → Xpert → products →
+ * is followed by a collapsible vertical flow (market → Xpert Fintech → products →
  * institutions → users) whose nodes open a bottom sheet with details and links.
  */
 export function EcosystemExplorer({

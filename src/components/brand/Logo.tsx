@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils/cn";
  * keeping the original aspect ratio. Its one motion (a full turn, approved by
  * XFL) lives in BrandLockup.
  *
- * TODO(brand): replace with the SVG master when Xpert provides it.
+ * TODO(brand): replace with the SVG master when Xpert Fintech provides it.
  */
 const LOGO = { src: "/brand/xpert-logo.png", width: 419, height: 437 } as const;
 

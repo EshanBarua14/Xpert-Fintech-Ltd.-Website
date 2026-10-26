@@ -11,19 +11,19 @@ import { getOrganizations, mediaMap } from "@/lib/public/content";
 /**
  * The consortium as relations, all from the database (nothing assumed):
  *  - each member brokerage house (Admin → Organizations, kind Consortium member)
- *  - who represents it on Xpert's Board or as a consultant (People whose
+ *  - who represents it on Xpert Fintech's Board or as a consultant (People whose
  *    position names the house, e.g. "CEO & Director, Apex Investments Ltd."),
- *    or as its representative only: a person with no role at Xpert (Admin →
+ *    or as its representative only: a person with no role at Xpert Fintech (Admin →
  *    People, no positions) whose position names the house
  *    (e.g. "Deputy Managing Director, Mika Securities Limited")
- *  - the branded trading app(s) it runs on Xpert's platform (Admin → Deployments)
+ *  - the branded trading app(s) it runs on Xpert Fintech's platform (Admin → Deployments)
  */
 export type ConsortiumApp = { name: string; playStoreUrl: string | null; appStoreUrl: string | null; webUrl: string | null };
 export type ConsortiumRep = {
   name: string;
   title: string | null;
   position: string | null;
-  /** REPRESENTATIVE: the house's representative, with no seat at Xpert. */
+  /** REPRESENTATIVE: the house's representative, with no seat at Xpert Fintech. */
   group: "BOARD" | "CONSULTANT" | "REPRESENTATIVE";
   photo: string | null;
   photoStyle?: import("react").CSSProperties;

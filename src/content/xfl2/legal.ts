@@ -38,7 +38,7 @@ export const LEGAL_DRAFTS: LegalDraft[] = [
       },
       {
         "title": "Who can see it",
-        "body": "Only authorised Xpert staff, through a password-protected admin area with an activity log. Our email and hosting providers process data on our behalf. [List the hosting and email providers.]"
+        "body": "Only authorised Xpert Fintech staff, through a password-protected admin area with an activity log. Our email and hosting providers process data on our behalf. [List the hosting and email providers.]"
       },
       {
         "title": "Your choices",
@@ -66,7 +66,7 @@ export const LEGAL_DRAFTS: LegalDraft[] = [
       },
       {
         "title": "Market share figures",
-        "body": "Xpert's market share is calculated from turnover traded through Xpert's platform and the exchange's total turnover for the day shown, with the source stated."
+        "body": "Xpert Fintech's market share is calculated from turnover traded through Xpert Fintech's platform and the exchange's total turnover for the day shown, with the source stated."
       },
       {
         "title": "Content and trademarks",
@@ -78,7 +78,7 @@ export const LEGAL_DRAFTS: LegalDraft[] = [
       },
       {
         "title": "Liability",
-        "body": "[To be completed by Xpert's legal adviser.]"
+        "body": "[To be completed by Xpert Fintech's legal adviser.]"
       },
       {
         "title": "Governing law",
@@ -118,11 +118,11 @@ export const LEGAL_DRAFTS: LegalDraft[] = [
     "key": "security",
     "path": "security",
     "title": "Security and compliance",
-    "intro": "How Xpert protects brokerage and investor data, and the rules it works under.",
+    "intro": "How Xpert Fintech protects brokerage and investor data, and the rules it works under.",
     "sections": [
       {
         "title": "The rules we work under",
-        "body": "Xpert's products serve brokerage houses licensed by the Bangladesh Securities and Exchange Commission (BSEC) and connect to the Dhaka Stock Exchange, the Chittagong Stock Exchange and CDBL. Exchange connections are certified as listed on our Credentials. [List any BSEC, DSE or CSE approvals with their dates.]"
+        "body": "Xpert Fintech's products serve brokerage houses licensed by the Bangladesh Securities and Exchange Commission (BSEC) and connect to the Dhaka Stock Exchange, the Chittagong Stock Exchange and CDBL. Exchange connections are certified as listed on our Credentials. [List any BSEC, DSE or CSE approvals with their dates.]"
       },
       {
         "title": "Where data is hosted",
@@ -138,7 +138,7 @@ export const LEGAL_DRAFTS: LegalDraft[] = [
       },
       {
         "title": "Certifications and audits",
-        "body": "[Only certifications Xpert actually holds — for example ISO/IEC 27001 — with the certificate number, scope and expiry, and the date of the latest independent audit.]"
+        "body": "[Only certifications Xpert Fintech actually holds — for example ISO/IEC 27001 — with the certificate number, scope and expiry, and the date of the latest independent audit.]"
       },
       {
         "title": "Business continuity",

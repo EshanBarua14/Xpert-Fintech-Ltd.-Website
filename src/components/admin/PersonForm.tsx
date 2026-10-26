@@ -17,6 +17,7 @@ export type PersonFormValues = {
   photoMediaId: string;
   linkedinUrl: string;
   websiteUrl: string;
+  githubUrl: string;
   email: string;
   department: string;
   isPlaceholder: boolean;
@@ -81,6 +82,15 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
             hint="Optional. Their own or their organisation's site, shown as a globe icon. Empty: their organisation's website is used."
             defaultValue={values.websiteUrl}
             error={e.websiteUrl}
+          />
+          <TextInput
+            id="githubUrl"
+            type="url"
+            label="GitHub profile"
+            placeholder="https://github.com/…"
+            hint="Optional, for engineers. Shown as a code icon on the card and in the profile."
+            defaultValue={values.githubUrl}
+            error={e.githubUrl}
           />
           <TextInput
             id="department"

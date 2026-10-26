@@ -1049,6 +1049,8 @@ model Person {
   linkedinUrl   String?
   /// Personal or organisational website, shown as a globe icon (optional; else their organisation's site).
   websiteUrl    String?
+  /// Code profile (GitHub, or another public code host), shown as a code icon (engineers; optional).
+  githubUrl     String?
   /// Work email shown on the person's card (optional).
   email         String?
   /// Department, e.g. "Engineering" (Team page colour and filter).

@@ -20,6 +20,7 @@ const schema = z.object({
   photoMediaId: optionalId,
   linkedinUrl: optionalHttpsUrl.refine((v) => !v || /^https:\/\/([a-z]{2,3}\.)?(www\.)?linkedin\.com\//i.test(v), "Enter a LinkedIn address, e.g. https://www.linkedin.com/in/name"),
   websiteUrl: optionalHttpsUrl,
+  githubUrl: optionalHttpsUrl,
   email: z
     .string()
     .trim()
@@ -62,6 +63,7 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
     photoMediaId: get("photoMediaId"),
     linkedinUrl: get("linkedinUrl"),
     websiteUrl: get("websiteUrl"),
+    githubUrl: get("githubUrl"),
     email: get("email"),
     department: get("department"),
     isPlaceholder: formData.get("isPlaceholder") === "on",
@@ -97,6 +99,7 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
     photoMediaId: v.photoMediaId,
     linkedinUrl: v.linkedinUrl,
     websiteUrl: v.websiteUrl,
+    githubUrl: v.githubUrl,
     email: v.email,
     department: v.department,
     isPlaceholder: v.isPlaceholder,

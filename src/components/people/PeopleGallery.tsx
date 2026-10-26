@@ -8,7 +8,7 @@ import { useRef, useState, type CSSProperties } from "react";
 import { SocialIcon } from "@/components/ui/SocialIcon";
 import { cn } from "@/lib/utils/cn";
 import { institutionOf, splitAffiliation } from "@/lib/people/affiliation";
-import { ContactIcon, WebsiteIcon } from "./ContactIcon";
+import { CodeIcon, ContactIcon, WebsiteIcon } from "./ContactIcon";
 
 /** Their own website, else their organisation's, else Xpert's (the home page). */
 const siteOf = (p: GalleryPerson) => p.websiteUrl || p.org?.url || "/";
@@ -34,6 +34,7 @@ export type GalleryPerson = {
   email: string | null;
   /** Their own or their organisation's website (Admin → People). */
   websiteUrl?: string | null;
+  githubUrl?: string | null;
   /** Seeded stand-in until XFL sends the real profile. */
   isPlaceholder: boolean;
   /** The organization named in the affiliation, when its logo may be shown. */
@@ -252,6 +253,7 @@ function PersonCard({
           ) : (
             <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org={p.org?.name ?? institutionOf(p.affiliation)} labels={labels} size="size-8" />
           )}
+          {p.githubUrl && <CodeIcon href={p.githubUrl} name={p.name} size="size-8" />}
           <WebsiteIcon href={siteOf(p)} name={p.org?.name ?? company ?? p.name} label={labels.website} size="size-8" />
           <button
             type="button"
@@ -411,6 +413,7 @@ export function PeopleGallery({
                 <div className="flex items-center justify-center gap-2">
                   <ContactIcon kind="email" value={open.email} name={open.name} labels={labels} size="size-10" />
                   <ContactIcon kind="linkedin" value={open.linkedinUrl} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
+                  {open.githubUrl && <CodeIcon href={open.githubUrl} name={open.name} size="size-10" />}
                   <WebsiteIcon href={siteOf(open)} name={open.org?.name ?? company ?? open.name} label={labels.website} size="size-10" />
                 </div>
                 {open.email && (

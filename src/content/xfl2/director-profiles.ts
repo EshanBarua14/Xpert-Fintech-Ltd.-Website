@@ -14,6 +14,10 @@ export type DirectorProfile = {
   /** Earlier seeded affiliations this one supersedes (replaced unless edited in the admin). */
   replaces?: string[];
   linkedinUrl?: string;
+  /** GitHub (or other code) profile, filled when empty. */
+  githubUrl?: string;
+  /** Earlier seeded biographies (either language) this one supersedes, unless edited in the admin. */
+  replacesBio?: string[];
 };
 
 export const DIRECTOR_PROFILES: DirectorProfile[] = [
@@ -121,9 +125,15 @@ export const DIRECTOR_PROFILES: DirectorProfile[] = [
   {
     key: "muhammad-shamsul-maruf",
     nameBn: "মোহাম্মদ শামসুল মারুফ",
+    githubUrl: "https://github.com/smaruf",
+    // Rewritten from his own profile (26 Oct 2026); replaces the first seeded text unless edited in the admin.
+    replacesBio: [
+      "Mohammad Shamsul Maruf is a results-driven software developer with strong expertise in Java, C#, Spring Boot, .NET Core, Python, Angular, React, Node.js and TypeScript. He builds scalable systems using MongoDB, Elasticsearch, Redis, Kafka and both relational and NoSQL databases.",
+      "মোহাম্মদ শামসুল মারুফ ফলাফলমুখী একজন সফটওয়্যার ডেভেলপার; Java, C#, Spring Boot, .NET Core, Python, Angular, React, Node.js ও TypeScript-এ তাঁর গভীর দক্ষতা রয়েছে। MongoDB, Elasticsearch, Redis, Kafka এবং রিলেশনাল ও NoSQL ডেটাবেস ব্যবহার করে তিনি স্কেলযোগ্য সিস্টেম তৈরি করেন।",
+    ],
     bio: {
-      en: "Mohammad Shamsul Maruf is a results-driven software developer with strong expertise in Java, C#, Spring Boot, .NET Core, Python, Angular, React, Node.js and TypeScript. He builds scalable systems using MongoDB, Elasticsearch, Redis, Kafka and both relational and NoSQL databases.",
-      bn: "মোহাম্মদ শামসুল মারুফ ফলাফলমুখী একজন সফটওয়্যার ডেভেলপার; Java, C#, Spring Boot, .NET Core, Python, Angular, React, Node.js ও TypeScript-এ তাঁর গভীর দক্ষতা রয়েছে। MongoDB, Elasticsearch, Redis, Kafka এবং রিলেশনাল ও NoSQL ডেটাবেস ব্যবহার করে তিনি স্কেলযোগ্য সিস্টেম তৈরি করেন।",
+      en: "Mohammad Shamsul Maruf is a Principal Software Engineer at Xpert Fintech Ltd., specialising in backend development, distributed systems and data-intensive platforms. He designs and builds scalable, high-performance systems where reliability, efficiency and correctness are critical.\n\nHe has worked with international teams in Europe and the United States, including on-site at EPAM Systems in Gdańsk, Poland, and remotely with Therap Services LLC and IdeaScale in the USA. That mix of on-site and remote work has shaped how he takes full ownership, communicates across time zones and delivers production-grade software in globally distributed teams.\n\nHis experience spans monolithic and microservices architectures, API-driven systems and real-time data pipelines, working with Java, C#, Spring Boot, .NET Core, Python, Node.js, TypeScript, Angular and React, and with MongoDB, Elasticsearch, Redis and Kafka. He approaches engineering from first principles, chooses tools pragmatically and works to simplify complex systems without compromising their robustness.",
+      bn: "মোহাম্মদ শামসুল মারুফ এক্সপার্ট ফিনটেক লিমিটেডের প্রিন্সিপাল সফটওয়্যার ইঞ্জিনিয়ার। ব্যাকএন্ড ডেভেলপমেন্ট, ডিস্ট্রিবিউটেড সিস্টেম ও বিপুল ডেটানির্ভর প্ল্যাটফর্ম তাঁর বিশেষত্ব। যেখানে নির্ভরযোগ্যতা, দক্ষতা ও নির্ভুলতা সবচেয়ে জরুরি, সেখানে তিনি স্কেলযোগ্য ও উচ্চক্ষমতার সিস্টেমের নকশা ও নির্মাণ করেন।\n\nইউরোপ ও যুক্তরাষ্ট্রের আন্তর্জাতিক টিমের সঙ্গে তাঁর কাজের অভিজ্ঞতা রয়েছে — পোল্যান্ডের গদানস্কে EPAM Systems-এ সরাসরি অফিসে থেকে, আর যুক্তরাষ্ট্রের Therap Services LLC ও IdeaScale-এর সঙ্গে দূর থেকে। এই অভিজ্ঞতা তাঁকে কাজের পূর্ণ দায়িত্ব নিতে, ভিন্ন টাইম জোনে সমন্বয় করতে এবং বিশ্বজুড়ে ছড়িয়ে থাকা টিমে প্রোডাকশন-মানের সফটওয়্যার পৌঁছে দিতে দক্ষ করে তুলেছে।\n\nমনোলিথিক ও মাইক্রোসার্ভিস আর্কিটেকচার, এপিআই-ভিত্তিক সিস্টেম এবং রিয়েল-টাইম ডেটা পাইপলাইনে তাঁর অভিজ্ঞতা বিস্তৃত; কাজ করেন Java, C#, Spring Boot, .NET Core, Python, Node.js, TypeScript, Angular ও React নিয়ে, সঙ্গে MongoDB, Elasticsearch, Redis ও Kafka। মূল নীতি থেকে সমস্যাকে ভাবা, প্রয়োজন বুঝে প্রযুক্তি বেছে নেওয়া এবং দৃঢ়তা অক্ষুণ্ণ রেখে জটিল সিস্টেমকে সহজ করা — এটাই তাঁর কাজের ধরন।",
     },
   },
   // Consultant. Checked on 8 Oct 2026 against ICAB's list of firms (partner, FCA no. 906, Motijheel and

@@ -650,6 +650,7 @@ async function seedRoster() {
     if (!person) continue;
     const personId = person.id;
     if (d.linkedinUrl && !person.linkedinUrl) await db.person.update({ where: { id: personId }, data: { linkedinUrl: d.linkedinUrl } });
+    if (d.githubUrl && !person.githubUrl) await db.person.update({ where: { id: personId }, data: { githubUrl: d.githubUrl } });
     for (const locale of [EN, BN] as const) {
       const lang = locale === EN ? "en" : "bn";
       const tr = await db.personTranslation.findUnique({ where: { personId_locale: { personId, locale } } });
@@ -663,7 +664,7 @@ async function seedRoster() {
       }
       const current = tr.affiliation?.trim() ?? "";
       const data = {
-        ...(d.bio && !tr.bio?.trim() && { bio: d.bio[lang] }),
+        ...(d.bio && (!tr.bio?.trim() || (d.replacesBio ?? []).includes(tr.bio.trim())) && tr.bio !== d.bio[lang] && { bio: d.bio[lang] }),
         ...(d.affiliation && (!current || (d.replaces ?? []).includes(current)) && current !== d.affiliation[lang] && { affiliation: d.affiliation[lang] }),
         // The Bangla name follows XFL's spelling unless the profile was edited in the admin.
         ...(locale === BN && !person.updatedById && tr.name !== d.nameBn && { name: d.nameBn }),

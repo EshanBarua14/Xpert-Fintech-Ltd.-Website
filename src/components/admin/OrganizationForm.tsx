@@ -97,6 +97,7 @@ export function OrganizationForm({ values, images }: { values: OrgFormValues; im
               { value: "BANK", label: "A bank" },
               { value: "INSURANCE", label: "An insurance company" },
               { value: "CORPORATE", label: "A corporate group" },
+              { value: "FAMILY", label: "A family (family-owned broker)" },
               { value: "INDEPENDENT", label: "Independent" },
             ]}
             error={e.parentType}

@@ -3042,6 +3042,24 @@ async function seedClientHeadReviews() {
   if (drafts.length) console.log(`  ${drafts.length} draft review card(s) to complete in Admin → Testimonials (head's name needed): ${drafts.join("; ")}`);
 }
 
+// ── 26 Oct (XFL): Thea Securities' logo; Mika under corporate groups, Remons as a family-owned broker ──
+async function seedOwnersAndThea() {
+  const MARK = "seed.owners-thea-2026-10-26";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const thea = await db.organization.findUnique({ where: { key: "thia-securities" }, select: { id: true, logoMediaId: true } });
+  const logo = thea ? await seedImage("logos", "thia-securities", "Thea Securities logo", ["logo", "client"]) : null;
+  if (thea && logo && thea.logoMediaId !== logo) {
+    await db.organization.update({ where: { id: thea.id }, data: { logoMediaId: logo, logoPermission: true } });
+    await db.mediaUsage.deleteMany({ where: { entityType: "ORGANIZATION", entityId: thea.id, field: "logo" } });
+    await db.mediaUsage.create({ data: { mediaId: logo, entityType: "ORGANIZATION", entityId: thea.id, field: "logo" } });
+    console.log("  Thea Securities: logo added");
+  }
+  // Only where the owner basis was not set in the admin.
+  await db.organization.updateMany({ where: { key: "mika-securities", OR: [{ parentType: null }, { parentType: "" }] }, data: { parentType: "CORPORATE" } });
+  await db.organization.updateMany({ where: { key: "remons-investment", OR: [{ parentType: null }, { parentType: "" }] }, data: { parentType: "FAMILY" } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
 // ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
 async function seedSharePlus() {
   const MARK = "seed.share-plus-2026-10-26";
@@ -3584,6 +3602,7 @@ async function main() {
   await seedSharePlus();
   await seedWhiteLabel();
   await seedClientHeadReviews();
+  await seedOwnersAndThea();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

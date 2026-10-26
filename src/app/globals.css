@@ -1853,3 +1853,21 @@ html:has(.whatsapp-fab) .back-to-top {
   html.has-section-rail { scrollbar-width: none; }
   html.has-section-rail::-webkit-scrollbar { display: none; }
 }
+
+/* Running text is justified on both sides, like a printed page (biographies,
+   messages, stories, articles, descriptions). The last line of a paragraph
+   stays at the start, so one-line text is unchanged; hyphenation keeps the
+   spacing even in narrow columns. Centred or right-aligned blocks, and any
+   text a utility class aligns, keep their own alignment. */
+@layer base {
+  :is(#main, dialog) p {
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  :is(#main, dialog) :is(.text-center, .text-right, .text-end) p,
+  :is(#main, dialog) [style*="text-align"] p {
+    text-align: inherit;
+  }
+}

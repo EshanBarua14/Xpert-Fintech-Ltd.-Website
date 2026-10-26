@@ -12,6 +12,7 @@ export const emptyPerson: PersonFormValues = {
   photoMediaId: "",
   linkedinUrl: "",
   websiteUrl: "",
+  githubUrl: "",
   email: "",
   department: "",
   isPlaceholder: false,
@@ -32,6 +33,7 @@ export function toPersonFormValues(p: {
   photoMediaId: string | null;
   linkedinUrl: string | null;
   websiteUrl?: string | null;
+  githubUrl?: string | null;
   email: string | null;
   department: string | null;
   isPlaceholder: boolean;
@@ -56,6 +58,7 @@ export function toPersonFormValues(p: {
     photoMediaId: p.photoMediaId ?? "",
     linkedinUrl: p.linkedinUrl ?? "",
     websiteUrl: p.websiteUrl ?? "",
+    githubUrl: p.githubUrl ?? "",
     email: p.email ?? "",
     department: p.department ?? "",
     isPlaceholder: p.isPlaceholder,

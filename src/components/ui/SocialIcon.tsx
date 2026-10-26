@@ -3,7 +3,7 @@
  * LinkedIn, Facebook, YouTube, X, Instagram, website). Chosen from the link
  * address, so admins only paste the URL.
  */
-export type SocialKind = "email" | "linkedin" | "facebook" | "youtube" | "x" | "instagram" | "web";
+export type SocialKind = "email" | "linkedin" | "facebook" | "youtube" | "x" | "instagram" | "code" | "web";
 
 export function socialKind(url: string): SocialKind {
   const u = url.toLowerCase();
@@ -13,6 +13,7 @@ export function socialKind(url: string): SocialKind {
   if (u.includes("youtube.") || u.includes("youtu.be")) return "youtube";
   if (u.includes("twitter.") || /\/\/(www\.)?x\.com/.test(u)) return "x";
   if (u.includes("instagram.")) return "instagram";
+  if (u.includes("github.") || u.includes("gitlab.") || u.includes("bitbucket.")) return "code";
   return "web";
 }
 
@@ -56,6 +57,13 @@ export function SocialIcon({ kind, className = "size-4" }: { kind: SocialKind; c
           <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
           <circle cx="12" cy="12" r="4" />
           <circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none" />
+        </svg>
+      );
+    case "code":
+      // A code profile (GitHub and similar): angle brackets and a slash.
+      return (
+        <svg {...common} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 4.5l-3 15" />
         </svg>
       );
     default:

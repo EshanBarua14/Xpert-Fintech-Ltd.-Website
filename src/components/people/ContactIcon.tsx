@@ -97,3 +97,34 @@ export function WebsiteIcon({
     </a>
   );
 }
+
+/** A code icon to a person's GitHub (or other code) profile, styled like the other contact icons; shown only when on file. */
+export function CodeIcon({
+  href,
+  name,
+  color = "var(--tone)",
+  ink = "var(--tone-ink)",
+  size = "size-9",
+}: {
+  href: string;
+  name: string;
+  color?: string;
+  ink?: string;
+  size?: string;
+}) {
+  const host = /github\./i.test(href) ? "GitHub" : /gitlab\./i.test(href) ? "GitLab" : /bitbucket\./i.test(href) ? "Bitbucket" : "Code";
+  const text = `${host}: ${name}`;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={text}
+      title={text}
+      className={cn("contact-icon flex shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-300", size)}
+      style={{ "--c": color, "--ci": ink } as CSSProperties}
+    >
+      <SocialIcon kind="code" className="size-4" />
+    </a>
+  );
+}

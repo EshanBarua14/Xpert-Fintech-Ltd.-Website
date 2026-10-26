@@ -106,6 +106,7 @@ export async function PeopleGrid({
       photo: photo ? { url: photo.url, width: photo.width, height: photo.height, focal: photo.focal ?? null } : null,
       linkedinUrl: p.linkedinUrl,
       websiteUrl: p.websiteUrl ?? null,
+      githubUrl: p.githubUrl ?? null,
       email: p.email,
       isPlaceholder: p.isPlaceholder,
     };

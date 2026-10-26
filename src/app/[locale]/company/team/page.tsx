@@ -50,6 +50,7 @@ export default async function TeamPage({ params }: Props) {
         email: p.email,
         linkedinUrl: p.linkedinUrl,
         websiteUrl: p.websiteUrl ?? null,
+        githubUrl: p.githubUrl ?? null,
       };
     })
     .filter((m) => m.name);

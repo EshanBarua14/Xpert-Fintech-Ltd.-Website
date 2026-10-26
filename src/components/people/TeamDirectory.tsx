@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useMemo, useState, type CSSProperties } from "react";
 import { departmentColor, departmentLabel, departmentRank } from "@/lib/people/departments";
 import { cn } from "@/lib/utils/cn";
-import { ContactIcon, WebsiteIcon } from "./ContactIcon";
+import { CodeIcon, ContactIcon, WebsiteIcon } from "./ContactIcon";
 
 export type TeamMember = {
   id: string;
@@ -19,6 +19,7 @@ export type TeamMember = {
   linkedinUrl: string | null;
   /** Their own website; Xpert's home page when empty. */
   websiteUrl?: string | null;
+  githubUrl?: string | null;
 };
 
 export type TeamLabels = { filter: string; everyone: string; showing: string; email: string; linkedin: string; linkedinSearch: string; emailMissing: string; /** Department names by lower-case department, from Site text. */ departments: Record<string, string> };
@@ -138,6 +139,7 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
         {/* Email and LinkedIn on every card: a link when it is on file, a muted icon until it is added (Admin → People → Contacts). */}
         <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
         <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org="Xpert Fintech" labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
+        {p.githubUrl && <CodeIcon href={p.githubUrl} name={p.name} color="var(--dept)" ink="var(--dept)" size="size-8" />}
         <WebsiteIcon href={p.websiteUrl || `/${locale}`} name="Xpert Fintech Ltd." label={locale === "bn" ? "ওয়েবসাইট" : "Website"} color="var(--dept)" ink="var(--dept)" size="size-8" />
         <span aria-hidden="true" className="ml-auto h-1 w-8 rounded-full bg-[var(--dept)] opacity-70 transition-[width] duration-500 group-hover:w-12" />
       </div>

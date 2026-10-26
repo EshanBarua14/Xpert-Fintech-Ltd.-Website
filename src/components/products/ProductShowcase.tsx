@@ -27,6 +27,8 @@ export type ShowcaseLabels = {
   pause?: string;
   /** "RMS built in", shown on the Trading OMS. */
   rmsBuiltIn?: string;
+  /** "White-label app" (the trading platform's mobile app under a brokerage's own brand). */
+  whiteLabel?: string;
 };
 
 const CYCLE_MS = 7000;
@@ -199,10 +201,20 @@ export function ProductShowcase({ products, labels }: { products: ShowcaseProduc
             <div className="flex flex-col gap-3">
               <ProductMark productKey={p.key} logo={p.logo} look={p.look} name={p.name} size="lg" className="showcase-rise" />
               <h3 className="showcase-rise font-display text-3xl leading-[1.05] font-semibold tracking-[-0.025em] text-balance md:text-4xl">{p.name}</h3>
-              {p.key === "trading-platform" && labels.rmsBuiltIn && (
-                <span className="showcase-rise inline-flex items-center gap-1.5 self-start rounded-full border border-brand-sky/30 bg-brand-sky/10 px-2.5 py-0.5 text-xs font-semibold text-brand-sky">
-                  <svg aria-hidden="true" viewBox="0 0 24 24" className="size-3.5 fill-none stroke-current stroke-2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" /></svg>
-                  {labels.rmsBuiltIn}
+              {p.key === "trading-platform" && (labels.rmsBuiltIn || labels.whiteLabel) && (
+                <span className="showcase-rise flex flex-wrap items-center gap-2 self-start">
+                  {labels.rmsBuiltIn && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-sky/30 bg-brand-sky/10 px-2.5 py-0.5 text-xs font-semibold text-brand-sky">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="size-3.5 fill-none stroke-current stroke-2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" /></svg>
+                      {labels.rmsBuiltIn}
+                    </span>
+                  )}
+                  {labels.whiteLabel && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-2.5 py-0.5 text-xs font-semibold text-gold">
+                      <svg aria-hidden="true" viewBox="0 0 24 24" className="size-3.5 fill-none stroke-current stroke-2" strokeLinecap="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5" /><path d="M11 18.5h2" /></svg>
+                      {labels.whiteLabel}
+                    </span>
+                  )}
                 </span>
               )}
               {p.tagline && <p className="showcase-rise text-gradient-brand text-lg font-medium" style={{ animationDelay: "80ms" }}>{p.tagline}</p>}

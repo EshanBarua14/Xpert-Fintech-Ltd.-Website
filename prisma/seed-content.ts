@@ -90,8 +90,8 @@ const CONTENT: OfferingContent[] = [
     name: t("Xpert Trading Platform (OMS)", "এক্সপার্ট ট্রেডিং প্ল্যাটফর্ম (ওএমএস)"),
     tagline: t("Order management for brokerage trading on DSE and CSE.", "ডিএসই ও সিএসই-তে ব্রোকারেজ লেনদেনের অর্ডার ব্যবস্থাপনা।"),
     summary: t(
-      "The trading platform consortium brokerages run every day: investors and dealers place and manage orders, follow the market and see their portfolio, on web, desktop and mobile. Xpert implements, operates and supports the platform for its member brokerages and connects it to both exchanges.",
-      "কনসোর্টিয়াম ব্রোকারেজগুলো প্রতিদিন যে ট্রেডিং প্ল্যাটফর্ম ব্যবহার করে: বিনিয়োগকারী ও ডিলাররা ওয়েব, ডেস্কটপ ও মোবাইলে অর্ডার দেন ও পরিচালনা করেন, বাজার অনুসরণ করেন এবং পোর্টফোলিও দেখেন। এক্সপার্ট সদস্য ব্রোকারেজগুলোর জন্য প্ল্যাটফর্মটি বাস্তবায়ন, পরিচালনা ও সহায়তা করে এবং দুই এক্সচেঞ্জের সঙ্গে যুক্ত করে।",
+      "The trading platform consortium brokerages run every day: investors and dealers place and manage orders, follow the market and see their portfolio, on web, desktop and mobile. Brokerages can also launch the mobile app under their own name, logo and colours, published to Google Play and the App Store as their own app. Xpert implements, operates and supports the platform for its member brokerages and connects it to both exchanges.",
+      "কনসোর্টিয়াম ব্রোকারেজগুলো প্রতিদিন যে ট্রেডিং প্ল্যাটফর্ম ব্যবহার করে: বিনিয়োগকারী ও ডিলাররা ওয়েব, ডেস্কটপ ও মোবাইলে অর্ডার দেন ও পরিচালনা করেন, বাজার অনুসরণ করেন এবং পোর্টফোলিও দেখেন। ব্রোকারেজগুলো চাইলে মোবাইল অ্যাপটি নিজেদের নাম, লোগো ও রঙে চালু করতে পারে, যা গুগল প্লে ও অ্যাপ স্টোরে তাদের নিজস্ব অ্যাপ হিসেবেই প্রকাশিত হয়। এক্সপার্ট সদস্য ব্রোকারেজগুলোর জন্য প্ল্যাটফর্মটি বাস্তবায়ন, পরিচালনা ও সহায়তা করে এবং দুই এক্সচেঞ্জের সঙ্গে যুক্ত করে।",
     ),
     problem: t(
       "Brokerages need dependable order entry for dealers and investors, live market views and controls that apply to every order, across the channels their clients use. Building and certifying this independently is costly for each house.",
@@ -2935,6 +2935,42 @@ async function seedXpertFintechName() {
   console.log(`  "Xpert" → "Xpert Fintech" in ${changed} text(s)`);
 }
 
+// ── 26 Oct: the trading platform's white-label app (XFL): one line in the description, and the first capability ──
+async function seedWhiteLabel() {
+  const MARK = "seed.white-label-2026-10-26";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const offering = await db.offering.findFirst({ where: { key: "trading-platform", deletedAt: null }, select: { id: true } });
+  if (offering) {
+    const add = {
+      en: { after: "on web, desktop and mobile.", text: " Brokerages can also launch the mobile app under their own name, logo and colours, published to Google Play and the App Store as their own app." },
+      bn: { after: "পোর্টফোলিও দেখেন।", text: " ব্রোকারেজগুলো চাইলে মোবাইল অ্যাপটি নিজেদের নাম, লোগো ও রঙে চালু করতে পারে, যা গুগল প্লে ও অ্যাপ স্টোরে তাদের নিজস্ব অ্যাপ হিসেবেই প্রকাশিত হয়।" },
+    } as const;
+    for (const tr of await db.offeringTranslation.findMany({ where: { offeringId: offering.id }, select: { id: true, locale: true, summary: true } })) {
+      const a = add[tr.locale === BN ? "bn" : "en"];
+      if (tr.summary && tr.summary.includes(a.after) && !tr.summary.includes(a.text.trim())) {
+        await db.offeringTranslation.update({ where: { id: tr.id }, data: { summary: tr.summary.replace(a.after, `${a.after}${a.text}`) } });
+      }
+    }
+    const caps = await db.offeringItem.findMany({ where: { offeringId: offering.id, kind: "CAPABILITY" }, include: { translations: true }, orderBy: { sortOrder: "asc" } });
+    const title = { en: "White-label mobile app under your brokerage's brand", bn: "আপনার ব্রোকারেজের নিজস্ব ব্র্যান্ডে হোয়াইট-লেবেল মোবাইল অ্যাপ" };
+    if (!caps.some((c) => c.translations.some((t) => /white-label|হোয়াইট-লেবেল/i.test(t.title)))) {
+      // First in the list: every other capability moves down one place.
+      for (const c of caps) await db.offeringItem.update({ where: { id: c.id }, data: { sortOrder: c.sortOrder + 1 } });
+      await db.offeringItem.create({
+        data: {
+          offeringId: offering.id,
+          kind: "CAPABILITY",
+          iconName: "phone",
+          sortOrder: caps.length ? Math.min(...caps.map((c) => c.sortOrder)) : 0,
+          translations: { create: [{ locale: EN, title: title.en }, { locale: BN, title: title.bn }] },
+        },
+      });
+    }
+    console.log("  Trading platform: white-label app in the description and first in the capabilities");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
 // ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
 async function seedSharePlus() {
   const MARK = "seed.share-plus-2026-10-26";
@@ -3475,6 +3511,7 @@ async function main() {
   await seedAboutHeadline();
   await seedXpertFintechName();
   await seedSharePlus();
+  await seedWhiteLabel();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

@@ -786,5 +786,6 @@
   "consultantsHero": "Consultants: *outside expertise, inside the work*",
   "teamHero": "The people who *keep it running*",
   "requestDemoHero": "See Xpert Fintech *on your own workflow*",
-  "githubMissing": "GitHub not listed yet"
+  "githubMissing": "GitHub not listed yet",
+  "whiteLabelChip": "White-label app"
 }

@@ -62,17 +62,17 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
-  const [page, info] = await Promise.all([getPageByKey("home"), getSiteInfo(locale)]);
+  const page = await getPageByKey("home");
   const seo = page ? await getSeo("PAGE", page.id, locale) : null;
   const meta = await buildMetadata({
     locale,
-    title: seo?.title ?? info.companyName,
-    description: seo?.description,
+    title: seo?.title ?? getMessages(locale).seoHomeTitle,
+    description: seo?.description ?? getMessages(locale).seoHomeDesc,
     paths: { en: "", ...(page?.translations.some((t) => t.locale === "bn") ? { bn: "" } : {}) },
     ogImageId: seo?.ogImageId,
   });
   // The home page title stands alone, without the " · Xpert Fintech Ltd." suffix.
-  return { ...meta, title: { absolute: seo?.title ?? info.companyName } };
+  return { ...meta, title: { absolute: seo?.title ?? getMessages(locale).seoHomeTitle } };
 }
 
 export default async function HomePage({ params }: Props) {
@@ -92,6 +92,24 @@ export default async function HomePage({ params }: Props) {
         ...(info.phone && { telephone: info.phone }),
         ...(info.address && { address: { "@type": "PostalAddress", streetAddress: info.address, addressCountry: "BD" } }),
         sameAs: info.socialLinks.map((s) => s.url),
+        alternateName: ["Xpert Fintech", "এক্সপার্ট ফিনটেক"],
+        description: getMessages(locale).seoHomeDesc,
+        areaServed: { "@type": "Country", name: "Bangladesh" },
+        knowsAbout: ["Order management system (OMS)", "Risk management system (RMS)", "eKYC", "BO account opening", "Brokerage back office", "Document management", "Dhaka Stock Exchange", "Chittagong Stock Exchange"],
+      }}
+    />
+  );
+  // The site itself, with its search, so Google can offer a search box for it.
+  const siteLd = (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: info.companyName,
+        url: `${SITE_URL}/${locale}`,
+        inLanguage: locale === "bn" ? "bn-BD" : "en",
+        publisher: { "@type": "Organization", name: info.companyName, url: SITE_URL },
+        potentialAction: { "@type": "SearchAction", target: `${SITE_URL}/${locale}/search?q={search_term_string}`, "query-input": "required name=search_term_string" },
       }}
     />
   );
@@ -455,6 +473,7 @@ export default async function HomePage({ params }: Props) {
   return (
     <>
       {orgLd}
+      {siteLd}
       <FlagshipHero
         t={t}
         locale={locale}

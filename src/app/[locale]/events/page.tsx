@@ -12,7 +12,7 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
-  return buildMetadata({ locale, title: getMessages(locale).events, paths: { en: "events", bn: "events" } });
+  return buildMetadata({ locale, title: getMessages(locale).seoEventsTitle, description: getMessages(locale).eventsHeroBody, paths: { en: "events", bn: "events" } });
 }
 
 export default async function EventsPage({ params }: Props) {
@@ -22,7 +22,7 @@ export default async function EventsPage({ params }: Props) {
   const events = await getEventTimeline(locale);
   return (
     <>
-      <PageHero eyebrow={t.latestEyebrow} title={t.eventsHero} body={t.eventsHeroBody} />
+      <PageHero crumb={{ locale, path: "events", name: t.events, home: t.home }} eyebrow={t.latestEyebrow} title={t.eventsHero} body={t.eventsHeroBody} />
       <Shell className="pb-12">
         {events.length ? <EventTimeline events={events} locale={locale} labels={{ photos: t.eventsPhotos, with: t.eventsWith, open: t.eventsOpen }} /> : <p className="text-text-secondary">{t.noItems}</p>}
       </Shell>

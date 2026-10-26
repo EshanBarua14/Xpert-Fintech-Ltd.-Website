@@ -1,3 +1,4 @@
+import { breadcrumbLd, JsonLd, SITE_URL } from "@/lib/public/seo";
 import { Emph } from "@/components/ui/Emph";
 import { SplitWords } from "@/components/ui/SplitWords";
 import Image from "next/image";
@@ -643,9 +644,31 @@ export function CtaBand({ t, locale }: { t: Messages; locale: AppLocale }) {
 
 // ── Page intro for inner pages ───────────────────────────────────────────────
 
-export function PageHero({ eyebrow, title, body, children }: { eyebrow?: string; title: string; body?: string | null; children?: ReactNode }) {
+export function PageHero({
+  eyebrow,
+  title,
+  body,
+  children,
+  crumb,
+}: {
+  eyebrow?: string;
+  title: string;
+  body?: string | null;
+  children?: ReactNode;
+  /** For search engines: this page's place under the home page (BreadcrumbList). */
+  crumb?: { locale: string; path: string; name: string; home: string; parent?: { path: string; name: string } };
+}) {
   return (
     <section className="page-hero hero-seq relative -mt-20 overflow-hidden pt-20 md:-mt-24 md:pt-24">
+      {crumb && (
+        <JsonLd
+          data={breadcrumbLd([
+            { name: crumb.home, url: `${SITE_URL}/${crumb.locale}` },
+            ...(crumb.parent ? [{ name: crumb.parent.name, url: `${SITE_URL}/${crumb.locale}/${crumb.parent.path}` }] : []),
+            { name: crumb.name, url: `${SITE_URL}/${crumb.locale}/${crumb.path}` },
+          ])}
+        />
+      )}
       <span aria-hidden="true" className="page-hero-grid pointer-events-none absolute inset-0" />
       <span aria-hidden="true" className="page-hero-glow pointer-events-none absolute -top-40 right-[-10%] size-[36rem] rounded-full" />
       <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pt-6 pb-6 md:px-8 md:pt-8 md:pb-8">

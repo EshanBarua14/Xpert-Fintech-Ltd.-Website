@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.requestDemo, description: t.requestDemoIntro, paths: { en: "request-demo", bn: "request-demo" } });
+  return buildMetadata({ locale, title: t.seoDemoTitle, description: t.requestDemoIntro, paths: { en: "request-demo", bn: "request-demo" } });
 }
 
 /** Demo request form. ?product=slug pre-selects the product. Saves to Admin → Leads. */
@@ -29,7 +29,7 @@ export default async function RequestDemoPage({ params, searchParams }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.demoEyebrow} title={t.requestDemoHero} body={t.requestDemoIntro} />
+      <PageHero crumb={{ locale, path: "request-demo", name: t.requestDemo, home: t.home }} eyebrow={t.demoEyebrow} title={t.requestDemoHero} body={t.requestDemoIntro} />
       <Shell className="pb-16 md:pb-20">
       <div className="grid gap-8 lg:grid-cols-12">
         <div data-reveal className="glass rounded-3xl p-6 md:p-10 lg:col-span-8">

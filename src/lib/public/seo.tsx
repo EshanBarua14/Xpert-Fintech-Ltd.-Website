@@ -51,6 +51,8 @@ export async function buildMetadata({
     const m = await db.media.findFirst({ where: { id: ogImageId, deletedAt: null }, select: { storageKey: true, width: true, height: true } });
     if (m) image = { url: `${SITE_URL}/media/${m.storageKey}`, width: m.width ?? undefined, height: m.height ?? undefined };
   }
+  // Every page shares with an image: its own, else the site's (logo, name and what Xpert Fintech does).
+  image ??= { url: `${SITE_URL}/brand/og-default.png`, width: 1200, height: 630 };
   const info = await getSiteInfo(locale);
   const desc = description ?? info.summary ?? undefined;
 
@@ -66,9 +68,9 @@ export async function buildMetadata({
       title,
       description: desc,
       locale: locale === "bn" ? "bn_BD" : "en_US",
-      images: image ? [image] : undefined,
+      images: [image],
     },
-    twitter: { card: image ? "summary_large_image" : "summary", title, description: desc, images: image ? [image.url] : undefined },
+    twitter: { card: "summary_large_image", title, description: desc, images: [image.url] },
   };
 }
 

@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.contactTitle, description: t.contactIntro, paths: { en: "contact", bn: "contact" } });
+  return buildMetadata({ locale, title: t.seoContactTitle, description: t.contactIntro, paths: { en: "contact", bn: "contact" } });
 }
 
 /**
@@ -38,7 +38,7 @@ export default async function ContactPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.contactEyebrow} title={tr?.title ?? t.contactTitle} body={tr?.intro ?? t.contactIntro} />
+      <PageHero crumb={{ locale, path: "contact", name: t.contact, home: t.home }} eyebrow={t.contactEyebrow} title={tr?.title ?? t.contactTitle} body={tr?.intro ?? t.contactIntro} />
       <Shell className="pb-16 md:pb-20">
         <div className="grid gap-8 lg:grid-cols-12">
           <div data-reveal className="glass rounded-3xl p-6 md:p-10 lg:col-span-8">

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.consortiumPageTitle, description: t.consortiumPageBody, paths: { en: "consortium", bn: "consortium" } });
+  return buildMetadata({ locale, title: t.seoConsortiumTitle, description: t.seoConsortiumDesc, paths: { en: "consortium", bn: "consortium" } });
 }
 
 /**
@@ -48,7 +48,7 @@ export default async function ConsortiumPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.consortiumEyebrow} title={t.consortiumPageTitle} body={t.consortiumPageBody} />
+      <PageHero crumb={{ locale, path: "consortium", name: t.consortiumEyebrow, home: t.home }} eyebrow={t.consortiumEyebrow} title={t.consortiumPageTitle} body={t.consortiumPageBody} />
 
 
       {members.length > 0 && (

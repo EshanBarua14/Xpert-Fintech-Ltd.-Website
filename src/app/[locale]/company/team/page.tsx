@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.teamTitle, description: t.teamBody, paths: { en: "company/team", bn: "company/team" } });
+  return buildMetadata({ locale, title: t.seoTeamTitle, description: t.teamBody, paths: { en: "company/team", bn: "company/team" } });
 }
 
 /**
@@ -59,7 +59,7 @@ export default async function TeamPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.companyEyebrow} title={t.teamHero} body={t.teamBody} />
+      <PageHero crumb={{ locale, path: "company/team", name: t.teamTitle, home: t.home }} eyebrow={t.companyEyebrow} title={t.teamHero} body={t.teamBody} />
 
       {leadership.length > 0 && (
         <Shell className="pb-12 md:pb-16">

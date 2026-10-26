@@ -3078,6 +3078,62 @@ async function seedBankAsiaFirst() {
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
 }
 
+// ── 26 Oct (XFL): a success story for every client ──
+// Clients with a branded app on record get a short, fact-only story (the app, the
+// platform, the exchanges), published like the others; the rest get a draft whose
+// results and quote stay in [brackets] until the client confirms them. Nothing is invented.
+async function seedEveryClientStory() {
+  const MARK = "seed.every-client-story-2026-10-26";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const clients = await db.organization.findMany({
+    where: { status: "PUBLISHED", deletedAt: null, OR: [{ kind: { in: ["CONSORTIUM_MEMBER", "CLIENT"] } }, { deployments: { some: { status: "PUBLISHED", deletedAt: null } } }] },
+    orderBy: { sortOrder: "asc" },
+    include: { translations: true, deployments: { where: { status: "PUBLISHED", deletedAt: null, appName: { not: null } }, orderBy: { sortOrder: "asc" } } },
+  });
+  const stories = await db.caseStudyTranslation.findMany({ where: { locale: EN }, select: { title: true, summary: true, slug: true, caseStudy: { select: { deletedAt: true } } } });
+  const core = (v: string) => v.toLowerCase().replace(/[.,&()]/g, " ").replace(/\b(limited|ltd|plc|and)\b/g, " ").replace(/\s+/g, " ").trim();
+  let order = (await db.caseStudy.count()) + 1;
+  let published = 0;
+  let drafts = 0;
+  for (const org of clients) {
+    const en = org.translations.find((t) => t.locale === EN)?.name ?? "";
+    const bn = org.translations.find((t) => t.locale === BN)?.name ?? en;
+    if (!en) continue;
+    const short = core(en).replace(/\b(securities|investments?|stock brokerage|brokerage|investment)\b/g, " ").replace(/\s+/g, " ").trim() || core(en);
+    const has = stories.some((s) => !s.caseStudy.deletedAt && (core(`${s.title} ${s.summary ?? ""}`).includes(core(en)) || (org.key && s.slug.startsWith(org.key)) || (short.length > 3 && core(s.title).startsWith(short))));
+    if (has) continue;
+    const app = org.deployments[0];
+    const member = org.kind === "CONSORTIUM_MEMBER";
+    const slug = `${org.key ?? core(en).replace(/\s+/g, "-")}-on-xpert-fintech`;
+    if (await db.caseStudyTranslation.findFirst({ where: { slug } })) continue;
+    const whoEn = member ? `${en}, a member of the consortium that owns Xpert Fintech` : `${en}, an Xpert Fintech client`;
+    const whoBn = member ? `${bn}, এক্সপার্ট ফিনটেকের মালিক কনসোর্টিয়ামের সদস্য` : `${bn}, এক্সপার্ট ফিনটেকের গ্রাহক`;
+    const tr = app
+      ? {
+          en: { title: `${en}: ${app.appName} on the Xpert Fintech platform`, summary: `${whoEn}, serves its investors through ${app.appName}, a branded trading app built on the Xpert Fintech platform.`, solution: `${app.appName} runs on the consortium's shared platform: investors trade through the house's own app, and every order passes the RMS checks built into the Xpert Trading OMS on its way to the exchange.` },
+          bn: { title: `${bn}: এক্সপার্ট ফিনটেক প্ল্যাটফর্মে ${app.appName}`, summary: `${whoBn}, এক্সপার্ট ফিনটেক প্ল্যাটফর্মে তৈরি নিজস্ব ব্র্যান্ডের ট্রেডিং অ্যাপ ${app.appName}-এর মাধ্যমে বিনিয়োগকারীদের সেবা দেয়।`, solution: `${app.appName} কনসোর্টিয়ামের শেয়ার করা প্ল্যাটফর্মে চলে: বিনিয়োগকারীরা প্রতিষ্ঠানের নিজস্ব অ্যাপে লেনদেন করেন, আর প্রতিটি অর্ডার এক্সপার্ট ট্রেডিং ওএমএস-এর ভেতরের আরএমএস যাচাই পার হয়ে এক্সচেঞ্জে যায়।` },
+        }
+      : {
+          en: { title: `${en} on Xpert Fintech: [headline result in a few words]`, summary: `${whoEn}. [Which Xpert Fintech products the house uses, and one line on the result, approved by the client.]`, solution: `[Which Xpert Fintech products ${en} uses, since when, and how they fit the house's work.]` },
+          bn: { title: `এক্সপার্ট ফিনটেকে ${bn}: [কয়েক শব্দে মূল ফলাফল]`, summary: `${whoBn}। [প্রতিষ্ঠানটি কোন এক্সপার্ট ফিনটেক পণ্য ব্যবহার করে, এবং ফলাফল নিয়ে এক লাইন, গ্রাহকের অনুমোদিত।]`, solution: `[${bn} কোন এক্সপার্ট ফিনটেক পণ্য ব্যবহার করে, কবে থেকে, এবং প্রতিষ্ঠানের কাজে কীভাবে যুক্ত।]` },
+        };
+    await db.caseStudy.create({
+      data: {
+        status: app ? "PUBLISHED" : "DRAFT",
+        sortOrder: order++,
+        ...(app?.playStoreUrl && { sourceName: "Google Play", sourceUrl: app.playStoreUrl }),
+        translations: {
+          create: (["en", "bn"] as const).map((l) => ({ locale: l === "en" ? EN : BN, slug, title: tr[l].title, summary: tr[l].summary, solution: tr[l].solution })),
+        },
+      },
+    });
+    if (app) published++;
+    else drafts++;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), published, drafts } } });
+  if (published || drafts) console.log(`  Success stories: ${published} added for clients with an app on record, ${drafts} draft(s) to complete in Admin → Success stories`);
+}
+
 // ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
 async function seedSharePlus() {
   const MARK = "seed.share-plus-2026-10-26";
@@ -3622,6 +3678,7 @@ async function main() {
   await seedClientHeadReviews();
   await seedOwnersAndThea();
   await seedBankAsiaFirst();
+  await seedEveryClientStory();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

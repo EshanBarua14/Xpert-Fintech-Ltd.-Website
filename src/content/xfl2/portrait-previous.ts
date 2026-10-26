@@ -6,7 +6,7 @@
  */
 export const PREVIOUS_PORTRAITS: Record<string, string | string[]> = {
   "wasif-zaman": "b2e6a388b11bad5d924312c32aeb6da1f8e1d44758f59b9f95e0f257f9af2fad", // new photo supplied 26 Oct 2026
-  "ali-hossain-maruf": "28aa0e190b740a3aa879192f1c5ae1e37a91261b074f621f498fc187eee072e8", // new photo supplied 26 Oct 2026 (afternoon)
+  "ali-hossain-maruf": ["28aa0e190b740a3aa879192f1c5ae1e37a91261b074f621f498fc187eee072e8", "f7b54493a50d81da0e932160f5bdde7756e44e3f7ec739dc4f1af08eb6a636ca"], // new photo supplied 26 Oct 2026 (afternoon)
   "aminul-islam": ["46d0aa5730c65fbba9e749371bedd7722d9a7e30349ce6c7f2de198a2464e8e1", "3ca2782be379c32419f168c078e5fc3f38d74b2a526d96de135b341aa1d1011a"], // new photo supplied 20 Oct 2026
   "bishnu-pada-kunda": ["5e3185c1c06dacef9997e5e1f0e21d704b52d3c481575717f9e3b1f5355a572b", "a754c94f7248585f1c24bcc12b618efac790f744a4a06fa37fdc851277112c2e", "6f94c3d351c334b8529e868711c81d0cb2377e5fddb3fa880ad4b506c7ae177e"], // new photo supplied 19 Oct 2026
   "dilip-kajuri": "00e8925b6282c40615911568d0f9d529b75be9ad7e7528eecb1428fb29f86399",

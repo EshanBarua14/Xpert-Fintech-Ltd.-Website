@@ -76,7 +76,7 @@ export function HighlightsForm({
               <TextInput id={`titleEn_${i}`} label="Title (English)" defaultValue={r.titleEn} error={e[`titleEn_${i}`]} />
               <TextInput id={`titleBn_${i}`} label="Title (বাংলা)" lang="bn" defaultValue={r.titleBn} error={e[`titleBn_${i}`]} />
               <span className="hidden md:block" />
-              <TextInput id={`statEn_${i}`} label="Figure, optional (English), e.g. ৳39 cr or 7" defaultValue={r.statEn ?? ""} error={e[`statEn_${i}`]} />
+              <TextInput id={`statEn_${i}`} label="Figure, optional (English), e.g. ৳36 cr or 7" defaultValue={r.statEn ?? ""} error={e[`statEn_${i}`]} />
               <TextInput id={`statBn_${i}`} label="Figure (বাংলা)" lang="bn" defaultValue={r.statBn ?? ""} error={e[`statBn_${i}`]} />
               <span className="hidden md:block" />
               <TextArea id={`bodyEn_${i}`} label="Text (English)" rows={2} defaultValue={r.bodyEn} error={e[`bodyEn_${i}`]} />

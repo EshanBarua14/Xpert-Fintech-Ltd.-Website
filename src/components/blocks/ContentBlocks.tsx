@@ -73,7 +73,7 @@ export function StatsBlock({ block, ctx }: { block: BlockData; ctx: BlockContext
                 <StatValue value={item.subtitle} locale={ctx.locale} />
               </dd>
               {source && (
-                <p className="order-3 text-xs text-text-secondary/80">
+                <p className="order-3 text-xs text-text-secondary">
                   {ctx.t.source}: {source}
                 </p>
               )}

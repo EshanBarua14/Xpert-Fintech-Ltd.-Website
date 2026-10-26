@@ -192,7 +192,7 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
               <div key={`${f.value}-${f.label}`} className="flex flex-col gap-1 border-l-2 border-gold/60 pl-4">
                 <dd className="order-1 font-display text-4xl leading-none tracking-[-0.02em] text-text-primary md:text-5xl">{f.value}</dd>
                 <dt className="order-2 text-sm text-text-secondary">{f.label}</dt>
-                <dd className="order-3 text-xs text-text-secondary/80">{f.source}</dd>
+                <dd className="order-3 text-xs text-text-secondary">{f.source}</dd>
               </div>
             ))}
           </dl>

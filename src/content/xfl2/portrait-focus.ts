@@ -7,6 +7,7 @@
  * it can be changed per photo in Admin → Media.
  */
 export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: number }> = {
+  "ali-hossain-maruf": { x: 0.5, y: 0.36 }, // first photo 26 Oct 2026
   "aminul-islam": { x: 0.48, y: 0.36 }, // new photo 20 Oct 2026
   // Representatives (19 Oct 2026): Wasif Zaman's photo is half-length, so his face is brought in.
   "wasif-zaman": { x: 0.43, y: 0.52, zoom: 1.35 },

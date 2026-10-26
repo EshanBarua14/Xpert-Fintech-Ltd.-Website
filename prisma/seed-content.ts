@@ -3060,6 +3060,24 @@ async function seedOwnersAndThea() {
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
 }
 
+// ── 26 Oct (XFL): Bank Asia Securities first among the members, UCB Stock Brokerage second ──
+async function seedBankAsiaFirst() {
+  const MARK = "seed.bank-asia-first-2026-10-26";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const [ucb, ba] = await Promise.all([
+    db.organization.findUnique({ where: { key: "ucb-stock-brokerage" }, select: { id: true, sortOrder: true } }),
+    db.organization.findUnique({ where: { key: "bank-asia-securities" }, select: { id: true, sortOrder: true } }),
+  ]);
+  if (ucb && ba && ucb.sortOrder <= ba.sortOrder) {
+    // Swap their places; when both share one number, Bank Asia goes just before UCB.
+    const [a, b] = ucb.sortOrder === ba.sortOrder ? [ucb.sortOrder, ucb.sortOrder + 1] : [ucb.sortOrder, ba.sortOrder];
+    await db.organization.update({ where: { id: ba.id }, data: { sortOrder: a } });
+    await db.organization.update({ where: { id: ucb.id }, data: { sortOrder: b } });
+    console.log("  Bank Asia Securities and UCB Stock Brokerage swapped places");
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+}
+
 // ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
 async function seedSharePlus() {
   const MARK = "seed.share-plus-2026-10-26";
@@ -3603,6 +3621,7 @@ async function main() {
   await seedWhiteLabel();
   await seedClientHeadReviews();
   await seedOwnersAndThea();
+  await seedBankAsiaFirst();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

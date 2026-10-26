@@ -37,8 +37,8 @@ export default async function ConsortiumPage({ params }: Props) {
   const t = getMessages(locale);
   const [data, members, liveApps] = await Promise.all([getFlagshipData(locale), getConsortium(locale), getLiveApps(locale)]);
   const nf = new Intl.NumberFormat(locale === "bn" ? "bn-BD" : "en-US");
-  const seats = members.filter((m) => m.reps.some((r) => r.group === "BOARD")).length;
-  const apps = members.reduce((n, m) => n + m.apps.length, 0);
+  // Every branded app live on the platform (the same count as on the home page).
+  const apps = liveApps.length;
   const steps = [
     { icon: "users", title: t.consStep1Title, body: t.consStep1Body.replace("{n}", nf.format(members.length)) },
     { icon: "shield", title: t.consStep2Title, body: t.consStep2Body },
@@ -55,10 +55,9 @@ export default async function ConsortiumPage({ params }: Props) {
         <>
           {/* The figures behind the relationships */}
           <Shell className="pb-4">
-            <dl className="grid max-w-3xl grid-cols-3 border-t border-fg/10 pt-6">
+            <dl className="grid max-w-xl grid-cols-2 border-t border-fg/10 pt-6">
               {[
                 [members.length, t.consAllMembers],
-                [seats, t.consStatSeats],
                 [apps, t.consStatApps],
               ].map(([v, l], i) => (
                 <div key={String(l)} data-reveal style={{ "--d": i } as CSSProperties} className={i ? "flex flex-col gap-1 border-l border-fg/10 pl-4 sm:pl-6" : "flex flex-col gap-1"}>
@@ -117,7 +116,7 @@ export default async function ConsortiumPage({ params }: Props) {
                   noApp: t.consNoApp,
                   noRep: t.consNoRep,
                   repPending: locale === "bn" ? "প্রতিনিধির নাম শিগগিরই" : "Representative to be announced",
-                  representative: locale === "bn" ? "প্রতিনিধি" : "Representative",
+                  representative: locale === "bn" ? "অনুমোদিত প্রতিনিধি, এক্সপার্ট ফিনটেক লিমিটেড" : "Authorized Representative, Xpert Fintech Ltd.",
                   website: t.consWebsite,
                   contact: { linkedin: t.linkedinProfile, email: t.emailPerson, linkedinSearch: t.linkedinSearch, emailMissing: t.emailMissing, website: locale === "bn" ? "ওয়েবসাইট" : "Website" },
                   android: t.getAndroidApp,

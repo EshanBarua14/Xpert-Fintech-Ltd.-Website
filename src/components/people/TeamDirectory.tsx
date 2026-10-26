@@ -20,9 +20,10 @@ export type TeamMember = {
   /** Their own website; Xpert's home page when empty. */
   websiteUrl?: string | null;
   githubUrl?: string | null;
+  engineer?: boolean;
 };
 
-export type TeamLabels = { filter: string; everyone: string; showing: string; email: string; linkedin: string; linkedinSearch: string; emailMissing: string; /** Department names by lower-case department, from Site text. */ departments: Record<string, string> };
+export type TeamLabels = { filter: string; everyone: string; showing: string; email: string; linkedin: string; linkedinSearch: string; emailMissing: string; githubMissing?: string; /** Department names by lower-case department, from Site text. */ departments: Record<string, string> };
 
 function initials(name: string) {
   return name
@@ -139,7 +140,7 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
         {/* Email and LinkedIn on every card: a link when it is on file, a muted icon until it is added (Admin → People → Contacts). */}
         <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
         <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org="Xpert Fintech" labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
-        {p.githubUrl && <CodeIcon href={p.githubUrl} name={p.name} color="var(--dept)" ink="var(--dept)" size="size-8" />}
+        {(p.githubUrl || p.engineer) && <CodeIcon href={p.githubUrl ?? null} name={p.name} missing={labels.githubMissing} color="var(--dept)" ink="var(--dept)" size="size-8" />}
         <WebsiteIcon href={p.websiteUrl || `/${locale}`} name="Xpert Fintech Ltd." label={locale === "bn" ? "ওয়েবসাইট" : "Website"} color="var(--dept)" ink="var(--dept)" size="size-8" />
         <span aria-hidden="true" className="ml-auto h-1 w-8 rounded-full bg-[var(--dept)] opacity-70 transition-[width] duration-500 group-hover:w-12" />
       </div>

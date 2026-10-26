@@ -1,3 +1,4 @@
+import { isEngineeringRole } from "@/lib/content/engineering";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -51,6 +52,7 @@ export default async function TeamPage({ params }: Props) {
         linkedinUrl: p.linkedinUrl,
         websiteUrl: p.websiteUrl ?? null,
         githubUrl: p.githubUrl ?? null,
+        engineer: isEngineeringRole(p.department, p.roles[0]?.translations.find((x) => x.locale === "en")?.title),
       };
     })
     .filter((m) => m.name);
@@ -83,6 +85,7 @@ export default async function TeamPage({ params }: Props) {
                 linkedin: t.linkedinProfile,
                 linkedinSearch: t.linkedinSearch,
                 emailMissing: t.emailMissing,
+                githubMissing: t.githubMissing,
                 departments: Object.fromEntries(Object.entries(DEPARTMENT_TEXT_KEYS).map(([d, k]) => [d, t[k as keyof typeof t] as string])),
               }}
             />

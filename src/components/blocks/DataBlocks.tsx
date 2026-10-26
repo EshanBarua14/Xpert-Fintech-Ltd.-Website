@@ -12,6 +12,7 @@ import { formatEventDate, pick } from "@/lib/public/text";
 import { cn } from "@/lib/utils/cn";
 import { getMessages } from "@/lib/i18n/messages";
 import { PeopleGallery, type GalleryPerson } from "@/components/people/PeopleGallery";
+import { isEngineeringRole } from "@/lib/content/engineering";
 import { BlockHeading, CARD, gridCols, revealDelay } from "./Shared";
 import { bool, num, str, type BlockContext, type BlockData } from "./types";
 
@@ -107,6 +108,7 @@ export async function PeopleGrid({
       linkedinUrl: p.linkedinUrl,
       websiteUrl: p.websiteUrl ?? null,
       githubUrl: p.githubUrl ?? null,
+      engineer: isEngineeringRole(p.department, p.roles[0]?.translations.find((x) => x.locale === "en")?.title),
       email: p.email,
       isPlaceholder: p.isPlaceholder,
     };
@@ -131,6 +133,7 @@ export async function PeopleGrid({
         email: t.emailPerson,
         linkedinSearch: t.linkedinSearch,
         emailMissing: t.emailMissing,
+        githubMissing: t.githubMissing,
         website: locale === "bn" ? "ওয়েবসাইট" : "Website",
         placeholder: t.placeholderBadge,
         role: t.roleLabel,

@@ -35,6 +35,8 @@ export type GalleryPerson = {
   /** Their own or their organisation's website (Admin → People). */
   websiteUrl?: string | null;
   githubUrl?: string | null;
+  /** Engineering role: the code-profile icon always shows (muted until a GitHub is on file). */
+  engineer?: boolean;
   /** Seeded stand-in until XFL sends the real profile. */
   isPlaceholder: boolean;
   /** The organization named in the affiliation, when its logo may be shown. */
@@ -53,6 +55,8 @@ export type GalleryLabels = {
   linkedinSearch: string;
   /** No email on file yet */
   emailMissing: string;
+  /** "GitHub not listed yet" */
+  githubMissing?: string;
   /** "Website" */
   website?: string;
   placeholder: string;
@@ -253,7 +257,7 @@ function PersonCard({
           ) : (
             <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org={p.org?.name ?? institutionOf(p.affiliation)} labels={labels} size="size-8" />
           )}
-          {p.githubUrl && <CodeIcon href={p.githubUrl} name={p.name} size="size-8" />}
+          {(p.githubUrl || p.engineer) && <CodeIcon href={p.githubUrl ?? null} name={p.name} missing={labels.githubMissing} size="size-8" />}
           <WebsiteIcon href={siteOf(p)} name={p.org?.name ?? company ?? p.name} label={labels.website} size="size-8" />
           <button
             type="button"
@@ -413,7 +417,7 @@ export function PeopleGallery({
                 <div className="flex items-center justify-center gap-2">
                   <ContactIcon kind="email" value={open.email} name={open.name} labels={labels} size="size-10" />
                   <ContactIcon kind="linkedin" value={open.linkedinUrl} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
-                  {open.githubUrl && <CodeIcon href={open.githubUrl} name={open.name} size="size-10" />}
+                  {(open.githubUrl || open.engineer) && <CodeIcon href={open.githubUrl ?? null} name={open.name} missing={labels.githubMissing} size="size-10" />}
                   <WebsiteIcon href={siteOf(open)} name={open.org?.name ?? company ?? open.name} label={labels.website} size="size-10" />
                 </div>
                 {open.email && (

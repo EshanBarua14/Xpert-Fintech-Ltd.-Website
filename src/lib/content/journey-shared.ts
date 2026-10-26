@@ -1,7 +1,7 @@
 /**
  * Admin → Success stories → Growth journey: the company's milestones on the
  * success stories page, each with its source. A milestone with a number (e.g.
- * brokerage houses on Xpert) is drawn as a 3D bar; one without, as a marker.
+ * brokerage houses on Xpert Fintech) is drawn as a 3D bar; one without, as a marker.
  */
 export const JOURNEY_KEY = "stories.journey";
 export const MAX_STEPS = 8;

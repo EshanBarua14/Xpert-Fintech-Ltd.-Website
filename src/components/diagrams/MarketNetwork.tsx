@@ -2,7 +2,7 @@ import { MotionPause } from "@/components/motion/MotionPause";
 import { Badge } from "@/components/ui/Badge";
 
 /**
- * Hero visual: brokerages connect through one Xpert layer to DSE and CSE.
+ * Hero visual: brokerages connect through one Xpert Fintech layer to DSE and CSE.
  * A conceptual picture, always labelled as such — it does not show real
  * network locations or topology. Motion: packets travel along each link;
  * paused off-screen; static under reduced motion.
@@ -29,7 +29,7 @@ export function MarketNetwork({ caption }: { caption: string }) {
   return (
     <figure className="relative">
       <MotionPause>
-        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Brokerages connect through the Xpert platform to the Dhaka and Chittagong stock exchanges">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Brokerages connect through the Xpert Fintech platform to the Dhaka and Chittagong stock exchanges">
           <defs>
             <radialGradient id="mn-glow" cx="50%" cy="50%" r="50%">
               <stop offset="0%" style={{ stopColor: "var(--color-brand-sky)", stopOpacity: 0.35 }} />
@@ -53,7 +53,7 @@ export function MarketNetwork({ caption }: { caption: string }) {
           <circle cx={xpert.x} cy={xpert.y} r="110" fill="url(#mn-glow)" />
           <circle cx={xpert.x} cy={xpert.y} r="46" className="flow-node-pulse fill-ink-950 stroke-brand-sky" strokeWidth="2" />
           <text x={xpert.x} y={xpert.y + 6} textAnchor="middle" fontSize="18" fontWeight="600" className="fill-text-primary">
-            Xpert
+            Xpert Fintech
           </text>
 
           {brokers.map((b, i) => (

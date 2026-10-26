@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * Who Xpert is: the story, mission and vision from Admin → Settings, the
+ * Who Xpert Fintech is: the story, mission and vision from Admin → Settings, the
  * milestones from published events, the consortium, and the people. Sections
  * an editor adds to the "About" page in Admin → Pages (e.g. core values)
  * appear at the end.
@@ -74,7 +74,7 @@ export default async function AboutPage({ params }: Props) {
     { value: flagship.members.length, label: t.proofMembers },
     { value: flagship.clients.length, label: t.proofClients },
     { value: flagship.offerings.length, label: t.proofProducts },
-    { value: counts.TEAM, label: loc === "bn" ? "এক্সপার্টের টিমে" : "People on the team" },
+    { value: counts.TEAM, label: loc === "bn" ? "এক্সপার্ট ফিনটেকের টিমে" : "People on the team" },
     { value: flagship.exchanges.length, label: t.proofExchanges },
   ].filter((g) => g.value > 0);
   const share = headline?.dse ?? headline?.cse ?? null;
@@ -151,14 +151,14 @@ export default async function AboutPage({ params }: Props) {
         </Shell>
       )}
 
-      {/* Who owns Xpert (Admin → Home highlights → Who owns Xpert, and Organizations → Owned by) */}
+      {/* Who owns Xpert Fintech (Admin → Home highlights → Who owns Xpert Fintech, and Organizations → Owned by) */}
       {ownership && (
         <Shell className="pb-10 md:pb-12">
           <OwnershipShowcase data={ownership} locale={loc === "bn" ? "bn" : "en"} />
         </Shell>
       )}
 
-      {/* What sets Xpert apart (Admin → Home highlights → Core strengths), with the market share beside the heading */}
+      {/* What sets Xpert Fintech apart (Admin → Home highlights → Core strengths), with the market share beside the heading */}
       {strengths.items.length > 0 && (
         <Shell className="pb-10 md:pb-12">
           <div className="flex flex-col gap-10">
@@ -169,13 +169,14 @@ export default async function AboutPage({ params }: Props) {
                   {/* The share as a small 3D pie, its figure on the label. */}
                   <ShareCoin3D
                     pct={share}
+                    plus={headline?.plus}
                     size="sm"
                     locale={loc === "bn" ? "bn" : "en"}
-                    label={`${digits(share, loc === "bn")}% ${loc === "bn" ? `${shareEx === "DSE" ? "ডিএসইর" : "সিএসইর"} লেনদেন এক্সপার্টের মাধ্যমে` : `of ${shareEx} turnover runs through Xpert`}`}
+                    label={`${digits(share, loc === "bn")}%${headline?.plus ? "+" : ""} ${loc === "bn" ? `${shareEx === "DSE" ? "ডিএসইর" : "সিএসইর"} লেনদেন এক্সপার্ট ফিনটেকের মাধ্যমে` : `of ${shareEx} turnover runs through Xpert Fintech`}`}
                     className="w-36 shrink-0"
                   />
                   <span className="max-w-[15rem] text-sm leading-snug text-balance text-text-secondary">
-                    {loc === "bn" ? `${shareEx === "DSE" ? "ডিএসইর" : "সিএসইর"} লেনদেন এক্সপার্টের মাধ্যমে` : `of ${shareEx} turnover runs through Xpert`}
+                    {loc === "bn" ? `${shareEx === "DSE" ? "ডিএসইর" : "সিএসইর"} লেনদেন এক্সপার্ট ফিনটেকের মাধ্যমে` : `of ${shareEx} turnover runs through Xpert Fintech`}
                     {headline?.source && <span className="mt-1 block text-xs opacity-80">{loc === "bn" ? "সূত্র" : "Source"}: {headline.source}</span>}
                   </span>
                 </div>

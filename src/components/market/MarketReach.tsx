@@ -31,14 +31,14 @@ export type ReachLabels = {
 type Props = {
   shares: ShareFigure[];
   /** Overall share stated by XFL (Admin → Market data); shown instead of the computed one. */
-  headline?: { pct: number | null; asOf: string | null; dse?: number; cse?: number; source?: string; sourceUrl?: string; note?: { en: string; bn?: string } } | null;
+  headline?: { pct: number | null; asOf: string | null; plus?: boolean; dse?: number; cse?: number; source?: string; sourceUrl?: string; note?: { en: string; bn?: string } } | null;
   goal: { targetPct: number; year: number; note: string | null } | null;
   clientBase: { value: number; label: string }[];
   /** Admin → Figures: more numbers with their source, in the same card. */
   figures?: { value: string; label: string; source: string }[];
   /** Outside the live site: where figures still to come go. */
   figureSlot?: ReactNode;
-  /** Card heading when figures are shown with the client base (e.g. "Xpert in numbers"). */
+  /** Card heading when figures are shown with the client base (e.g. "Xpert Fintech in numbers"). */
   numbersTitle?: string;
   locale: "en" | "bn";
   labels: ReachLabels;
@@ -82,7 +82,7 @@ function ExchangeRow({ f, goal, locale, labels }: { f: ExchangeFigure; goal: Pro
 }
 
 /**
- * Xpert's share of DSE and CSE turnover against the goal set in Admin → Market
+ * Xpert Fintech's share of DSE and CSE turnover against the goal set in Admin → Market
  * data, and the client base underneath.
  *  - One headline figure: the combined share XFL stated, or, when only one
  *    exchange has a figure, that one.
@@ -126,9 +126,10 @@ export function MarketReach({ shares, headline, goal, clientBase, figures = [], 
                 {/* The share as a 3D pie instead of a big printed number; the figure rides on its label. */}
                 <ShareCoin3D
                   pct={hero.pct}
+                  plus={Boolean(headline?.plus) && (hero.pct === headline?.dse || hero.pct === headline?.cse || hero.pct === headline?.pct)}
                   caption={hero.caption}
                   goal={goal ? { pct: goal.targetPct, label: "" } : null}
-                  label={`${labels.share}: ${fmt(locale, hero.pct, Number.isInteger(hero.pct) ? 0 : 2)}% (${hero.caption})`}
+                  label={`${labels.share}: ${fmt(locale, hero.pct, Number.isInteger(hero.pct) ? 0 : 2)}%${headline?.plus ? "+" : ""} (${hero.caption})`}
                   locale={locale}
                   className="-mx-2 sm:mx-0"
                 />

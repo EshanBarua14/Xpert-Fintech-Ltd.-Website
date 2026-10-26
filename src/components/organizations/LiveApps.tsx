@@ -35,7 +35,7 @@ function linksOf(a: LiveApp, labels: Labels): StoreLink[] {
   return links;
 }
 
-/** A client of Xpert without a branded app on the stores: its logo, name and website. */
+/** A client of Xpert Fintech without a branded app on the stores: its logo, name and website. */
 export type OtherClient = { id: string; name: string; url: string | null; logo?: { url: string; width: number | null; height: number | null } | null };
 
 /** The featured app: its brokerage's logo large, what it is, and its store buttons at full size. */

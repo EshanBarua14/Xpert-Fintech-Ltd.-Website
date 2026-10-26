@@ -6,10 +6,10 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type Keyboard
 import { cn } from "@/lib/utils/cn";
 
 /**
- * How a brokerage house running Xpert connects to Bangladesh's capital
+ * How a brokerage house running Xpert Fintech connects to Bangladesh's capital
  * market: investors, banks, DSE, CSE, CDBL and the regulator BSEC.
  * A simplified, conceptual view (labelled as such) — it shows relationships,
- * not live data. Four scenes play in turn; in each, the Xpert modules doing
+ * not live data. Four scenes play in turn; in each, the Xpert Fintech modules doing
  * the work light up and link to the party they deal with. Visitors can pick
  * a scene. Motion stops for reduced-motion users and while off-screen.
  * Colours come from CSS variables (--eco-*), so it follows light/dark mode.
@@ -48,7 +48,7 @@ export type EcoLogo = { url: string; width: number | null; height: number | null
 /**
  * Logos drawn on the map, only those uploaded with permission on file
  * (Admin → Organizations): the market's institutions by key, and the
- * brokerages running Xpert, shown in turn inside the hub.
+ * brokerages running Xpert Fintech, shown in turn inside the hub.
  */
 export type EcosystemLogos = {
   parties?: Partial<Record<"bsec" | "dse" | "cse" | "cdbl", EcoLogo>>;
@@ -370,7 +370,7 @@ export function EcosystemMap({
     return () => clearTimeout(id);
   }, [scene, cur, atLast, running, holding, stepMs, stepped]);
 
-  /* The brokerages running Xpert, shown in turn inside the hub. */
+  /* The brokerages running Xpert Fintech, shown in turn inside the hub. */
   const members = logos?.members ?? [];
   const [mi, setMi] = useState(0);
   useEffect(() => {
@@ -544,7 +544,7 @@ export function EcosystemMap({
               );
             })}
 
-          {/* Brokerage house running Xpert */}
+          {/* Brokerage house running Xpert Fintech */}
           <g>
             <circle cx={HUB.x} cy={HUB.y} r={HUB.r + 40} fill="url(#eco-glow)" />
             <circle

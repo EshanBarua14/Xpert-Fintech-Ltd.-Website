@@ -30,7 +30,7 @@ const LABELS: Record<OwnerBasis, { en: [string, string]; bn: [string, string] }>
 const ORDER: OwnerBasis[] = ["BANK", "INSURANCE", "CORPORATE", "INDEPENDENT", "OTHER"];
 
 /**
- * "Who owns Xpert", all from the admin: paid-up capital (Admin → Home
+ * "Who owns Xpert Fintech", all from the admin: paid-up capital (Admin → Home
  * highlights), the consortium houses grouped by who owns them (Admin →
  * Organizations → Owned by, with the parent's name) and the board size
  * (Admin → People). Null when unpublished or nothing to show.

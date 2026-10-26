@@ -21,14 +21,14 @@ export type ConsortiumLabels = {
   consultant: string;
   appLive: string;
   representedBy: string;
-  /** "{title}, Xpert Fintech Ltd.": the representative's position at Xpert. */
+  /** "{title}, Xpert Fintech Ltd.": the representative's position at Xpert Fintech. */
   roleAtXpert?: string;
   apps: string;
   noApp: string;
   noRep: string;
   /** Placeholder card when a house has no representative on file: "Representative to be announced". */
   repPending?: string;
-  /** Gold line under a representative with no seat at Xpert ("Representative"). */
+  /** Gold line under a representative with no seat at Xpert Fintech ("Representative"). */
   representative?: string;
   website: string;
   /** LinkedIn and email icons beside each representative. */
@@ -84,9 +84,9 @@ function plateEdge(px: number, py: number) {
 
 /**
  * The consortium as a map: Xpert Fintech in the middle, every member brokerage
- * house around it. A gold mark outside a house means it has a seat on Xpert's
+ * house around it. A gold mark outside a house means it has a seat on Xpert Fintech's
  * board (or a consultant), a blue one that its branded trading app runs on
- * Xpert's platform. Choosing a house (click, tap, keyboard, or the list) lights
+ * Xpert Fintech's platform. Choosing a house (click, tap, keyboard, or the list) lights
  * its line — ownership flowing in, the platform flowing out — and shows who
  * represents it and which app it runs. Until someone chooses, the map steps
  * through the houses slowly; reduced motion keeps it still.
@@ -180,7 +180,7 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
             <circle cx={C} cy={C} r={RING} fill="none" className="stroke-fg/10" strokeDasharray="2 7" />
             <circle cx={C} cy={C} r={MARK_R} fill="none" className="stroke-fg/[0.06]" />
 
-            {/* Lines: every house to Xpert */}
+            {/* Lines: every house to Xpert Fintech */}
             {members.map((x, i) => {
               const p = place(i, n, RING);
               const e = plateEdge(p.x, p.y);
@@ -208,7 +208,7 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
               );
             })}
 
-            {/* Xpert in the middle */}
+            {/* Xpert Fintech in the middle */}
             <g>
               <circle cx={C} cy={C} r={HUB_R + 16} className="fill-brand-sky/[0.06]" />
               <circle cx={C} cy={C} r={HUB_R} fill="url(#cx-hub)" className="stroke-brand-sky/60" strokeWidth={1.5} />
@@ -380,7 +380,7 @@ export function ConsortiumExplorer({ members, labels, locale }: { members: Conso
                     {m.reps.map((r) => (
                       <li key={r.name} className="flex flex-wrap items-center gap-3 rounded-2xl border border-fg/10 p-2.5 pr-3 transition-colors hover:border-gold/60 sm:flex-nowrap">
                         {r.group === "REPRESENTATIVE" ? (
-                          // Representative only: no seat at Xpert, so no profile page to link to.
+                          // Representative only: no seat at Xpert Fintech, so no profile page to link to.
                           <div className="group flex min-w-0 flex-1 items-center gap-3">
                           <span className="relative aspect-[4/5] w-12 shrink-0 overflow-hidden rounded-xl bg-navy-800">
                             {r.photo ? (

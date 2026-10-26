@@ -11,7 +11,7 @@ export type StrengthCard = { icon: string; title: string; body: string; stat?: s
 const AUTO_MS = 5000;
 
 /**
- * Admin → Home highlights → Core strengths, as a constellation: Xpert at the
+ * Admin → Home highlights → Core strengths, as a constellation: Xpert Fintech at the
  * centre, the strengths around it, each joined to the core by a line of light.
  * The highlighted strength (one after another by itself, or the one pointed
  * at) sends a stream along its line and is told in the core. On phones it

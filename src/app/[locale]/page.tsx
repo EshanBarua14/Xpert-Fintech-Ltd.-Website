@@ -143,9 +143,9 @@ export default async function HomePage({ params }: Props) {
             <SectionHeader
               title={
                 headline?.dse
-                  ? t.reachTitleShare.replace("{pct}", digits(headline.dse, locale === "bn"))
+                  ? t.reachTitleShare.replace("{pct}%", `${digits(headline.dse, locale === "bn")}%${headline.plus ? "+" : ""}`)
                   : headline?.cse
-                    ? t.reachTitleShareCse.replace("{pct}", digits(headline.cse, locale === "bn"))
+                    ? t.reachTitleShareCse.replace("{pct}%", `${digits(headline.cse, locale === "bn")}%${headline.plus ? "+" : ""}`)
                     : t.reachTitle
               }
             />
@@ -154,7 +154,7 @@ export default async function HomePage({ params }: Props) {
               headline={headline}
               goal={goal ? { targetPct: goal.targetPct, year: goal.year, note: (locale === "bn" ? goal.bn : goal.en) || goal.en || null } : null}
               clientBase={clientBase}
-              // Admin → Figures join the client base in one card ("Xpert in numbers").
+              // Admin → Figures join the client base in one card ("Xpert Fintech in numbers").
               figures={figures.map((f) => ({
                 value: digits(f.value, locale === "bn"),
                 label: (locale === "bn" && f.labelBn) || f.labelEn,
@@ -275,7 +275,7 @@ export default async function HomePage({ params }: Props) {
       )}
       {show("savings") && !savings && editorHints() && (
         <Shell id="savings" className="py-12 md:py-16">
-          <ContentSlot kind="figure" locale={locale} title="Cost savings graphic: enter the cost before and with Xpert, with its source" adminHref="/admin/highlights" className="min-h-0" />
+          <ContentSlot kind="figure" locale={locale} title="Cost savings graphic: enter the cost before and with Xpert Fintech, with its source" adminHref="/admin/highlights" className="min-h-0" />
         </Shell>
       )}
     </>
@@ -321,7 +321,7 @@ export default async function HomePage({ params }: Props) {
   ),
     ownership: (
     <>
-      {/* Who owns Xpert: paid-up capital and the owner houses by basis (Admin → Home highlights, Organizations). */}
+      {/* Who owns Xpert Fintech: paid-up capital and the owner houses by basis (Admin → Home highlights, Organizations). */}
       {show("ownership") && ownership && (
         <Shell id="ownership" nav={locale === "bn" ? "মালিকানা" : "Owners"} className="py-12 md:py-16">
           <OwnershipShowcase data={ownership} locale={locale} />
@@ -464,7 +464,7 @@ export default async function HomePage({ params }: Props) {
         logos={data.logos}
         credentials={credentials.length ? <CredentialsInline items={credentials} label={t.credentialsTitle} /> : undefined}
         // The figures follow right below in "Our share of the market".
-        // Who built it, in three real numbers: the brokerage houses that own Xpert, the institutions on it, the apps live.
+        // Who built it, in three real numbers: the brokerage houses that own Xpert Fintech, the institutions on it, the apps live.
         facts={[
           { value: data.members.length, label: t.proofMembers },
           { value: data.clients.length, label: t.proofClients },

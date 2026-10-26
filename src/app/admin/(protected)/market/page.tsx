@@ -173,11 +173,11 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
           Xpert&rsquo;s share of each exchange&rsquo;s turnover, as XFL states it. The home page shows DSE and CSE side by side, each against the goal,
           instead of the figures worked out from the daily entries above.{" "}
           {headline
-            ? `Now: ${[headline.dse !== undefined && `DSE ${headline.dse}%`, headline.cse !== undefined && `CSE ${headline.cse}%`, headline.pct !== null && `combined ${headline.pct}%`].filter(Boolean).join(", ")}${headline.asOf ? ` as of ${headline.asOf}` : ""}.`
+            ? `Now: ${[headline.dse !== undefined && `DSE ${headline.dse}%`, headline.cse !== undefined && `CSE ${headline.cse}%`, headline.pct !== null && `combined ${headline.pct}%`].filter(Boolean).join(", ")}${headline.plus ? " (shown with +)" : ""}${headline.asOf ? ` as of ${headline.asOf}` : ""}.`
             : "Not set."}
         </p>
         <HeadlineShareForm
-          key={headline ? `${headline.pct}-${headline.asOf}-${headline.dse}-${headline.cse}` : "none"}
+          key={headline ? `${headline.pct}-${headline.asOf}-${headline.dse}-${headline.cse}-${headline.plus}` : "none"}
           pct={headline?.pct != null ? String(headline.pct) : ""}
           asOf={headline?.asOf ?? ""}
           dse={headline?.dse !== undefined ? String(headline.dse) : ""}
@@ -186,6 +186,7 @@ export default async function MarketAdminPage({ searchParams }: { searchParams: 
           sourceUrl={headline?.sourceUrl ?? ""}
           noteEn={headline?.note?.en ?? ""}
           noteBn={headline?.note?.bn ?? ""}
+          plus={headline?.plus ?? false}
         />
       </section>
 

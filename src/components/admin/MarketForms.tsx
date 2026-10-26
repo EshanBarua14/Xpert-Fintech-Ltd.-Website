@@ -139,6 +139,7 @@ export function HeadlineShareForm({
   sourceUrl = "",
   noteEn = "",
   noteBn = "",
+  plus = false,
 }: {
   pct: string;
   asOf: string;
@@ -148,6 +149,7 @@ export function HeadlineShareForm({
   sourceUrl?: string;
   noteEn?: string;
   noteBn?: string;
+  plus?: boolean;
 }) {
   const { state, pending, onSubmit } = useActionForm<MarketState>(saveHeadlineShare, {});
   const e = state.errors ?? {};
@@ -164,6 +166,13 @@ export function HeadlineShareForm({
         <TextInput id="headlineNoteEn" label="Note (English), optional" placeholder="45–47% on a typical day, up to 57% on the busiest" defaultValue={noteEn} />
         <TextInput id="headlineNoteBn" label="Note (বাংলা), optional" lang="bn" defaultValue={noteBn} />
       </div>
+      <label className="flex items-start gap-3 text-sm">
+        <input type="checkbox" name="headlinePlus" defaultChecked={plus} className="mt-0.5 size-4 accent-brand-royal" />
+        <span>
+          Show as &ldquo;at least&rdquo; (e.g. <strong>45%+</strong>)
+          <span className="block text-xs text-text-secondary">Tick when the share is at or above the figure on most days. Adds a + after the figure on the home page, the About page and the market-share ring.</span>
+        </span>
+      </label>
       <div>
         <SubmitButton pending={pending}>Save shares</SubmitButton>
       </div>

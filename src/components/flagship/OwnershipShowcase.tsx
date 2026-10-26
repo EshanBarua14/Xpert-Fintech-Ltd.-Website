@@ -40,7 +40,7 @@ const MAX_COINS = 60;
 const CYCLE_MS = 4800;
 
 /**
- * Who owns Xpert, in 3D (Admin → Home highlights → Who owns Xpert, and Admin →
+ * Who owns Xpert Fintech, in 3D (Admin → Home highlights → Who owns Xpert Fintech, and Admin →
  * Organizations → Owned by):
  *  - the paid-up capital as a meter: one fine mark per crore, lit in turn round a ring while the figure counts up;
  *  - the owner houses as a unit chart, one logo tile per house grouped by basis (banks,

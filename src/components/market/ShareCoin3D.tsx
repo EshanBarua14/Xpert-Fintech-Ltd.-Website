@@ -17,6 +17,8 @@ type Props = {
   label: string;
   locale: "en" | "bn";
   size?: "md" | "sm";
+  /** "At least": a + after the % (Admin → Market data). */
+  plus?: boolean;
   className?: string;
 };
 
@@ -25,12 +27,12 @@ const C = 2 * Math.PI * R;
 
 /**
  * A share of the market as a precise donut: a thin track for the whole
- * turnover and Xpert's share drawn along it when it comes into view, the figure
+ * turnover and Xpert Fintech's share drawn along it when it comes into view, the figure
  * counting up in the centre, and a gold tick at the goal. Calm, exact motion
  * (one ease-out, no bounce); reduced-motion visitors see it drawn.
  * (Kept under its earlier name so callers stay the same.)
  */
-export function ShareCoin3D({ pct, caption, goal, label, locale, size = "md", className }: Props) {
+export function ShareCoin3D({ pct, caption, goal, label, locale, size = "md", plus = false, className }: Props) {
   const gid = `donut-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const root = useRef<HTMLDivElement>(null);
   const arc = useRef<SVGCircleElement>(null);
@@ -121,7 +123,7 @@ export function ShareCoin3D({ pct, caption, goal, label, locale, size = "md", cl
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
           <span className={cn("font-display leading-none font-semibold tracking-[-0.03em] text-text-primary tabular-nums", size === "sm" ? "text-3xl" : "text-5xl")}>
             <span ref={num}>{fmt(locale, p, digits)}</span>
-            <span className="ml-0.5 text-[0.5em] text-text-secondary">%</span>
+            <span className="ml-0.5 text-[0.5em] text-text-secondary">{plus ? "%+" : "%"}</span>
           </span>
           {caption && size !== "sm" && <span className="mt-2 text-xs font-medium text-text-secondary">{caption}</span>}
         </div>

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils/cn";
 import { institutionOf, splitAffiliation } from "@/lib/people/affiliation";
 import { CodeIcon, ContactIcon, WebsiteIcon } from "./ContactIcon";
 
-/** Their own website, else their organisation's, else Xpert's (the home page). */
+/** Their own website, else their organisation's, else Xpert Fintech's (the home page). */
 const siteOf = (p: GalleryPerson) => p.websiteUrl || p.org?.url || "/";
 
 /**
@@ -26,7 +26,7 @@ export type GalleryPerson = {
   id: string;
   name: string;
   title: string | null;
-  /** Position outside Xpert, e.g. "Managing Director, Apex Investments Ltd.". */
+  /** Position outside Xpert Fintech, e.g. "Managing Director, Apex Investments Ltd.". */
   affiliation: string | null;
   bio: string | null;
   photo: { url: string; width: number | null; height: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
@@ -376,12 +376,12 @@ export function PeopleGallery({
               <span aria-hidden="true">×</span>
             </button>
             {/* The portrait in the same 4:5 frame as on the card, whatever the window's height: every profile shows its photo the same way. */}
-            {/* Wide screens: the profile card on the left (photo, Xpert's logo, name, designation, links); the biography fills the right. */}
+            {/* Wide screens: the profile card on the left (photo, Xpert Fintech's logo, name, designation, links); the biography fills the right. */}
             <div className="relative hidden min-h-0 flex-col gap-4 overflow-y-auto bg-navy-800/50 p-5 md:flex">
               <div className="relative aspect-[4/5] w-full shrink-0 overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-[color-mix(in_srgb,var(--tone)_35%,transparent)]">
                 <Image src={open.photo?.url ?? PLACEHOLDER_PHOTO} alt={open.name} fill sizes="(min-width: 768px) 22rem, 80vw" quality={90} className="object-cover" style={focusStyle(open.photo, 0.8)} unoptimized={!open.photo} />
               </div>
-              {/* Name and their seat at Xpert, then their own organisation, each as the same row: logo, organisation, role. */}
+              {/* Name and their seat at Xpert Fintech, then their own organisation, each as the same row: logo, organisation, role. */}
               <div className="flex flex-col gap-1">
                 <p className="text-center font-display text-[1.35rem] leading-tight font-semibold tracking-[-0.01em] text-balance text-text-primary">{open.name}</p>
               </div>

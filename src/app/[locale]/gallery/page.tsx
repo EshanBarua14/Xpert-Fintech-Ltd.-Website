@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.galleryTitle, description: t.galleryBody, paths: { en: "gallery", bn: "gallery" } });
+  return buildMetadata({ locale, title: t.seoGalleryTitle, description: t.galleryBody, paths: { en: "gallery", bn: "gallery" } });
 }
 
 const toItem = (v: GalleryVideo, loc: AppLocale): VideoItem => ({
@@ -132,7 +132,7 @@ export default async function GalleryPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.insightsEyebrow} title={t.galleryHero} body={t.galleryBody} />
+      <PageHero crumb={{ locale, path: "gallery", name: t.galleryTitle, home: t.home }} eyebrow={t.insightsEyebrow} title={t.galleryHero} body={t.galleryBody} />
       <Shell className="pb-14 md:pb-16">
         {albums.length === 0 && items.length === 0 ? (
           empty(t.galleryEmptyTitle, t.galleryEmptyBody)

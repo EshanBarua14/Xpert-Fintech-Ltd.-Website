@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.caseStudiesTitle, description: t.caseStudiesBody, paths: { en: "success-stories", bn: "success-stories" } });
+  return buildMetadata({ locale, title: t.seoSuccessTitle, description: t.caseStudiesBody, paths: { en: "success-stories", bn: "success-stories" } });
 }
 
 export default async function CaseStudiesPage({ params }: Props) {
@@ -31,7 +31,7 @@ export default async function CaseStudiesPage({ params }: Props) {
   const [items, orgLogos, journey] = await Promise.all([getCaseStudies(loc), getOrgLogos(loc), getJourney(loc)]);
   return (
     <>
-      <PageHero eyebrow={t.insightsEyebrow} title={t.successHero} body={t.caseStudiesBody} />
+      <PageHero crumb={{ locale, path: "success-stories", name: t.caseStudiesTitle, home: t.home }} eyebrow={t.insightsEyebrow} title={t.successHero} body={t.caseStudiesBody} />
       {/* The company's growth, milestone by milestone (Admin → Success stories → Growth journey). */}
       {journey && (
         <Shell className="pb-12 md:pb-16">

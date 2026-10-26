@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.newsTitle, description: t.newsBody, paths: { en: "news", bn: "news" } });
+  return buildMetadata({ locale, title: t.seoNewsTitle, description: t.newsBody, paths: { en: "news", bn: "news" } });
 }
 
 /** News and announcements from Admin → News, filterable by category. */
@@ -37,7 +37,7 @@ export default async function NewsPage({ params, searchParams }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.insightsEyebrow} title={t.newsHero} body={t.newsBody} />
+      <PageHero crumb={{ locale, path: "news", name: t.newsTitle, home: t.home }} eyebrow={t.insightsEyebrow} title={t.newsHero} body={t.newsBody} />
       <Shell className="pb-16 md:pb-20">
         <div className="flex flex-col gap-12">
           {categories.length > 0 && (

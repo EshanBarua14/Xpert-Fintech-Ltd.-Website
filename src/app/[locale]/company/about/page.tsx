@@ -37,8 +37,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const seo = page ? await getSeo("PAGE", page.id, locale) : null;
   return buildMetadata({
     locale,
-    title: seo?.title ?? t.aboutTitle,
-    description: seo?.description ?? story.summary,
+    title: seo?.title ?? t.seoAboutTitle,
+    description: seo?.description ?? t.seoAboutDesc,
     paths: { en: "company/about", bn: "company/about" },
     ogImageId: seo?.ogImageId,
   });
@@ -90,7 +90,7 @@ export default async function AboutPage({ params }: Props) {
 
   return (
     <div>
-      <PageHero eyebrow={t.companyEyebrow} title={tr?.title ?? t.aboutTitle} body={story.summary} />
+      <PageHero crumb={{ locale, path: "company/about", name: (locale === "bn" ? "আমাদের সম্পর্কে" : "About us"), home: t.home }} eyebrow={t.companyEyebrow} title={tr?.title ?? t.aboutTitle} body={story.summary} />
 
       {/* At a glance */}
       {glance.length > 0 && (

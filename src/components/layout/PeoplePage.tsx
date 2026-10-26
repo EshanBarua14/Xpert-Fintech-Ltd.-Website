@@ -11,11 +11,17 @@ import { getPeople, mediaMap } from "@/lib/public/content";
 import { buildMetadata } from "@/lib/public/seo";
 
 /** Shared by /company/board, /company/management and /company/consultants. The Chairman's and MD's messages are on the About page. */
+const SEO = {
+  board: ["seoBoardTitle", "seoBoardDesc"],
+  management: ["seoManagementTitle", "seoManagementDesc"],
+  consultants: ["seoConsultantsTitle", "seoConsultantsDesc"],
+} as const;
+
 export function peoplePage(group: PersonGroup, path: string, titleKey: "board" | "management" | "consultants") {
   async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
     const { locale } = await params;
     if (!isLocale(locale)) return {};
-    return buildMetadata({ locale, title: getMessages(locale)[titleKey], paths: { en: path, bn: path } });
+    return buildMetadata({ locale, title: getMessages(locale)[SEO[titleKey][0]], description: getMessages(locale)[SEO[titleKey][1]], paths: { en: path, bn: path } });
   }
 
   async function Page({ params }: { params: Promise<{ locale: string }> }) {
@@ -27,6 +33,7 @@ export function peoplePage(group: PersonGroup, path: string, titleKey: "board" |
     return (
       <>
         <PageHero
+          crumb={{ locale, path, name: t[titleKey], home: t.home }}
           eyebrow={t.companyEyebrow}
           title={t[`${titleKey}Hero`]}
           body={titleKey === "consultants" ? t.consultantsLinkBody : t[`${titleKey}HeroBody`]}

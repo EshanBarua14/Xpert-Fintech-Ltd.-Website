@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.careersTitle, description: t.careersBody, paths: { en: "careers", bn: "careers" } });
+  return buildMetadata({ locale, title: t.seoCareersTitle, description: t.careersBody, paths: { en: "careers", bn: "careers" } });
 }
 
 
@@ -55,7 +55,7 @@ export default async function CareersPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.companyEyebrow} title={t.careersHero} body={t.careersBody} />
+      <PageHero crumb={{ locale, path: "careers", name: t.careersTitle, home: t.home }} eyebrow={t.companyEyebrow} title={t.careersHero} body={t.careersBody} />
       <Shell className="pb-14 md:pb-16">
         <ul className="grid gap-4 md:grid-cols-3">
           {why.map((w, i) => (

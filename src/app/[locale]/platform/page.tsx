@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.platformPageTitle, description: t.platformPageBody, paths: { en: "platform", bn: "platform" } });
+  return buildMetadata({ locale, title: t.seoPlatformTitle, description: t.seoPlatformDesc, paths: { en: "platform", bn: "platform" } });
 }
 
 /** Overview of the whole suite. Each capability links to its product page once that is published. */
@@ -41,7 +41,7 @@ export default async function PlatformPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.platformEyebrow} title={t.platformPageTitle} body={t.platformPageBody}>
+      <PageHero crumb={{ locale, path: "platform", name: t.platformEyebrow, home: t.home }} eyebrow={t.platformEyebrow} title={t.platformPageTitle} body={t.platformPageBody}>
         <div data-reveal style={{ "--d": 3 } as CSSProperties}>
           <PrimaryButton href={`/${locale}/request-demo`}>{t.requestDemo}</PrimaryButton>
         </div>

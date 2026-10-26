@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.resourcesTitle, description: t.resourcesBody, paths: { en: "resources", bn: "resources" } });
+  return buildMetadata({ locale, title: t.seoResourcesTitle, description: t.resourcesBody, paths: { en: "resources", bn: "resources" } });
 }
 
 const kindLabel = (t: Messages, k: string) =>
@@ -31,7 +31,7 @@ export default async function ResourcesPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.insightsEyebrow} title={t.resourcesHero} body={t.resourcesBody} />
+      <PageHero crumb={{ locale, path: "resources", name: t.resourcesTitle, home: t.home }} eyebrow={t.insightsEyebrow} title={t.resourcesHero} body={t.resourcesBody} />
       <Shell className="pb-16 md:pb-20">
         {items.length === 0 ? (
           <div data-reveal className="glass rounded-[2rem] p-10 text-center md:p-16">

@@ -9,14 +9,14 @@ import { capabilities, CapabilityBento, CtaBand, PageHero, SectionHeader, Shell 
 import { isLocale } from "@/lib/i18n/config";
 import { getMessages } from "@/lib/i18n/messages";
 import { getFlagshipData, getFlowProducts } from "@/lib/public/flagship";
-import { buildMetadata } from "@/lib/public/seo";
+import { buildMetadata, JsonLd, SITE_URL } from "@/lib/public/seo";
 
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
-  return buildMetadata({ locale, title: getMessages(locale).products, paths: { en: "products", bn: "products" } });
+  return buildMetadata({ locale, title: getMessages(locale).seoProductsTitle, description: getMessages(locale).seoProductsDesc, paths: { en: "products", bn: "products" } });
 }
 
 export default async function ProductsPage({ params }: Props) {
@@ -30,7 +30,17 @@ export default async function ProductsPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.platformEyebrow} title={t.productsHero} body={t.productsHeroBody} />
+      {showcase.length > 0 && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: t.seoProductsTitle,
+            itemListElement: showcase.map((p, i) => ({ "@type": "ListItem", position: i + 1, name: p.name, url: `${SITE_URL}${p.href}` })),
+          }}
+        />
+      )}
+      <PageHero crumb={{ locale, path: "products", name: t.products, home: t.home }} eyebrow={t.platformEyebrow} title={t.productsHero} body={t.productsHeroBody} />
       {showcase.length > 0 && (
         <Shell className="pb-10 md:pb-12">
           <ProductShowcase products={showcase} labels={showcaseLabels(t)} />

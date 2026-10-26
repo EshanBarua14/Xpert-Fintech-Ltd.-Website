@@ -21,7 +21,7 @@ export const PORTRAIT_FOCUS: Record<string, { x: number; y: number; zoom?: numbe
   "m-shahryar-faiz": { x: 0.5, y: 0.33 }, // new photo 19 Oct 2026
   "mahmuda-yasmin-farah": { x: 0.5, y: 0.38 }, // new photo 20 Oct 2026 (frame line trimmed)
   "md-abdur-rahman-rony": { x: 0.49, y: 0.42 }, // new photo 19 Oct 2026
-  "md-abul-moshad-chowdhury": { x: 0.5, y: 0.34 }, // new photo 19 Oct 2026
+  "md-abul-moshad-chowdhury": { x: 0.5, y: 0.36 }, // new photo 26 Oct 2026
   "md-hasan-uddin": { x: 0.5, y: 0.38 }, // new photo 19 Oct 2026
   "md-hefaj-uddin": { x: 0.5, y: 0.38 }, // new photo 19 Oct 2026
   "md-refat-hossen": { x: 0.5, y: 0.34 }, // new photo 20 Oct 2026

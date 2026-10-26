@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const t = getMessages(locale);
-  return buildMetadata({ locale, title: t.marketsNav, description: t.marketsBody, paths: { en: "markets", bn: "markets" } });
+  return buildMetadata({ locale, title: t.seoMarketsTitle, description: t.marketsBody, paths: { en: "markets", bn: "markets" } });
 }
 
 /** Markets overview: both exchanges at a glance, then the shared market pulse. */
@@ -35,7 +35,7 @@ export default async function MarketsPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.marketsNav} title={t.marketsTitle} body={t.marketsBody} />
+      <PageHero crumb={{ locale, path: "markets", name: t.marketsNav, home: t.home }} eyebrow={t.marketsNav} title={t.marketsTitle} body={t.marketsBody} />
       <Shell className="pb-12">
         <div className="flex flex-col gap-10">
           <div className="grid gap-4 md:grid-cols-2">

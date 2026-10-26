@@ -141,9 +141,9 @@ export function TestimonialSlider({ items, labels, seconds = DEFAULT_SECONDS }: 
                   {t.role && <span className="mt-1.5 text-[0.8125rem] leading-snug font-semibold text-gold">{t.role}</span>}
                   {t.organization && <span className="mt-0.5 font-display text-[0.95rem] leading-snug text-brand-sky">{t.organization}</span>}
                   {labels.contact && (
+                    // LinkedIn and the company's website only: no personal email on reviews.
                     <span className="mt-3 flex items-center gap-2">
                       <ContactIcon kind="linkedin" value={t.linkedin ?? null} name={t.name} org={t.organization} labels={labels.contact} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />
-                      <ContactIcon kind="email" value={t.email ?? null} name={t.name} labels={labels.contact} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />
                       {t.website && <WebsiteIcon href={t.website} name={t.organization ?? t.name} label={labels.contact.website} color="var(--color-brand-sky)" ink="var(--color-brand-sky)" size="size-8" />}
                     </span>
                   )}

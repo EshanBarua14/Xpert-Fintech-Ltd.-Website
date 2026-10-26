@@ -3168,6 +3168,26 @@ async function seedCapital36() {
   console.log(`  Paid-up capital: ৳36 crore (${changed} setting(s) updated)`);
 }
 
+// ── 26 Oct (XFL): Thea Securities' logo on every record of the house (by key or by name), once more ──
+async function seedTheaLogo() {
+  const MARK = "seed.thea-logo-2026-10-26b";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const logo = await seedImage("logos", "thia-securities", "Thea Securities logo", ["logo", "client"]);
+  if (!logo) return; // tried again on the next run
+  const orgs = await db.organization.findMany({
+    where: { deletedAt: null, OR: [{ key: { in: ["thia-securities", "thea-securities"] } }, { translations: { some: { name: { contains: "Thea Securities", mode: "insensitive" } } } }, { translations: { some: { name: { contains: "Thia Securities", mode: "insensitive" } } } }] },
+    select: { id: true, logoMediaId: true },
+  });
+  for (const o of orgs) {
+    if (o.logoMediaId === logo) continue;
+    await db.organization.update({ where: { id: o.id }, data: { logoMediaId: logo, logoPermission: true } });
+    await db.mediaUsage.deleteMany({ where: { entityType: "ORGANIZATION", entityId: o.id, field: "logo" } });
+    await db.mediaUsage.create({ data: { mediaId: logo, entityType: "ORGANIZATION", entityId: o.id, field: "logo" } });
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), orgs: orgs.length } } });
+  console.log(`  Thea Securities: logo set on ${orgs.length} record(s) (run npm run media:to-db next)`);
+}
+
 // ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
 async function seedSharePlus() {
   const MARK = "seed.share-plus-2026-10-26";
@@ -3714,6 +3734,7 @@ async function main() {
   await seedBankAsiaFirst();
   await seedEveryClientStory();
   await seedCapital36();
+  await seedTheaLogo();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

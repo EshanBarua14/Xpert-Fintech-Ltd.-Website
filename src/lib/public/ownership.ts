@@ -7,7 +7,7 @@ import { getOwnershipSetting } from "@/lib/content/highlights";
 import { getOrganizations, mediaMap } from "./content";
 import { pick } from "./text";
 
-export type OwnerBasis = "BANK" | "INSURANCE" | "CORPORATE" | "INDEPENDENT" | "OTHER";
+export type OwnerBasis = "BANK" | "INSURANCE" | "CORPORATE" | "FAMILY" | "INDEPENDENT" | "OTHER";
 export type OwnerHouse = { name: string; parent: string | null; url: string | null; logo: { url: string; width: number | null; height: number | null } | null };
 export type OwnerGroup = { basis: OwnerBasis; label: string; blurb: string; houses: OwnerHouse[] };
 export type OwnershipView = {
@@ -24,10 +24,11 @@ const LABELS: Record<OwnerBasis, { en: [string, string]; bn: [string, string] }>
   BANK: { en: ["Bank subsidiaries", "Brokerage arms of the country's banks."], bn: ["ব্যাংকের সাবসিডিয়ারি", "দেশের ব্যাংকগুলোর ব্রোকারেজ প্রতিষ্ঠান।"] },
   INSURANCE: { en: ["Insurance companies", "Brokerage arms of insurers."], bn: ["বিমা প্রতিষ্ঠান", "বিমা প্রতিষ্ঠানগুলোর ব্রোকারেজ প্রতিষ্ঠান।"] },
   CORPORATE: { en: ["Corporate groups", "Brokerage houses of corporate groups."], bn: ["করপোরেট গ্রুপ", "করপোরেট গ্রুপগুলোর ব্রোকারেজ হাউস।"] },
+  FAMILY: { en: ["Family Owned Brokers", "Brokerage houses owned by their founding families."], bn: ["পারিবারিক মালিকানার ব্রোকার", "প্রতিষ্ঠাতা পরিবারের মালিকানাধীন ব্রোকারেজ হাউস।"] },
   INDEPENDENT: { en: ["Independent houses", "Brokerage houses owned on their own."], bn: ["স্বতন্ত্র হাউস", "নিজস্ব মালিকানার ব্রোকারেজ হাউস।"] },
   OTHER: { en: ["Other owner houses", "Brokerage houses among the owners."], bn: ["অন্যান্য মালিক হাউস", "মালিকদের মধ্যে থাকা ব্রোকারেজ হাউস।"] },
 };
-const ORDER: OwnerBasis[] = ["BANK", "INSURANCE", "CORPORATE", "INDEPENDENT", "OTHER"];
+const ORDER: OwnerBasis[] = ["BANK", "INSURANCE", "CORPORATE", "FAMILY", "INDEPENDENT", "OTHER"];
 
 /**
  * "Who owns Xpert Fintech", all from the admin: paid-up capital (Admin → Home

@@ -33,7 +33,7 @@ const schema = z.object({
   cseRank: z.string().trim().refine((v) => v === "" || /^\d{1,3}$/.test(v), "A position, e.g. 3.").transform((v) => (v ? Number(v) : null)),
   rankAsOf: optionalText(40),
   rankSource: optionalText(200),
-  parentType: z.enum(["", "BANK", "INSURANCE", "CORPORATE", "INDEPENDENT"]).transform((v) => v || null),
+  parentType: z.enum(["", "BANK", "INSURANCE", "CORPORATE", "FAMILY", "INDEPENDENT"]).transform((v) => v || null),
   parentName: optionalText(120),
   parentNameBn: optionalText(120),
   logoMediaId: optionalId,

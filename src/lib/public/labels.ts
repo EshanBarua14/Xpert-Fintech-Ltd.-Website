@@ -13,6 +13,7 @@ export function showcaseLabels(t: Messages): ShowcaseLabels {
     play: t.consPlay,
     pause: t.consPause,
     rmsBuiltIn: t.rmsChip,
+    whiteLabel: t.whiteLabelChip,
     typeLabels: {
       PLATFORM: t.typePlatform,
       PRODUCT: t.typeProduct,

@@ -25,6 +25,7 @@ export async function getJourney(locale: AppLocale) {
     steps: s.steps.map((x) => ({
       date: fmt(x.date),
       year: x.date.slice(0, 4),
+      iso: x.date,
       value: x.value,
       title: pick(locale, x.titleEn, x.titleBn),
       body: pick(locale, x.bodyEn, x.bodyBn),

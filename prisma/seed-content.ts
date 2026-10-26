@@ -2971,6 +2971,77 @@ async function seedWhiteLabel() {
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
 }
 
+// ── 26 Oct: a review card for the head (MD / CEO) of every client and consortium member (XFL) ──
+// Heads already in Admin → People (directors, representatives) get a card like the board's,
+// with their photo and position; the quote stays "coming soon" until XFL adds their own words.
+// Where the head's name is not on file, a draft card linked to the house is added for XFL to
+// complete in Admin → Testimonials (name, title, quote, approval): no names are made up.
+async function seedClientHeadReviews() {
+  const MARK = "seed.client-head-reviews-2026-10-26";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const now = new Date();
+  const live = { status: "PUBLISHED" as const, deletedAt: null };
+  const clients = await db.organization.findMany({
+    where: { ...live, OR: [{ kind: { in: ["CONSORTIUM_MEMBER", "CLIENT"] } }, { deployments: { some: { status: "PUBLISHED", deletedAt: null } } }] },
+    orderBy: { sortOrder: "asc" },
+    include: { translations: true },
+  });
+  const norm = (v: string) => v.toLowerCase().replace(/&/g, " and ").replace(/[.,()'’]/g, " ").replace(/\b(limited|ltd|plc)\b/g, " ").replace(/\s+/g, " ").trim();
+  const nameKey = (v: string) => v.toLowerCase().replace(/,?\s*\b(fca|fcs|fcma|acca|fcca|cfa)\b\.?/g, "").replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
+  const people = await db.person.findMany({ where: { deletedAt: null, isPlaceholder: false }, include: { translations: true } });
+  const reviews = await db.testimonial.findMany({ where: { deletedAt: null }, select: { personName: true, organizationId: true } });
+  const reviewed = new Set(reviews.map((r) => nameKey(r.personName)));
+  const orgReviewed = new Set(reviews.map((r) => r.organizationId).filter(Boolean));
+  const HEAD = /\b(managing director|chief executive|ceo|chairman)\b/i;
+  let order = (await db.testimonial.count({ where: { deletedAt: null } })) + 1;
+  let published = 0;
+  const drafts: string[] = [];
+  for (const org of clients) {
+    const names = org.translations.map((t) => t.name).filter(Boolean);
+    const enName = org.translations.find((t) => t.locale === EN)?.name ?? names[0] ?? "";
+    // The house's head among the people on file: their English position names this house and says MD / CEO / Chairman.
+    const head = people.find((p) => {
+      const aff = p.translations.find((t) => t.locale === EN)?.affiliation ?? "";
+      const [designation] = aff.split(",");
+      return aff && HEAD.test(designation ?? "") && names.some((n) => norm(aff).includes(norm(n)));
+    });
+    const headName = head?.translations.find((t) => t.locale === EN)?.name;
+    if (headName) {
+      if (reviewed.has(nameKey(headName))) continue;
+      const review = await db.testimonial.create({
+        data: {
+          personName: headName,
+          photoMediaId: head!.photoMediaId,
+          organizationId: org.id,
+          status: "PUBLISHED",
+          hasApproval: true,
+          publishAt: now,
+          sortOrder: order++,
+          translations: { create: { locale: EN, personTitle: null, quote: `[Review from ${headName}: to be written in their own words, with their title, institution and rating, and approved before publishing.]` } },
+        },
+      });
+      if (head!.photoMediaId) await db.mediaUsage.create({ data: { mediaId: head!.photoMediaId, entityType: "TESTIMONIAL", entityId: review.id, field: "photo" } });
+      reviewed.add(nameKey(headName));
+      published++;
+    } else if (!orgReviewed.has(org.id)) {
+      await db.testimonial.create({
+        data: {
+          personName: `[Managing Director / CEO of ${enName}]`,
+          organizationId: org.id,
+          status: "DRAFT",
+          hasApproval: false,
+          sortOrder: order++,
+          translations: { create: { locale: EN, personTitle: "Managing Director / CEO", quote: `[Review from the Managing Director / CEO of ${enName}: add their name, photo, title and their own words, then tick approval and publish.]` } },
+        },
+      });
+      drafts.push(enName);
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: now.toISOString(), published, drafts } } });
+  if (published) console.log(`  ${published} review card(s) added for client heads already on file`);
+  if (drafts.length) console.log(`  ${drafts.length} draft review card(s) to complete in Admin → Testimonials (head's name needed): ${drafts.join("; ")}`);
+}
+
 // ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
 async function seedSharePlus() {
   const MARK = "seed.share-plus-2026-10-26";
@@ -3512,6 +3583,7 @@ async function main() {
   await seedXpertFintechName();
   await seedSharePlus();
   await seedWhiteLabel();
+  await seedClientHeadReviews();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

@@ -318,8 +318,9 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           logoAlt: org ? (pick(org.translations, locale)?.name ?? null) : named ? (pick(named.translations, locale)?.name ?? null) : null,
           logoUrl: (org ?? named)?.websiteUrl || null,
           linkedin: personOf(r)?.linkedinUrl || null,
-          website: personOf(r)?.websiteUrl || (org ?? named)?.websiteUrl || null,
-          email: personOf(r)?.email || null,
+          // The company's website (not a personal one); no email is shared on reviews.
+          website: (org ?? named)?.websiteUrl || null,
+          email: null,
           rating: r.rating && r.rating >= 1 && r.rating <= 5 ? r.rating : null,
           draft: preview && editorHints() && !(r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date())),
         },

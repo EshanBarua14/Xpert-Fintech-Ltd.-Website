@@ -12,6 +12,8 @@ export type ContactLabels = {
   emailMissing: string;
   /** "Website" */
   website?: string;
+  /** "GitHub not listed yet" */
+  githubMissing?: string;
 };
 
 /**
@@ -98,20 +100,32 @@ export function WebsiteIcon({
   );
 }
 
-/** A code icon to a person's GitHub (or other code) profile, styled like the other contact icons; shown only when on file. */
+/**
+ * A code icon to a person's GitHub (or other code) profile, styled like the
+ * other contact icons. With no profile on file it is muted and says so on hover, like a missing email.
+ */
 export function CodeIcon({
   href,
   name,
+  missing = "GitHub not listed yet",
   color = "var(--tone)",
   ink = "var(--tone-ink)",
   size = "size-9",
 }: {
-  href: string;
+  href: string | null;
   name: string;
+  missing?: string;
   color?: string;
   ink?: string;
   size?: string;
 }) {
+  const cls = cn("contact-icon flex shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-300", size);
+  if (!href)
+    return (
+      <span role="img" aria-label={missing} title={missing} tabIndex={0} className={cn(cls, "contact-icon-soft cursor-default")} style={{ "--c": color, "--ci": ink } as CSSProperties}>
+        <SocialIcon kind="code" className="size-4" />
+      </span>
+    );
   const host = /github\./i.test(href) ? "GitHub" : /gitlab\./i.test(href) ? "GitLab" : /bitbucket\./i.test(href) ? "Bitbucket" : "Code";
   const text = `${host}: ${name}`;
   return (

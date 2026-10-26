@@ -5,7 +5,7 @@ import { Icon } from "@/components/ui/Icon";
 import { digits } from "@/lib/i18n/digits";
 import { cn } from "@/lib/utils/cn";
 
-/** `stat`: an optional figure from the admin (e.g. "৳39 cr", "7"), shown large. */
+/** `stat`: an optional figure from the admin (e.g. "৳36 cr", "7"), shown large. */
 export type StrengthCard = { icon: string; title: string; body: string; stat?: string };
 
 const AUTO_MS = 5000;

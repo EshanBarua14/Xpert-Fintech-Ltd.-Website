@@ -2488,10 +2488,10 @@ async function seedInstitutionStrengths() {
       icon: "building",
       titleEn: "Owned by the country's leading institutions",
       titleBn: "দেশের শীর্ষস্থানীয় প্রতিষ্ঠানগুলোর মালিকানাধীন",
-      statEn: "৳39 cr",
-      statBn: "৳৩৯ কোটি",
-      bodyEn: "A capital-market fintech with ৳39 crore paid-up capital, owned by 12 brokerage houses backed by the country's banks, insurers and corporate groups.",
-      bodyBn: "৳৩৯ কোটি পরিশোধিত মূলধনের পুঁজিবাজার ফিনটেক, যার মালিক দেশের ব্যাংক, বিমা প্রতিষ্ঠান ও করপোরেট গ্রুপ-সমর্থিত ১২টি ব্রোকারেজ হাউস।",
+      statEn: "৳36 cr",
+      statBn: "৳৩৬ কোটি",
+      bodyEn: "A capital-market fintech with ৳36 crore paid-up capital, owned by 12 brokerage houses backed by the country's banks, insurers and corporate groups.",
+      bodyBn: "৳৩৬ কোটি পরিশোধিত মূলধনের পুঁজিবাজার ফিনটেক, যার মালিক দেশের ব্যাংক, বিমা প্রতিষ্ঠান ও করপোরেট গ্রুপ-সমর্থিত ১২টি ব্রোকারেজ হাউস।",
     },
     {
       icon: "landmark",
@@ -2575,7 +2575,7 @@ async function seedInstitutionStrengths() {
   const figures = Array.isArray(fig?.value) ? (fig!.value as { value?: string; labelEn?: string }[]) : [];
   let figNote = "";
   if (!figures.some((f) => /paid-up capital/i.test(f.labelEn ?? "")) && figures.length < 6) {
-    const next = [...figures, { value: "৳39 crore", labelEn: "Paid-up capital", labelBn: "পরিশোধিত মূলধন", source: "Xpert Fintech Ltd.", asOf: null }];
+    const next = [...figures, { value: "৳36 crore", labelEn: "Paid-up capital", labelBn: "পরিশোধিত মূলধন", source: "Xpert Fintech Ltd.", asOf: null }];
     await db.siteSetting.upsert({ where: { key: "site.figures" }, update: { value: next }, create: { key: "site.figures", value: next } });
     figNote = "; paid-up capital added to Figures";
   }
@@ -3134,6 +3134,40 @@ async function seedEveryClientStory() {
   if (published || drafts) console.log(`  Success stories: ${published} added for clients with an app on record, ${drafts} draft(s) to complete in Admin → Success stories`);
 }
 
+// ── 26 Oct (XFL): paid-up capital is ৳36 crore. Changed wherever it still shows the earlier ৳39 (or ৳33) crore. ──
+async function seedCapital36() {
+  const MARK = "seed.capital-36-2026-10-26";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const swap = (v: unknown): unknown => {
+    if (typeof v === "string")
+      return v
+        .replace(/৳\s?(39|33)(\s?(cr|crore))/g, "৳36$2")
+        .replace(/৳\s?(৩৯|৩৩)(\s?কোটি)/g, "৳৩৬$2")
+        .replace(/\b(39|33) crore paid-up capital/g, "36 crore paid-up capital");
+    if (Array.isArray(v)) return v.map(swap);
+    if (v && typeof v === "object") return Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([k, x]) => [k, swap(x)]));
+    return v;
+  };
+  let changed = 0;
+  for (const row of await db.siteSetting.findMany({ where: { NOT: { key: { startsWith: "seed." } } } })) {
+    let value = swap(row.value) as Record<string, unknown> | unknown;
+    if (row.key === "home.ownership" && value && typeof value === "object" && !Array.isArray(value)) {
+      const o = value as Record<string, unknown>;
+      if (o.capitalCrore === 39 || o.capitalCrore === 33) value = { ...o, capitalCrore: 36 };
+    }
+    if (JSON.stringify(value) !== JSON.stringify(row.value)) {
+      await db.siteSetting.update({ where: { key: row.key }, data: { value: value as object } });
+      changed++;
+    }
+  }
+  for (const m of await db.metricTranslation.findMany({ where: { label: { contains: "capital", mode: "insensitive" } }, select: { id: true, label: true } })) {
+    const label = swap(m.label) as string;
+    if (label !== m.label) await db.metricTranslation.update({ where: { id: m.id }, data: { label } });
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), changed } } });
+  console.log(`  Paid-up capital: ৳36 crore (${changed} setting(s) updated)`);
+}
+
 // ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
 async function seedSharePlus() {
   const MARK = "seed.share-plus-2026-10-26";
@@ -3679,6 +3713,7 @@ async function main() {
   await seedOwnersAndThea();
   await seedBankAsiaFirst();
   await seedEveryClientStory();
+  await seedCapital36();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

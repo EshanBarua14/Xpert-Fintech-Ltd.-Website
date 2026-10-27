@@ -123,57 +123,40 @@ test.describe("Admin content editing", () => {
 
   test("products: a key feature is added, shown on the product page and deleted", async ({ page }) => {
     test.setTimeout(300_000);
-    const errors: string[] = [];
-    page.on("pageerror", (e) => errors.push(e.message.slice(0, 200)));
-    page.on("console", (m) => m.type() === "error" && errors.push(m.text().slice(0, 200)));
     const feature = `E2E feature ${STAMP}`;
     await page.goto("/admin/products");
-    // A live product (the trading platform), not one in the trash.
-    // Diagnostic: how responsive each product's editor is (logged, not asserted).
-    const all = await page.locator("main a[href^='/admin/products/']").evaluateAll((as) => as.map((a) => [a.getAttribute("href")!, a.textContent ?? ""] as const).filter(([h]) => !/new|\?/.test(h)));
+    // Every live product's editor opens and offers "Add to key features".
+    const all = await page.locator("main a[href^='/admin/products/']").evaluateAll((as) => as.map((a) => [a.getAttribute("href")!, (a.textContent ?? "").trim()] as const).filter(([h]) => !/new|\?/.test(h)));
+    expect(all.length).toBeGreaterThan(0);
     const report: string[] = [];
-    let href: string | null = null;
     for (const [h, name] of all.slice(0, 14)) {
       const probe = await page.context().newPage();
-      const t = Date.now();
       await probe.goto(h, { waitUntil: "load", timeout: 30_000 }).catch(() => {});
-      await new Promise((r) => setTimeout(r, 4000));
-      const ok = await Promise.race([
-        probe.evaluate(() => [...document.querySelectorAll("summary")].some((s) => /Add to key features/i.test(s.textContent ?? ""))).then((k) => (k ? "ok+kf" : "ok")),
-        new Promise<string>((r) => setTimeout(() => r("NOT RESPONDING"), 15_000)),
-      ]);
-      report.push(`${name.trim()}=${ok}/${Date.now() - t}ms`);
-      if (ok === "ok+kf" && !href) href = h;
+      const ok = await probe.locator("summary").filter({ hasText: /Add to key features/i }).first().waitFor({ state: "attached", timeout: 20_000 }).then(() => true).catch(() => false);
+      if (!ok) report.push(name);
       await Promise.race([probe.close().catch(() => {}), new Promise((r) => setTimeout(r, 5000))]);
     }
-    console.log(`TIMING editors: ${report.join(", ")}`);
-    const t0 = Date.now();
-    await page.goto(href!, { waitUntil: "domcontentloaded", timeout: 120_000 });
-    console.log(`TIMING product editor ready in ${Date.now() - t0} ms`);
-    const editor = page.url().split("?")[0]!.split("#")[0]!;
-    // The product's public address, from its slug field.
-    const slug = await page.locator("#enSlug").inputValue().catch(() => "");
-    const adder = page.locator("summary").filter({ hasText: /Add to key features/i }).first();
-    const found = await adder.waitFor({ state: "attached", timeout: 30_000 }).then(() => true).catch(() => false);
-    if (!found) {
-      const probe = await Promise.race([
-        page.evaluate(() => `${document.title} · summaries: ${[...document.querySelectorAll("summary")].map((x) => x.textContent).join(" | ")} · h1: ${document.querySelector("h1")?.textContent}`),
-        new Promise<string>((r) => setTimeout(() => r("page not responding"), 10_000)),
-      ]);
-      throw new Error(`no "Add to key features" on ${page.url()}: ${probe} · errors: ${errors.join(" | ")}`);
-    }
+    expect(report, `product editors without "Add to key features": ${report.join(", ")}`).toEqual([]);
+
+    // Add a key feature to the first product, in a fresh tab.
+    const ed = await page.context().newPage();
+    ed.on("dialog", (d) => d.accept());
+    await ed.goto(all[0]![0], { waitUntil: "load" });
+    const editor = ed.url().split("?")[0]!.split("#")[0]!;
+    const slug = await ed.locator("#enSlug").inputValue().catch(() => "");
+    const adder = ed.locator("summary").filter({ hasText: /Add to key features/i }).first();
     await adder.scrollIntoViewIfNeeded();
     await adder.click();
-    await page.locator("#new-CAPABILITY-enTitle").fill(feature);
-    await page.locator("#new-CAPABILITY-enTitle").locator("xpath=ancestor::form").getByRole("button", { name: "Add" }).click();
-    await expect(page.locator(`input[value="${feature}"]`).first()).toBeVisible({ timeout: 15_000 });
-    if (slug) await publicHas(page, `/en/products/${slug}`, feature);
+    await ed.locator("#new-CAPABILITY-enTitle").fill(feature);
+    await ed.locator("#new-CAPABILITY-enTitle").locator("xpath=ancestor::form").getByRole("button", { name: "Add" }).click();
+    await expect(ed.locator(`input[value="${feature}"]`).first()).toBeVisible({ timeout: 15_000 });
+    if (slug) await publicHas(ed, `/en/products/${slug}`, feature);
 
-    await page.goto(editor);
-    const row = page.locator("div").filter({ has: page.locator(`input[value="${feature}"]`) }).filter({ has: page.getByRole("button", { name: "Delete" }) }).last();
+    await ed.goto(editor, { waitUntil: "load" });
+    const row = ed.locator("div").filter({ has: ed.locator(`input[value="${feature}"]`) }).filter({ has: ed.getByRole("button", { name: "Delete" }) }).last();
     await row.getByRole("button", { name: "Delete" }).first().click();
-    await expect(page.locator(`input[value="${feature}"]`)).toHaveCount(0, { timeout: 15_000 });
-    if (slug) await publicHas(page, `/en/products/${slug}`, feature, false);
+    await expect(ed.locator(`input[value="${feature}"]`)).toHaveCount(0, { timeout: 15_000 });
+    if (slug) await publicHas(ed, `/en/products/${slug}`, feature, false);
   });
 
   test("backups: back up now, download, delete", async ({ page }) => {

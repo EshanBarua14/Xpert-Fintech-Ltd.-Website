@@ -84,8 +84,11 @@ test.describe("Admin content editing", () => {
     await page.locator('select[name="type"]').first().selectOption("FEATURE_GRID");
     await page.getByRole("button", { name: "Add block" }).first().click();
     await expect(page.getByText("+ Add card").first()).toBeVisible({ timeout: 15_000 });
-    form = await blockForm(page, 1);
-    await form.locator('input[name="status"][value="PUBLISHED"]').check();
+    // The new cards block: open its own settings and publish it.
+    const grid = page.locator("li").filter({ has: page.getByText("+ Add card") }).filter({ has: page.getByText("Edit text and settings") }).last();
+    await grid.getByText("Edit text and settings").click();
+    form = grid.locator("form").filter({ has: page.getByRole("button", { name: "Save block" }) });
+    await form.locator('input[name="status"][value="PUBLISHED"]').check({ force: true });
     await form.getByRole("button", { name: "Save block" }).click();
     await expect(page.getByText("Block saved.").first()).toBeVisible({ timeout: 15_000 });
     await page.getByText("+ Add card").first().click();

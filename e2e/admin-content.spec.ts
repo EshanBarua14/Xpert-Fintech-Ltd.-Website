@@ -25,6 +25,12 @@ test.describe("Admin content editing", () => {
     }).toPass({ timeout: 30_000 });
   };
 
+  /** The n-th block's text-and-settings form (opened), where blocks are published. */
+  const blockForm = async (page: Page, n: number) => {
+    await page.getByText("Edit text and settings").nth(n).click();
+    return page.locator("form").filter({ has: page.getByRole("button", { name: "Save block" }) }).nth(n);
+  };
+
   test("page builder: page, section, text block, cards, hide, delete", async ({ page }) => {
     test.setTimeout(240_000);
     const slug = `e2e-builder-${STAMP}`;
@@ -46,18 +52,20 @@ test.describe("Admin content editing", () => {
     await expect(page.getByRole("button", { name: "Add block" }).first()).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: "Add block" }).first().click();
     await expect(page.getByText("Edit text and settings").first()).toBeVisible({ timeout: 15_000 });
-    await page.getByText("Edit text and settings").first().click();
-    await page.locator('input[name="en.title"]').first().fill(heading);
-    await page.locator('textarea[name="en.body"]').first().fill("E2E paragraph, written by the automated test.");
-    await page.getByRole("button", { name: "Save block" }).first().click();
+    let form = await blockForm(page, 0);
+    await form.locator('input[name="en.title"]').fill(heading);
+    await form.locator('textarea[name="en.body"]').fill("E2E paragraph, written by the automated test.");
+    // Blocks start as drafts: publish it.
+    await form.locator('input[name="status"][value="PUBLISHED"]').check();
+    await form.getByRole("button", { name: "Save block" }).click();
     await expect(page.getByText("Block saved.").first()).toBeVisible({ timeout: 15_000 });
     await publicHas(page, `/en/${slug}`, heading);
 
     // Edit it.
     await page.goto(editor);
-    await page.getByText("Edit text and settings").first().click();
-    await page.locator('input[name="en.title"]').first().fill(edited);
-    await page.getByRole("button", { name: "Save block" }).first().click();
+    form = await blockForm(page, 0);
+    await form.locator('input[name="en.title"]').fill(edited);
+    await form.getByRole("button", { name: "Save block" }).click();
     await expect(page.getByText("Block saved.").first()).toBeVisible({ timeout: 15_000 });
     await publicHas(page, `/en/${slug}`, edited);
 
@@ -76,6 +84,10 @@ test.describe("Admin content editing", () => {
     await page.locator('select[name="type"]').first().selectOption("FEATURE_GRID");
     await page.getByRole("button", { name: "Add block" }).first().click();
     await expect(page.getByText("+ Add card").first()).toBeVisible({ timeout: 15_000 });
+    form = await blockForm(page, 1);
+    await form.locator('input[name="status"][value="PUBLISHED"]').check();
+    await form.getByRole("button", { name: "Save block" }).click();
+    await expect(page.getByText("Block saved.").first()).toBeVisible({ timeout: 15_000 });
     await page.getByText("+ Add card").first().click();
     const cardForm = page.locator("form").filter({ has: page.getByRole("button", { name: "Add card" }) }).first();
     await cardForm.locator('[name="en.title"]').fill(card);

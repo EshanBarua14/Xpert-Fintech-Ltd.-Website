@@ -81,3 +81,10 @@ jobs:
       - name: Remove the temporary results branch
         if: always()
         run: git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" --delete tmp/dse-pages || true
+      - name: Failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/**/*.png
+          retention-days: 3

@@ -116,8 +116,9 @@ test.describe("Admin content editing", () => {
     await page.goto(editor);
     await page.getByRole("button", { name: "Move to trash" }).click();
     await page.waitForURL(/trashed=1/, { timeout: 15_000 });
-    const res = await page.request.get(`/en/${slug}`);
-    expect(res.status(), "a trashed page is gone from the site").toBe(404);
+    // Gone from the site: the not-found screen (streamed pages can answer 200 with noindex).
+    await page.goto(`/en/${slug}`);
+    await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible({ timeout: 15_000 });
   });
 
   test("products: a key feature is added, shown on the product page and deleted", async ({ page }) => {

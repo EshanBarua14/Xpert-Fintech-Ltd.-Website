@@ -76,5 +76,12 @@ export async function alertRecipients(kind: keyof typeof ALERT_KEYS): Promise<st
   let list = await read(ALERT_KEYS[kind]);
   if (!list.length && kind === "careers") list = await read(ALERT_KEYS.leads);
   if (!list.length) list = (process.env.LEAD_ALERT_EMAILS ?? "").split(/[,\s]+/).filter(Boolean);
+  // Nothing set anywhere: the company's own contact email (Admin → Settings), so requests are never lost.
+  if (!list.length) {
+    const row = await db.siteSetting.findUnique({ where: { key: "contact.email" } }).catch(() => null);
+    const v: unknown = row?.value;
+    const email = typeof v === "string" ? v : v && typeof v === "object" ? ((v as Record<string, unknown>).en ?? Object.values(v as Record<string, unknown>)[0]) : null;
+    if (typeof email === "string" && email.trim()) list = [email.trim()];
+  }
   return [...new Set(list.map((e) => e.trim().toLowerCase()))].filter(valid);
 }

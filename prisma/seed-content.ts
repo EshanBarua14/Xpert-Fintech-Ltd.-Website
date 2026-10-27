@@ -3202,6 +3202,31 @@ async function seedRepLinkedIn() {
   if (set) console.log(`  LinkedIn added for ${set} representative(s)`);
 }
 
+// ── 27 Oct (XFL): management order after the leaders — Saikat, Maruf, Mehrab, Moshad; Square Securities' own logo ──
+async function seedManagementOrderAndSquare() {
+  const MARK = "seed.mancom-order-square-2026-10-27";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const order: [string, number][] = [["saikat-biswas", 3], ["muhammad-shamsul-maruf", 4], ["mohammad-mehrabul-ferdous", 5], ["md-abul-moshad-chowdhury", 6]];
+  for (const [key, sortOrder] of order) {
+    const person = await db.person.findUnique({ where: { key }, select: { id: true } });
+    if (person) await db.personRole.updateMany({ where: { personId: person.id, group: "MANAGEMENT" }, data: { sortOrder } });
+  }
+  const logo = await seedImage("logos", "square-securities", "Square Securities Management logo", ["logo", "client"]);
+  if (logo) {
+    const orgs = await db.organization.findMany({
+      where: { deletedAt: null, OR: [{ key: "square-securities" }, { translations: { some: { name: { contains: "Square Securities", mode: "insensitive" } } } }] },
+      select: { id: true },
+    });
+    for (const o of orgs) {
+      await db.organization.update({ where: { id: o.id }, data: { logoMediaId: logo, logoPermission: true } });
+      await db.mediaUsage.deleteMany({ where: { entityType: "ORGANIZATION", entityId: o.id, field: "logo" } });
+      await db.mediaUsage.create({ data: { mediaId: logo, entityType: "ORGANIZATION", entityId: o.id, field: "logo" } });
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log("  Management order: Saikat, Maruf, Mehrab, Moshad after the leaders; Square Securities logo replaced (run npm run media:to-db next)");
+}
+
 // ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
 async function seedSharePlus() {
   const MARK = "seed.share-plus-2026-10-26";
@@ -3750,6 +3775,7 @@ async function main() {
   await seedCapital36();
   await seedTheaLogo();
   await seedRepLinkedIn();
+  await seedManagementOrderAndSquare();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

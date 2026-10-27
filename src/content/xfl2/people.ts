@@ -37,6 +37,8 @@ export const BOARD: RosterPerson[] = [
 
 /** Management Committee (ManCom). */
 export const MANAGEMENT: RosterPerson[] = [
+  // Executive Director, first in the committee (XFL, 27 Oct 2026); rank 0 keeps him first beside profiles already ordered in the admin.
+  { key: "sowkot-osman", name: "Sowkot Osman", title: "Executive Director", department: "Leadership", rank: 0 },
   { key: "md-shahinur-rahman", name: "Md. Shahinur Rahman", title: "Managing Director", department: "Leadership", rank: 1 },
   { key: "md-abdur-rahman-rony", name: "Md. Abdur Rahman Rony, FCS", formerName: "Md. Abdur Rahman Rony", title: "CFO & Company Secretary", department: "Leadership", rank: 2 },
   { key: "md-abul-moshad-chowdhury", name: "Md. Abul Moshad Chowdhury", title: "Head of Application Support and Development", department: "Engineering", rank: 3 },

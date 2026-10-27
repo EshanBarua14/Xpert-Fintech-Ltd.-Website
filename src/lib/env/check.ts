@@ -37,7 +37,7 @@ export function checkEnv(env: NodeJS.ProcessEnv = process.env): EnvIssue[] {
 
   // File storage
   const storage = (env.STORAGE_DRIVER ?? "local").toLowerCase();
-  if (!["local", "s3"].includes(storage)) add("STORAGE_DRIVER", "must be local or s3.");
+  if (!["local", "database", "s3"].includes(storage)) add("STORAGE_DRIVER", "must be local or database.");
   if (storage === "s3") add("STORAGE_DRIVER", "s3 is not available yet. Use local and back up the storage folder.");
   if (prod && storage === "local") add("STORAGE_DRIVER", "is local: uploads are stored on this server's disk. Back up the storage folder (see docs/OPERATIONS.md).", false);
 

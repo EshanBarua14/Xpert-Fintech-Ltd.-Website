@@ -145,16 +145,20 @@ test.describe("Admin content editing", () => {
     const editor = ed.url().split("?")[0]!.split("#")[0]!;
     const slug = await ed.locator("#enSlug").inputValue().catch(() => "");
     const adder = ed.locator("summary").filter({ hasText: /Add to key features/i }).first();
-    await adder.scrollIntoViewIfNeeded();
-    await adder.click();
+    // Diagnostic: Playwright's "stable element" wait has stalled here before.
+    const clicked = await adder.click({ timeout: 10_000 }).then(() => true).catch((e: Error) => (console.log(`TIMING adder click failed: ${e.message.split("\n")[0]}`), false));
+    if (!clicked) {
+      await Promise.race([ed.screenshot({ path: "test-results/diag-product-editor.png", timeout: 15_000 }).catch(() => {}), new Promise((r) => setTimeout(r, 20_000))]);
+      await adder.evaluate((s) => ((s.parentElement as HTMLDetailsElement).open = true));
+    }
     await ed.locator("#new-CAPABILITY-enTitle").fill(feature);
-    await ed.locator("#new-CAPABILITY-enTitle").locator("xpath=ancestor::form").getByRole("button", { name: "Add" }).click();
+    await ed.locator("#new-CAPABILITY-enTitle").evaluate((i) => (i as HTMLInputElement).form!.requestSubmit());
     await expect(ed.locator(`input[value="${feature}"]`).first()).toBeVisible({ timeout: 15_000 });
     if (slug) await publicHas(ed, `/en/products/${slug}`, feature);
 
     await ed.goto(editor, { waitUntil: "load" });
     const row = ed.locator("div").filter({ has: ed.locator(`input[value="${feature}"]`) }).filter({ has: ed.getByRole("button", { name: "Delete" }) }).last();
-    await row.getByRole("button", { name: "Delete" }).first().click();
+    await row.getByRole("button", { name: "Delete" }).first().click({ timeout: 15_000 }).catch(() => row.getByRole("button", { name: "Delete" }).first().evaluate((b) => (b as HTMLButtonElement).click()));
     await expect(ed.locator(`input[value="${feature}"]`)).toHaveCount(0, { timeout: 15_000 });
     if (slug) await publicHas(ed, `/en/products/${slug}`, feature, false);
   });

@@ -81,7 +81,7 @@ On your computer: install the GitHub CLI (https://cli.github.com) and run `gh au
    (Or remove the Vercel project once the domain has been live for a while.)
 6. Google Search Console: add `xpertfintech.com`, submit `https://xpertfintech.com/sitemap.xml`.
 
-`CANONICAL_HOST` sends `www.`, `http://` and any other address to `https://xpertfintech.com`
+`CANONICAL_HOST` sends `www.` and any other address to `https://xpertfintech.com`
 (src/middleware.ts); it is off while unset.
 
 ## Every update after that

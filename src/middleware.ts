@@ -14,6 +14,18 @@ const SESSION_COOKIE = "xpert_admin_session";
 export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
+  // 0. One address for the whole site. Off unless CANONICAL_HOST is set (e.g. xpertfintech.com):
+  //    then www., the old vercel.app address and plain http:// all move to https://<CANONICAL_HOST>.
+  const canonical = process.env.CANONICAL_HOST;
+  if (canonical) {
+    const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "").split(",")[0]!.trim().split(":")[0]!.toLowerCase();
+    const proto = (request.headers.get("x-forwarded-proto") ?? "").split(",")[0]!.trim();
+    const local = host === "localhost" || host.startsWith("127.") || host === "";
+    if (!local && (host !== canonical || proto === "http")) {
+      return NextResponse.redirect(`https://${canonical}${pathname}${search}`, 308);
+    }
+  }
+
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (pathname === "/admin/login" || request.cookies.has(SESSION_COOKIE)) return NextResponse.next();
     const url = request.nextUrl.clone();

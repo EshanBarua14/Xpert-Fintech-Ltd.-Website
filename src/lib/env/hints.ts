@@ -6,8 +6,8 @@
  */
 export const editorHints = () => process.env.EDITOR_HINTS === "on" && !isLiveDeployment();
 
-/** Vercel's production deployment (the live site), whatever else is set. */
-const isLiveDeployment = () => process.env.VERCEL_ENV === "production";
+/** The live site: Vercel's production deployment, or a server with APP_ENV=production (Namecheap). */
+const isLiveDeployment = () => process.env.VERCEL_ENV === "production" || process.env.APP_ENV === "production";
 
 /**
  * Empty slots for content still to come (screenshots, key features, case

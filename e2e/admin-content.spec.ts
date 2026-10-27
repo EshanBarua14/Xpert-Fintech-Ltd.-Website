@@ -129,7 +129,17 @@ test.describe("Admin content editing", () => {
     const feature = `E2E feature ${STAMP}`;
     await page.goto("/admin/products");
     // A live product (the trading platform), not one in the trash.
-    const href = await page.locator("main a[href^='/admin/products/']").filter({ hasText: /Trading/ }).first().getAttribute("href");
+    // Diagnostic: how responsive each product's editor is (logged, not asserted).
+    const all = await page.locator("main a[href^='/admin/products/']").evaluateAll((as) => as.map((a) => [a.getAttribute("href")!, a.textContent ?? ""] as const).filter(([h]) => !/new|\?/.test(h)));
+    for (const [h, name] of all.slice(0, 8)) {
+      const probe = await page.context().newPage();
+      const t = Date.now();
+      await probe.goto(h, { waitUntil: "domcontentloaded" }).catch(() => {});
+      const ok = await Promise.race([probe.evaluate(() => document.querySelectorAll("summary").length).then((n) => `ok ${n} summaries`), new Promise<string>((r) => setTimeout(() => r("NOT RESPONDING"), 15_000))]);
+      console.log(`TIMING editor ${name.trim()}: ${ok} after ${Date.now() - t} ms`);
+      await probe.close().catch(() => {});
+    }
+    const href = await page.locator("main a[href^='/admin/products/']").filter({ hasText: /DMS/ }).first().getAttribute("href");
     const t0 = Date.now();
     await page.goto(href!, { waitUntil: "domcontentloaded", timeout: 120_000 });
     console.log(`TIMING product editor ready in ${Date.now() - t0} ms`);

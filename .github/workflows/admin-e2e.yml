@@ -79,6 +79,14 @@ jobs:
       - name: Fail on test failures
         if: always()
         run: grep -q "^exit 0" e2e.log && grep -q "^exit 0" public.log
+      - name: Push screenshots to a temporary branch
+        if: always()
+        run: |
+          shopt -s globstar nullglob
+          files=(test-results/**/*.png admin-results/**/*.png)
+          [ ${#files[@]} -eq 0 ] && exit 0
+          d=$(mktemp -d); i=0; for f in "${files[@]}"; do i=$((i+1)); cp "$f" "$d/$i-$(echo "$f" | tr '/' '_' | tail -c 90)"; done
+          cd "$d" && git init -q && git add . && git -c user.name=ci -c user.email=ci@local commit -qm shots && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/tmp/e2e-shots || true
       - name: Remove the temporary results branch
         if: always()
         run: git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" --delete tmp/dse-pages || true

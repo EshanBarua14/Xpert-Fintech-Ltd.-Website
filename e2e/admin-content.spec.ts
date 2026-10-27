@@ -104,10 +104,11 @@ test.describe("Admin content editing", () => {
     await page.locator("ol > li").filter({ hasText: card }).getByRole("button", { name: "Delete" }).first().click();
     await publicHas(page, `/en/${slug}`, card, false);
     await page.goto(editor);
-    while ((await page.getByRole("button", { name: /^Delete$/ }).count()) > 0) {
+    // The section's Delete comes first and removes its blocks with it.
+    for (let guard = 0; guard < 6 && (await page.getByRole("button", { name: /^Delete$/ }).count()) > 0; guard++) {
       const before = await page.getByRole("button", { name: /^Delete$/ }).count();
       await page.getByRole("button", { name: /^Delete$/ }).first().click();
-      await expect(page.getByRole("button", { name: /^Delete$/ })).toHaveCount(before - 1, { timeout: 15_000 });
+      await expect(async () => expect(await page.getByRole("button", { name: /^Delete$/ }).count()).toBeLessThan(before)).toPass({ timeout: 15_000 });
     }
     await publicHas(page, `/en/${slug}`, edited, false);
 

@@ -131,7 +131,13 @@ test.describe("Admin content editing", () => {
     const editor = page.url().split("?")[0]!.split("#")[0]!;
     // The product's public address, from its slug field.
     const slug = await page.locator("#enSlug").inputValue().catch(() => "");
-    await page.locator("summary").filter({ hasText: /Add to key features/i }).first().click();
+    const adder = page.locator("summary").filter({ hasText: /Add to key features/i }).first();
+    if (!(await adder.isVisible({ timeout: 15_000 }).catch(() => false))) {
+      const heads = await page.locator("main h1, main h2").allInnerTexts();
+      const sums = await page.locator("summary").allInnerTexts();
+      throw new Error(`no "Add to key features" on ${page.url()} — headings: ${heads.join(" | ")} — summaries: ${sums.join(" | ")}`);
+    }
+    await adder.click();
     await page.locator("#new-CAPABILITY-enTitle").fill(feature);
     await page.locator("#new-CAPABILITY-enTitle").locator("xpath=ancestor::form").getByRole("button", { name: "Add" }).click();
     await expect(page.locator(`input[value="${feature}"]`).first()).toBeVisible({ timeout: 15_000 });

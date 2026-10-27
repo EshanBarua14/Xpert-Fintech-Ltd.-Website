@@ -11,7 +11,8 @@
 //   Neon DATABASE_URL host.
 import { execSync } from "node:child_process";
 
-if (process.env.VERCEL_ENV !== "production") {
+// MIGRATE_ON_BUILD=1: the Namecheap deploy (.github/workflows/deploy-namecheap.yml) asks for it too.
+if (process.env.VERCEL_ENV !== "production" && process.env.MIGRATE_ON_BUILD !== "1") {
   console.log(`[migrate-on-deploy] skipped (VERCEL_ENV=${process.env.VERCEL_ENV ?? "unset"})`);
   process.exit(0);
 }

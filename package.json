@@ -12,6 +12,8 @@
     "dev:fast": "next dev --turbopack",
     "build": "node scripts/migrate-on-deploy.mjs && prisma generate && next build",
     "start": "next start",
+    "deploy": "node scripts/deploy.mjs",
+    "build:server": "prisma generate && NEXT_OUTPUT=standalone next build && bash deploy/package.sh",
     "preview": "next build && next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

@@ -45,3 +45,4 @@ market-debug/
 data.sql
 
 /audit-out/
+/dist/

@@ -1,0 +1,115 @@
+name: deploy-namecheap
+# Builds the whole site (pages, admin, API: one Node.js server) and puts it live on the Namecheap server.
+# Runs ONLY when started by hand (npm run deploy, or GitHub → Actions → deploy-namecheap → Run workflow),
+# with the confirmation typed, and only once the repository variable DEPLOY_ENABLED is "yes".
+# Setup and go-live steps: docs/DEPLOY-NAMECHEAP.md
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type xpertfintech.com to confirm"
+        required: true
+      action:
+        description: "deploy = build and put live; rollback = go back to the previous release"
+        type: choice
+        options: [deploy, rollback]
+        default: deploy
+      migrate:
+        description: "Apply database migrations before the build"
+        type: boolean
+        default: true
+concurrency:
+  group: deploy-namecheap
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: inputs.confirm == 'xpertfintech.com' && vars.DEPLOY_ENABLED == 'yes'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    env:
+      SITE_HOST: ${{ vars.SITE_HOST || 'xpertfintech.com' }}
+      APP_DIR: ${{ vars.NC_APP_DIR || 'xpertfintech' }}
+      MODE: ${{ vars.NC_MODE || 'cpanel' }}
+      SSH_HOST: ${{ secrets.NC_SSH_HOST }}
+      SSH_PORT: ${{ vars.NC_SSH_PORT || '21098' }}
+      SSH_USER: ${{ secrets.NC_SSH_USER }}
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check settings
+        env:
+          HAS_KEY: ${{ secrets.NC_SSH_KEY != '' }}
+          HAS_DB: ${{ secrets.DATABASE_URL != '' }}
+        run: |
+          missing=""
+          [ -n "$SSH_HOST" ] || missing="$missing NC_SSH_HOST"
+          [ -n "$SSH_USER" ] || missing="$missing NC_SSH_USER"
+          [ "$HAS_KEY" = true ] || missing="$missing NC_SSH_KEY"
+          if [ "${{ inputs.action }}" = deploy ]; then
+            [ "$HAS_DB" = true ] || missing="$missing DATABASE_URL"
+          fi
+          [ -z "$missing" ] || { echo "::error::Missing GitHub secrets:$missing (see docs/DEPLOY-NAMECHEAP.md)"; exit 1; }
+
+      - name: SSH key
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.NC_SSH_KEY }}" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "SSH=ssh -i $HOME/.ssh/id_deploy -p $SSH_PORT -o BatchMode=yes $SSH_USER@$SSH_HOST" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        if: inputs.action == 'deploy'
+        with: { node-version: 22, cache: npm }
+      - if: inputs.action == 'deploy'
+        run: npm ci
+
+      # Database engines for the server's Linux (cPanel CloudLinux or Ubuntu), not only this runner's.
+      - name: Prisma client for the server
+        if: inputs.action == 'deploy'
+        run: |
+          sed -i 's/^  provider = "prisma-client-js"$/  provider = "prisma-client-js"\n  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-1.1.x", "rhel-openssl-3.0.x", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]/' prisma/schema.prisma
+          grep -q binaryTargets prisma/schema.prisma
+          npx prisma generate
+
+      - name: Database migrations
+        if: inputs.action == 'deploy' && inputs.migrate
+        env:
+          MIGRATE_ON_BUILD: "1"
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: node scripts/migrate-on-deploy.mjs
+
+      - name: Build
+        if: inputs.action == 'deploy'
+        env:
+          NEXT_OUTPUT: standalone
+          NEXT_PUBLIC_SITE_URL: https://${{ vars.SITE_HOST || 'xpertfintech.com' }}
+          CANONICAL_HOST: ${{ vars.SITE_HOST || 'xpertfintech.com' }}
+          APP_ENV: production
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+        run: for i in 1 2 3; do npx next build && exit 0; echo "::warning::build failed, retrying ($i)"; sleep 20; done; exit 1
+
+      - name: Package
+        if: inputs.action == 'deploy'
+        run: bash deploy/package.sh
+
+      - name: Upload
+        if: inputs.action == 'deploy'
+        run: |
+          tar -C dist -czf - . | $SSH "rm -rf '$APP_DIR.new' && mkdir -p '$APP_DIR.new' && tar -xzf - -C '$APP_DIR.new'"
+
+      - name: Put live
+        run: $SSH "bash -s -- ${{ inputs.action == 'rollback' && 'rollback' || 'switch' }} '$APP_DIR' '$MODE'" < deploy/remote.sh
+
+      - name: Health check
+        run: |
+          url="https://$SITE_HOST/api/health"
+          for i in $(seq 1 30); do
+            if curl -fsS --max-time 15 "$url"; then echo; echo "Site answers at $url"; exit 0; fi
+            sleep 10
+          done
+          echo "::error::$url did not answer. On the server: ~/$APP_DIR/stderr.log (cPanel) or pm2 logs xpertfintech (VPS). Undo with: npm run deploy -- rollback"
+          exit 1

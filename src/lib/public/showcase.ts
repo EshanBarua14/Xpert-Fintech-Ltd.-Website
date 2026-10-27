@@ -88,7 +88,7 @@ export const getShowcase = cache(async (locale: AppLocale): Promise<ShowcaseProd
         }),
         logo: r.iconMediaId ? (images.get(r.iconMediaId) ?? null) : null,
         look: (r.key && design.products[r.key]) || null,
-        capabilities: titles("CAPABILITY").slice(0, 4),
+        capabilities: titles("CAPABILITY").slice(0, 5),
         steps: titles("WORKFLOW_STEP").slice(0, 6),
       };
     })

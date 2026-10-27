@@ -41,8 +41,9 @@ jobs:
           printf 'NEXT_PUBLIC_SITE_URL=https://xpertfintech.com\nDATABASE_URL=%s\nSESSION_SECRET=%s\nCANONICAL_HOST=xpertfintech.com\nSTORAGE_DRIVER=database\n' "$DATABASE_URL" "$SESSION_SECRET" > /tmp/xfl.env
           cd /tmp && env -i PATH="$PATH" HOME="$HOME" XFL_ENV_FILE=/tmp/xfl.env PORT=3100 nohup node /tmp/srv/app.js > /tmp/srv.log 2>&1 &
           for i in $(seq 1 60); do curl -sf http://127.0.0.1:3100/api/health >/dev/null && break; sleep 2; done
+          set +e
           fail=0
-          check() { code=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $2" "http://127.0.0.1:3100$1"); echo "::notice::$2$1 → $code (want $3)"; [ "$code" = "$3" ] || fail=1; }
+          check() { code=$(curl -s --max-time 60 -o /dev/null -w '%{http_code}' -H "Host: $2" "http://127.0.0.1:3100$1"); rc=$?; echo "::notice::$2$1 → $code curl=$rc (want $3)"; [ "$code" = "$3" ] || fail=1; }
           check /api/health xpertfintech.com 200
           check /en xpertfintech.com 200
           check /en/products xpertfintech.com 200
@@ -53,4 +54,4 @@ jobs:
           loc=$(curl -s -o /dev/null -w '%{redirect_url}' -H "Host: www.xpertfintech.com" http://127.0.0.1:3100/en/products); echo "::notice::www redirect → $loc"; [ "$loc" = "https://xpertfintech.com/en/products" ] || fail=1
           img=$(curl -s -H "Host: xpertfintech.com" http://127.0.0.1:3100/en | grep -o '/_next/static/[^"]*\.css' | head -1); check "$img" xpertfintech.com 200
           grep -q "https://xpertfintech.com" <(curl -s -H "Host: xpertfintech.com" http://127.0.0.1:3100/sitemap.xml) && echo "::notice::sitemap uses https://xpertfintech.com" || fail=1
-          [ $fail = 0 ] || { tail -40 /tmp/srv.log | sed 's/^/::error::/'; exit 1; }
+          [ $fail = 0 ] || { grep -v '^ *$' /tmp/srv.log | tail -40 | sed 's/^/::error::/'; pgrep -fa app.js | sed 's/^/::error::running /'; exit 1; }

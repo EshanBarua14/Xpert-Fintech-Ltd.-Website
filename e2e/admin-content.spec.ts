@@ -125,7 +125,8 @@ test.describe("Admin content editing", () => {
     test.setTimeout(150_000);
     const feature = `E2E feature ${STAMP}`;
     await page.goto("/admin/products");
-    await page.locator("main a[href^='/admin/products/']").filter({ hasNotText: /new/i }).first().click();
+    // A live product (the trading platform), not one in the trash.
+    await page.locator("main a[href^='/admin/products/']").filter({ hasText: /Trading/ }).first().click();
     await page.waitForURL(/\/admin\/products\/[0-9a-f-]{36}/);
     const editor = page.url().split("?")[0]!.split("#")[0]!;
     // The product's public address, from its slug field.

@@ -123,6 +123,9 @@ test.describe("Admin content editing", () => {
 
   test("products: a key feature is added, shown on the product page and deleted", async ({ page }) => {
     test.setTimeout(150_000);
+    const errors: string[] = [];
+    page.on("pageerror", (e) => errors.push(e.message.slice(0, 200)));
+    page.on("console", (m) => m.type() === "error" && errors.push(m.text().slice(0, 200)));
     const feature = `E2E feature ${STAMP}`;
     await page.goto("/admin/products");
     // A live product (the trading platform), not one in the trash.
@@ -134,11 +137,15 @@ test.describe("Admin content editing", () => {
     // The product's public address, from its slug field.
     const slug = await page.locator("#enSlug").inputValue().catch(() => "");
     const adder = page.locator("summary").filter({ hasText: /Add to key features/i }).first();
-    if (!(await adder.isVisible({ timeout: 15_000 }).catch(() => false))) {
-      const heads = await page.locator("main h1, main h2").allInnerTexts();
-      const sums = await page.locator("summary").allInnerTexts();
-      throw new Error(`no "Add to key features" on ${page.url()} — headings: ${heads.join(" | ")} — summaries: ${sums.join(" | ")}`);
+    const found = await adder.waitFor({ state: "attached", timeout: 30_000 }).then(() => true).catch(() => false);
+    if (!found) {
+      const probe = await Promise.race([
+        page.evaluate(() => `${document.title} · summaries: ${[...document.querySelectorAll("summary")].map((x) => x.textContent).join(" | ")} · h1: ${document.querySelector("h1")?.textContent}`),
+        new Promise<string>((r) => setTimeout(() => r("page not responding"), 10_000)),
+      ]);
+      throw new Error(`no "Add to key features" on ${page.url()}: ${probe} · errors: ${errors.join(" | ")}`);
     }
+    await adder.scrollIntoViewIfNeeded();
     await adder.click();
     await page.locator("#new-CAPABILITY-enTitle").fill(feature);
     await page.locator("#new-CAPABILITY-enTitle").locator("xpath=ancestor::form").getByRole("button", { name: "Add" }).click();

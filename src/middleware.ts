@@ -15,15 +15,14 @@ export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   // 0. One address for the whole site. Off unless CANONICAL_HOST is set (e.g. xpertfintech.com):
-  //    then www., the old vercel.app address and plain http:// all move to https://<CANONICAL_HOST>.
+  //    then www. and the old vercel.app address move to https://<CANONICAL_HOST>.
+  //    http:// → https:// is left to the host (cPanel "Force HTTPS", Nginx, Vercel): behind a proxy
+  //    the request reaches Next.js as plain http, so checking the scheme here would loop.
   const canonical = process.env.CANONICAL_HOST;
   if (canonical) {
-    const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "").split(",")[0]!.trim().split(":")[0]!.toLowerCase();
-    const proto = (request.headers.get("x-forwarded-proto") ?? "").split(",")[0]!.trim();
-    const local = host === "localhost" || host.startsWith("127.") || host === "";
-    if (!local && (host !== canonical || proto === "http")) {
-      return NextResponse.redirect(`https://${canonical}${pathname}${search}`, 308);
-    }
+    const host = (request.headers.get("host") ?? "").split(":")[0]!.toLowerCase();
+    const local = host === "" || host === "localhost" || host.startsWith("127.");
+    if (!local && host !== canonical) return NextResponse.redirect(`https://${canonical}${pathname}${search}`, 308);
   }
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {

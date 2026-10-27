@@ -131,15 +131,22 @@ test.describe("Admin content editing", () => {
     // A live product (the trading platform), not one in the trash.
     // Diagnostic: how responsive each product's editor is (logged, not asserted).
     const all = await page.locator("main a[href^='/admin/products/']").evaluateAll((as) => as.map((a) => [a.getAttribute("href")!, a.textContent ?? ""] as const).filter(([h]) => !/new|\?/.test(h)));
-    for (const [h, name] of all.slice(0, 8)) {
+    const report: string[] = [];
+    let href: string | null = null;
+    for (const [h, name] of all.slice(0, 14)) {
       const probe = await page.context().newPage();
       const t = Date.now();
-      await probe.goto(h, { waitUntil: "domcontentloaded" }).catch(() => {});
-      const ok = await Promise.race([probe.evaluate(() => document.querySelectorAll("summary").length).then((n) => `ok ${n} summaries`), new Promise<string>((r) => setTimeout(() => r("NOT RESPONDING"), 15_000))]);
-      console.log(`TIMING editor ${name.trim()}: ${ok} after ${Date.now() - t} ms`);
-      await probe.close().catch(() => {});
+      await probe.goto(h, { waitUntil: "load", timeout: 30_000 }).catch(() => {});
+      await new Promise((r) => setTimeout(r, 4000));
+      const ok = await Promise.race([
+        probe.evaluate(() => [...document.querySelectorAll("summary")].some((s) => /Add to key features/i.test(s.textContent ?? ""))).then((k) => (k ? "ok+kf" : "ok")),
+        new Promise<string>((r) => setTimeout(() => r("NOT RESPONDING"), 15_000)),
+      ]);
+      report.push(`${name.trim()}=${ok}/${Date.now() - t}ms`);
+      if (ok === "ok+kf" && !href) href = h;
+      await Promise.race([probe.close().catch(() => {}), new Promise((r) => setTimeout(r, 5000))]);
     }
-    const href = await page.locator("main a[href^='/admin/products/']").filter({ hasText: /DMS/ }).first().getAttribute("href");
+    console.log(`TIMING editors: ${report.join(", ")}`);
     const t0 = Date.now();
     await page.goto(href!, { waitUntil: "domcontentloaded", timeout: 120_000 });
     console.log(`TIMING product editor ready in ${Date.now() - t0} ms`);

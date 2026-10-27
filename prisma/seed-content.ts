@@ -3188,6 +3188,20 @@ async function seedTheaLogo() {
   console.log(`  Thea Securities: logo set on ${orgs.length} record(s) (run npm run media:to-db next)`);
 }
 
+// ── 27 Oct (XFL): representatives' LinkedIn profiles (filled only where none is on file) ──
+async function seedRepLinkedIn() {
+  const MARK = "seed.rep-linkedin-2026-10-27";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const links: [string, string][] = [["wasif-zaman", "https://www.linkedin.com/in/wasifzaman"]];
+  let set = 0;
+  for (const [key, url] of links) {
+    const r = await db.person.updateMany({ where: { key, OR: [{ linkedinUrl: null }, { linkedinUrl: "" }] }, data: { linkedinUrl: url } });
+    set += r.count;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), set } } });
+  if (set) console.log(`  LinkedIn added for ${set} representative(s)`);
+}
+
 // ── 26 Oct: the market share reads "45%+" (at least), as XFL states it ──
 async function seedSharePlus() {
   const MARK = "seed.share-plus-2026-10-26";
@@ -3735,6 +3749,7 @@ async function main() {
   await seedEveryClientStory();
   await seedCapital36();
   await seedTheaLogo();
+  await seedRepLinkedIn();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

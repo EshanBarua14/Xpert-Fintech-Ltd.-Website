@@ -38,7 +38,7 @@ jobs:
         run: |
           mkdir -p /tmp/srv && tar -C dist -czf - . | tar -xzf - -C /tmp/srv
           ls /tmp/srv/node_modules/.prisma/client/ | sed 's/^/::notice::engine /'
-          printf 'DATABASE_URL=%s\nSESSION_SECRET=%s\nCANONICAL_HOST=xpertfintech.com\nSTORAGE_DRIVER=database\n' "$DATABASE_URL" "$SESSION_SECRET" > /tmp/xfl.env
+          printf 'NEXT_PUBLIC_SITE_URL=https://xpertfintech.com\nDATABASE_URL=%s\nSESSION_SECRET=%s\nCANONICAL_HOST=xpertfintech.com\nSTORAGE_DRIVER=database\n' "$DATABASE_URL" "$SESSION_SECRET" > /tmp/xfl.env
           cd /tmp && env -i PATH="$PATH" HOME="$HOME" XFL_ENV_FILE=/tmp/xfl.env PORT=3100 nohup node /tmp/srv/app.js > /tmp/srv.log 2>&1 &
           for i in $(seq 1 60); do curl -sf http://127.0.0.1:3100/api/health >/dev/null && break; sleep 2; done
           fail=0

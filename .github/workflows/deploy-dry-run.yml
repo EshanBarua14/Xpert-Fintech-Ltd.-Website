@@ -37,13 +37,13 @@ jobs:
       - name: Run the package like the server
         run: |
           mkdir -p /tmp/srv && tar -C dist -czf - . | tar -xzf - -C /tmp/srv
-          ls /tmp/srv/node_modules/.prisma/client/ | sed 's/^/::notice::engine /'
+          echo "::notice::engines: $(ls /tmp/srv/node_modules/.prisma/client/ | grep -c node$)"
           printf 'NEXT_PUBLIC_SITE_URL=https://xpertfintech.com\nDATABASE_URL=%s\nSESSION_SECRET=%s\nCANONICAL_HOST=xpertfintech.com\nSTORAGE_DRIVER=database\n' "$DATABASE_URL" "$SESSION_SECRET" > /tmp/xfl.env
           cd /tmp && env -i PATH="$PATH" HOME="$HOME" XFL_ENV_FILE=/tmp/xfl.env PORT=3100 nohup node /tmp/srv/app.js > /tmp/srv.log 2>&1 &
           for i in $(seq 1 60); do curl -sf http://127.0.0.1:3100/api/health >/dev/null && break; sleep 2; done
           set +e
-          fail=0
-          check() { code=$(curl -s --max-time 60 -o /dev/null -w '%{http_code}' -H "Host: $2" "http://127.0.0.1:3100$1"); rc=$?; echo "::notice::$2$1 → $code curl=$rc (want $3)"; [ "$code" = "$3" ] || fail=1; }
+          fail=0; R=""
+          check() { code=$(curl -s --max-time 60 -o /dev/null -w '%{http_code}' -H "Host: $2" "http://127.0.0.1:3100$1"); rc=$?; R="$R | $2$1=$code${rc:+/c$rc}(want $3)"; [ "$code" = "$3" ] || fail=1; }
           check /api/health xpertfintech.com 200
           check /en xpertfintech.com 200
           check /en/products xpertfintech.com 200
@@ -51,7 +51,8 @@ jobs:
           check /sitemap.xml xpertfintech.com 200
           check /en www.xpertfintech.com 308
           check /en xpert-fintech-ltd-website.vercel.app 308
-          loc=$(curl -s -o /dev/null -w '%{redirect_url}' -H "Host: www.xpertfintech.com" http://127.0.0.1:3100/en/products); echo "::notice::www redirect → $loc"; [ "$loc" = "https://xpertfintech.com/en/products" ] || fail=1
+          loc=$(curl -s -o /dev/null -w '%{redirect_url}' -H "Host: www.xpertfintech.com" http://127.0.0.1:3100/en/products); R="$R | www→$loc"; [ "$loc" = "https://xpertfintech.com/en/products" ] || fail=1
           img=$(curl -s -H "Host: xpertfintech.com" http://127.0.0.1:3100/en | grep -o '/_next/static/[^"]*\.css' | head -1); check "$img" xpertfintech.com 200
-          grep -q "https://xpertfintech.com" <(curl -s -H "Host: xpertfintech.com" http://127.0.0.1:3100/sitemap.xml) && echo "::notice::sitemap uses https://xpertfintech.com" || fail=1
+          grep -q "https://xpertfintech.com" <(curl -s -H "Host: xpertfintech.com" http://127.0.0.1:3100/sitemap.xml) && R="$R | sitemap ok" || { fail=1; R="$R | sitemap BAD"; }
+          echo "::notice::checks$R"
           [ $fail = 0 ] || { grep -v '^ *$' /tmp/srv.log | tail -40 | sed 's/^/::error::/'; pgrep -fa app.js | sed 's/^/::error::running /'; exit 1; }

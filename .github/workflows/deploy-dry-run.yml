@@ -1,0 +1,56 @@
+name: deploy-dry-run
+# CI only (ci/build-check): builds and packages exactly as deploy-namecheap.yml does, starts the
+# package with app.js like the server would, and checks pages, API, admin and the address redirect.
+on:
+  push:
+    branches: [ci/build-check]
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_USER: xpert, POSTGRES_PASSWORD: xpert, POSTGRES_DB: xpert_dry }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U xpert" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://xpert:xpert@localhost:5432/xpert_dry?schema=public
+      SESSION_SECRET: dry-run-session-secret-0123456789-abcdefghijkl
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Prisma client for the server (as in deploy-namecheap.yml)
+        run: |
+          sed -i 's/^  provider = "prisma-client-js"$/  provider = "prisma-client-js"\n  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-1.1.x", "rhel-openssl-3.0.x", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]/' prisma/schema.prisma
+          grep -q binaryTargets prisma/schema.prisma
+          npx prisma generate
+      - run: MIGRATE_ON_BUILD=1 node scripts/migrate-on-deploy.mjs && npx prisma db seed > /dev/null 2>&1 && (npm run db:seed:content > /dev/null 2>&1 || true)
+      - name: Build
+        env: { NEXT_OUTPUT: standalone, NEXT_PUBLIC_SITE_URL: "https://xpertfintech.com", CANONICAL_HOST: xpertfintech.com, APP_ENV: production }
+        run: for i in 1 2 3; do npx next build > build.log 2>&1 && exit 0; sleep 20; done; tail -40 build.log | sed "s/^/::error::/"; exit 1
+      - run: bash deploy/package.sh
+      - name: Run the package like the server
+        run: |
+          mkdir -p /tmp/srv && tar -C dist -czf - . | tar -xzf - -C /tmp/srv
+          ls /tmp/srv/node_modules/.prisma/client/ | sed 's/^/::notice::engine /'
+          printf 'DATABASE_URL=%s\nSESSION_SECRET=%s\nCANONICAL_HOST=xpertfintech.com\nSTORAGE_DRIVER=database\n' "$DATABASE_URL" "$SESSION_SECRET" > /tmp/xfl.env
+          cd /tmp && env -i PATH="$PATH" HOME="$HOME" XFL_ENV_FILE=/tmp/xfl.env PORT=3100 nohup node /tmp/srv/app.js > /tmp/srv.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:3100/api/health >/dev/null && break; sleep 2; done
+          fail=0
+          check() { code=$(curl -s -o /dev/null -w '%{http_code}' -H "Host: $2" "http://127.0.0.1:3100$1"); echo "::notice::$2$1 → $code (want $3)"; [ "$code" = "$3" ] || fail=1; }
+          check /api/health xpertfintech.com 200
+          check /en xpertfintech.com 200
+          check /en/products xpertfintech.com 200
+          check /admin/login xpertfintech.com 200
+          check /sitemap.xml xpertfintech.com 200
+          check /en www.xpertfintech.com 308
+          check /en xpert-fintech-ltd-website.vercel.app 308
+          loc=$(curl -s -o /dev/null -w '%{redirect_url}' -H "Host: www.xpertfintech.com" http://127.0.0.1:3100/en/products); echo "::notice::www redirect → $loc"; [ "$loc" = "https://xpertfintech.com/en/products" ] || fail=1
+          img=$(curl -s -H "Host: xpertfintech.com" http://127.0.0.1:3100/en | grep -o '/_next/static/[^"]*\.css' | head -1); check "$img" xpertfintech.com 200
+          grep -q "https://xpertfintech.com" <(curl -s -H "Host: xpertfintech.com" http://127.0.0.1:3100/sitemap.xml) && echo "::notice::sitemap uses https://xpertfintech.com" || fail=1
+          [ $fail = 0 ] || { tail -40 /tmp/srv.log | sed 's/^/::error::/'; exit 1; }

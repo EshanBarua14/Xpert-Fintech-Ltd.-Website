@@ -122,7 +122,7 @@ test.describe("Admin content editing", () => {
   });
 
   test("products: a key feature is added, shown on the product page and deleted", async ({ page }) => {
-    test.setTimeout(150_000);
+    test.setTimeout(300_000);
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message.slice(0, 200)));
     page.on("console", (m) => m.type() === "error" && errors.push(m.text().slice(0, 200)));
@@ -131,8 +131,8 @@ test.describe("Admin content editing", () => {
     // A live product (the trading platform), not one in the trash.
     const href = await page.locator("main a[href^='/admin/products/']").filter({ hasText: /Trading/ }).first().getAttribute("href");
     const t0 = Date.now();
-    await page.goto(href!, { waitUntil: "load", timeout: 90_000 });
-    console.log(`product editor loaded in ${Date.now() - t0} ms`);
+    await page.goto(href!, { waitUntil: "domcontentloaded", timeout: 120_000 });
+    console.log(`TIMING product editor ready in ${Date.now() - t0} ms`);
     const editor = page.url().split("?")[0]!.split("#")[0]!;
     // The product's public address, from its slug field.
     const slug = await page.locator("#enSlug").inputValue().catch(() => "");

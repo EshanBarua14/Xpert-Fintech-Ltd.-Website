@@ -1875,3 +1875,22 @@ html:has(.whatsapp-fab) .back-to-top {
     text-align: inherit;
   }
 }
+
+/* Home "Built around your house": connectors from each system to the API bar and on to the platform,
+   with a light that runs down them. */
+.integration-wire {
+  background: linear-gradient(to bottom, rgb(34 188 235 / 0.15), rgb(34 188 235 / 0.9), rgb(34 188 235 / 0.15));
+  background-size: 100% 200%;
+  animation: integration-flow 2.4s linear infinite;
+}
+@keyframes integration-flow {
+  from { background-position: 0 100%; }
+  to { background-position: 0 -100%; }
+}
+.integration-api {
+  width: fit-content;
+  box-shadow: 0 0 30px -8px rgb(34 188 235 / 0.6);
+}
+@media (prefers-reduced-motion: reduce) {
+  .integration-wire { animation: none; }
+}

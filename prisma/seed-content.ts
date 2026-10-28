@@ -3202,6 +3202,26 @@ async function seedRepLinkedIn() {
   if (set) console.log(`  LinkedIn added for ${set} representative(s)`);
 }
 
+// ── 28 Oct (XFL): more LinkedIn profiles. Dilip Kajuri, Md. Abul Moshad Chowdhury and Shamsher Morshed
+//    confirmed by XFL; Fakruddin Ali Ahmed Rajib's from his own public posts (same full name, Green Delta).
+async function seedMoreLinkedIn() {
+  const MARK = "seed.more-linkedin-2026-10-28";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const links: [string, string][] = [
+    ["dilip-kajuri", "https://www.linkedin.com/in/dilip-kajuri-693483a1/"],
+    ["md-abul-moshad-chowdhury", "https://www.linkedin.com/in/md-abul-moshad-chowdhury-48458950/"],
+    ["shamsher-morshed", "https://www.linkedin.com/in/shamsher-morshed-a9613026/"],
+    ["fakruddin-ali-ahmed-rajib", "https://www.linkedin.com/in/fakruddin-ali-ahmed-rajib/"],
+  ];
+  let set = 0;
+  for (const [key, url] of links) {
+    const r = await db.person.updateMany({ where: { key, OR: [{ linkedinUrl: null }, { linkedinUrl: "" }] }, data: { linkedinUrl: url } });
+    set += r.count;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), set } } });
+  if (set) console.log(`  LinkedIn added for ${set} more person(s)`);
+}
+
 // ── 28 Oct (XFL): Eshan Barua's own links, supplied by him (each filled only where empty) ──
 async function seedEshanLinks() {
   const MARK = "seed.eshan-links-2026-10-28";
@@ -3819,6 +3839,7 @@ async function main() {
   await seedManagementOrderAndSquare();
   await seedVerifiedLinkedIn();
   await seedEshanLinks();
+  await seedMoreLinkedIn();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

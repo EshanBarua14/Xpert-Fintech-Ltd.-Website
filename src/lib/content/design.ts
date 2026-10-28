@@ -39,6 +39,7 @@ export const HOME_SECTIONS = [
   { key: "reach", label: "Market share and client base" },
   { key: "figures", label: "Xpert Fintech in numbers (Admin → Figures)" },
   { key: "showcase", label: "Product showcase" },
+  { key: "integration", label: "Built around your house (brand, rules, systems, features)" },
   { key: "roles", label: "Built for every desk (products by role)" },
   { key: "testimonials", label: "Client reviews" },
   { key: "market", label: "Today on DSE and CSE (switched on under DSE · CSE prices)", toggle: false },

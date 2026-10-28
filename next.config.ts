@@ -54,6 +54,10 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "50mb" },
   },
   images: {
+    // Vercel's image service has a monthly quota (the free plan's ran out on 28 Oct 2026 and every
+    // resized image then failed with "402 Payment Required"), so on Vercel images are served as they
+    // are. On our own server (Namecheap) Next.js resizes them itself, free. NEXT_IMAGE_UNOPTIMIZED=1 forces it.
+    unoptimized: process.env.VERCEL === "1" || process.env.NEXT_IMAGE_UNOPTIMIZED === "1",
     formats: ["image/avif", "image/webp"],
     // 75 for most images; portraits ask for 90 so faces stay crisp.
     qualities: [75, 90],

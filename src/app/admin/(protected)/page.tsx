@@ -1,9 +1,14 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
 import { contentTodos } from "@/lib/admin/todo";
+import { Icon } from "@/components/ui/Icon";
+import { AdminCount, Greeting, LiveRefresh, ProgressRing } from "@/components/admin/AdminMotion";
 
-type Stat = { label: string; value: number; href?: string; note?: string };
+type Stat = { label: string; value: number; href?: string; note?: string; icon: string; tone: string };
+
+const DAY = 24 * 60 * 60 * 1000;
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ denied?: string }> }) {
   const admin = await requireAdmin();
@@ -44,69 +49,129 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     db.lead.findMany({ where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 5, select: { id: true, name: true, organization: true, createdAt: true, status: true } }),
     contentTodos(),
   ]);
+  // Website enquiries per day, last 14 days (Dhaka time), for the trend bars.
+  const since = new Date(Date.now() - 13 * DAY);
+  since.setUTCHours(0, 0, 0, 0);
+  const leadDates = await db.lead.findMany({ where: { deletedAt: null, createdAt: { gte: since } }, select: { createdAt: true } });
+  const dayKey = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+  const days = Array.from({ length: 14 }, (_, i) => new Date(since.getTime() + i * DAY));
+  const perDay = days.map((d) => ({ key: dayKey(d), label: d.toLocaleDateString("en-GB", { timeZone: "Asia/Dhaka", day: "numeric", month: "short" }), n: 0 }));
+  for (const l of leadDates) {
+    const slot = perDay.find((x) => x.key === dayKey(l.createdAt));
+    if (slot) slot.n++;
+  }
+  const peak = Math.max(1, ...perDay.map((x) => x.n));
+  const leads14 = perDay.reduce((a, x) => a + x.n, 0);
   const open = todos.filter((x) => !x.done);
 
   const stats: Stat[] = [
-    { label: "Products published", value: productsLive, href: "/admin/products?status=PUBLISHED" },
-    { label: "Products in draft", value: productsDraft, href: "/admin/products?status=DRAFT" },
-    { label: "Pages", value: pages, href: "/admin/pages" },
-    { label: "Consortium members", value: members, href: "/admin/organizations?kind=CONSORTIUM_MEMBER" },
-    { label: "App deployments", value: deployments, href: "/admin/deployments" },
-    { label: "Events", value: events, href: "/admin/events" },
-    { label: "New leads", value: newLeads, href: "/admin/leads?status=NEW" },
-    { label: "Follow-ups due", value: followUpsDue, href: "/admin/leads" },
-    { label: "Media files", value: media, href: "/admin/media" },
+    { label: "New leads", value: newLeads, href: "/admin/leads?status=NEW", icon: "mail", tone: "#22bceb" },
+    { label: "Follow-ups due", value: followUpsDue, href: "/admin/leads", icon: "calendar", tone: "#f0c66e" },
+    { label: "Products published", value: productsLive, href: "/admin/products?status=PUBLISHED", icon: "bolt", tone: "#67e8f9" },
+    { label: "Products in draft", value: productsDraft, href: "/admin/products?status=DRAFT", icon: "document", tone: "#8fb4ff" },
+    { label: "Pages", value: pages, href: "/admin/pages", icon: "document", tone: "#8fb4ff" },
+    { label: "Consortium members", value: members, href: "/admin/organizations?kind=CONSORTIUM_MEMBER", icon: "building", tone: "#f0c66e" },
+    { label: "App deployments", value: deployments, href: "/admin/deployments", icon: "phone", tone: "#22bceb" },
+    { label: "Events", value: events, href: "/admin/events", icon: "calendar", tone: "#67e8f9" },
+    { label: "Media files", value: media, href: "/admin/media", icon: "image", tone: "#8fb4ff" },
   ];
+  const quick =
+    admin.role === "ADMIN"
+      ? [
+          { href: "/admin/pages/new", label: "New page", icon: "document" },
+          { href: "/admin/products/new", label: "New product", icon: "bolt" },
+          { href: "/admin/news/new", label: "New article", icon: "newspaper" },
+          { href: "/admin/people/new", label: "New person", icon: "users" },
+          { href: "/admin/media", label: "Upload media", icon: "cloud" },
+        ]
+      : [
+          { href: "/admin/pages", label: "Edit pages", icon: "document" },
+          { href: "/admin/site-text", label: "Edit site text", icon: "document" },
+          { href: "/admin/people", label: "Edit people", icon: "users" },
+          { href: "/admin/media", label: "Upload media", icon: "cloud" },
+        ];
 
   return (
     <div className="flex flex-col gap-10">
-      <div>
-        <h1 className="font-display text-3xl font-semibold">Welcome, {admin.name}</h1>
-        <p className="mt-1 text-text-secondary">
-          Overview of the website content. You are signed in as {admin.role === "ADMIN" ? "an admin" : "an editor"}.
-        </p>
-        {denied && (
-          <p role="alert" className="mt-4 rounded-card border border-gold/40 bg-gold/10 px-4 py-3 text-sm">
-            Editors can edit existing content, but only an admin can create, delete, trash or restore it, or manage users and backups.
+      <div className="admin-card flex flex-col gap-6 p-6 md:flex-row md:items-end md:justify-between md:p-8">
+        <div className="flex flex-col gap-2">
+          <Greeting name={admin.name} />
+          <p className="text-text-secondary">
+            Here is the website at a glance. You are signed in as {admin.role === "ADMIN" ? "an admin" : "an editor"}.
           </p>
-        )}
+          <LiveRefresh seconds={60} />
+          {denied && (
+            <p role="alert" className="mt-2 rounded-card border border-gold/40 bg-gold/10 px-4 py-3 text-sm">
+              Editors can edit existing content, but only an admin can create, delete, trash or restore it, or manage users and backups.
+            </p>
+          )}
+        </div>
+        <ul className="flex flex-wrap gap-2">
+          {quick.map((q) => (
+            <li key={q.href}>
+              <Link href={q.href} className="admin-card admin-card-hover flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold">
+                <Icon name={q.icon} className="size-4 text-brand-sky" />
+                {q.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((s) => {
-          const body = (
-            <>
-              <span className="tabular text-3xl font-semibold">{s.value}</span>
-              <span className="text-sm text-text-secondary">{s.label}</span>
-              {s.note && <span className="text-xs text-text-secondary/70">{s.note}</span>}
-            </>
-          );
-          return (
-            <li key={s.label}>
-              {s.href ? (
-                <Link href={s.href} className="flex h-full flex-col gap-1 rounded-card border border-fg/10 bg-ink-950/50 p-5 hover:border-brand-sky/40">
-                  {body}
-                </Link>
-              ) : (
-                <div className="flex h-full flex-col gap-1 rounded-card border border-fg/10 bg-ink-950/50 p-5">{body}</div>
-              )}
-            </li>
-          );
-        })}
+      <ul className="admin-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {stats.map((s, i) => (
+          <li key={s.label} style={{ "--i": i } as CSSProperties}>
+            <Link href={s.href ?? "/admin"} className="admin-card flex h-full items-center gap-4 p-5">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl" style={{ background: `${s.tone}22`, color: s.tone, boxShadow: `0 0 24px -6px ${s.tone}88` }}>
+                <Icon name={s.icon} className="size-5" />
+              </span>
+              <span className="flex min-w-0 flex-col">
+                <span className="text-3xl font-semibold">
+                  <AdminCount value={s.value} />
+                </span>
+                <span className="text-sm text-text-secondary">{s.label}</span>
+                {s.note && <span className="text-xs text-text-secondary/70">{s.note}</span>}
+              </span>
+            </Link>
+          </li>
+        ))}
       </ul>
 
-      <section className="flex flex-col gap-3">
+      <section className="admin-card flex flex-col gap-4 p-6">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-display text-xl font-semibold">Still to add to the website</h2>
+          <h2 className="font-display text-xl font-semibold">Website enquiries, last 14 days</h2>
           <span className="text-sm text-text-secondary">
-            {todos.length - open.length} of {todos.length} done
+            <span className="tabular font-semibold text-text-primary">{leads14}</span> in total
           </span>
         </div>
-        <p className="text-sm text-text-secondary">The same items the dashed placeholders on the site point to. Each ticks itself off once the content is added and published.</p>
-        <ul className="grid gap-2 md:grid-cols-2">
-          {todos.map((x) => (
-            <li key={x.label}>
-              <Link href={x.href} className="flex h-full items-start gap-3 rounded-card border border-fg/10 bg-ink-950/50 p-4 hover:border-brand-sky/40">
+        <div className="flex h-36 items-end gap-1.5" role="img" aria-label={`Leads per day: ${perDay.map((d) => `${d.label} ${d.n}`).join(", ")}`}>
+          {perDay.map((d, i) => (
+            <div key={d.key} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5" title={`${d.label}: ${d.n}`}>
+              {d.n > 0 && <span className="tabular text-[10px] text-text-secondary">{d.n}</span>}
+              <span
+                className="admin-bar w-full rounded-t-md bg-linear-to-t from-brand-royal to-brand-sky"
+                style={{ height: `${Math.max(4, (d.n / peak) * 100)}%`, opacity: d.n ? 1 : 0.25, "--i": i } as CSSProperties}
+              />
+              <span className="text-[10px] text-text-secondary">{i % 2 === 0 ? d.label : "\u00a0"}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-5">
+          <ProgressRing done={todos.length - open.length} total={todos.length} />
+          <div className="flex flex-col gap-1">
+            <h2 className="font-display text-xl font-semibold">Still to add to the website</h2>
+            <span className="text-sm text-text-secondary">
+              {todos.length - open.length} of {todos.length} done. Each item ticks itself off once the content is added and published.
+            </span>
+          </div>
+        </div>
+        <ul className="admin-stagger grid gap-2 md:grid-cols-2">
+          {todos.map((x, i) => (
+            <li key={x.label} style={{ "--i": i } as CSSProperties}>
+              <Link href={x.href} className="admin-card flex h-full items-start gap-3 p-4">
                 <span aria-hidden="true" className={x.done ? "mt-0.5 text-market-up" : "mt-0.5 text-gold"}>{x.done ? "✓" : "○"}</span>
                 <span className="flex min-w-0 flex-col gap-0.5">
                   <span className="font-semibold">{x.label}</span>
@@ -126,7 +191,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             All leads →
           </Link>
         </div>
-        <ul className="divide-y divide-fg/10 rounded-card border border-fg/10">
+        <ul className="admin-card divide-y divide-fg/10">
           {recentLeads.length === 0 && <li className="px-4 py-3 text-sm text-text-secondary">No leads yet. Website enquiries will appear here.</li>}
           {recentLeads.map((l) => (
             <li key={l.id} className="flex items-center justify-between gap-4 px-4 py-3">
@@ -145,7 +210,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-xl font-semibold">Recently edited products</h2>
-        <ul className="divide-y divide-fg/10 rounded-card border border-fg/10">
+        <ul className="admin-card divide-y divide-fg/10">
           {recent.map((o) => (
             <li key={o.id} className="flex items-center justify-between gap-4 px-4 py-3">
               <Link href={`/admin/products/${o.id}`} className="hover:text-brand-sky">

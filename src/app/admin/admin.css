@@ -1,0 +1,190 @@
+/*
+ * Admin portal motion and surfaces: a slowly drifting brand backdrop, pages that
+ * fade up on arrival, glass cards that lift on hover, a glowing active nav item,
+ * live indicators. Everything is still for visitors who ask for reduced motion.
+ */
+
+/* ── Backdrop ─────────────────────────────────────────────────────────── */
+.admin-shell {
+  position: relative;
+  isolation: isolate;
+}
+.admin-shell::before,
+.admin-shell::after {
+  content: "";
+  position: fixed;
+  inset: -20vmax;
+  z-index: -1;
+  pointer-events: none;
+}
+.admin-shell::before {
+  background:
+    radial-gradient(40vmax 30vmax at 15% 10%, rgb(42 95 174 / 0.28), transparent 60%),
+    radial-gradient(35vmax 28vmax at 85% 30%, rgb(34 188 235 / 0.14), transparent 60%),
+    radial-gradient(30vmax 25vmax at 60% 95%, rgb(240 198 110 / 0.08), transparent 60%);
+  animation: admin-drift 28s ease-in-out infinite alternate;
+}
+.admin-shell::after {
+  background-image: radial-gradient(rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(70% 60% at 50% 30%, #000 30%, transparent 80%);
+}
+[data-theme="light"] .admin-shell::before {
+  background:
+    radial-gradient(40vmax 30vmax at 15% 10%, rgb(42 95 174 / 0.12), transparent 60%),
+    radial-gradient(35vmax 28vmax at 85% 30%, rgb(34 188 235 / 0.1), transparent 60%),
+    radial-gradient(30vmax 25vmax at 60% 95%, rgb(240 198 110 / 0.1), transparent 60%);
+}
+[data-theme="light"] .admin-shell::after {
+  background-image: radial-gradient(rgb(10 20 40 / 0.06) 1px, transparent 1px);
+}
+@keyframes admin-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(3vmax, -2vmax, 0) scale(1.05); }
+  100% { transform: translate3d(-2vmax, 2vmax, 0) scale(1.02); }
+}
+
+/* ── Page arrival: the main content's sections fade up one after another ── */
+.admin-enter > * > * {
+  animation: admin-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.admin-enter > * > *:nth-child(2) { animation-delay: 0.06s; }
+.admin-enter > * > *:nth-child(3) { animation-delay: 0.12s; }
+.admin-enter > * > *:nth-child(4) { animation-delay: 0.18s; }
+.admin-enter > * > *:nth-child(5) { animation-delay: 0.24s; }
+.admin-enter > * > *:nth-child(n + 6) { animation-delay: 0.3s; }
+@keyframes admin-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Lists inside: rows slide in with a small stagger (set --i on each row). */
+.admin-stagger > * {
+  animation: admin-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms + 0.15s);
+}
+
+/* ── Glass cards ──────────────────────────────────────────────────────── */
+.admin-card {
+  position: relative;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.015));
+  backdrop-filter: blur(10px);
+  border-radius: 1.25rem;
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.35s,
+    box-shadow 0.35s;
+  overflow: hidden;
+}
+[data-theme="light"] .admin-card {
+  border-color: rgb(10 20 40 / 0.08);
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.75));
+  box-shadow: 0 1px 2px rgb(10 20 40 / 0.04);
+}
+a.admin-card:hover,
+.admin-card-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgb(103 232 249 / 0.4);
+  box-shadow: 0 18px 40px -18px rgb(34 188 235 / 0.45);
+}
+/* A light sweep across a card on hover */
+a.admin-card::after,
+.admin-card-hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.09) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 0.8s ease;
+  pointer-events: none;
+}
+a.admin-card:hover::after,
+.admin-card-hover:hover::after {
+  transform: translateX(120%);
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────── */
+.admin-nav-link {
+  position: relative;
+}
+.admin-nav-link[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 18%;
+  bottom: 18%;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(var(--color-brand-sky), var(--color-gold));
+  box-shadow: 0 0 12px rgb(34 188 235 / 0.8);
+  animation: admin-bar 0.35s ease both;
+}
+@keyframes admin-bar {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.admin-nav-link svg {
+  transition: transform 0.3s ease;
+}
+.admin-nav-link:hover svg {
+  transform: scale(1.12) rotate(-4deg);
+}
+
+/* ── Live dot, progress ring, bars, gradient text ─────────────────────── */
+.admin-live {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-market-up);
+}
+.admin-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: admin-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes admin-ping {
+  75%, 100% { transform: scale(2.6); opacity: 0; }
+}
+.admin-ring {
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.admin-bar {
+  transform-origin: bottom;
+  animation: admin-grow 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms + 0.2s);
+}
+@keyframes admin-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.admin-gradient-text {
+  background: linear-gradient(90deg, var(--color-brand-sky), #8fb4ff, var(--color-gold), var(--color-brand-sky));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: admin-flow 8s linear infinite;
+}
+@keyframes admin-flow {
+  to { background-position: 300% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-shell::before,
+  .admin-enter > * > *,
+  .admin-stagger > *,
+  .admin-live::after,
+  .admin-bar,
+  .admin-gradient-text,
+  .admin-nav-link[aria-current="page"]::before {
+    animation: none !important;
+  }
+  .admin-ring { transition: none; }
+  a.admin-card:hover, .admin-card-hover:hover { transform: none; }
+}

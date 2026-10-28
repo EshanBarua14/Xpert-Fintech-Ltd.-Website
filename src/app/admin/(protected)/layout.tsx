@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageEnter } from "@/components/admin/AdminMotion";
 import { after } from "next/server";
 import { Logo } from "@/components/brand/Logo";
 import { AdminNav } from "@/components/admin/AdminUi";
@@ -20,8 +21,8 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
   after(() => backupIfDue());
 
   return (
-    <div className="flex min-h-dvh flex-col lg:flex-row">
-      <aside className="flex shrink-0 flex-col gap-6 border-b border-fg/10 bg-ink-950 p-4 lg:w-60 lg:border-r lg:border-b-0">
+    <div className="admin-shell flex min-h-dvh flex-col lg:flex-row">
+      <aside className="flex shrink-0 flex-col gap-4 border-b border-fg/10 bg-ink-950/80 p-4 backdrop-blur-xl lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:border-r lg:border-b-0">
         <Link href="/admin" className="flex items-center gap-3">
           <Logo height={40} />
           <span className="flex flex-col leading-tight">
@@ -33,7 +34,7 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex flex-wrap items-center justify-end gap-4 border-b border-fg/10 px-4 py-3 text-sm md:px-8">
+        <header className="sticky top-0 z-30 flex flex-wrap items-center justify-end gap-4 border-b border-fg/10 bg-navy-900/70 px-4 py-3 text-sm backdrop-blur-xl md:px-8">
           <div className="mr-auto">
             <UndoBar />
           </div>
@@ -51,7 +52,9 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
             </button>
           </form>
         </header>
-        <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
+        <main className="flex-1 px-4 py-8 md:px-8">
+          <PageEnter>{children}</PageEnter>
+        </main>
       </div>
     </div>
   );

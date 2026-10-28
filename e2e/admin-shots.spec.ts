@@ -5,7 +5,6 @@ import { hasAdmin, signIn } from "./helpers/admin";
 for (const theme of ["dark", "light"] as const) {
   test(`admin pictures ${theme}`, async ({ page }) => {
     test.skip(!hasAdmin);
-    test.use({});
     await page.emulateMedia({ colorScheme: theme });
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto("/admin/login");

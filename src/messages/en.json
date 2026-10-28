@@ -269,7 +269,7 @@
   "integrationSysCrm": "CRM",
   "integrationSysBank": "Bank",
   "integrationSysPayments": "Payment gateways",
-  "integrationSysAlerts": "SMS / email alerts",
+  "integrationSysAlerts": "SMS / email",
   "integrationApiLabel": "Secure APIs",
   "integrationPlatformLabel": "Xpert Fintech, set up for your house",
   "showcaseBody": "From the first KYC check to the final settlement. Pick a product and watch it work.",

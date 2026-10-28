@@ -1,5 +1,5 @@
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireFullAdmin } from "@/lib/auth/session";
 import { ConfirmButton } from "@/components/admin/AdminUi";
 import { formatDhaka, Notice } from "@/components/admin/AdminList";
 import { buttonClasses } from "@/components/ui/Button";
@@ -16,7 +16,7 @@ type Search = { made?: string; restored?: string; deleted?: string; error?: stri
  * outside the site; restore one to put all content back as it was then.
  */
 export default async function BackupsPage({ searchParams }: { searchParams: Promise<Search> }) {
-  await requireAdmin();
+  await requireFullAdmin();
   const params = await searchParams;
   const [rows, admins] = await Promise.all([
     db.backup.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, kind: true, sizeBytes: true, counts: true, actorId: true, note: true, createdAt: true } }),

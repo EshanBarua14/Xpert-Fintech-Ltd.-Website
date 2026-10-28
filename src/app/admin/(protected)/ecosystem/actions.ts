@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { checkbox, optionalText, parseLocalDateTime, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 
 export type EcoState = { errors?: FieldErrors; message?: string; ok?: boolean };
@@ -59,7 +59,10 @@ export async function saveNode(_prev: EcoState, formData: FormData): Promise<Eco
   let id = v.id;
   await db.$transaction(async (tx) => {
     if (id) await tx.ecosystemNode.update({ where: { id }, data });
-    else id = (await tx.ecosystemNode.create({ data: { ...data, createdById: admin.id } })).id;
+    else {
+      assertMayCreate(admin);
+      id = (await tx.ecosystemNode.create({ data: { ...data, createdById: admin.id } })).id;
+    }
     const nodeId = id!;
     await tx.ecosystemNodeTranslation.upsert({ where: { nodeId_locale: { nodeId, locale: "en" } }, update: text("en"), create: { nodeId, locale: "en", ...text("en") } });
     if (v.bnLabel) await tx.ecosystemNodeTranslation.upsert({ where: { nodeId_locale: { nodeId, locale: "bn" } }, update: text("bn"), create: { nodeId, locale: "bn", ...text("bn") } });
@@ -70,7 +73,7 @@ export async function saveNode(_prev: EcoState, formData: FormData): Promise<Eco
 }
 
 export async function deleteNode(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = z.string().min(1).parse(formData.get("id"));
   // Its links and flow steps go with it (cascade).
   await db.ecosystemNode.delete({ where: { id } });
@@ -86,7 +89,7 @@ const edgeSchema = z.object({
 });
 
 export async function addEdge(_prev: EcoState, formData: FormData): Promise<EcoState> {
-  await requireAdmin();
+  await requireFullAdmin();
   const parsed = edgeSchema.safeParse(Object.fromEntries(Object.keys(edgeSchema.shape).map((k) => [k, formData.get(k) ?? ""])));
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), message: "Please fix the highlighted fields." };
   const v = parsed.data;
@@ -101,7 +104,7 @@ export async function addEdge(_prev: EcoState, formData: FormData): Promise<EcoS
 }
 
 export async function deleteEdge(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = z.string().min(1).parse(formData.get("id"));
   const nodeId = z.string().min(1).parse(formData.get("nodeId"));
   await db.ecosystemEdge.delete({ where: { id } }).catch(() => null);
@@ -151,7 +154,10 @@ export async function saveFlow(_prev: EcoState, formData: FormData): Promise<Eco
     // Only one flow is the guided tour.
     if (v.isPlayback) await tx.ecosystemFlow.updateMany({ where: { isPlayback: true, ...(id && { id: { not: id } }) }, data: { isPlayback: false } });
     if (id) await tx.ecosystemFlow.update({ where: { id }, data });
-    else id = (await tx.ecosystemFlow.create({ data: { ...data, createdById: admin.id } })).id;
+    else {
+      assertMayCreate(admin);
+      id = (await tx.ecosystemFlow.create({ data: { ...data, createdById: admin.id } })).id;
+    }
     const flowId = id!;
     await tx.ecosystemFlowTranslation.upsert({ where: { flowId_locale: { flowId, locale: "en" } }, update: { name: v.enName }, create: { flowId, locale: "en", name: v.enName } });
     if (v.bnName) await tx.ecosystemFlowTranslation.upsert({ where: { flowId_locale: { flowId, locale: "bn" } }, update: { name: v.bnName }, create: { flowId, locale: "bn", name: v.bnName } });
@@ -179,7 +185,7 @@ export async function saveFlow(_prev: EcoState, formData: FormData): Promise<Eco
 }
 
 export async function deleteFlow(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = z.string().min(1).parse(formData.get("id"));
   await db.ecosystemFlow.delete({ where: { id } });
   refresh();

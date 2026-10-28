@@ -11,16 +11,25 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { next } = await searchParams;
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-ink-950 px-4 py-16">
-      <div className="w-full max-w-sm">
+    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-ink-950 px-4 py-16">
+      {/* Soft brand glow behind the card */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(60rem_30rem_at_50%_-10%,rgb(42_95_174/0.35),transparent_70%)]" />
+      <div className="relative w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-4 text-center">
-          <Logo height={72} priority />
-          <h1 className="font-display text-2xl font-semibold">Xpert Admin</h1>
-          <p className="text-sm text-text-secondary">Sign in to manage the website.</p>
+          <Logo height={64} priority />
+          <div className="flex flex-col gap-1.5">
+            <p className="text-xs font-semibold tracking-[0.18em] text-brand-sky uppercase">Xpert Fintech Ltd.</p>
+            <h1 className="font-display text-3xl font-semibold tracking-tight">Xpert Fintech Web App Admin</h1>
+            <p className="text-sm text-text-secondary">Sign in to manage the website&apos;s content, leads and settings.</p>
+          </div>
         </div>
-        <div className="rounded-card border border-fg/10 bg-navy-900 p-6">
+        <div className="rounded-card border border-fg/10 bg-navy-900/90 p-7 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.6)] backdrop-blur">
           <LoginForm next={next} />
         </div>
+        <p className="mt-6 text-center text-xs text-text-secondary">
+          Authorised staff only. Sign-ins are recorded; two-factor sign-in is recommended.
+          <br />© {new Date().getFullYear()} Xpert Fintech Ltd.
+        </p>
       </div>
     </main>
   );

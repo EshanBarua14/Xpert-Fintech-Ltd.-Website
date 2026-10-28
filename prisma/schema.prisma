@@ -12,7 +12,7 @@
 //    Bangla row exists.
 //  • createdById / updatedById store the admin's id without a foreign key, so
 //    "last edited by" survives when an admin account is removed.
-//  • One admin role (no RBAC): every AdminUser has full rights.
+//  • Two roles: ADMIN (full rights) and EDITOR (edits existing content; no create, delete, users or backups).
 // ─────────────────────────────────────────────────────────────────────────────
 
 generator client {
@@ -222,10 +222,17 @@ enum MarketDataMode {
 
 // ── Admin accounts ───────────────────────────────────────────────────────────
 
+/// ADMIN: everything (create, edit, delete, users, backups). EDITOR: edits existing content only.
+enum AdminRole {
+  ADMIN
+  EDITOR
+}
+
 model AdminUser {
   id               String    @id @default(uuid()) @db.Uuid
   email            String    @unique
   name             String
+  role             AdminRole @default(ADMIN)
   passwordHash     String
   totpSecret       String? // encrypted at rest by the app before storing
   totpEnabled      Boolean   @default(false)

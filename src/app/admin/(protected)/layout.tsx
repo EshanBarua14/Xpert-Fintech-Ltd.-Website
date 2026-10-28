@@ -24,7 +24,10 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
       <aside className="flex shrink-0 flex-col gap-6 border-b border-fg/10 bg-ink-950 p-4 lg:w-60 lg:border-r lg:border-b-0">
         <Link href="/admin" className="flex items-center gap-3">
           <Logo height={40} />
-          <span className="font-display font-semibold">Xpert Admin</span>
+          <span className="flex flex-col leading-tight">
+            <span className="font-display text-base font-semibold">Xpert Fintech</span>
+            <span className="text-[11px] font-semibold tracking-[0.12em] text-text-secondary uppercase">Web App Admin</span>
+          </span>
         </Link>
         <AdminNav />
       </aside>
@@ -39,6 +42,7 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
           </Link>
           <Link href="/admin/users" className="text-text-secondary hover:text-text-primary" title={`${admin.email} — change password`}>
             {admin.name}
+            <span className="ml-2 rounded-full border border-fg/15 px-2 py-0.5 text-[11px] font-semibold tracking-wide uppercase">{admin.role === "ADMIN" ? "Admin" : "Editor"}</span>
           </Link>
           <ThemeToggle labels={{ toLight: "Switch to light mode", toDark: "Switch to dark mode" }} className="size-9" />
           <form action={logoutAction}>

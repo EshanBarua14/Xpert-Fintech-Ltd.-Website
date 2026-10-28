@@ -3,19 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireFullAdmin } from "@/lib/auth/session";
 import { db } from "@/lib/db/client";
 import { createBackup, restoreBackup, unpack } from "@/lib/admin/backup";
 
 export async function backupNow(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const note = String(formData.get("note") ?? "").trim().slice(0, 200) || null;
   await createBackup("manual", admin.id, note);
   redirect("/admin/backups?made=1");
 }
 
 export async function restoreFromBackup(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = z.string().uuid().parse(formData.get("id"));
   const row = await db.backup.findUnique({ where: { id } });
   if (!row) redirect("/admin/backups?error=" + encodeURIComponent("That backup no longer exists."));
@@ -31,7 +31,7 @@ export async function restoreFromBackup(formData: FormData) {
 }
 
 export async function restoreFromFile(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const file = formData.get("file");
   let message = "";
   try {
@@ -45,7 +45,7 @@ export async function restoreFromFile(formData: FormData) {
 }
 
 export async function deleteBackup(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = z.string().uuid().parse(formData.get("id"));
   await db.backup.delete({ where: { id } }).catch(() => null);
   redirect("/admin/backups?deleted=1");

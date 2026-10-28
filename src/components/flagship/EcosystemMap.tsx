@@ -412,7 +412,7 @@ export function EcosystemMap({
     const nameW = title.length * 13;
     const left = n.x - (P + 7 + nameW) / 2;
     return (
-      <g key={key} className="transition-opacity duration-500" opacity={on ? 1 : 0.5}>
+      <g key={key} className="transition-opacity duration-500" style={{ opacity: on ? 1 : "var(--eco-dim)" }}>
         {on && <rect x={n.x - NODE_W / 2 - 8} y={n.y - NODE_H / 2 - 8} width={NODE_W + 16} height={NODE_H + 16} rx={22} fill="url(#eco-glow)" />}
         <rect
           x={n.x - NODE_W / 2}
@@ -581,7 +581,7 @@ export function EcosystemMap({
                 <g
                   key={key}
                   className="eco-role cursor-pointer outline-none transition-opacity duration-500 focus-visible:[&>rect:last-of-type]:stroke-[3]"
-                  opacity={on || emphasis === key ? 1 : focusModule ? 0.3 : 0.55}
+                  style={{ opacity: on || emphasis === key ? 1 : focusModule ? 0.3 : "var(--eco-dim)" }}
                   tabIndex={0}
                   role={info?.href ? "link" : "button"}
                   aria-label={info?.description ? `${text}: ${info.description}` : text}

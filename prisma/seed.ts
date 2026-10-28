@@ -459,7 +459,7 @@ async function seedAdmin() {
   const existing = await db.adminUser.findUnique({ where: { email } });
   if (existing) return;
   await db.adminUser.create({
-    data: { email, name: process.env.SEED_ADMIN_NAME || "Xpert Admin", passwordHash: await hash(password) },
+    data: { email, name: process.env.SEED_ADMIN_NAME || "Xpert Fintech Web App Admin", passwordHash: await hash(password) },
   });
   console.log(`• Created admin ${email}`);
 }

@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireFullAdmin } from "@/lib/auth/session";
 import { offeringOptions } from "@/lib/admin/options";
 import { LeadDetailsForm } from "@/components/admin/LeadForms";
 
 export default async function NewLeadPage() {
-  await requireAdmin();
+  await requireFullAdmin();
   const offerings = await offeringOptions();
   return (
     <div className="flex max-w-4xl flex-col gap-8">

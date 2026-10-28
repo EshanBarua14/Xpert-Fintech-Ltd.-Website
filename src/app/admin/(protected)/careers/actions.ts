@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { formInput } from "@/lib/admin/forms";
 import { purgeApplication, purgeCareer } from "@/lib/admin/purge";
 import { checkbox, optionalHttpsUrl, optionalText, parseLocalDateTime, slugField, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
@@ -89,7 +89,10 @@ export async function saveCareer(_prev: CareerState, formData: FormData): Promis
   try {
     await db.$transaction(async (tx) => {
       if (id) await tx.career.update({ where: { id }, data });
-      else id = (await tx.career.create({ data: { ...data, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.career.create({ data: { ...data, createdById: admin.id } })).id;
+      }
       const careerId = id!;
       await tx.careerTranslation.upsert({ where: { careerId_locale: { careerId, locale: "en" } }, update: text("en"), create: { careerId, locale: "en", ...text("en") } });
       if (v.bnTitle) {
@@ -110,7 +113,7 @@ export async function saveCareer(_prev: CareerState, formData: FormData): Promis
 }
 
 export async function trashCareer(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.career.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -118,7 +121,7 @@ export async function trashCareer(formData: FormData) {
 }
 
 export async function restoreCareer(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.career.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh();
@@ -126,7 +129,7 @@ export async function restoreCareer(formData: FormData) {
 }
 
 export async function deleteCareerForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const c = await db.career.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!c?.deletedAt) redirect(`/admin/careers/${id}`);
@@ -155,14 +158,14 @@ export async function updateApplication(_prev: ApplicationState, formData: FormD
 }
 
 export async function trashApplication(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.careerApplication.update({ where: { id }, data: { deletedAt: new Date() } });
   redirect("/admin/applications?trashed=1");
 }
 
 export async function restoreApplication(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.careerApplication.update({ where: { id }, data: { deletedAt: null } });
   redirect(`/admin/applications/${id}?restored=1`);
@@ -170,7 +173,7 @@ export async function restoreApplication(formData: FormData) {
 
 /** Permanent delete also removes the CV file (personal data). */
 export async function deleteApplicationForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const a = await db.careerApplication.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!a?.deletedAt) redirect(`/admin/applications/${id}`);

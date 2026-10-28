@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { PERSON_GROUPS } from "@/lib/validation/people";
 import { optionalHttpsUrl, optionalId, optionalText, parseLocalDateTime, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
@@ -110,7 +110,10 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
   try {
     await db.$transaction(async (tx) => {
       if (id) await tx.person.update({ where: { id }, data });
-      else id = (await tx.person.create({ data: { ...data, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.person.create({ data: { ...data, createdById: admin.id } })).id;
+      }
       const personId = id!;
 
       await tx.personTranslation.upsert({
@@ -166,7 +169,7 @@ export async function savePerson(_prev: PersonState, formData: FormData): Promis
 }
 
 export async function trashPerson(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.person.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -174,7 +177,7 @@ export async function trashPerson(formData: FormData) {
 }
 
 export async function restorePerson(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.person.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh();
@@ -182,7 +185,7 @@ export async function restorePerson(formData: FormData) {
 }
 
 export async function deletePersonForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const person = await db.person.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!person?.deletedAt) redirect(`/admin/people/${id}`);

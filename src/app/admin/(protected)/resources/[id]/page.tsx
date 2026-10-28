@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
@@ -14,7 +14,7 @@ import { deleteResourceForever, restoreResource, trashResource } from "../action
 const emptyText = { title: "", slug: "", summary: "" };
 
 export default async function ResourcePage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; restored?: string }> }) {
-  await requireAdmin();
+  const me = await requireAdmin();
   const { id } = await params;
   const flags = await searchParams;
   const [images, documents] = await Promise.all([imageOptions(), documentOptions()]);
@@ -24,6 +24,7 @@ export default async function ResourcePage({ params, searchParams }: { params: P
     </Link>
   );
   if (id === "new") {
+    if (me.role !== "ADMIN") redirect("/admin?denied=1");
     const values: ResourceFormValues = { status: "DRAFT", publishAt: "", sortOrder: 0, kind: "BROCHURE", fileMediaId: "", externalUrl: "", coverMediaId: "", en: { ...emptyText }, bn: { ...emptyText } };
     return (
       <div className="flex flex-col gap-6">

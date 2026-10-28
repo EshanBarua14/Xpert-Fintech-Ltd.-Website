@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
@@ -19,12 +19,13 @@ export default async function DeploymentPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ saved?: string; restored?: string }>;
 }) {
-  await requireAdmin();
+  const me = await requireAdmin();
   const { id } = await params;
   const flags = await searchParams;
   const [organizations, offerings] = await Promise.all([organizationOptions(), offeringOptions()]);
 
   if (id === "new") {
+    if (me.role !== "ADMIN") redirect("/admin?denied=1");
     const values: DeploymentFormValues = {
       status: "DRAFT",
       publishAt: "",

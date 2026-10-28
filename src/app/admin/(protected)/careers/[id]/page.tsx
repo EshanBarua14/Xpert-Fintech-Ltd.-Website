@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
@@ -21,11 +21,12 @@ export default async function CareerPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ saved?: string; restored?: string }>;
 }) {
-  await requireAdmin();
+  const me = await requireAdmin();
   const { id } = await params;
   const flags = await searchParams;
 
   if (id === "new") {
+    if (me.role !== "ADMIN") redirect("/admin?denied=1");
     const values: CareerFormValues = {
       status: "DRAFT", publishAt: "", sortOrder: 0, department: "", location: "Dhaka", employmentType: "FULL_TIME",
       experience: "", deadline: "", isClosed: false, linkedinUrl: "", bdjobsUrl: "", applyEmail: "career@xpertfintech.com", en: { ...emptyText }, bn: { ...emptyText },

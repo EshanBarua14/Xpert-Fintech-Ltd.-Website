@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { optionalHttpsUrl, optionalId, optionalText, parseLocalDateTime, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { parseDateOnly } from "@/lib/validation/organizations";
 import { purgeDeployment } from "@/lib/admin/purge";
@@ -68,7 +68,10 @@ export async function saveDeployment(_prev: DeploymentState, formData: FormData)
   try {
     await db.$transaction(async (tx) => {
       if (id) await tx.deployment.update({ where: { id }, data });
-      else id = (await tx.deployment.create({ data: { ...data, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.deployment.create({ data: { ...data, createdById: admin.id } })).id;
+      }
       const deploymentId = id!;
       for (const [locale, summary] of [
         ["en", v.enSummary],
@@ -94,7 +97,7 @@ export async function saveDeployment(_prev: DeploymentState, formData: FormData)
 }
 
 export async function trashDeployment(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.deployment.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -102,7 +105,7 @@ export async function trashDeployment(formData: FormData) {
 }
 
 export async function restoreDeployment(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.deployment.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh();
@@ -110,7 +113,7 @@ export async function restoreDeployment(formData: FormData) {
 }
 
 export async function deleteDeploymentForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const d = await db.deployment.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!d?.deletedAt) redirect(`/admin/deployments/${id}`);

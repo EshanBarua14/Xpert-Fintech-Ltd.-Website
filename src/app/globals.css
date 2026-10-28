@@ -100,10 +100,12 @@
   --bg-glow-1: rgb(42 95 174 / 0.18);
   --bg-glow-2: rgb(34 188 235 / 0.08);
   /* Ecosystem map */
-  --eco-node: rgb(10 20 40 / 0.92);
-  --eco-line: rgb(255 255 255 / 0.12);
+  --eco-node: rgb(14 28 54 / 0.96);
+  --eco-line: rgb(170 200 240 / 0.34);
   --eco-text: #ffffff;
-  --eco-muted: #9aa7ba;
+  --eco-muted: #c0cbdb;
+  /* Parties and modules not in the current step: still readable in dark mode */
+  --eco-dim: 0.82;
   --eco-accent: #67e8f9;
   --eco-flow: #22bceb;
   --eco-oversight: #8fb4ff;
@@ -148,7 +150,8 @@
   --bg-glow-1: rgb(42 95 174 / 0.1);
   --bg-glow-2: rgb(34 188 235 / 0.08);
   --eco-node: #ffffff;
-  --eco-line: rgb(10 20 40 / 0.14);
+  --eco-line: rgb(10 20 40 / 0.2);
+  --eco-dim: 0.6;
   --eco-text: #0a1428;
   --eco-muted: #4a5873;
   --eco-accent: #0a78ad;
@@ -651,7 +654,8 @@ html[data-nav="soft"] main [data-reveal]:not(.is-in) {
 }
 /* The office map follows the site theme: darkened in dark mode */
 [data-theme="dark"] .office-map {
-  filter: invert(0.9) hue-rotate(180deg) saturate(0.6) brightness(0.95);
+  /* Inverted to dark, then lifted so streets, labels and the pin stay clear */
+  filter: invert(0.88) hue-rotate(180deg) saturate(0.85) brightness(1.15) contrast(1.15);
 }
 
 /* Testimonials: a track without a visible scrollbar; the active slide's bar fills over its time */

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
@@ -21,7 +21,7 @@ export default async function ArticlePage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ saved?: string; restored?: string }>;
 }) {
-  await requireAdmin();
+  const me = await requireAdmin();
   const { id } = await params;
   const flags = await searchParams;
   const [images, cats] = await Promise.all([
@@ -31,6 +31,7 @@ export default async function ArticlePage({
   const categories = cats.map((c) => ({ value: c.id, label: c.translations.find((t) => t.locale === "en")?.name ?? c.key }));
 
   if (id === "new") {
+    if (me.role !== "ADMIN") redirect("/admin?denied=1");
     const values: ArticleFormValues = {
       status: "DRAFT", publishAt: "", sortOrder: 0, displayDate: "", authorName: "", sourceUrl: "", coverMediaId: "", videoUrl: "", categoryId: "", tags: "",
       en: { ...emptyText }, bn: { ...emptyText },

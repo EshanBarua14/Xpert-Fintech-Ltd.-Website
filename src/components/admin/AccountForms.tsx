@@ -19,7 +19,12 @@ import {
 import { ConfirmButton, SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
 import { Badge } from "@/components/ui/Badge";
-import { TextInput } from "@/components/ui/Field";
+import { Select, TextInput } from "@/components/ui/Field";
+
+const ROLE_OPTIONS = [
+  { value: "ADMIN", label: "Admin: create, edit and delete everything; users and backups" },
+  { value: "EDITOR", label: "Editor: edit existing content only" },
+];
 
 const PASSWORD_HINT = "At least 12 characters, with letters and a number.";
 
@@ -80,6 +85,7 @@ function CreateAdminInner({ onCreated }: { onCreated: (message: string) => void 
       <TextInput id="name" label="Name" required error={e.name} />
       <TextInput id="email" type="email" label="Email" required autoComplete="off" error={e.email} />
       <TextInput id="password" type="password" label="Temporary password" required autoComplete="new-password" hint={PASSWORD_HINT} error={e.password} />
+      <Select id="role" label="Role" options={ROLE_OPTIONS} defaultValue="EDITOR" error={e.role} />
       <div className="md:col-span-3">
         <SubmitButton pending={pending}>Add admin</SubmitButton>
       </div>
@@ -91,6 +97,7 @@ export type AdminRow = {
   id: string;
   name: string;
   email: string;
+  role: "ADMIN" | "EDITOR";
   isActive: boolean;
   isSelf: boolean;
   lastLogin: string;
@@ -111,7 +118,7 @@ function EditAdmin({ row }: { row: AdminRow }) {
   if (!open) {
     return (
       <button type="button" onClick={() => setOpen(true)} className="rounded-control border border-fg/15 px-3 py-2 text-sm hover:border-brand-sky">
-        Edit name or email
+        Edit name, email or role
       </button>
     );
   }
@@ -131,6 +138,7 @@ function EditAdmin({ row }: { row: AdminRow }) {
         hint={row.isSelf ? "Changing it signs out your other devices." : "Changing it signs them out."}
         error={e.email}
       />
+      {!row.isSelf && <Select id={`role-${row.id}`} name="role" label="Role" options={ROLE_OPTIONS} defaultValue={row.role} error={e.role} />}
       <SubmitButton pending={pending}>Save</SubmitButton>
       <button type="button" onClick={() => setOpen(false)} className="h-11 px-3 text-sm text-text-secondary hover:text-fg">
         Cancel
@@ -161,6 +169,7 @@ export function AdminUsersTable({ rows }: { rows: AdminRow[] }) {
           <div className="flex flex-wrap items-center gap-3">
             <span className="font-medium">{u.name}</span>
             <span className="text-sm text-text-secondary">{u.email}</span>
+            <Badge tone={u.role === "ADMIN" ? "brand" : undefined}>{u.role === "ADMIN" ? "Admin" : "Editor"}</Badge>
             {u.isSelf && <Badge tone="brand">You</Badge>}
             {!u.isActive && <Badge tone="down">Deactivated</Badge>}
             {u.locked && <Badge>Locked for a few minutes</Badge>}

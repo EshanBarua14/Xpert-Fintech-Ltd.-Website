@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 
 export type RedirectState = { errors?: FieldErrors; message?: string; savedAt?: number };
@@ -39,7 +39,7 @@ const schema = z
   .refine((v) => v.toPath.replace(/\/+$/, "") !== v.fromPath, { path: ["toPath"], message: "This would send visitors back to the same address." });
 
 export async function saveRedirect(_prev: RedirectState, formData: FormData): Promise<RedirectState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = schema.safeParse({
     id: formData.get("id") || undefined,
     fromPath: formData.get("fromPath") ?? "",
@@ -52,7 +52,10 @@ export async function saveRedirect(_prev: RedirectState, formData: FormData): Pr
   const { id, ...data } = parsed.data;
   try {
     if (id) await db.redirect.update({ where: { id }, data });
-    else await db.redirect.create({ data });
+    else {
+      assertMayCreate(admin);
+      await db.redirect.create({ data });
+    }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { errors: { fromPath: "There is already a redirect for this address." } };
@@ -65,7 +68,7 @@ export async function saveRedirect(_prev: RedirectState, formData: FormData): Pr
 }
 
 export async function deleteRedirect(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = z.string().uuid().parse(formData.get("id"));
   await db.redirect.delete({ where: { id } });
   revalidatePath("/admin/redirects");

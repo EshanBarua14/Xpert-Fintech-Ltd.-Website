@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireFullAdmin } from "@/lib/auth/session";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { newProductValues, parentOptions } from "@/lib/admin/products";
 import { imageOptions } from "@/lib/admin/media";
 
 export default async function NewProductPage() {
-  await requireAdmin();
+  await requireFullAdmin();
   return (
     <div className="flex flex-col gap-6">
       <div>

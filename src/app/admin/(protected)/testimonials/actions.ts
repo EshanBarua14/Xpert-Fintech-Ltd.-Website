@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { REVIEW_SPEED_CHOICES, REVIEW_SPEED_KEY } from "@/lib/content/reviews";
 import { formInput } from "@/lib/admin/forms";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
@@ -64,7 +64,10 @@ export async function saveTestimonial(_prev: TestimonialState, formData: FormDat
   try {
     await db.$transaction(async (tx) => {
       if (id) await tx.testimonial.update({ where: { id }, data });
-      else id = (await tx.testimonial.create({ data: { ...data, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.testimonial.create({ data: { ...data, createdById: admin.id } })).id;
+      }
       const testimonialId = id!;
       await tx.testimonialTranslation.upsert({
         where: { testimonialId_locale: { testimonialId, locale: "en" } },
@@ -91,7 +94,7 @@ export async function saveTestimonial(_prev: TestimonialState, formData: FormDat
 }
 
 export async function trashTestimonial(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.testimonial.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -99,7 +102,7 @@ export async function trashTestimonial(formData: FormData) {
 }
 
 export async function restoreTestimonial(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.testimonial.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh();
@@ -107,7 +110,7 @@ export async function restoreTestimonial(formData: FormData) {
 }
 
 export async function deleteTestimonialForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const t = await db.testimonial.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!t?.deletedAt) redirect(`/admin/testimonials/${id}`);

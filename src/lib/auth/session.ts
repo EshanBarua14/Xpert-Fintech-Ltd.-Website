@@ -74,7 +74,7 @@ export async function revokeAllSessions(adminUserId: string) {
   await db.session.updateMany({ where: { adminUserId, revokedAt: null }, data: { revokedAt: new Date() } });
 }
 
-export type CurrentAdmin = { id: string; email: string; name: string };
+export type CurrentAdmin = { id: string; email: string; name: string; role: "ADMIN" | "EDITOR" };
 
 /**
  * The signed-in admin for this request, or null. Cached per request, so
@@ -87,7 +87,7 @@ export const getCurrentAdmin = cache(async (): Promise<CurrentAdmin | null> => {
 
   const session = await db.session.findUnique({
     where: { tokenHash: hashToken(token) },
-    include: { adminUser: { select: { id: true, email: true, name: true, isActive: true } } },
+    include: { adminUser: { select: { id: true, email: true, name: true, role: true, isActive: true } } },
   });
   const now = Date.now();
   if (
@@ -104,8 +104,8 @@ export const getCurrentAdmin = cache(async (): Promise<CurrentAdmin | null> => {
   if (now - session.lastSeenAt.getTime() > TOUCH_INTERVAL_MS) {
     await db.session.update({ where: { id: session.id }, data: { lastSeenAt: new Date(now) } });
   }
-  const { id, email, name } = session.adminUser;
-  return { id, email, name };
+  const { id, email, name, role } = session.adminUser;
+  return { id, email, name, role };
 });
 
 /** Use at the top of every admin page and every admin server action. */
@@ -113,6 +113,24 @@ export async function requireAdmin(): Promise<CurrentAdmin> {
   const admin = await getCurrentAdmin();
   if (!admin) redirect("/admin/login");
   return admin;
+}
+
+/** Where an editor lands when they try something only an admin may do. */
+const DENIED = "/admin?denied=1";
+
+/**
+ * Admins only (not editors): creating, deleting, trashing and restoring content,
+ * managing users and backups. Use instead of requireAdmin in those pages and actions.
+ */
+export async function requireFullAdmin(): Promise<CurrentAdmin> {
+  const admin = await requireAdmin();
+  if (admin.role !== "ADMIN") redirect(DENIED);
+  return admin;
+}
+
+/** For "save" actions that create a record when it has no id yet: editors may only edit. */
+export function assertMayCreate(admin: CurrentAdmin) {
+  if (admin.role !== "ADMIN") redirect(DENIED);
 }
 
 /** Ends every session of an admin except the one making this request. */

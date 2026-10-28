@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Prisma, type BlockType } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { checkbox, optionalId, optionalText, parseLocalDateTime, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { blockDefinition, readSettings, settingsSchema } from "@/content/blocks/registry";
@@ -93,7 +93,10 @@ export async function savePage(_prev: PageState, formData: FormData): Promise<Pa
   try {
     await db.$transaction(async (tx) => {
       if (id) await tx.page.update({ where: { id }, data });
-      else id = (await tx.page.create({ data: { ...data, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.page.create({ data: { ...data, createdById: admin.id } })).id;
+      }
       const pageId = id!;
 
       const langs = [
@@ -134,7 +137,7 @@ export async function savePage(_prev: PageState, formData: FormData): Promise<Pa
 }
 
 export async function trashPage(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.page.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -142,7 +145,7 @@ export async function trashPage(formData: FormData) {
 }
 
 export async function restorePage(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.page.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh(id);
@@ -151,7 +154,7 @@ export async function restorePage(formData: FormData) {
 
 /** Permanent delete, from the trash only. System pages (home, about…) cannot be deleted. */
 export async function deletePageForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const page = await db.page.findUnique({ where: { id }, select: { deletedAt: true, key: true } });
   if (!page?.deletedAt || page.key) redirect(`/admin/pages/${id}`);
@@ -163,7 +166,7 @@ export async function deletePageForever(formData: FormData) {
 // ── Sections ─────────────────────────────────────────────────────────────────
 
 export async function addSection(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const pageId = uuid.parse(formData.get("pageId"));
   const last = await db.pageSection.aggregate({ where: { pageId }, _max: { sortOrder: true } });
   await db.pageSection.create({ data: { pageId, sortOrder: (last._max.sortOrder ?? -1) + 1 } });
@@ -218,7 +221,7 @@ export async function moveSection(formData: FormData) {
 }
 
 export async function deleteSection(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("sectionId"));
   const s = await db.pageSection.findUniqueOrThrow({ where: { id }, include: { blocks: { include: { items: true } } } });
   await db.$transaction(async (tx) => {
@@ -233,7 +236,7 @@ export async function deleteSection(formData: FormData) {
 // ── Blocks ───────────────────────────────────────────────────────────────────
 
 export async function addBlock(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const sectionId = uuid.parse(formData.get("sectionId"));
   const type = z.string().parse(formData.get("type"));
   const def = blockDefinition(type);
@@ -337,7 +340,7 @@ export async function moveBlock(formData: FormData) {
 }
 
 export async function deleteBlock(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("blockId"));
   const pageId = await pageIdOfBlock(id);
   const items = await db.blockItem.findMany({ where: { blockId: id }, select: { id: true } });
@@ -354,7 +357,7 @@ const itemText = { title: optionalText(200), subtitle: optionalText(200), body: 
 const itemTextSchema = z.object(itemText);
 
 export async function saveItem(_prev: PageState, formData: FormData): Promise<PageState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const blockId = uuid.parse(formData.get("blockId"));
   const itemId = formData.get("itemId") ? uuid.parse(formData.get("itemId")) : null;
   const block = await db.contentBlock.findUniqueOrThrow({ where: { id: blockId }, include: { section: true } });
@@ -393,6 +396,7 @@ export async function saveItem(_prev: PageState, formData: FormData): Promise<Pa
     let id = itemId;
     if (id) await tx.blockItem.update({ where: { id }, data });
     else {
+      assertMayCreate(admin);
       const last = await tx.blockItem.aggregate({ where: { blockId }, _max: { sortOrder: true } });
       id = (await tx.blockItem.create({ data: { ...data, blockId, sortOrder: (last._max.sortOrder ?? -1) + 1 } })).id;
     }
@@ -436,7 +440,7 @@ export async function moveItem(formData: FormData) {
 }
 
 export async function deleteItem(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("itemId"));
   const item = await db.blockItem.findUniqueOrThrow({ where: { id } });
   await db.$transaction([

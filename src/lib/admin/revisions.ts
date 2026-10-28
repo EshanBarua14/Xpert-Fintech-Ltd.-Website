@@ -174,6 +174,10 @@ export async function restoreRevision(revisionId: string): Promise<RestoreResult
   const admin = await requireAdmin();
   const id = (rev.snapshot as Row)[idName];
   const current = await readSnapshot(db, rev.model, { [idName]: id });
+  // Editors edit existing content: taking an added item away or bringing a deleted one back is for admins.
+  if (admin.role !== "ADMIN" && (rev.action === "create" || !current)) {
+    return { ok: false, message: "Only an admin can remove an added item or bring back a deleted one." };
+  }
   try {
     if (rev.action === "create") {
       // "Added …": restoring the version before it means taking the item away again.

@@ -5,8 +5,9 @@ import { contentTodos } from "@/lib/admin/todo";
 
 type Stat = { label: string; value: number; href?: string; note?: string };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ denied?: string }> }) {
   const admin = await requireAdmin();
+  const { denied } = await searchParams;
   const live = { status: "PUBLISHED" as const, deletedAt: null };
   const draft = { status: "DRAFT" as const, deletedAt: null };
 
@@ -61,7 +62,14 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-10">
       <div>
         <h1 className="font-display text-3xl font-semibold">Welcome, {admin.name}</h1>
-        <p className="mt-1 text-text-secondary">Overview of the website content.</p>
+        <p className="mt-1 text-text-secondary">
+          Overview of the website content. You are signed in as {admin.role === "ADMIN" ? "an admin" : "an editor"}.
+        </p>
+        {denied && (
+          <p role="alert" className="mt-4 rounded-card border border-gold/40 bg-gold/10 px-4 py-3 text-sm">
+            Editors can edit existing content, but only an admin can create, delete, trash or restore it, or manage users and backups.
+          </p>
+        )}
       </div>
 
       <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

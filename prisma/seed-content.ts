@@ -3231,18 +3231,25 @@ async function seedMoreLinkedIn() {
 
 // ── 28 Oct (XFL): M Shahryar Faiz's biography, as XFL supplied it — set even where other text is on file ──
 async function seedShahryarBio() {
-  const MARK = "seed.shahryar-bio-2026-10-28";
+  const MARK = "seed.shahryar-bio-2026-10-28b";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
   const profile = DIRECTOR_PROFILES.find((d) => d.key === "m-shahryar-faiz");
-  const person = await db.person.findUnique({ where: { key: "m-shahryar-faiz" }, select: { id: true } });
-  if (!profile?.bio || !person) return;
+  // By key, or by name (a record added or re-created in the admin may have no key).
+  const person =
+    (await db.person.findFirst({ where: { key: "m-shahryar-faiz", deletedAt: null }, select: { id: true } })) ??
+    (await db.person.findFirst({ where: { deletedAt: null, translations: { some: { locale: EN, name: { contains: "Shahryar Faiz", mode: "insensitive" } } } }, select: { id: true } }));
+  if (!profile?.bio) return;
+  if (!person) {
+    console.log("  M Shahryar Faiz: no profile found in Admin → People; biography not set");
+    return;
+  }
   for (const [locale, bio] of [[EN, profile.bio.en], [BN, profile.bio.bn]] as const) {
     const tr = await db.personTranslation.findUnique({ where: { personId_locale: { personId: person.id, locale } } });
     if (tr) await db.personTranslation.update({ where: { id: tr.id }, data: { bio } });
     else if (locale === BN) await db.personTranslation.create({ data: { personId: person.id, locale: BN, name: profile.nameBn, bio, affiliation: profile.affiliation?.bn ?? null } });
   }
   await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
-  console.log("  M Shahryar Faiz: biography set (EN + BN)");
+  console.log("  M Shahryar Faiz: biography set (EN + BN); the website shows it within 5 minutes");
 }
 
 // ── 28 Oct (XFL): Eshan Barua's own links, supplied by him (each filled only where empty) ──

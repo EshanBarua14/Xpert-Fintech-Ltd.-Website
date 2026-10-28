@@ -81,7 +81,7 @@ jobs:
         run: grep -q "^exit 0" e2e.log && grep -q "^exit 0" public.log
       - name: Map pictures
         if: always()
-        run: BASE_URL=http://localhost:3000 npx playwright test e2e/shots.spec.ts --project=desktop --retries=0 --reporter=list 2>&1 | grep -E "SHOT|passed|failed" | sed 's/^/::notice::/' || true
+        run: BASE_URL=http://localhost:3000 npx playwright test e2e/shots.spec.ts e2e/admin-shots.spec.ts --project=desktop --retries=0 --reporter=list 2>&1 | grep -E "SHOT|passed|failed" | sed 's/^/::notice::/' || true
       - name: Push screenshots to a temporary branch
         if: always()
         run: |

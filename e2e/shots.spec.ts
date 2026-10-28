@@ -7,6 +7,7 @@ const maps: [string, string, string][] = [
   ["/en/consortium", "main svg[role='group']", "consortium"],
   ["/en", "svg[viewBox='0 0 800 580']", "home-ecosystem"],
   ["/en", "main svg[role='group']", "home-consortium"],
+  ["/en", "#integration", "home-integration"],
 ];
 
 for (const theme of ["dark", "light"] as const) {

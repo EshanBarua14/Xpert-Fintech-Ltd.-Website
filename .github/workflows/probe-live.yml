@@ -9,13 +9,14 @@ jobs:
     steps:
       - name: Live images
         run: |
+          set +e
           B=https://xpert-fintech-ltd-website.vercel.app
           R=""; N=0; BAD=""
           for p in /en /en/platform /en/consortium /en/markets /en/company/about; do
-            curl -s -L --max-time 30 "$B$p" -o page.html
+            curl -s -L --max-time 30 "$B$p" -o page.html; echo "::notice::page $p $(wc -c < page.html) bytes"
             for u in $(grep -oE '(src|href|srcSet|srcset)="[^"]*(/media/|/_next/image|/brand/|/logos/)[^" ,]*' page.html | sed -E 's/^[a-zA-Z]+="//' | sed 's/&amp;/\&/g' | sort -u | head -60); do
               case "$u" in http*) url="$u";; *) url="$B$u";; esac
-              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url"); N=$((N+1))
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || true); N=$((N+1))
               [ "$code" = 200 ] || BAD="$BAD | $code $u"
             done
           done

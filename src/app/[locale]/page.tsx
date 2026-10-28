@@ -49,6 +49,7 @@ import { SavingsGraphic } from "@/components/flagship/SavingsGraphic";
 import { PhoneStage } from "@/components/flagship/PhoneStage";
 import { OwnershipShowcase } from "@/components/flagship/OwnershipShowcase";
 import { HomeSectionNav } from "@/components/flagship/HomeSectionNav";
+import { IntegrationSection } from "@/components/flagship/IntegrationSection";
 import { getOwnership } from "@/lib/public/ownership";
 import { getSavings, getStrengths } from "@/lib/content/highlights";
 import { exchangeLogos } from "@/components/market/ExchangeMark";
@@ -227,6 +228,15 @@ export default async function HomePage({ params }: Props) {
             </div>
             <ProductShowcase products={showcase} labels={showcaseLabels(t)} />
           </div>
+        </Shell>
+      )}
+    </>
+  ),
+    integration: (
+    <>
+      {show("integration") && (
+        <Shell id="integration" nav={locale === "bn" ? "ইন্টিগ্রেশন" : "Integration"} className="py-12 md:py-16">
+          <IntegrationSection t={t} locale={locale} />
         </Shell>
       )}
     </>

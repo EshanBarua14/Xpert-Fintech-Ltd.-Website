@@ -29,7 +29,7 @@ export function IntegrationSection({ t, locale }: { t: Messages; locale: string 
   return (
     <div className="grid items-center gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
       <div className="flex flex-col gap-6">
-        <h2 className="font-display text-4xl leading-[1.08] font-semibold text-balance text-text-primary md:text-5xl">
+        <h2 className="font-display text-4xl leading-[1.08] font-semibold text-balance text-text-primary md:text-5xl [&_.emph]:table">
           <Emph text={t.integrationTitle} />
         </h2>
         <p className="max-w-xl text-lg leading-relaxed text-pretty text-text-secondary [hyphens:none] [text-align:left]">{t.integrationBody}</p>

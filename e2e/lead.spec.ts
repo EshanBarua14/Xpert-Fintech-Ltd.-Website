@@ -11,11 +11,21 @@ test.describe("Demo request", () => {
     await page.goto("/en/request-demo");
     // The demo form has three steps: organisation, interest, contact.
     await page.getByLabel(/^Organization/).fill("E2E Securities Ltd.");
+    await page.locator("#designation").fill("E2E Head of IT");
     await page.getByRole("button", { name: "Continue" }).click();
+    const product = page.locator("#interestedOfferingId");
+    let productName = "";
+    if (await product.count()) {
+      const opt = product.locator("option:not([value=''])").first();
+      productName = ((await opt.textContent()) ?? "").trim();
+      await product.selectOption((await opt.getAttribute("value"))!);
+    }
     await page.getByLabel("What do you need?").fill("Automated test — please ignore.");
     await page.getByRole("button", { name: "Continue" }).click();
     await page.getByLabel("Full name").fill(name);
     await page.getByLabel("Work email").fill(email);
+    await page.locator("#phone").fill("+880 1711 000000");
+    await page.locator("#message").fill("E2E message text.");
     await page.getByLabel(/I agree/).check();
     // Forms sent faster than a person could type are ignored as spam.
     await page.waitForTimeout(3000);
@@ -26,8 +36,14 @@ test.describe("Demo request", () => {
     await page.goto(`/admin/leads?q=${encodeURIComponent(email)}`);
     await expect(page.getByRole("link", { name })).toBeVisible();
 
-    // Clean up: move the test lead to the trash.
+    // Every detail the visitor gave is on the lead's page.
     await page.getByRole("link", { name }).click();
+    const enquiry = page.locator("section").filter({ has: page.getByRole("heading", { name: "Enquiry" }) });
+    for (const text of [email, "+880 1711 000000", "E2E Securities Ltd.", "E2E Head of IT", "Automated test — please ignore.", "E2E message text.", ...(productName ? [productName] : [])]) {
+      await expect(enquiry, `"${text}" missing on the lead page`).toContainText(text);
+    }
+
+    // Clean up: move the test lead to the trash.
     page.once("dialog", (d) => d.accept());
     await page.getByRole("button", { name: "Move to trash" }).click();
     await expect(page.getByText("Moved to trash.")).toBeVisible();

@@ -91,6 +91,11 @@ export const DIRECTOR_PROFILES: DirectorProfile[] = [
     key: "m-shahryar-faiz",
     nameBn: "এম শাহরিয়ার ফয়েজ",
     affiliation: { en: "Chief Operating Officer / Acting Managing Director, EBL Securities PLC", bn: "প্রধান পরিচালন কর্মকর্তা / ভারপ্রাপ্ত ব্যবস্থাপনা পরিচালক, ইবিএল সিকিউরিটিজ পিএলসি" },
+    // Biography supplied by XFL (28 Oct 2026), copy-edited for grammar only.
+    bio: {
+      en: "M Shahryar Faiz has been the Chief Operating Officer (COO) of EBL Securities PLC since May 2021. He has over 17 years of diversified experience across stock brokerage, merchant banking and local and global banking institutions, with extensive expertise in investment management, research, corporate finance, risk management, business development and strategic planning.\n\nBefore his current role, he held leadership positions at EBL Securities PLC, EBL Investments Ltd., Eastern Bank PLC and Standard Chartered Bank. He holds an MBA and a BBA in Finance from the University of Dhaka and has passed Level II of the Chartered Financial Analyst (CFA) program.",
+      bn: "এম শাহরিয়ার ফয়েজ ২০২১ সালের মে মাস থেকে ইবিএল সিকিউরিটিজ পিএলসির প্রধান পরিচালন কর্মকর্তা (সিওও)। স্টক ব্রোকারেজ, মার্চেন্ট ব্যাংকিং এবং দেশি ও আন্তর্জাতিক ব্যাংকিং প্রতিষ্ঠানে তাঁর ১৭ বছরেরও বেশি বৈচিত্র্যময় অভিজ্ঞতা রয়েছে। বিনিয়োগ ব্যবস্থাপনা, গবেষণা, কর্পোরেট ফাইন্যান্স, ঝুঁকি ব্যবস্থাপনা, ব্যবসা উন্নয়ন ও কৌশলগত পরিকল্পনায় তাঁর ব্যাপক দক্ষতা রয়েছে।\n\nবর্তমান দায়িত্বের আগে তিনি ইবিএল সিকিউরিটিজ পিএলসি, ইবিএল ইনভেস্টমেন্টস লিমিটেড, ইস্টার্ন ব্যাংক পিএলসি এবং স্ট্যান্ডার্ড চার্টার্ড ব্যাংকে বিভিন্ন নেতৃত্বস্থানীয় পদে দায়িত্ব পালন করেছেন। তিনি ঢাকা বিশ্ববিদ্যালয় থেকে ফাইন্যান্সে বিবিএ ও এমবিএ সম্পন্ন করেছেন এবং চার্টার্ড ফিন্যান্সিয়াল অ্যানালিস্ট (সিএফএ) প্রোগ্রামের লেভেল II উত্তীর্ণ হয়েছেন।",
+    },
   },
   {
     key: "bishnu-pada-kunda",

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import {
   checkbox,
@@ -95,7 +95,10 @@ export async function saveEvent(_prev: EventState, formData: FormData): Promise<
   try {
     await db.$transaction(async (tx) => {
       if (id) await tx.event.update({ where: { id }, data });
-      else id = (await tx.event.create({ data: { ...data, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.event.create({ data: { ...data, createdById: admin.id } })).id;
+      }
       const eventId = id!;
 
       const en = { slug: enSlug, title: v.enTitle, summary: v.enSummary ?? null, body: v.enBody ?? null, location: v.enLocation ?? null };
@@ -147,7 +150,7 @@ export async function saveEvent(_prev: EventState, formData: FormData): Promise<
 }
 
 export async function trashEvent(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.event.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -155,7 +158,7 @@ export async function trashEvent(formData: FormData) {
 }
 
 export async function restoreEvent(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.event.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh();
@@ -163,7 +166,7 @@ export async function restoreEvent(formData: FormData) {
 }
 
 export async function deleteEventForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const ev = await db.event.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!ev?.deletedAt) redirect(`/admin/events/${id}`);

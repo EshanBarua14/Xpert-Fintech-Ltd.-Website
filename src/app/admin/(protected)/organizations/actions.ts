@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import {
   checkbox,
@@ -82,7 +82,10 @@ export async function saveOrganization(_prev: OrgState, formData: FormData): Pro
   try {
     await db.$transaction(async (tx) => {
       if (id) await tx.organization.update({ where: { id }, data });
-      else id = (await tx.organization.create({ data: { ...data, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.organization.create({ data: { ...data, createdById: admin.id } })).id;
+      }
       const organizationId = id!;
       const en = { name: v.enName, shortName: v.enShortName ?? null, description: v.enDescription ?? null };
       await tx.organizationTranslation.upsert({
@@ -111,7 +114,7 @@ export async function saveOrganization(_prev: OrgState, formData: FormData): Pro
 }
 
 export async function trashOrganization(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.organization.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -119,7 +122,7 @@ export async function trashOrganization(formData: FormData) {
 }
 
 export async function restoreOrganization(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.organization.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh();
@@ -127,7 +130,7 @@ export async function restoreOrganization(formData: FormData) {
 }
 
 export async function deleteOrganizationForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const org = await db.organization.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!org?.deletedAt) redirect(`/admin/organizations/${id}`);

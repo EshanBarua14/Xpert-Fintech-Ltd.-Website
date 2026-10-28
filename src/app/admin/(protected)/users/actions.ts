@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { hash, verify } from "@node-rs/argon2";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin, revokeAllSessions, revokeOtherSessions } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, revokeAllSessions, revokeOtherSessions } from "@/lib/auth/session";
 import { toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { consumeStep, decryptSecret, encryptSecret, generateTotpSecret, hasServerSecret, otpauthUri, verifyTotp } from "@/lib/auth/totp";
 
 export type AccountState = { errors?: FieldErrors; message?: string; savedAt?: number };
+
+const role = z.enum(["ADMIN", "EDITOR"], { errorMap: () => ({ message: "Choose Admin or Editor." }) });
 
 const password = z
   .string()
@@ -39,33 +41,34 @@ export async function changeOwnPassword(_prev: AccountState, formData: FormData)
 // ── Other admins ─────────────────────────────────────────────────────────────
 
 export async function createAdmin(_prev: AccountState, formData: FormData): Promise<AccountState> {
-  await requireAdmin();
+  await requireFullAdmin();
   const parsed = z
     .object({
       name: z.string().trim().min(1, "Enter a name.").max(120),
       email: z.string().trim().toLowerCase().email("Enter a valid email address.").max(254),
       password,
+      role,
     })
-    .safeParse({ name: formData.get("name") ?? "", email: formData.get("email") ?? "", password: formData.get("password") ?? "" });
+    .safeParse({ name: formData.get("name") ?? "", email: formData.get("email") ?? "", password: formData.get("password") ?? "", role: formData.get("role") ?? "ADMIN" });
   if (!parsed.success) return { errors: toFieldErrors(parsed.error) };
 
   const exists = await db.adminUser.findUnique({ where: { email: parsed.data.email } });
   if (exists) return { errors: { email: "An admin with this email already exists." } };
 
   await db.adminUser.create({
-    data: { name: parsed.data.name, email: parsed.data.email, passwordHash: await hash(parsed.data.password) },
+    data: { name: parsed.data.name, email: parsed.data.email, role: parsed.data.role, passwordHash: await hash(parsed.data.password) },
   });
   revalidatePath("/admin/users");
-  return { message: `Admin ${parsed.data.email} created. Share the temporary password privately and ask them to change it.`, savedAt: Date.now() };
+  return { message: `${parsed.data.role === "EDITOR" ? "Editor" : "Admin"} ${parsed.data.email} created. Share the temporary password privately and ask them to change it.`, savedAt: Date.now() };
 }
 
 export async function setAdminActive(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = z.string().uuid().parse(formData.get("id"));
   const active = formData.get("active") === "true";
   if (id === admin.id) throw new Error("You cannot deactivate your own account.");
   if (!active) {
-    const others = await db.adminUser.count({ where: { isActive: true, id: { not: id } } });
+    const others = await db.adminUser.count({ where: { isActive: true, role: "ADMIN", id: { not: id } } });
     if (others === 0) throw new Error("At least one active admin is required.");
   }
   await db.adminUser.update({ where: { id }, data: { isActive: active, failedLoginCount: 0, lockedUntil: null } });
@@ -75,20 +78,26 @@ export async function setAdminActive(formData: FormData) {
 
 /** Change an admin's name or sign-in email (yours or another admin's). */
 export async function updateAdmin(_prev: AccountState, formData: FormData): Promise<AccountState> {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const parsed = z
     .object({
       id: z.string().uuid(),
       name: z.string().trim().min(1, "Enter a name.").max(120),
       email: z.string().trim().toLowerCase().email("Enter a valid email address.").max(254),
+      role: role.optional(),
     })
-    .safeParse({ id: formData.get("id") ?? "", name: formData.get("name") ?? "", email: formData.get("email") ?? "" });
+    .safeParse({ id: formData.get("id") ?? "", name: formData.get("name") ?? "", email: formData.get("email") ?? "", role: formData.get("role") || undefined });
   if (!parsed.success) return { errors: toFieldErrors(parsed.error) };
-  const { id, name, email } = parsed.data;
+  const { id, name, email, role: newRole } = parsed.data;
+  if (newRole === "EDITOR") {
+    if (id === admin.id) return { errors: { role: "You cannot make your own account an editor." } };
+    const admins = await db.adminUser.count({ where: { isActive: true, role: "ADMIN", id: { not: id } } });
+    if (admins === 0) return { errors: { role: "At least one active admin is required." } };
+  }
   const clash = await db.adminUser.findFirst({ where: { email, id: { not: id } }, select: { id: true } });
   if (clash) return { errors: { email: "Another admin already uses this email." } };
   const before = await db.adminUser.findUniqueOrThrow({ where: { id }, select: { email: true } });
-  await db.adminUser.update({ where: { id }, data: { name, email } });
+  await db.adminUser.update({ where: { id }, data: { name, email, ...(newRole && { role: newRole }) } });
   // A changed sign-in email signs that admin out everywhere else.
   if (before.email !== email) {
     if (id === admin.id) await revokeOtherSessions(id);
@@ -104,17 +113,17 @@ export async function updateAdmin(_prev: AccountState, formData: FormData): Prom
  * remove yourself or the last active admin.
  */
 export async function deleteAdmin(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = z.string().uuid().parse(formData.get("id"));
   if (id === admin.id) throw new Error("You cannot remove your own account.");
-  const others = await db.adminUser.count({ where: { isActive: true, id: { not: id } } });
+  const others = await db.adminUser.count({ where: { isActive: true, role: "ADMIN", id: { not: id } } });
   if (others === 0) throw new Error("At least one active admin is required.");
   await db.adminUser.delete({ where: { id } });
   revalidatePath("/admin/users");
 }
 
 export async function resetAdminPassword(_prev: AccountState, formData: FormData): Promise<AccountState> {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = z.string().uuid().parse(formData.get("id"));
   if (id === admin.id) return { errors: { password: "Use My account to change your own password." } };
   const parsed = password.safeParse(formData.get("password") ?? "");
@@ -174,7 +183,7 @@ export async function disableOwnTwoFactor(_prev: TwoFactorState, formData: FormD
 
 /** For an admin who lost their phone: another admin switches it off for them. */
 export async function resetAdminTwoFactor(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = z.string().uuid().parse(formData.get("id"));
   if (id === admin.id) throw new Error("Use the two-factor section above for your own account.");
   await db.adminUser.update({ where: { id }, data: { totpEnabled: false, totpSecret: null } });

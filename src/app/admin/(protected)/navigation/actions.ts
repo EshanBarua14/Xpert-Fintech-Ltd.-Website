@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { navItemSchema } from "@/lib/validation/navigation";
 
@@ -18,7 +18,7 @@ async function refresh(menuId: string) {
 }
 
 export async function saveNavItem(_prev: NavState, formData: FormData): Promise<NavState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = navItemSchema.safeParse({
     menuId: formData.get("menuId"),
     itemId: formData.get("itemId") || undefined,
@@ -63,6 +63,7 @@ export async function saveNavItem(_prev: NavState, formData: FormData): Promise<
     if (id) {
       await tx.navItem.update({ where: { id }, data });
     } else {
+      assertMayCreate(admin);
       const last = await tx.navItem.aggregate({
         where: { menuId: v.menuId, parentId: v.parentId },
         _max: { sortOrder: true },
@@ -94,7 +95,7 @@ export async function saveNavItem(_prev: NavState, formData: FormData): Promise<
 
 /** Deletes an item and the links under it. */
 export async function deleteNavItem(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("itemId"));
   const item = await db.navItem.delete({ where: { id } });
   await refresh(item.menuId);

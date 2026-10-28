@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
@@ -15,7 +15,7 @@ import { deleteAlbumForever, restoreAlbum, trashAlbum } from "../actions";
 const emptyText = { title: "", slug: "", description: "" };
 
 export default async function AlbumPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; restored?: string }> }) {
-  await requireAdmin();
+  const me = await requireAdmin();
   const { id } = await params;
   const flags = await searchParams;
   const images = await imageOptions();
@@ -25,6 +25,7 @@ export default async function AlbumPage({ params, searchParams }: { params: Prom
     </Link>
   );
   if (id === "new") {
+    if (me.role !== "ADMIN") redirect("/admin?denied=1");
     const values: AlbumFormValues = { status: "DRAFT", publishAt: "", sortOrder: 0, takenAt: "", coverMediaId: "", photos: [], en: { ...emptyText }, bn: { ...emptyText } };
     return (
       <div className="flex flex-col gap-6">

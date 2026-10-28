@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { formInput } from "@/lib/admin/forms";
 import { isUsableDocument, isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { purgeResource } from "@/lib/admin/purge";
@@ -59,7 +59,10 @@ export async function saveResource(_prev: ResourceState, formData: FormData): Pr
   try {
     await db.$transaction(async (tx) => {
       if (id) await tx.resource.update({ where: { id }, data });
-      else id = (await tx.resource.create({ data: { ...data, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.resource.create({ data: { ...data, createdById: admin.id } })).id;
+      }
       const resourceId = id!;
       const en = { slug: enSlug, title: v.enTitle, summary: v.enSummary ?? null };
       await tx.resourceTranslation.upsert({ where: { resourceId_locale: { resourceId, locale: "en" } }, update: en, create: { resourceId, locale: "en", ...en } });
@@ -84,7 +87,7 @@ export async function saveResource(_prev: ResourceState, formData: FormData): Pr
 }
 
 export async function trashResource(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.resource.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -92,7 +95,7 @@ export async function trashResource(formData: FormData) {
 }
 
 export async function restoreResource(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.resource.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh();
@@ -100,7 +103,7 @@ export async function restoreResource(formData: FormData) {
 }
 
 export async function deleteResourceForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const r = await db.resource.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!r?.deletedAt) redirect(`/admin/resources/${id}`);

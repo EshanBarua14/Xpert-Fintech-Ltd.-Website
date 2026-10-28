@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { formInput } from "@/lib/admin/forms";
 import { isUsableImage, isUsableVideoFile, syncMediaUsage } from "@/lib/admin/media";
 import { purgeVideo } from "@/lib/admin/purge";
@@ -97,7 +97,10 @@ export async function saveVideo(_prev: VideoState, formData: FormData): Promise<
       // Only one featured video leads the gallery.
       if (v.isFeatured) await tx.video.updateMany({ where: { isFeatured: true, ...(id && { id: { not: id } }) }, data: { isFeatured: false } });
       if (id) await tx.video.update({ where: { id }, data });
-      else id = (await tx.video.create({ data: { ...data, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.video.create({ data: { ...data, createdById: admin.id } })).id;
+      }
       const videoId = id!;
       await tx.videoTranslation.upsert({ where: { videoId_locale: { videoId, locale: "en" } }, update: text("en"), create: { videoId, locale: "en", ...text("en") } });
       if (v.bnTitle) {
@@ -117,7 +120,7 @@ export async function saveVideo(_prev: VideoState, formData: FormData): Promise<
 }
 
 export async function trashVideo(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.video.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -125,7 +128,7 @@ export async function trashVideo(formData: FormData) {
 }
 
 export async function restoreVideo(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.video.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh();
@@ -133,7 +136,7 @@ export async function restoreVideo(formData: FormData) {
 }
 
 export async function deleteVideoForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const v = await db.video.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!v?.deletedAt) redirect(`/admin/videos/${id}`);

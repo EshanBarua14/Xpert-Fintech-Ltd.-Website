@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin } from "@/lib/auth/session";
 import { storage } from "@/lib/storage";
 import { purgeMedia } from "@/lib/admin/purge";
 import { cleanFileName, MAX_BYTES, sniff } from "@/lib/media/inspect";
@@ -163,7 +163,7 @@ export async function saveMediaDetails(_prev: MediaState, formData: FormData): P
 }
 
 export async function trashMedia(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.media.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   revalidatePath("/", "layout");
@@ -171,7 +171,7 @@ export async function trashMedia(formData: FormData) {
 }
 
 export async function restoreMedia(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.media.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   revalidatePath("/", "layout");
@@ -180,7 +180,7 @@ export async function restoreMedia(formData: FormData) {
 
 /** Permanent delete: only from the trash, and only when nothing uses the file. */
 export async function deleteMediaForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const media = await db.media.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!media?.deletedAt || !(await purgeMedia(id))) redirect(`/admin/media/${id}`);

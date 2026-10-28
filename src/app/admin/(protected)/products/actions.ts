@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { parseLocalDateTime, slugify, toFieldErrors, type FieldErrors } from "@/lib/validation/common";
 import { offeringItemSchema, offeringSchema } from "@/lib/validation/offering";
 import { purgeOffering } from "@/lib/admin/purge";
@@ -85,6 +85,7 @@ export async function saveOffering(_prev: FormState, formData: FormData): Promis
       if (id) {
         await tx.offering.update({ where: { id }, data: base });
       } else {
+        assertMayCreate(admin);
         const created = await tx.offering.create({ data: { ...base, createdById: admin.id } });
         id = created.id;
       }
@@ -121,7 +122,7 @@ export async function saveOffering(_prev: FormState, formData: FormData): Promis
 }
 
 export async function trashOffering(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.offering.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refreshSite();
@@ -129,7 +130,7 @@ export async function trashOffering(formData: FormData) {
 }
 
 export async function restoreOffering(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.offering.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refreshSite();
@@ -138,7 +139,7 @@ export async function restoreOffering(formData: FormData) {
 
 /** Permanent delete — only for items already in the trash. */
 export async function deleteOfferingForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const offering = await db.offering.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!offering?.deletedAt) redirect(`/admin/products/${id}`);
@@ -168,6 +169,7 @@ export async function saveOfferingItem(_prev: FormState, formData: FormData): Pr
     if (id) {
       await tx.offeringItem.update({ where: { id }, data: { kind: v.kind, updatedById: admin.id } });
     } else {
+      assertMayCreate(admin);
       const last = await tx.offeringItem.aggregate({
         where: { offeringId: v.offeringId, kind: v.kind },
         _max: { sortOrder: true },
@@ -206,7 +208,7 @@ export async function saveOfferingItem(_prev: FormState, formData: FormData): Pr
 }
 
 export async function deleteOfferingItem(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("itemId"));
   const item = await db.offeringItem.delete({ where: { id } });
   refreshSite();

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin, assertMayCreate } from "@/lib/auth/session";
 import { isUsableImage, syncMediaUsage } from "@/lib/admin/media";
 import { formInput, splitList } from "@/lib/admin/forms";
 import { purgeArticle } from "@/lib/admin/purge";
@@ -86,7 +86,10 @@ export async function saveArticle(_prev: ArticleState, formData: FormData): Prom
     await db.$transaction(async (tx) => {
       const categoryId = v.newCategoryEn ? await ensureCategory(tx, v.newCategoryEn, v.newCategoryBn ?? null) : v.categoryId;
       if (id) await tx.article.update({ where: { id }, data: { ...data, categoryId } });
-      else id = (await tx.article.create({ data: { ...data, categoryId, createdById: admin.id } })).id;
+      else {
+        assertMayCreate(admin);
+        id = (await tx.article.create({ data: { ...data, categoryId, createdById: admin.id } })).id;
+      }
       const articleId = id!;
 
       const en = { slug: enSlug, title: v.enTitle, subtitle: v.enSubtitle ?? null, excerpt: v.enExcerpt ?? null, body: v.enBody ?? null };
@@ -125,7 +128,7 @@ export async function saveArticle(_prev: ArticleState, formData: FormData): Prom
 }
 
 export async function trashArticle(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.article.update({ where: { id }, data: { deletedAt: new Date(), updatedById: admin.id } });
   refresh();
@@ -133,7 +136,7 @@ export async function trashArticle(formData: FormData) {
 }
 
 export async function restoreArticle(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.article.update({ where: { id }, data: { deletedAt: null, updatedById: admin.id } });
   refresh();
@@ -141,7 +144,7 @@ export async function restoreArticle(formData: FormData) {
 }
 
 export async function deleteArticleForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const a = await db.article.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!a?.deletedAt) redirect(`/admin/news/${id}`);
@@ -162,7 +165,7 @@ const categorySchema = z.object({
 });
 
 export async function saveCategory(_prev: CategoryState, formData: FormData): Promise<CategoryState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = categorySchema.safeParse(formInput(categorySchema.shape, formData));
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), message: "Please fix the highlighted fields." };
   const v = parsed.data;
@@ -170,6 +173,7 @@ export async function saveCategory(_prev: CategoryState, formData: FormData): Pr
   if (!slug) return { errors: { enName: "Use English letters for the name." } };
   try {
     await db.$transaction(async (tx) => {
+      if (!v.id) assertMayCreate(admin);
       const id = v.id ?? (await tx.articleCategory.create({ data: { key: slug, sortOrder: v.sortOrder } })).id;
       if (v.id) await tx.articleCategory.update({ where: { id }, data: { sortOrder: v.sortOrder } });
       await tx.articleCategoryTranslation.upsert({
@@ -200,7 +204,7 @@ export async function saveCategory(_prev: CategoryState, formData: FormData): Pr
 
 /** Deletes a category; its articles stay, uncategorised. */
 export async function deleteCategory(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.articleCategory.delete({ where: { id } });
   refresh();
@@ -219,7 +223,7 @@ const tagSchema = z.object({
 
 /** Adds a tag, or renames one (its articles keep it). */
 export async function saveTag(_prev: TagState, formData: FormData): Promise<TagState> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = tagSchema.safeParse(formInput(tagSchema.shape, formData));
   if (!parsed.success) return { errors: toFieldErrors(parsed.error), message: "Please fix the highlighted fields." };
   const v = parsed.data;
@@ -227,6 +231,7 @@ export async function saveTag(_prev: TagState, formData: FormData): Promise<TagS
   if (!slug) return { errors: { enName: "Use English letters for the name." } };
   try {
     await db.$transaction(async (tx) => {
+      if (!v.id) assertMayCreate(admin);
       const id = v.id ?? (await tx.tag.create({ data: { key: slug } })).id;
       await tx.tagTranslation.upsert({
         where: { tagId_locale: { tagId: id, locale: "en" } },
@@ -257,7 +262,7 @@ export async function saveTag(_prev: TagState, formData: FormData): Promise<TagS
 
 /** Deletes a tag; it is removed from its articles, which stay as they are. */
 export async function deleteTag(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.tag.delete({ where: { id } });
   refresh();

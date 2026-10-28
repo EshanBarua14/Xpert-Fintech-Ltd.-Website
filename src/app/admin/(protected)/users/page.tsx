@@ -12,8 +12,10 @@ export default async function UsersPage() {
   return (
     <div className="flex flex-col gap-10">
       <div>
-        <h1 className="font-display text-3xl font-semibold">Admins</h1>
-        <p className="mt-1 text-sm text-text-secondary">Everyone listed here can edit the whole website.</p>
+        <h1 className="font-display text-3xl font-semibold">Users and roles</h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          Admins create, edit and delete content and manage users and backups. Editors edit existing content only.
+        </p>
       </div>
 
       <section className="flex flex-col gap-4">
@@ -26,13 +28,16 @@ export default async function UsersPage() {
         <TwoFactorPanel enabled={Boolean(admins.find((a) => a.id === me.id)?.totpEnabled)} serverReady={hasServerSecret()} />
       </section>
 
+      {me.role === "ADMIN" && (
+      <>
       <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
-        <h2 className="font-display text-xl font-semibold">Admin accounts</h2>
+        <h2 className="font-display text-xl font-semibold">Accounts</h2>
         <AdminUsersTable
           rows={admins.map((a) => ({
             id: a.id,
             name: a.name,
             email: a.email,
+            role: a.role,
             isActive: a.isActive,
             isSelf: a.id === me.id,
             lastLogin: formatDhaka(a.lastLoginAt),
@@ -43,9 +48,11 @@ export default async function UsersPage() {
       </section>
 
       <section className="flex flex-col gap-4 border-t border-fg/10 pt-8">
-        <h2 className="font-display text-xl font-semibold">Add an admin</h2>
+        <h2 className="font-display text-xl font-semibold">Add a user</h2>
         <CreateAdminForm />
       </section>
+      </>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { requireAdmin } from "@/lib/auth/session";
@@ -21,7 +21,7 @@ async function organizationOptions() {
 }
 
 export default async function TestimonialPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; restored?: string }> }) {
-  await requireAdmin();
+  const me = await requireAdmin();
   const { id } = await params;
   const flags = await searchParams;
   const [images, organizations] = await Promise.all([imageOptions(), organizationOptions()]);
@@ -31,6 +31,7 @@ export default async function TestimonialPage({ params, searchParams }: { params
     </Link>
   );
   if (id === "new") {
+    if (me.role !== "ADMIN") redirect("/admin?denied=1");
     const values: TestimonialFormValues = {
       status: "DRAFT",
       publishAt: "",

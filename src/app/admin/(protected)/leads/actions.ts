@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin } from "@/lib/auth/session";
 import { parseLocalDateTime } from "@/lib/validation/common";
 import { ACTIVITY_KINDS, ADMIN_ERROR_TEXT, LEAD_STATUSES, leadFields, STATUS_LABELS } from "@/lib/validation/lead";
 import { purgeLead } from "@/lib/admin/purge";
@@ -46,7 +46,7 @@ async function existingOffering(id: string | null) {
 
 /** Admin adds a lead by hand (phone call, event, referral…). */
 export async function createLead(_prev: LeadAdminState, formData: FormData): Promise<LeadAdminState> {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const result = parseDetails(formData);
   if ("errors" in result) return { errors: result.errors, message: "Please fix the highlighted fields." };
   const v = result.data;
@@ -150,7 +150,7 @@ const activitySchema = z.object({
 
 /** Log a note, call, email or meeting. */
 export async function addLeadActivity(_prev: LeadAdminState, formData: FormData): Promise<LeadAdminState> {
-  const admin = await requireAdmin();
+  const admin = await requireFullAdmin();
   const parsed = activitySchema.safeParse({ leadId: formData.get("leadId"), kind: formData.get("kind"), body: str(formData.get("body")) });
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
@@ -168,7 +168,7 @@ export async function addLeadActivity(_prev: LeadAdminState, formData: FormData)
 }
 
 export async function deleteLeadActivity(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const activity = await db.leadActivity.findUnique({ where: { id }, select: { leadId: true, kind: true } });
   // Status changes are the lead's history; only notes and logged contacts can be removed.
@@ -178,7 +178,7 @@ export async function deleteLeadActivity(formData: FormData) {
 }
 
 export async function trashLead(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.lead.update({ where: { id }, data: { deletedAt: new Date() } });
   refresh();
@@ -186,7 +186,7 @@ export async function trashLead(formData: FormData) {
 }
 
 export async function restoreLead(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   await db.lead.update({ where: { id }, data: { deletedAt: null } });
   refresh();
@@ -195,7 +195,7 @@ export async function restoreLead(formData: FormData) {
 
 /** Permanently removes the lead and its history (e.g. on a data-deletion request). */
 export async function deleteLeadForever(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = uuid.parse(formData.get("id"));
   const lead = await db.lead.findUnique({ where: { id }, select: { deletedAt: true } });
   if (!lead?.deletedAt) redirect(`/admin/leads/${id}`);

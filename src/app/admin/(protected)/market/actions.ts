@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireAdmin, requireFullAdmin } from "@/lib/auth/session";
 import { clearMarketInfoCache, dhakaToday, REFRESH_CHOICES, REFRESH_KEY, SESSIONS_KEY, testFeed } from "@/lib/market/data";
 import { saveShares, type ShareInput } from "@/lib/market/share";
 import { HEADLINE_SHARE_KEY } from "@/lib/content/leaders";
@@ -110,7 +110,7 @@ export async function saveMarketShare(_prev: MarketState, formData: FormData): P
 }
 
 export async function deleteMarketShare(formData: FormData) {
-  await requireAdmin();
+  await requireFullAdmin();
   const id = z.string().uuid().parse(formData.get("id"));
   await db.marketShare.delete({ where: { id } }).catch(() => null);
   refresh();

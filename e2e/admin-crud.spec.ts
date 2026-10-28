@@ -410,7 +410,7 @@ test.describe("Admin console: inline lists, admins, media, ecosystem", () => {
     await page.locator("#email").fill(email);
     await page.locator("#password").fill("e2e-temporary-pass-42");
     await page.getByRole("button", { name: "Add admin" }).click();
-    await expect(page.getByText(`Admin ${email} created`), `admin not created: ${await formProblems(page)}`).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(new RegExp(`(Admin|Editor) ${email.replace(/[.]/g, "\\.")} created`)), `admin not created: ${await formProblems(page)}`).toBeVisible({ timeout: 15_000 });
     await page.reload();
     const card = page.locator("li, div").filter({ hasText: email }).filter({ has: page.getByRole("button", { name: "Remove" }) }).last();
     await card.getByRole("button", { name: "Deactivate" }).click();

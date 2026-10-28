@@ -13,12 +13,14 @@ export function SplitWords({ text }: { text: string }) {
       const em = inEm || opens;
       if (opens) inEm = true;
       if (closes) inEm = false;
-      return { w: raw.replace(/\*/g, ""), em };
+      return { w: raw.replace(/\*/g, ""), em, opens };
     });
   return (
     <>
-      {words.map(({ w, em }, i) => (
+      {words.map(({ w, em, opens }, i) => (
         <Fragment key={i}>
+          {/* A hook after a full sentence starts on its own line ("…for themselves." / "Proven on every trade."). */}
+          {opens && i > 0 && /[.!?।]$/.test(words[i - 1]!.w) && <br />}
           <span className={em ? "hero-word emph" : "hero-word"} style={{ "--w": i } as CSSProperties}>
             {w}
           </span>

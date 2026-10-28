@@ -150,7 +150,7 @@ export function ImagePicker({
           </div>
           <div className="overflow-y-auto p-4">
             {options.length === 0 ? (
-              <p className="py-10 text-center text-sm text-text-secondary">No images yet: use "Upload new".</p>
+              <p className="py-10 text-center text-sm text-text-secondary">No images yet: use &quot;Upload new&quot;.</p>
             ) : (
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {visible.map((o) => (

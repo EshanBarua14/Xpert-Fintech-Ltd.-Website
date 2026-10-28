@@ -90,7 +90,7 @@ export function EventForm({
         <Language l="bn" values={values.bn} errors={e} />
         <fieldset className="flex flex-col gap-3 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">Photo gallery</legend>
-          <p className="text-xs text-text-secondary">Shown on the event page and in the website&apos;s Gallery. Upload photos in Media first.</p>
+          <p className="text-xs text-text-secondary">Shown on the event page and in the website&apos;s Gallery. Upload new photos right here, or pick from the library.</p>
           <GalleryPicker name="gallery" options={images} defaultValue={values.gallery} />
           {e.gallery && <p className="text-xs text-market-down">{e.gallery}</p>}
         </fieldset>

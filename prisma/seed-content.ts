@@ -3202,6 +3202,29 @@ async function seedRepLinkedIn() {
   if (set) console.log(`  LinkedIn added for ${set} representative(s)`);
 }
 
+// ── 28 Oct (XFL): web-trading addresses of client apps, each as the client publishes it
+//    (checked 28 Oct 2026): IBSL's TradeiBS manual (ibb.xfltrade.com); the GDS Trade link on
+//    gdslbd.com; RemX on remons.org; AIL Trade on ail-bd.com; UTrade on ucbstock.com.bd.
+//    Filled only where no web address is on file.
+async function seedWebTradingLinks() {
+  const MARK = "seed.web-trading-links-2026-10-28";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const links: [string, string][] = [
+    ["tradeibs", "https://ibb.xfltrade.com/"],
+    ["gds-trade", "https://gdf.xfltrade.com/app/Login"],
+    ["rem", "https://rem.xfltrade.com/"],
+    ["ail-trade", "https://ailtrade.com"],
+    ["utrade-ucb-stock", "https://utrade.ucbstock.com.bd/app/Login"],
+  ];
+  let set = 0;
+  for (const [key, url] of links) {
+    const r = await db.deployment.updateMany({ where: { key, OR: [{ webUrl: null }, { webUrl: "" }] }, data: { webUrl: url, linksCheckedAt: new Date("2026-10-28") } });
+    set += r.count;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), set } } });
+  if (set) console.log(`  Web trading address added to ${set} client app(s)`);
+}
+
 // ── 28 Oct (XFL): more LinkedIn profiles. Dilip Kajuri, Md. Abul Moshad Chowdhury and Shamsher Morshed
 //    confirmed by XFL; Fakruddin Ali Ahmed Rajib's from his own public posts (same full name, Green Delta).
 async function seedMoreLinkedIn() {
@@ -3840,6 +3863,7 @@ async function main() {
   await seedVerifiedLinkedIn();
   await seedEshanLinks();
   await seedMoreLinkedIn();
+  await seedWebTradingLinks();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

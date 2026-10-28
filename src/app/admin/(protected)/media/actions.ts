@@ -19,12 +19,14 @@ const uuid = z.string().uuid();
 const mb = (bytes: number) => `${Math.round(bytes / 1024 / 1024)} MB`;
 
 /** Checks one uploaded file by its content, stores it and adds it to the library. */
-async function storeUpload(file: File, adminId: string, only?: "IMAGE"): Promise<{ problem: string } | { id: string; storageKey: string; name: string; width: number | null; height: number | null }> {
+const KIND_TEXT = { IMAGE: "a PNG, JPEG, WebP or GIF image", VIDEO: "an MP4 or WebM video", DOCUMENT: "a PDF" } as const;
+
+async function storeUpload(file: File, adminId: string, only?: "IMAGE" | "VIDEO" | "DOCUMENT"): Promise<{ problem: string } | { id: string; storageKey: string; name: string; width: number | null; height: number | null }> {
   const name = cleanFileName(file.name);
   const data = Buffer.from(await file.arrayBuffer());
   const type = sniff(data);
   if (!type || (only && type.kind !== only)) {
-    return { problem: only ? `${name}: not a PNG, JPEG, WebP or GIF image.` : `${name}: not a PNG, JPEG, WebP, GIF, PDF, MP4 or WebM file.` };
+    return { problem: only ? `${name}: not ${KIND_TEXT[only]}.` : `${name}: not a PNG, JPEG, WebP, GIF, PDF, MP4 or WebM file.` };
   }
   if (data.length > MAX_BYTES[type.kind]) return { problem: `${name}: larger than ${mb(MAX_BYTES[type.kind])}.` };
 
@@ -76,6 +78,23 @@ export async function uploadPhotos(formData: FormData): Promise<PhotoUploadResul
   }
   if (added.length) revalidatePath("/admin/media");
   return { added, problems };
+}
+
+export type FileUploadResult = { option?: { value: string; label: string }; problem?: string };
+
+/**
+ * Uploads one video or PDF straight from an editor (product, video, resource), so it can be
+ * chosen there at once without going to Admin → Media first.
+ */
+export async function uploadFileFromEditor(formData: FormData): Promise<FileUploadResult> {
+  const admin = await requireAdmin();
+  const kind = formData.get("kind") === "DOCUMENT" ? "DOCUMENT" : "VIDEO";
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { problem: "Choose a file." };
+  const r = await storeUpload(file, admin.id, kind);
+  if ("problem" in r) return { problem: r.problem };
+  revalidatePath("/admin/media");
+  return { option: { value: r.id, label: `${r.name} (${Math.max(1, Math.round(file.size / 1024 / 1024))} MB)` } };
 }
 
 export async function uploadMedia(_prev: UploadState, formData: FormData): Promise<UploadState> {

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState } from "react";
 import { uploadPhotos } from "@/app/admin/(protected)/media/actions";
 import { DEFAULT_REQUEST_BYTES, fitForUpload, mbText } from "@/lib/media/client-upload";
@@ -203,13 +202,7 @@ export function GalleryPicker({ name, options: initialOptions, defaultValue }: {
           </div>
           <div className="overflow-y-auto p-4">
             {options.length === 0 ? (
-              <p className="py-10 text-center text-sm text-text-secondary">
-                No images yet.{" "}
-                <Link href="/admin/media" className="text-brand-sky hover:underline">
-                  Upload in Media
-                </Link>
-                , then come back.
-              </p>
+              <p className="py-10 text-center text-sm text-text-secondary">No images yet: use &quot;Upload new photos&quot;.</p>
             ) : available.length === 0 ? (
               <p className="py-10 text-center text-sm text-text-secondary">Every image is already in this gallery.</p>
             ) : (

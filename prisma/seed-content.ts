@@ -3202,6 +3202,26 @@ async function seedRepLinkedIn() {
   if (set) console.log(`  LinkedIn added for ${set} representative(s)`);
 }
 
+// ── 28 Oct (XFL): Eshan Barua's own links, supplied by him (each filled only where empty) ──
+async function seedEshanLinks() {
+  const MARK = "seed.eshan-links-2026-10-28";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const person = await db.person.findUnique({ where: { key: "eshan-barua" }, select: { id: true, websiteUrl: true, linkedinUrl: true, githubUrl: true, email: true } });
+  if (!person) return;
+  const empty = (v: string | null) => !v || !v.trim();
+  await db.person.update({
+    where: { id: person.id },
+    data: {
+      ...(empty(person.websiteUrl) && { websiteUrl: "https://eshan-portfolio-five.vercel.app/" }),
+      ...(empty(person.linkedinUrl) && { linkedinUrl: "https://www.linkedin.com/in/eshan01/" }),
+      ...(empty(person.githubUrl) && { githubUrl: "https://github.com/EshanBarua14/" }),
+      ...(empty(person.email) && { email: "eshan@xpertfintech.com" }),
+    },
+  });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString() } } });
+  console.log("  Eshan Barua: website, LinkedIn, GitHub and email added where empty");
+}
+
 // ── 28 Oct (XFL): LinkedIn profiles found by public search, each matching the person's name and
 //    current company in its LinkedIn headline (filled only where none is on file):
 //    Mohd. Shaahed Imran "Chief Executive Officer - NLI Securities Limited"; M Shahryar Faiz "EBL Securities PLC.";
@@ -3798,6 +3818,7 @@ async function main() {
   await seedRepLinkedIn();
   await seedManagementOrderAndSquare();
   await seedVerifiedLinkedIn();
+  await seedEshanLinks();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

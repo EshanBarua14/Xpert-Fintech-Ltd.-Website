@@ -58,7 +58,7 @@ export async function saveDeployment(_prev: DeploymentState, formData: FormData)
     androidPackage: v.androidPackage,
     playStoreUrl: v.playStoreUrl,
     appStoreUrl: v.appStoreUrl,
-    webUrl: v.webUrl,
+    webUrl: null, // never stored or published (security)
     launchedAt: parseDateOnly(v.launchedAt),
     linksCheckedAt: parseDateOnly(v.linksCheckedAt),
     updatedById: admin.id,

@@ -686,11 +686,6 @@ function DeploymentList({ offering, locale, t, logos }: { offering: Offering; lo
                     {t.getIosApp} ↗
                   </a>
                 )}
-                {d.webUrl && (
-                  <a href={d.webUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-full border border-fg/15 px-4 text-brand-sky transition-colors hover:border-brand-sky/60 hover:text-fg">
-                    {t.openWebApp} ↗
-                  </a>
-                )}
               </span>
             </li>
           );

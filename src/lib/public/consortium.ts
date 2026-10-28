@@ -124,7 +124,7 @@ export const getConsortium = cache(async (locale: AppLocale): Promise<Consortium
         logo: logo ? { url: logo.url, width: logo.width, height: logo.height } : null,
         apps: deployments
           .filter((d) => d.organizationId === o.id)
-          .map((d) => ({ name: d.appName!, playStoreUrl: d.playStoreUrl, appStoreUrl: d.appStoreUrl, webUrl: d.webUrl })),
+          .map((d) => ({ name: d.appName!, playStoreUrl: d.playStoreUrl, appStoreUrl: d.appStoreUrl, webUrl: null })), // web-trading addresses are never published (security)
         reps,
       };
     })

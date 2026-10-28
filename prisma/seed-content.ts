@@ -2068,7 +2068,6 @@ async function seedShareAndClients() {
  *  - Android app "Innova OMS" (com.innovaoms.oms), linked from Innova's own website
  *    (innovasecurities.com.bd) and described on Google Play as "OMS application for
  *    Innova Securities Ltd."; no App Store listing found.
- *  - Web trading: the OMS login Innova's website links to (ibl.xfltrade.com, Xpert-hosted).
  *  - Website innovasecurities.com.bd and DSE TREC No. 302, as its website states,
  *    set only where the admin has none.
  */
@@ -2094,7 +2093,6 @@ async function seedInnovaApp() {
           appName: "Innova OMS",
           androidPackage: "com.innovaoms.oms",
           playStoreUrl: "https://play.google.com/store/apps/details?id=com.innovaoms.oms",
-          webUrl: "https://ibl.xfltrade.com/app/Login",
           organizationId: org.id,
           offeringId: offering?.id ?? null,
           linksCheckedAt: new Date("2026-10-18"),
@@ -3202,27 +3200,13 @@ async function seedRepLinkedIn() {
   if (set) console.log(`  LinkedIn added for ${set} representative(s)`);
 }
 
-// ── 28 Oct (XFL): web-trading addresses of client apps, each as the client publishes it
-//    (checked 28 Oct 2026): IBSL's TradeiBS manual (ibb.xfltrade.com); the GDS Trade link on
-//    gdslbd.com; RemX on remons.org; AIL Trade on ail-bd.com; UTrade on ucbstock.com.bd.
-//    Filled only where no web address is on file.
+// ── 28 Oct (XFL): web-trading addresses are not published, for security: clear every one on file.
 async function seedWebTradingLinks() {
-  const MARK = "seed.web-trading-links-2026-10-28";
+  const MARK = "seed.web-trading-removed-2026-10-28";
   if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
-  const links: [string, string][] = [
-    ["tradeibs", "https://ibb.xfltrade.com/"],
-    ["gds-trade", "https://gdf.xfltrade.com/app/Login"],
-    ["rem", "https://rem.xfltrade.com/"],
-    ["ail-trade", "https://ailtrade.com"],
-    ["utrade-ucb-stock", "https://utrade.ucbstock.com.bd/app/Login"],
-  ];
-  let set = 0;
-  for (const [key, url] of links) {
-    const r = await db.deployment.updateMany({ where: { key, OR: [{ webUrl: null }, { webUrl: "" }] }, data: { webUrl: url, linksCheckedAt: new Date("2026-10-28") } });
-    set += r.count;
-  }
-  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), set } } });
-  if (set) console.log(`  Web trading address added to ${set} client app(s)`);
+  const r = await db.deployment.updateMany({ where: { webUrl: { not: null } }, data: { webUrl: null } });
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), cleared: r.count } } });
+  if (r.count) console.log(`  Web-trading addresses removed from ${r.count} client app(s)`);
 }
 
 // ── 28 Oct (XFL): more LinkedIn profiles. Dilip Kajuri, Md. Abul Moshad Chowdhury and Shamsher Morshed

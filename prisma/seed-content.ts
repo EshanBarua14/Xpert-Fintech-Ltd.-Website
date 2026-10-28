@@ -3202,6 +3202,27 @@ async function seedRepLinkedIn() {
   if (set) console.log(`  LinkedIn added for ${set} representative(s)`);
 }
 
+// ── 28 Oct (XFL): LinkedIn profiles found by public search, each matching the person's name and
+//    current company in its LinkedIn headline (filled only where none is on file):
+//    Mohd. Shaahed Imran "Chief Executive Officer - NLI Securities Limited"; M Shahryar Faiz "EBL Securities PLC.";
+//    Ali Hossain Maruf "Executive (HR & Admin) - Xpert Fintech Ltd.".
+async function seedVerifiedLinkedIn() {
+  const MARK = "seed.verified-linkedin-2026-10-28";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const links: [string, string][] = [
+    ["mohd-shaahed-imran", "https://www.linkedin.com/in/mohd-shaahed-imran-26b60915/"],
+    ["m-shahryar-faiz", "https://www.linkedin.com/in/m-shahryar-faiz-00727b3a/"],
+    ["ali-hossain-maruf", "https://www.linkedin.com/in/ali-hossain-maruf-822a27157/"],
+  ];
+  let set = 0;
+  for (const [key, url] of links) {
+    const r = await db.person.updateMany({ where: { key, OR: [{ linkedinUrl: null }, { linkedinUrl: "" }] }, data: { linkedinUrl: url } });
+    set += r.count;
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), set } } });
+  if (set) console.log(`  LinkedIn added for ${set} person(s)`);
+}
+
 // ── 27 Oct (XFL): management order after the leaders — Saikat, Maruf, Mehrab, Moshad; Square Securities' own logo ──
 async function seedManagementOrderAndSquare() {
   const MARK = "seed.mancom-order-square-2026-10-27";
@@ -3776,6 +3797,7 @@ async function main() {
   await seedTheaLogo();
   await seedRepLinkedIn();
   await seedManagementOrderAndSquare();
+  await seedVerifiedLinkedIn();
   await seedCareers();
   await seedMemberProfiles();
   await fillMemberWebsites();

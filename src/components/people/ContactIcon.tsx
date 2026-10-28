@@ -68,10 +68,11 @@ export function ContactIcon({
   );
 }
 
-/** A globe icon to a person's own or their organisation's website, styled like the email and LinkedIn icons. */
+/** A globe icon to an organisation's website (or, with kind="portfolio", a person's own site), styled like the email and LinkedIn icons. */
 export function WebsiteIcon({
   href,
   name,
+  kind = "web",
   label = "Website",
   color = "var(--tone)",
   ink = "var(--tone-ink)",
@@ -79,6 +80,7 @@ export function WebsiteIcon({
 }: {
   href: string;
   name: string;
+  kind?: "web" | "portfolio";
   label?: string;
   color?: string;
   ink?: string;
@@ -95,7 +97,7 @@ export function WebsiteIcon({
       className={cn("contact-icon flex shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,transform] duration-300", size)}
       style={{ "--c": color, "--ci": ink } as CSSProperties}
     >
-      <SocialIcon kind="web" className="size-4" />
+      <SocialIcon kind={kind} className="size-4" />
     </a>
   );
 }

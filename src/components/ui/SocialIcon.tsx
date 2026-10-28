@@ -3,7 +3,7 @@
  * LinkedIn, Facebook, YouTube, X, Instagram, website). Chosen from the link
  * address, so admins only paste the URL.
  */
-export type SocialKind = "email" | "linkedin" | "facebook" | "youtube" | "x" | "instagram" | "code" | "web";
+export type SocialKind = "email" | "linkedin" | "facebook" | "youtube" | "x" | "instagram" | "code" | "web" | "portfolio";
 
 export function socialKind(url: string): SocialKind {
   const u = url.toLowerCase();
@@ -64,6 +64,15 @@ export function SocialIcon({ kind, className = "size-4" }: { kind: SocialKind; c
       return (
         <svg {...common} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 4.5l-3 15" />
+        </svg>
+      );
+    case "portfolio":
+      // A personal website or portfolio: a person on a page.
+      return (
+        <svg {...common} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3.5" y="3.5" width="17" height="17" rx="3" />
+          <circle cx="12" cy="10" r="2.8" />
+          <path d="M7 17.5c1-2.4 2.8-3.6 5-3.6s4 1.2 5 3.6" />
         </svg>
       );
     default:

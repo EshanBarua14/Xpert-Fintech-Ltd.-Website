@@ -3040,6 +3040,109 @@ async function seedClientHeadReviews() {
   if (drafts.length) console.log(`  ${drafts.length} draft review card(s) to complete in Admin → Testimonials (head's name needed): ${drafts.join("; ")}`);
 }
 
+// ── 29 Oct (XFL): a review card for the head of every client institution, shown on the site ──
+// Head on file (Admin → People, position "Managing Director / CEO / Chairman, <house>") → card with
+// their name and photo. Not on file → card with a "[Managing Director / CEO of …]" placeholder name
+// (the site shows "Name to be added"). Quotes stay in [brackets] ("Review coming soon.") until the
+// head's own approved words are entered. Earlier draft placeholders are published the same way;
+// reviews with real words are left as they are. Deputies (e.g. a DMD) do not count as the head.
+async function seedAllClientHeadReviews() {
+  const MARK = "seed.all-client-head-reviews-2026-10-29";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const now = new Date();
+  const TITLE = { en: "Managing Director / CEO", bn: "ব্যবস্থাপনা পরিচালক / প্রধান নির্বাহী কর্মকর্তা" };
+  const bracketed = (v: string | null | undefined) => /^\s*\[[\s\S]*\]\s*$/.test(v ?? "");
+  const clients = await db.organization.findMany({
+    where: { status: "PUBLISHED", deletedAt: null, OR: [{ kind: { in: ["CONSORTIUM_MEMBER", "CLIENT"] } }, { deployments: { some: { status: "PUBLISHED", deletedAt: null } } }] },
+    orderBy: { sortOrder: "asc" },
+    include: { translations: true },
+  });
+  const norm = (v: string) => v.toLowerCase().replace(/&/g, " and ").replace(/[.,()'’]/g, " ").replace(/\b(limited|ltd|plc)\b/g, " ").replace(/\s+/g, " ").trim();
+  const nameKey = (v: string) => v.toLowerCase().replace(/,?\s*\b(fca|fcs|fcma|acca|fcca|cfa)\b\.?/g, "").replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
+  const people = await db.person.findMany({ where: { deletedAt: null, isPlaceholder: false }, include: { translations: true } });
+  const reviews = await db.testimonial.findMany({ where: { deletedAt: null }, include: { translations: true } });
+  const HEAD = /\b(managing director|chief executive|ceo|chairman)\b/i;
+  const NOT_HEAD = /\b(deputy|additional|assistant|vice|associate)\b|\b(dmd|amd|dceo)\b/i;
+  let order = reviews.length + 1;
+  const added: string[] = [];
+  const placeholders: string[] = [];
+  let publishedDrafts = 0;
+  for (const org of clients) {
+    const names = org.translations.map((t) => t.name).filter(Boolean);
+    const enName = org.translations.find((t) => t.locale === EN)?.name ?? names[0] ?? "";
+    const bnName = org.translations.find((t) => t.locale === BN)?.name ?? enName;
+    if (!enName) continue;
+    const head = people.find((p) => {
+      const aff = p.translations.find((t) => t.locale === EN)?.affiliation ?? "";
+      const [designation = ""] = aff.split(",");
+      return aff && HEAD.test(designation) && !NOT_HEAD.test(designation) && names.some((n) => norm(aff).includes(norm(n)));
+    });
+    const headName = head?.translations.find((t) => t.locale === EN)?.name;
+    const own = reviews.filter((r) => r.organizationId === org.id);
+    // A draft placeholder from 26 Oct (or one an editor named but has no words yet): publish it.
+    for (const r of own) {
+      const en = r.translations.find((t) => t.locale === EN);
+      if (r.status === "PUBLISHED" && r.hasApproval) continue;
+      if (!bracketed(en?.quote)) continue; // real words: only published with the head's approval, in the admin
+      if (headName && bracketed(r.personName)) continue; // the head on file gets their own card below
+      await db.testimonial.update({ where: { id: r.id }, data: { status: "PUBLISHED", hasApproval: true, publishAt: r.publishAt ?? now } });
+      if (!r.translations.some((t) => t.locale === BN))
+        await db.testimonialTranslation.create({ data: { testimonialId: r.id, locale: BN, personTitle: en?.personTitle ? TITLE.bn : null, quote: `[${bnName}-এর ব্যবস্থাপনা পরিচালক / প্রধান নির্বাহীর মতামত: তাঁর নিজের ভাষায়, অনুমোদনসহ যোগ করুন।]` } });
+      r.status = "PUBLISHED";
+      r.hasApproval = true;
+      publishedDrafts++;
+    }
+    const hasHeadCard = (headName ? reviews.some((r) => nameKey(r.personName) === nameKey(headName)) : false) || own.some((r) => bracketed(r.personName) && r.status === "PUBLISHED");
+    if (hasHeadCard) continue;
+    if (headName) {
+      const review = await db.testimonial.create({
+        data: {
+          personName: headName,
+          photoMediaId: head!.photoMediaId,
+          organizationId: org.id,
+          status: "PUBLISHED",
+          hasApproval: true,
+          publishAt: now,
+          sortOrder: order++,
+          translations: {
+            create: [
+              { locale: EN, personTitle: null, quote: `[Review from ${headName}: to be written in their own words, with their rating, and approved before it replaces this placeholder.]` },
+              { locale: BN, personTitle: null, quote: `[${headName}-এর মতামত: তাঁর নিজের ভাষায়, অনুমোদনসহ যোগ করুন।]` },
+            ],
+          },
+        },
+      });
+      if (head!.photoMediaId) await db.mediaUsage.create({ data: { mediaId: head!.photoMediaId, entityType: "TESTIMONIAL", entityId: review.id, field: "photo" } });
+      reviews.push({ ...review, translations: [] });
+      added.push(`${headName} (${enName})`);
+    } else {
+      const review = await db.testimonial.create({
+        data: {
+          personName: `[Managing Director / CEO of ${enName}]`,
+          organizationId: org.id,
+          status: "PUBLISHED",
+          hasApproval: true,
+          publishAt: now,
+          sortOrder: order++,
+          translations: {
+            create: [
+              { locale: EN, personTitle: TITLE.en, quote: `[Review from the Managing Director / CEO of ${enName}: add their name, photo, title, rating and their own approved words.]` },
+              { locale: BN, personTitle: TITLE.bn, quote: `[${bnName}-এর ব্যবস্থাপনা পরিচালক / প্রধান নির্বাহীর মতামত: নাম, ছবি, পদবি ও তাঁর নিজের অনুমোদিত ভাষা যোগ করুন।]` },
+            ],
+          },
+        },
+      });
+      reviews.push({ ...review, translations: [] });
+      placeholders.push(enName);
+    }
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: now.toISOString(), added, placeholders, publishedDrafts } } });
+  if (added.length) console.log(`  Review cards added for client heads on file: ${added.join("; ")}`);
+  if (publishedDrafts) console.log(`  ${publishedDrafts} draft head review card(s) now shown as placeholders`);
+  if (placeholders.length) console.log(`  Placeholder head cards (name, photo and words to add in Admin → Testimonials): ${placeholders.join("; ")}`);
+  console.log("  Every client institution now has a head review card on the home page (placeholders say \"Review coming soon\").");
+}
+
 // ── 26 Oct (XFL): Thea Securities' logo; Mika under corporate groups, Remons as a family-owned broker ──
 async function seedOwnersAndThea() {
   const MARK = "seed.owners-thea-2026-10-26";
@@ -3877,6 +3980,7 @@ async function main() {
   await fillMemberWebsites();
   await seedIdlcClient();
   await seedBanglaGaps();
+  await seedAllClientHeadReviews();
   // What is in place: the one-time steps already applied (each runs once, so later runs print nothing for them).
   const done = await db.siteSetting.findMany({ where: { key: { startsWith: "seed." } }, select: { key: true }, orderBy: { updatedAt: "desc" }, take: 12 });
   if (done.length) console.log(`Latest one-time steps applied: ${done.map((d) => d.key.replace(/^seed\./, "")).join(", ")}`);

@@ -203,6 +203,8 @@ export type TestimonialCard = {
   rating: number | null;
   /** Not published or no written approval yet: only shown outside production, marked as a draft. */
   draft?: boolean;
+  /** The reviewer's name is not known yet (written as "[…]" in the admin): the card says so. */
+  unnamed?: boolean;
 };
 
 /**
@@ -322,6 +324,7 @@ export const getTestimonials = cache(async (locale: AppLocale): Promise<Testimon
           website: (org ?? named)?.websiteUrl || null,
           email: null,
           rating: r.rating && r.rating >= 1 && r.rating <= 5 ? r.rating : null,
+          unnamed: /^\s*\[[\s\S]*\]\s*$/.test(r.personName) && !personOf(r),
           draft: preview && editorHints() && !(r.status === "PUBLISHED" && r.hasApproval && (!r.publishAt || r.publishAt <= new Date())),
         },
       ];

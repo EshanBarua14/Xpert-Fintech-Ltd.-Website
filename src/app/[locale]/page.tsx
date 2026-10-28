@@ -408,6 +408,7 @@ export default async function HomePage({ params }: Props) {
                 ratingShort: t.testimonialRatingShort,
                 digits: locale === "bn" ? "০১২৩৪৫৬৭৮৯" : undefined,
                 pending: locale === "bn" ? "মতামত শিগগিরই আসছে।" : "Review coming soon.",
+                unnamed: locale === "bn" ? "নাম শিগগিরই যোগ হবে" : "Name to be added",
                 contact: { linkedin: t.linkedinProfile, email: t.emailPerson, linkedinSearch: t.linkedinSearch, emailMissing: t.emailMissing, website: locale === "bn" ? "ওয়েবসাইট" : "Website" },
               }}
             />

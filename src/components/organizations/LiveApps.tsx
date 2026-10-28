@@ -27,12 +27,11 @@ export type LiveApp = {
 type Labels = { android: string; ios: string; web: string; featured?: string; rank?: RankLabels; locale?: "en" | "bn"; site?: string; othersTitle?: string };
 type StoreLink = { href: string; label: string; kind: "play" | "ios" | "web" };
 
-/** The app's links: Google Play, App Store and web trading (the brokerage's site is the link on its name). */
+/** The app's store links: Google Play and App Store. Web-trading addresses are never shown (security). */
 function linksOf(a: LiveApp, labels: Labels): StoreLink[] {
   const links: StoreLink[] = [];
   if (a.playStoreUrl) links.push({ href: a.playStoreUrl, label: labels.android, kind: "play" });
   if (a.appStoreUrl) links.push({ href: a.appStoreUrl, label: labels.ios, kind: "ios" });
-  if (a.webUrl) links.push({ href: a.webUrl, label: labels.web, kind: "web" });
   return links;
 }
 

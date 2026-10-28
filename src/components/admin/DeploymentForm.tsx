@@ -74,7 +74,7 @@ export function DeploymentForm({
           <legend className="px-2 text-sm font-semibold">Links</legend>
           <TextInput id="playStoreUrl" type="url" label="Google Play" placeholder="https://play.google.com/…" defaultValue={values.playStoreUrl} error={e.playStoreUrl} />
           <TextInput id="appStoreUrl" type="url" label="Apple App Store" placeholder="https://apps.apple.com/…" defaultValue={values.appStoreUrl} error={e.appStoreUrl} />
-          <TextInput id="webUrl" type="url" label="Web trading" placeholder="https://" defaultValue={values.webUrl} error={e.webUrl} />
+          {/* Web-trading addresses are not published (security), so there is no field for one. */}
           <TextInput
             id="linksCheckedAt"
             type="date"

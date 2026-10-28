@@ -82,7 +82,8 @@ export const getLiveApps = cache(async (locale: AppLocale) => {
       logo: logo ? { url: logo.url, width: logo.width, height: logo.height } : null,
       playStoreUrl: d.playStoreUrl,
       appStoreUrl: d.appStoreUrl,
-      webUrl: d.webUrl,
+      // Web-trading addresses are never published (security).
+      webUrl: null,
       featured: d.featured,
       rank: rankOf(o),
       summary: pick(d.translations, locale)?.summary ?? null,

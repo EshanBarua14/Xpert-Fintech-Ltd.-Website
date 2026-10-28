@@ -77,9 +77,9 @@ export function PersonForm({ values, images }: { values: PersonFormValues; image
           <TextInput
             id="websiteUrl"
             type="url"
-            label="Website"
+            label="Personal website / portfolio"
             placeholder="https://…"
-            hint="Optional. Their own or their organisation's site, shown as a globe icon. Empty: their organisation's website is used."
+            hint="Optional. Their own site, shown as its own icon. The company icon always goes to their organisation's website (Xpert Fintech's for staff)."
             defaultValue={values.websiteUrl}
             error={e.websiteUrl}
           />

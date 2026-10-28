@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils/cn";
 import { institutionOf, splitAffiliation } from "@/lib/people/affiliation";
 import { CodeIcon, ContactIcon, WebsiteIcon } from "./ContactIcon";
 
-/** Their own website, else their organisation's, else Xpert Fintech's (the home page). */
-const siteOf = (p: GalleryPerson) => p.websiteUrl || p.org?.url || "/";
+/** Their organisation's website, else Xpert Fintech's (the home page). Their own site has its own icon. */
+const siteOf = (p: GalleryPerson) => p.org?.url || "/";
 
 /**
  * Board and management profiles: photo cards that open a full profile in a
@@ -32,7 +32,7 @@ export type GalleryPerson = {
   photo: { url: string; width: number | null; height: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
   linkedinUrl: string | null;
   email: string | null;
-  /** Their own or their organisation's website (Admin → People). */
+  /** Their own website or portfolio (Admin → People), shown as its own icon. */
   websiteUrl?: string | null;
   githubUrl?: string | null;
   /** Engineering role: the code-profile icon always shows (muted until a GitHub is on file). */
@@ -57,8 +57,10 @@ export type GalleryLabels = {
   emailMissing: string;
   /** "GitHub not listed yet" */
   githubMissing?: string;
-  /** "Website" */
+  /** "Company website" */
   website?: string;
+  /** "Personal website" */
+  portfolio?: string;
   placeholder: string;
   role: string;
   /** Biography pages: "Previous part", "Next part", "Part {n} of {total}". */
@@ -258,6 +260,7 @@ function PersonCard({
             <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org={p.org?.name ?? institutionOf(p.affiliation)} labels={labels} size="size-8" />
           )}
           {(p.githubUrl || p.engineer) && <CodeIcon href={p.githubUrl ?? null} name={p.name} missing={labels.githubMissing} size="size-8" />}
+          {p.websiteUrl && <WebsiteIcon href={p.websiteUrl} kind="portfolio" name={p.name} label={labels.portfolio ?? "Personal website"} size="size-8" />}
           <WebsiteIcon href={siteOf(p)} name={p.org?.name ?? company ?? p.name} label={labels.website} size="size-8" />
           <button
             type="button"
@@ -418,6 +421,7 @@ export function PeopleGallery({
                   <ContactIcon kind="email" value={open.email} name={open.name} labels={labels} size="size-10" />
                   <ContactIcon kind="linkedin" value={open.linkedinUrl} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
                   {(open.githubUrl || open.engineer) && <CodeIcon href={open.githubUrl ?? null} name={open.name} missing={labels.githubMissing} size="size-10" />}
+                  {open.websiteUrl && <WebsiteIcon href={open.websiteUrl} kind="portfolio" name={open.name} label={labels.portfolio ?? "Personal website"} size="size-10" />}
                   <WebsiteIcon href={siteOf(open)} name={open.org?.name ?? company ?? open.name} label={labels.website} size="size-10" />
                 </div>
                 {open.email && (
@@ -541,6 +545,7 @@ export function PeopleGallery({
                 ) : (
                   <ContactIcon kind="linkedin" value={null} name={open.name} org={open.org?.name ?? institutionOf(open.affiliation)} labels={labels} size="size-10" />
                 )}
+                {open.websiteUrl && <WebsiteIcon href={open.websiteUrl} kind="portfolio" name={open.name} label={labels.portfolio ?? "Personal website"} size="size-10" />}
                 <WebsiteIcon href={siteOf(open)} name={open.org?.name ?? company ?? open.name} label={labels.website} size="size-10" />
                 {open.org && <OrgLogo org={open.org} className="ml-auto h-9" />}
               </div>

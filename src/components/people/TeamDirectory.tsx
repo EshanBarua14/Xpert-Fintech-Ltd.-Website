@@ -17,7 +17,7 @@ export type TeamMember = {
   photo: { url: string; width?: number | null; height?: number | null; focal?: { x: number; y: number; zoom?: number | null } | null } | null;
   email: string | null;
   linkedinUrl: string | null;
-  /** Their own website; Xpert Fintech's home page when empty. */
+  /** Their own website or portfolio (own icon); the company icon goes to Xpert Fintech's home page. */
   websiteUrl?: string | null;
   githubUrl?: string | null;
   engineer?: boolean;
@@ -141,7 +141,8 @@ function MemberCard({ p, locale, labels }: { p: TeamMember; locale: string; labe
         <ContactIcon kind="email" value={p.email} name={p.name} labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
         <ContactIcon kind="linkedin" value={p.linkedinUrl} name={p.name} org="Xpert Fintech" labels={labels} color="var(--dept)" ink="var(--dept)" size="size-8" />
         {(p.githubUrl || p.engineer) && <CodeIcon href={p.githubUrl ?? null} name={p.name} missing={labels.githubMissing} color="var(--dept)" ink="var(--dept)" size="size-8" />}
-        <WebsiteIcon href={p.websiteUrl || `/${locale}`} name="Xpert Fintech Ltd." label={locale === "bn" ? "ওয়েবসাইট" : "Website"} color="var(--dept)" ink="var(--dept)" size="size-8" />
+        {p.websiteUrl && <WebsiteIcon href={p.websiteUrl} kind="portfolio" name={p.name} label={locale === "bn" ? "ব্যক্তিগত ওয়েবসাইট" : "Personal website"} color="var(--dept)" ink="var(--dept)" size="size-8" />}
+        <WebsiteIcon href={`/${locale}`} name="Xpert Fintech Ltd." label={locale === "bn" ? "প্রতিষ্ঠানের ওয়েবসাইট" : "Company website"} color="var(--dept)" ink="var(--dept)" size="size-8" />
         <span aria-hidden="true" className="ml-auto h-1 w-8 rounded-full bg-[var(--dept)] opacity-70 transition-[width] duration-500 group-hover:w-12" />
       </div>
     </article>

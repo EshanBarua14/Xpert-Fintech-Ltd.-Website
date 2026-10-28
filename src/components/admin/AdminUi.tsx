@@ -8,42 +8,68 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/Badge";
 import { buttonClasses } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
 
-/** Sidebar entries. Only sections that exist are listed — no dead links. */
-const NAV = [
-  { href: "/admin", label: "Dashboard", exact: true },
-  { href: "/admin/leads", label: "Leads" },
-  { href: "/admin/market", label: "Market data" },
-  { href: "/admin/pages", label: "Pages" },
-  { href: "/admin/products", label: "Products" },
-  { href: "/admin/ecosystem", label: "Ecosystem" },
-  { href: "/admin/news", label: "News" },
-  { href: "/admin/events", label: "Events" },
-  { href: "/admin/albums", label: "Albums (photos and videos)" },
-  { href: "/admin/videos", label: "Videos" },
-  { href: "/admin/careers", label: "Careers" },
-  { href: "/admin/applications", label: "Applications" },
-  { href: "/admin/resources", label: "Resources" },
-  { href: "/admin/case-studies", label: "Success stories" },
-  { href: "/admin/people", label: "People" },
-  { href: "/admin/organizations", label: "Organizations" },
-  { href: "/admin/testimonials", label: "Testimonials" },
-  { href: "/admin/figures", label: "Figures" },
-  { href: "/admin/messages", label: "Messages" },
-  { href: "/admin/credentials", label: "Credentials" },
-  { href: "/admin/deployments", label: "App deployments" },
-  { href: "/admin/navigation", label: "Navigation" },
-  { href: "/admin/redirects", label: "Redirects" },
-  { href: "/admin/media", label: "Media" },
-  { href: "/admin/site-text", label: "Site text" },
-  { href: "/admin/design", label: "Design" },
-  { href: "/admin/highlights", label: "Home highlights" },
-  { href: "/admin/settings", label: "Settings" },
-  { href: "/admin/notifications", label: "Email & notifications" },
-  { href: "/admin/users", label: "Admins" },
-  { href: "/admin/history", label: "History & undo" },
-  { href: "/admin/backups", label: "Backups" },
-  { href: "/admin/audit", label: "Activity log" },
+/** Sidebar entries, in groups. Only sections that exist are listed — no dead links. */
+const NAV_GROUPS = [
+  {
+    title: "Overview",
+    items: [
+      { href: "/admin", label: "Dashboard", icon: "chart", exact: true },
+      { href: "/admin/leads", label: "Leads", icon: "mail" },
+      { href: "/admin/applications", label: "Applications", icon: "id" },
+      { href: "/admin/market", label: "Market data", icon: "exchange" },
+    ],
+  },
+  {
+    title: "Content",
+    items: [
+      { href: "/admin/pages", label: "Pages", icon: "document" },
+      { href: "/admin/products", label: "Products", icon: "bolt" },
+      { href: "/admin/ecosystem", label: "Ecosystem", icon: "network" },
+      { href: "/admin/news", label: "News", icon: "newspaper" },
+      { href: "/admin/events", label: "Events", icon: "calendar" },
+      { href: "/admin/albums", label: "Albums (photos and videos)", icon: "image" },
+      { href: "/admin/videos", label: "Videos", icon: "video" },
+      { href: "/admin/careers", label: "Careers", icon: "briefcase" },
+      { href: "/admin/resources", label: "Resources", icon: "book" },
+      { href: "/admin/case-studies", label: "Success stories", icon: "award" },
+      { href: "/admin/media", label: "Media", icon: "cloud" },
+    ],
+  },
+  {
+    title: "Company",
+    items: [
+      { href: "/admin/people", label: "People", icon: "users" },
+      { href: "/admin/organizations", label: "Organizations", icon: "building" },
+      { href: "/admin/testimonials", label: "Testimonials", icon: "check" },
+      { href: "/admin/figures", label: "Figures", icon: "chart" },
+      { href: "/admin/messages", label: "Messages", icon: "mail" },
+      { href: "/admin/credentials", label: "Credentials", icon: "landmark" },
+      { href: "/admin/deployments", label: "App deployments", icon: "phone" },
+    ],
+  },
+  {
+    title: "Website",
+    items: [
+      { href: "/admin/highlights", label: "Home highlights", icon: "award" },
+      { href: "/admin/design", label: "Design", icon: "image" },
+      { href: "/admin/site-text", label: "Site text", icon: "document" },
+      { href: "/admin/navigation", label: "Navigation", icon: "globe" },
+      { href: "/admin/redirects", label: "Redirects", icon: "exchange" },
+      { href: "/admin/settings", label: "Settings", icon: "building" },
+      { href: "/admin/notifications", label: "Email & notifications", icon: "mail" },
+    ],
+  },
+  {
+    title: "System",
+    items: [
+      { href: "/admin/users", label: "Users and roles", icon: "lock" },
+      { href: "/admin/history", label: "History & undo", icon: "book" },
+      { href: "/admin/backups", label: "Backups", icon: "shield" },
+      { href: "/admin/audit", label: "Activity log", icon: "check" },
+    ],
+  },
 ] as const;
 
 type Inbox = {
@@ -109,7 +135,7 @@ export function AdminNav() {
   const { inbox, notice, dismiss } = useInbox();
   const count = (href: string) => (href === "/admin/leads" ? inbox?.leads : href === "/admin/applications" ? inbox?.applications : undefined) ?? 0;
   return (
-    <nav aria-label="Admin" className="flex flex-col gap-1">
+    <nav aria-label="Admin" className="flex flex-col gap-1 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-1">
       {notice && (
         <div role="status" className="fixed right-4 bottom-4 z-50 flex max-w-sm items-center gap-3 rounded-card border border-brand-sky/40 bg-ink-950 px-4 py-3 text-sm shadow-lg">
           <Link href={notice.href} onClick={dismiss} className="font-medium text-brand-sky hover:underline">
@@ -120,28 +146,34 @@ export function AdminNav() {
           </button>
         </div>
       )}
-      {NAV.map((item) => {
-        const active = "exact" in item ? pathname === item.href : pathname.startsWith(item.href);
-        const n = count(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "flex items-center justify-between gap-2 rounded-control px-3 py-2 text-sm transition-colors",
-              active ? "bg-brand-royal/25 text-text-primary" : "text-text-secondary hover:bg-fg/5 hover:text-text-primary",
-            )}
-          >
-            {item.label}
-            {n > 0 && (
-              <span className="rounded-full bg-brand-sky px-2 py-0.5 text-[11px] font-semibold text-ink-950" aria-label={`${n} new`}>
-                {n}
-              </span>
-            )}
-          </Link>
-        );
-      })}
+      {NAV_GROUPS.map((g) => (
+        <div key={g.title} className="flex flex-col gap-0.5">
+          <p className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-[0.16em] text-text-secondary/70 uppercase">{g.title}</p>
+          {g.items.map((item) => {
+            const active = "exact" in item ? pathname === item.href : pathname.startsWith(item.href);
+            const n = count(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "admin-nav-link flex items-center gap-2.5 rounded-control px-3 py-2 text-sm transition-colors",
+                  active ? "bg-linear-to-r from-brand-royal/35 to-brand-royal/5 text-text-primary" : "text-text-secondary hover:bg-fg/5 hover:text-text-primary",
+                )}
+              >
+                <Icon name={item.icon} className={cn("size-4 shrink-0", active ? "text-brand-sky" : "")} />
+                <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                {n > 0 && (
+                  <span className="rounded-full bg-brand-sky px-2 py-0.5 text-[11px] font-semibold text-ink-950 shadow-[0_0_12px_rgb(34_188_235/0.7)]" aria-label={`${n} new`}>
+                    {n}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 }

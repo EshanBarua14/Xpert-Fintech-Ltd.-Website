@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Schibsted_Grotesk, Spectral } from "next/font/google";
 import "../globals.css";
+import "./admin.css";
 import { THEME_SCRIPT } from "@/lib/theme-script";
 import { NavProgress } from "@/components/navigation/NavProgress";
 

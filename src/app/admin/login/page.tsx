@@ -11,7 +11,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { next } = await searchParams;
 
   return (
-    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-ink-950 px-4 py-16">
+    <main className="admin-shell relative flex min-h-dvh items-center justify-center overflow-hidden bg-ink-950 px-4 py-16">
       {/* Soft brand glow behind the card */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(60rem_30rem_at_50%_-10%,rgb(42_95_174/0.35),transparent_70%)]" />
       <div className="relative w-full max-w-md">
@@ -23,7 +23,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <p className="text-sm text-text-secondary">Sign in to manage the website&apos;s content, leads and settings.</p>
           </div>
         </div>
-        <div className="rounded-card border border-fg/10 bg-navy-900/90 p-7 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.6)] backdrop-blur">
+        <div className="admin-card p-7 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.6)]">
           <LoginForm next={next} />
         </div>
         <p className="mt-6 text-center text-xs text-text-secondary">

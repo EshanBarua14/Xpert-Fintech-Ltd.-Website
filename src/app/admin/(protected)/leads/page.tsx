@@ -68,7 +68,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         { label: `All (${counts.reduce((n, c) => n + c._count._all, 0)})`, param: "status", active: !status },
         ...LEAD_STATUSES.map((s) => ({ label: `${STATUS_LABELS[s]} (${countOf(s)})`, value: s, param: "status", active: status === s })),
       ]}
-      columns={["Organization", "Source", "Product", "Status", "Owner", "Received"]}
+      columns={["Organization", "Product", "Requirement / message", "Source", "Status", "Owner", "Received"]}
       notices={
         <>
           {params.trashed && <Notice>Moved to trash.</Notice>}
@@ -103,11 +103,14 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         id: l.id,
         href: `/admin/leads/${l.id}`,
         title: l.name,
-        subtitle: l.email,
+        subtitle: [l.email, l.phone].filter(Boolean).join(" · "),
         cells: [
-          l.organization ?? "—",
-          SOURCE_LABELS[l.source],
+          [l.organization, l.designation].filter(Boolean).join(" · ") || "—",
           l.interestedOffering?.translations[0]?.name ?? "—",
+          <span key="m" className="line-clamp-2 max-w-xs text-text-secondary" title={[l.expectedRequirement, l.message].filter(Boolean).join("\n\n")}>
+            {[l.expectedRequirement, l.message].filter(Boolean).join(" · ") || "—"}
+          </span>,
+          SOURCE_LABELS[l.source],
           <span key="s" className="flex flex-wrap gap-1.5">
             <Badge tone={l.status === "NEW" ? "brand" : l.status === "WON" ? "up" : l.status === "LOST" ? "down" : "neutral"}>
               {STATUS_LABELS[l.status]}

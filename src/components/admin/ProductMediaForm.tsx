@@ -1,5 +1,6 @@
 "use client";
 
+import { MediaFileSelect } from "@/components/admin/MediaFileSelect";
 import Link from "next/link";
 import { useState } from "react";
 import { saveOfferingMedia, type FormState } from "@/app/admin/(protected)/products/actions";
@@ -7,7 +8,7 @@ import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage } from "@/components/admin/EditorParts";
 import { GalleryPicker } from "@/components/admin/GalleryPicker";
 import { ImagePicker } from "@/components/admin/ImagePicker";
-import { Select, TextInput } from "@/components/ui/Field";
+import { TextInput } from "@/components/ui/Field";
 import type { ImageOption } from "@/lib/admin/media";
 import { parseVideoUrl } from "@/lib/public/text";
 
@@ -109,7 +110,7 @@ export function ProductMediaForm({
               (up to 45 MB), then come back.
             </p>
           ) : (
-            <Select id="videoFileId" label="Video file" options={files} placeholder="Choose a file…" defaultValue={values.videoFileId} error={e.videoFileId} />
+            <MediaFileSelect id="videoFileId" kind="VIDEO" label="Video file" options={files} placeholder="Choose a file…" defaultValue={values.videoFileId} error={e.videoFileId} />
           ))}
 
         {source !== "NONE" && (

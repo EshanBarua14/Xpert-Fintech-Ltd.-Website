@@ -1,5 +1,6 @@
 "use client";
 
+import { MediaFileSelect } from "@/components/admin/MediaFileSelect";
 import Link from "next/link";
 import { useState } from "react";
 import { saveVideo, type VideoState } from "@/app/admin/(protected)/videos/actions";
@@ -117,7 +118,7 @@ export function VideoForm({
                   (up to 45 MB), then come back.
                 </p>
               ) : (
-                <Select id="mediaId" label="Video file" options={files} placeholder="Choose a file…" defaultValue={values.mediaId} error={e.mediaId} />
+                <MediaFileSelect id="mediaId" kind="VIDEO" label="Video file" options={files} placeholder="Choose a file…" defaultValue={values.mediaId} error={e.mediaId} />
               )}
             </>
           )}

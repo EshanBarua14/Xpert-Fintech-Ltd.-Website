@@ -1,18 +1,20 @@
 "use client";
 
-import Link from "next/link";
 import { useId, useRef, useState } from "react";
+import { uploadPhotos } from "@/app/admin/(protected)/media/actions";
+import { DEFAULT_REQUEST_BYTES, fitForUpload, mbText } from "@/lib/media/client-upload";
 import type { ImageOption } from "@/lib/admin/media";
 
 /**
- * Picks an image from the media library. Submits the chosen media id in a
- * hidden input named `name`. New images are uploaded in Admin → Media.
+ * Picks an image from the media library, or uploads a new one right here
+ * (it joins the library and is chosen at once). Submits the chosen media id
+ * in a hidden input named `name`.
  */
 export function ImagePicker({
   name,
   label,
   hint,
-  options,
+  options: initialOptions,
   defaultValue,
   error,
 }: {
@@ -23,7 +25,51 @@ export function ImagePicker({
   defaultValue?: string | null;
   error?: string;
 }) {
+  const [options, setOptions] = useState<ImageOption[]>(initialOptions);
   const [selected, setSelected] = useState<string>(defaultValue ?? "");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  async function upload(original: File) {
+    setProblem(null);
+    const file = await fitForUpload(original, DEFAULT_REQUEST_BYTES);
+    if (!file) {
+      setProblem(`${original.name}: ${mbText(original.size)} is too large to upload and could not be made smaller.`);
+      return;
+    }
+    setBusy(`Uploading ${original.name}…`);
+    const fd = new FormData();
+    fd.append("files", file);
+    try {
+      const res = await uploadPhotos(fd);
+      const added = res.added[0];
+      if (added) {
+        setOptions((o) => [added, ...o]);
+        setSelected(added.id);
+        dialogRef.current?.close();
+      }
+      if (res.problems.length) setProblem(res.problems.join(" "));
+    } catch {
+      setProblem("Could not upload the image. Check your connection and try again.");
+    }
+    setBusy(null);
+  }
+  const uploadButton = (
+    <label className="cursor-pointer rounded-control border border-fg/15 px-3 py-1.5 hover:border-brand-sky">
+      Upload new
+      <input
+        type="file"
+        accept="image/png,image/jpeg,image/webp,image/gif"
+        className="sr-only"
+        disabled={!!busy}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          e.target.value = "";
+          if (f) void upload(f);
+        }}
+      />
+    </label>
+  );
   const [filter, setFilter] = useState("");
   const dialogRef = useRef<HTMLDialogElement>(null);
   const labelId = useId();
@@ -54,6 +100,7 @@ export function ImagePicker({
           >
             {current ? "Change image" : "Choose image"}
           </button>
+          {uploadButton}
           {current && (
             <button type="button" className="text-xs text-text-secondary hover:text-market-down" onClick={() => setSelected("")}>
               Remove
@@ -61,6 +108,16 @@ export function ImagePicker({
           )}
         </div>
       </div>
+      {busy && (
+        <p role="status" className="text-xs text-text-secondary">
+          {busy}
+        </p>
+      )}
+      {problem && (
+        <p role="alert" className="text-xs text-market-down">
+          {problem}
+        </p>
+      )}
       {hint && <p className="text-xs text-text-secondary">{hint}</p>}
       {error && (
         <p className="text-xs text-market-down" role="alert">
@@ -86,19 +143,14 @@ export function ImagePicker({
               aria-label="Search images"
               className="ml-auto h-9 w-48 rounded-control border border-fg/15 bg-ink-950/60 px-3 text-sm focus:border-brand-sky focus:outline-none"
             />
+            <span className="text-sm">{uploadButton}</span>
             <button type="button" className="rounded-control px-2 py-1 text-sm hover:bg-fg/10" onClick={() => dialogRef.current?.close()}>
               Close
             </button>
           </div>
           <div className="overflow-y-auto p-4">
             {options.length === 0 ? (
-              <p className="py-10 text-center text-sm text-text-secondary">
-                No images yet.{" "}
-                <Link href="/admin/media" className="text-brand-sky hover:underline">
-                  Upload in Media
-                </Link>
-                , then come back.
-              </p>
+              <p className="py-10 text-center text-sm text-text-secondary">No images yet: use "Upload new".</p>
             ) : (
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {visible.map((o) => (

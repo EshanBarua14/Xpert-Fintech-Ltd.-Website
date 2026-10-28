@@ -1,5 +1,6 @@
 "use client";
 
+import { MediaFileSelect } from "@/components/admin/MediaFileSelect";
 import { saveResource, type ResourceState } from "@/app/admin/(protected)/resources/actions";
 import { SubmitButton, useActionForm } from "@/components/admin/AdminUi";
 import { FormMessage, PublishFields } from "@/components/admin/EditorParts";
@@ -40,7 +41,7 @@ export function ResourceForm({ values, images, documents }: { values: ResourceFo
         <TranslatedFieldset l="bn" values={values.bn} errors={e} fields={FIELDS} slugBase="resources" />
         <fieldset className="flex flex-col gap-4 rounded-card border border-fg/10 p-5">
           <legend className="px-2 text-sm font-semibold">File or link</legend>
-          <Select id="fileMediaId" label="PDF from the media library" placeholder="No file" options={documents} defaultValue={values.fileMediaId} hint="Upload PDFs in Media first." error={e.fileMediaId} />
+          <MediaFileSelect id="fileMediaId" kind="DOCUMENT" label="PDF" placeholder="No file" options={documents} defaultValue={values.fileMediaId} hint="Choose one from the media library, or upload a new PDF here." error={e.fileMediaId} />
           <TextInput id="externalUrl" type="url" label="…or a link" placeholder="https://" hint="Used when no file is chosen, e.g. a video." defaultValue={values.externalUrl} error={e.externalUrl} />
         </fieldset>
       </div>

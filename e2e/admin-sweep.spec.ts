@@ -39,8 +39,9 @@ async function visit(page: Page, url: string, who: string, hard: Problem[], soft
     hard.push(`${who} ${url}: did not open (${e.message.split("\n")[0]})`);
     return null;
   });
-  await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+  // Time to a usable page (the dashboard keeps polling, so "network idle" is not a measure of speed).
   const ms = Date.now() - t0;
+  await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
   if (res && res.status() >= 400) hard.push(`${who} ${url}: HTTP ${res.status()}`);
   const text = await page.locator("body").innerText().catch(() => "");
   if (ERROR_TEXT.test(text)) hard.push(`${who} ${url}: error page shown ("${text.match(ERROR_TEXT)![0]}")`);

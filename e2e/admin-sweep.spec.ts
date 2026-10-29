@@ -80,12 +80,19 @@ async function detailLinks(page: Page, list: string) {
   await page.goto(list, { waitUntil: "domcontentloaded" });
   const base = list.replace(/\/$/, "");
   const hrefs = await page.locator(`main a[href^='${base}/']`).evaluateAll((as) => as.map((a) => (a as HTMLAnchorElement).getAttribute("href") ?? ""));
-  return [...new Set(hrefs.map((h) => h.split(/[?#]/)[0]!).filter((h) => !/\/new$/.test(h) && h.split("/").length === base.split("/").length + 1))].slice(0, 2);
+  return [...new Set(hrefs.map((h) => h.split(/[?#]/)[0]!).filter((h) => !/\/(new|export)$/.test(h) && h.split("/").length === base.split("/").length + 1))].slice(0, 2);
 }
 
 function report(name: string, hard: Problem[], soft: Problem[]) {
   for (const s of soft) console.log(`FINDING ${s}`);
   for (const h of hard) console.log(`BROKEN ${h}`);
+  // One line per kind of finding (CI shows only the first few FINDING lines).
+  const kinds = new Map<string, number>();
+  for (const f of soft) {
+    const k = f.replace(/^\S+ \S+: /, "").replace(/×\d+.*$/, "").replace(/\d+px wider/, "N px wider").replace(/\([\d.]+ s\)/, "").trim();
+    kinds.set(k, (kinds.get(k) ?? 0) + 1);
+  }
+  for (const [k, n] of kinds) console.log(`SWEEP ${name} finding on ${n} screen(s): ${k}`);
   console.log(`SWEEP ${name}: ${hard.length} broken, ${soft.length} findings`);
   expect(hard, hard.join("\n")).toEqual([]);
 }

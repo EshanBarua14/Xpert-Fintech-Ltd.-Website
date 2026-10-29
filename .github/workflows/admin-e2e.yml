@@ -7,7 +7,7 @@ permissions:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     services:
       postgres:
         image: postgres:16
@@ -65,6 +65,49 @@ jobs:
           grep -E "passed|failed|skipped|^exit" public.log | sed 's/^/::notice::public: /' || true
           grep -E "✘" public.log | head -40 | sed 's/^/::error::public: /' || true
           awk '/Error:/{n=10} n>0{printf "%s%%0A", $0; n--; if(n==0) print ""}' public.log | head -40 | sed 's/^/::warning::public: /' || true
+      # Every admin screen as admin and editor, security checks, two-factor sign-in.
+      - name: Admin sweep, security and two-factor
+        if: always()
+        run: |
+          set +e
+          BASE_URL=http://localhost:3000 npx playwright test e2e/security.spec.ts e2e/admin-sweep.spec.ts e2e/admin-2fa.spec.ts --project=desktop --retries=0 --reporter=list > sweep.log 2>&1
+          echo "exit $?" >> sweep.log
+          tail -40 sweep.log
+          grep -E '^BROKEN ' sweep.log | sort -u | head -40 | sed 's/^BROKEN /::error::BROKEN /' || true
+          grep -E '^FINDING ' sweep.log | sort -u | head -60 | sed 's/^FINDING /::warning::FINDING /' || true
+          grep -E '^(WARN|SWEEP) ' sweep.log | sort -u | sed 's/^/::notice::/' || true
+          grep -E "✘" sweep.log | head -20 | sed 's/^/::error::sweep: /' || true
+          awk '/Error:/{n=12} n>0{printf "%s%%0A", $0; n--; if(n==0) print ""}' sweep.log | head -10 | sed 's/^/::warning::sweep: /' || true
+          grep -E "passed|failed|skipped|^exit" sweep.log | sed 's/^/::notice::sweep: /' || true
+      - name: Database matches the schema (no missing migration)
+        if: always()
+        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code > drift.log 2>&1; c=$?; [ $c -eq 0 ] && echo "::notice::MIGRATIONS database matches schema.prisma" || { sed 's/^/::error::MIGRATIONS /' drift.log | head -20; }; exit 0
+        shell: bash
+      # Lighthouse (phone): performance, accessibility, best practices, SEO for the main pages.
+      - name: Lighthouse
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          CHROME=$(node -e "console.log(require('playwright').chromium.executablePath())")
+          for p in /en /bn /en/products /en/products/trading-platform /en/company/about /en/company/team /en/request-demo /en/news /admin/login; do
+            f=lh-$(echo "$p" | tr '/' '_').json
+            timeout 180 npx -y lighthouse@12.2.1 "http://localhost:3000$p" --chrome-path="$CHROME" --chrome-flags="--headless=new --no-sandbox" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path="$f" --quiet > /dev/null 2>&1
+            node -e 'const r=require("./'$f'");const c=r.categories;const s=k=>Math.round((c[k]?.score??0)*100);const a=r.audits;const lcp=a["largest-contentful-paint"]?.displayValue,cls=a["cumulative-layout-shift"]?.displayValue,tbt=a["total-blocking-time"]?.displayValue;const line=`LIGHTHOUSE '$p': performance ${s("performance")}, accessibility ${s("accessibility")}, best practices ${s("best-practices")}, SEO ${s("seo")} (LCP ${lcp}, CLS ${cls}, TBT ${tbt})`;console.log((s("accessibility")<90||s("seo")<90||s("best-practices")<80||s("performance")<50?"::warning::":"::notice::")+line)' 2>/dev/null || echo "::warning::LIGHTHOUSE $p: could not run"
+          done
+          exit 0
+      # Load: 25 visitors at once for 15 seconds on the busiest pages.
+      - name: Load test
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          for p in /en /en/products /api/health; do
+            npx -y autocannon@7.15.0 -c 25 -d 15 -j "http://localhost:3000$p" > load.json 2>/dev/null
+            node -e 'const r=require("./load.json");const l=r.latency;console.log(`::notice::LOAD '$p': ${Math.round(r.requests.average)} req/s, latency p50 ${l.p50} ms, p97.5 ${l.p97_5} ms, p99 ${l.p99} ms, errors ${r.errors}, timeouts ${r.timeouts}, non-2xx ${r.non2xx}`);if(r.errors||r.non2xx||r.timeouts)console.log(`::warning::LOAD '$p': failures under load`)' 2>/dev/null || echo "::warning::LOAD $p: could not run"
+          done
+          echo "::notice::LOAD database errors in server log after load: $(grep -c 'prisma:error' server.log 2>/dev/null || echo 0)"
+          exit 0
       - name: Results summary
         if: always()
         run: |
@@ -78,7 +121,7 @@ jobs:
       # The test step above always finishes (to print the log); this one fails the run when any test failed.
       - name: Fail on test failures
         if: always()
-        run: grep -q "^exit 0" e2e.log && grep -q "^exit 0" public.log
+        run: grep -q "^exit 0" e2e.log && grep -q "^exit 0" public.log && grep -q "^exit 0" sweep.log
       - name: Map pictures
         if: always()
         run: BASE_URL=http://localhost:3000 npx playwright test e2e/shots.spec.ts e2e/admin-shots.spec.ts --project=desktop --retries=0 --reporter=list 2>&1 | grep -E "SHOT|passed|failed" | sed 's/^/::notice::/' || true

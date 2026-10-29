@@ -23,6 +23,13 @@ async function fresh(baseURL: string): Promise<APIRequestContext> {
   return request.newContext({ baseURL, extraHTTPHeaders: { "x-forwarded-for": ip() } });
 }
 
+/** The sign-in form's message, once it shows (not Next's route announcer, which is also role=alert). */
+async function alertText(page: Page) {
+  const a = page.locator("form [role='alert']");
+  await expect(a).toBeVisible({ timeout: 15_000 });
+  return (await a.innerText()).trim();
+}
+
 async function login(page: Page, email: string, password: string) {
   await page.goto("/admin/login");
   await page.getByLabel("Email").fill(email);
@@ -108,9 +115,9 @@ test.describe("Security", () => {
     const ctx = await browser.newContext({ extraHTTPHeaders: { "x-forwarded-for": ip() } });
     const page = await ctx.newPage();
     await login(page, `nobody-${Date.now()}@example.com`, "wrong-password-1");
-    const unknown = (await page.locator("main [role='alert'], [role='alert']").first().innerText()).trim();
+    const unknown = await alertText(page);
     await login(page, `also-nobody-${Date.now()}@example.com`, "x");
-    const again = (await page.locator("main [role='alert'], [role='alert']").first().innerText()).trim();
+    const again = await alertText(page);
     expect(again).toBe(unknown);
     // (A wrong password for a real account is compared with this in the lock test, on a throwaway editor.)
     // next= pointing elsewhere never leaves the site.
@@ -144,22 +151,22 @@ test.describe("Security", () => {
       const ctx = await browser.newContext({ extraHTTPHeaders: { "x-forwarded-for": ip() } });
       const p = await ctx.newPage();
       await login(p, `nobody-${Date.now()}@example.com`, "nope");
-      const generic = (await p.locator("[role='alert']").first().innerText()).trim();
+      const generic = await alertText(p);
       await login(p, email, "wrong-1");
-      expect((await p.locator("[role='alert']").first().innerText()).trim(), "wrong password must say the same as unknown email").toBe(generic);
+      expect(await alertText(p), "wrong password must say the same as unknown email").toBe(generic);
       for (let i = 2; i <= 5; i++) await login(p, email, `wrong-${i}`);
       await login(p, email, password);
-      await expect(p.locator("[role='alert']").first()).toContainText(/locked/i);
+      await expect(p.locator("form [role='alert']")).toContainText(/locked/i);
       // Same address: the 11th try within 15 minutes is refused before the password is checked.
       for (let i = 0; i < 6; i++) await login(p, `nobody-${i}@example.com`, "nope");
-      await expect(p.locator("[role='alert']").first()).toContainText(/Too many attempts/i);
+      await expect(p.locator("form [role='alert']")).toContainText(/Too many attempts/i);
       await ctx.close();
 
       // The limit counts the first address in X-Forwarded-For: a client that sends its own header gets a fresh allowance.
       const ctx2 = await browser.newContext({ extraHTTPHeaders: { "x-forwarded-for": ip() } });
       const p2 = await ctx2.newPage();
       await login(p2, "nobody@example.com", "nope");
-      if (!/Too many/i.test(await p2.locator("[role='alert']").first().innerText()))
+      if (!/Too many/i.test(await alertText(p2)))
         console.log("WARN sign-in rate limit trusts the client's X-Forwarded-For: safe on Vercel (it sets the header), check the proxy on the Namecheap server");
       await ctx2.close();
     } finally {

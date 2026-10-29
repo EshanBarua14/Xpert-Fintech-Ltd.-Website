@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { hasAdmin, signIn } from "./helpers/admin";
+import { hasAdmin, signIn, testAddress } from "./helpers/admin";
 
 /**
  * Every admin screen, as an admin and as an editor:
@@ -124,7 +124,7 @@ test.describe("Admin sweep", () => {
     await page.getByRole("button", { name: "Add admin" }).click();
     await expect(page.getByText(`Editor ${EDITOR.email} created`)).toBeVisible({ timeout: 15_000 });
 
-    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: "reduce" });
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: "reduce", extraHTTPHeaders: { "x-forwarded-for": testAddress() } });
     const ed = await ctx.newPage();
     const hard: Problem[] = [];
     const soft: Problem[] = [];

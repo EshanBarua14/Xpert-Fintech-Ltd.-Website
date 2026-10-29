@@ -119,14 +119,14 @@ export function GalleryPicker({ name, options: initialOptions, defaultValue }: {
                 </span>
                 <span className="flex items-center justify-between gap-1 px-2 py-1.5 text-xs">
                   <span className="flex gap-1">
-                    <button type="button" aria-label="Move earlier" disabled={i === 0} onClick={() => move(i, -1)} className="rounded px-1.5 hover:bg-fg/10 disabled:opacity-30">
+                    <button type="button" aria-label="Move earlier" disabled={i === 0} onClick={() => move(i, -1)} className="inline-flex size-6 items-center justify-center rounded hover:bg-fg/10 disabled:opacity-30">
                       ←
                     </button>
-                    <button type="button" aria-label="Move later" disabled={i === ids.length - 1} onClick={() => move(i, 1)} className="rounded px-1.5 hover:bg-fg/10 disabled:opacity-30">
+                    <button type="button" aria-label="Move later" disabled={i === ids.length - 1} onClick={() => move(i, 1)} className="inline-flex size-6 items-center justify-center rounded hover:bg-fg/10 disabled:opacity-30">
                       →
                     </button>
                   </span>
-                  <button type="button" onClick={() => setIds((l) => l.filter((x) => x !== id))} className="text-text-secondary hover:text-market-down">
+                  <button type="button" onClick={() => setIds((l) => l.filter((x) => x !== id))} className="min-h-6 px-1 text-text-secondary hover:text-market-down">
                     Remove
                   </button>
                 </span>

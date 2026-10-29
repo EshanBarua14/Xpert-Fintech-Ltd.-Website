@@ -186,7 +186,10 @@ test.describe("Security", () => {
     const ctx = await browser.newContext({ extraHTTPHeaders: { "x-forwarded-for": ip() } });
     const page = await ctx.newPage();
     let dialog = false;
+    let cleaningUp = false;
+    // Any dialog before clean-up would be the script running; the trash button's confirm is expected.
     page.on("dialog", (d) => {
+      if (cleaningUp) return void d.accept();
       dialog = true;
       void d.dismiss();
     });
@@ -219,8 +222,9 @@ test.describe("Security", () => {
     expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss), "script ran on the lead page").toBeUndefined();
     await expect(page.locator("main")).toContainText("<script>");
     expect(dialog).toBe(false);
-    page.once("dialog", (d) => d.accept());
+    cleaningUp = true;
     await page.getByRole("button", { name: "Move to trash" }).click();
+    await expect(page.getByText("Moved to trash.")).toBeVisible();
     await ctx.close();
   });
 

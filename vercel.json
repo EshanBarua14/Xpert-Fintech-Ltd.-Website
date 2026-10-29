@@ -10,7 +10,8 @@
   ],
   "git": {
     "deploymentEnabled": {
-      "ci/build-check": false
+      "ci/build-check": false,
+      "tmp/*": false
     }
   }
 }

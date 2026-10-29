@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { hasAdmin, signIn } from "./helpers/admin";
+import { hasAdmin, signIn, testAddress } from "./helpers/admin";
 
 /**
  * Roles: an admin adds an editor; the editor can open and edit content but is
@@ -25,6 +25,7 @@ test.describe("Admin roles", () => {
   });
 
   test("the editor edits but cannot create, delete or manage users", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-forwarded-for": testAddress() });
     await page.goto("/admin/login");
     await page.getByLabel("Email").fill(EMAIL);
     await page.getByLabel("Password").fill(PASSWORD);

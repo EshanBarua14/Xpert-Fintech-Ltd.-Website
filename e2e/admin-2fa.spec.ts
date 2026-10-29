@@ -26,7 +26,7 @@ test.describe("Admin two-factor sign-in", () => {
 
       await page.getByLabel("6-digit code").fill("000000");
       await page.getByRole("button", { name: "Verify" }).click();
-      await expect(page.getByRole("alert")).toContainText("not correct");
+      await expect(page.locator("[role='alert']:not(#__next-route-announcer__)")).toContainText("not correct");
 
       const step = await nextStep(setupStep); // the setup code cannot be reused
       await page.getByLabel("6-digit code").fill(totp(secret, step));

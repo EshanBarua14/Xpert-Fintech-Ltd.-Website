@@ -1,0 +1,29 @@
+name: deps-update
+# Runs only when a commit on ci/build-check says [deps] in its message: updates Next.js to the
+# patched 15.5 release, applies non-breaking security fixes, and pushes package.json and
+# package-lock.json (with the audit before and after) to tmp/deps-update for review.
+on:
+  push:
+    branches: [ci/build-check]
+permissions:
+  contents: write
+jobs:
+  update:
+    if: contains(github.event.head_commit.message, '[deps]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci > /dev/null
+      - run: npm audit --omit=dev --json > audit-before.json || true
+      - run: npm install --save-exact=false next@15.5.28 eslint-config-next@15.5.28
+      - run: npm audit fix --omit=dev || true
+      - run: npm audit --omit=dev --json > audit-after.json || true
+      - run: |
+          node -e 'for (const f of ["audit-before.json","audit-after.json"]) { const a=require("./"+f); const v=a.metadata.vulnerabilities; console.log(`::notice::${f}: critical ${v.critical}, high ${v.high}, moderate ${v.moderate}`); for (const [n,x] of Object.entries(a.vulnerabilities)) if (["high","critical"].includes(x.severity)) console.log(`::warning::${f} ${x.severity} ${n}: ${(x.via||[]).filter(v=>typeof v==="object").map(v=>v.title+" "+v.url).join(" | ").slice(0,300)} fix: ${JSON.stringify(x.fixAvailable)}`) }'
+          npm ls next eslint-config-next postcss zod prisma @prisma/client 2>/dev/null | sed 's/^/::notice::/' | head -20
+      - run: |
+          d=$(mktemp -d); cp package.json package-lock.json audit-before.json audit-after.json "$d"/
+          echo '{"git":{"deploymentEnabled":false}}' > "$d/vercel.json"
+          cd "$d" && git init -q && git add . && git -c user.name=ci -c user.email=ci@local commit -qm deps && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/tmp/deps-update

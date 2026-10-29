@@ -3202,6 +3202,37 @@ async function seedMikaHeadCard() {
   console.log(`  Mika Securities: Wasif Zaman's review card kept${extra.length ? `, ${extra.length} placeholder card(s) moved to the trash` : ""}`);
 }
 
+// ── 29 Oct (XFL): full-resolution photos of Najmul Hasan Rifat and Md. Wahidul Alam ──
+// The copies uploaded in the admin looked soft; these are the originals (1449×1650, 1792×2400).
+// Each person's photo is set to the file in prisma/seed-media/people with its face point; the
+// earlier upload stays in Admin → Media.
+async function seedSharpPortraits() {
+  const MARK = "seed.sharp-portraits-2026-10-29";
+  if (await db.siteSetting.findUnique({ where: { key: MARK } })) return;
+  const done: string[] = [];
+  for (const [key, name] of [["najmul-hasan-rifat", "Najmul Hasan Rifat"], ["md-wahidul-alam", "Md. Wahidul Alam"]] as const) {
+    const person =
+      (await db.person.findUnique({ where: { key }, select: { id: true, photoMediaId: true } })) ??
+      (await db.person.findFirst({ where: { deletedAt: null, translations: { some: { locale: EN, name: { equals: name, mode: "insensitive" } } } }, select: { id: true, photoMediaId: true } }));
+    if (!person) {
+      console.log(`  ${name}: not found in Admin → People, photo not set`);
+      continue;
+    }
+    const photo = await seedImage("people", key, name, ["portrait", "team"]);
+    if (!photo) continue;
+    const f = PORTRAIT_FOCUS[key];
+    if (f) await db.media.update({ where: { id: photo }, data: { focalX: f.x, focalY: f.y, focalZoom: f.zoom ?? null } });
+    if (person.photoMediaId !== photo) {
+      await db.person.update({ where: { id: person.id }, data: { photoMediaId: photo } });
+      await db.mediaUsage.deleteMany({ where: { entityType: "PERSON", entityId: person.id, field: "photo" } });
+      await db.mediaUsage.create({ data: { mediaId: photo, entityType: "PERSON", entityId: person.id, field: "photo" } });
+    }
+    done.push(name);
+  }
+  await db.siteSetting.create({ data: { key: MARK, value: { at: new Date().toISOString(), done } } });
+  if (done.length) console.log(`  Full-resolution photos set: ${done.join(", ")}`);
+}
+
 // ── 26 Oct (XFL): Thea Securities' logo; Mika under corporate groups, Remons as a family-owned broker ──
 async function seedOwnersAndThea() {
   const MARK = "seed.owners-thea-2026-10-26";
@@ -4041,6 +4072,7 @@ async function main() {
   await seedBanglaGaps();
   await seedAllClientHeadReviews();
   await seedMikaHeadCard();
+  await seedSharpPortraits();
   // What is in place: the one-time steps already applied (each runs once, so later runs print nothing for them).
   const done = await db.siteSetting.findMany({ where: { key: { startsWith: "seed." } }, select: { key: true }, orderBy: { updatedAt: "desc" }, take: 12 });
   if (done.length) console.log(`Latest one-time steps applied: ${done.map((d) => d.key.replace(/^seed\./, "")).join(", ")}`);

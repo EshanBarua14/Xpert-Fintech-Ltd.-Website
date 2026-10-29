@@ -15,12 +15,39 @@ jobs:
           npx tsc --noEmit -p . | sed -E 's/^([^(]+)\(([0-9]+),([0-9]+)\): error (.*)$/::error file=\1,line=\2::\4/' || true
       - run: |
           npx next lint 2>&1 | grep -E 'Error:' -B1 | sed 's/^/::warning::/' || true
+      # ── Quality and security checks (reported; the guard check fails the run) ──
+      - name: Server actions check who is signed in
+        run: node scripts/check-action-guards.mjs | sed -E 's/^GUARD (.*)$/::error::\1/; s/^(checked .*)$/::notice::\1/'; exit ${PIPESTATUS[0]}
+        shell: bash
+      - name: Database schema is valid
+        run: npx prisma validate
+        env:
+          DATABASE_URL: postgresql://u:p@localhost:5432/x
+      - name: Type errors and lint
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          npx tsc --noEmit -p . > tsc.log 2>&1; n=$(grep -c 'error TS' tsc.log); echo "::notice::QUALITY type errors: $n"
+          npx eslint . -f json -o eslint.json > /dev/null 2>&1
+          node -e 'const r=require("./eslint.json");let e=0,w=0;const top={};for(const f of r){e+=f.errorCount;w+=f.warningCount;for(const m of f.messages)if(m.severity===2)top[m.ruleId]=(top[m.ruleId]||0)+1}console.log(`::notice::QUALITY lint: ${e} errors, ${w} warnings ${JSON.stringify(top)}`);for(const f of r)for(const m of f.messages.filter(m=>m.severity===2).slice(0,3))console.log(`::warning file=${f.filePath.replace(process.cwd()+"/","")},line=${m.line}::${m.ruleId}: ${m.message}`)' 2>/dev/null | head -40
+          exit 0
+      - name: Known vulnerabilities in packages (npm audit)
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          npm audit --omit=dev --json > audit.json 2>/dev/null
+          node -e 'const a=require("./audit.json");const v=a.metadata?.vulnerabilities||{};console.log(`::notice::AUDIT production packages: critical ${v.critical||0}, high ${v.high||0}, moderate ${v.moderate||0}, low ${v.low||0}`);for(const [n,x] of Object.entries(a.vulnerabilities||{}))if(["high","critical"].includes(x.severity))console.log(`::warning::AUDIT ${x.severity}: ${n} ${x.range} ${x.fixAvailable?"(fix available)":"(no fix yet)"}`)'
+          exit 0
       - run: |
           set +e
           npx tsc --noEmit -p . > tsc.log 2>&1; echo "::notice::tsc exit $? with $(grep -c 'error TS' tsc.log) errors"
           for i in 1 2 3; do npx next build > build.log 2>&1; code=$?; [ $code -eq 0 ] && break; grep -q "next/font" build.log || break; echo "::warning::font download failed, retrying ($i)"; sleep 20; done
           echo "::notice::next build exit $code; $(grep -E 'Compiled|Generating static|Route \(app\)' build.log | tr '\n' ' ' | cut -c1-200)"
           grep -nE "rror|Failed|failed" build.log | head -40 | sed 's/^/::error::/'
+          echo "::notice::SIZE $(grep -E 'First Load JS shared by all' build.log | tr -s ' ')"
+          grep -E "^[├└┌] [ƒ○●]" build.log | awk '$NF=="kB"{print $(NF-1)" kB "$3}' | sort -rn | head -5 | sed 's/^/::notice::SIZE biggest first load: /'
           exit $code
         env:
           DATABASE_URL: postgresql://u:p@localhost:5432/x

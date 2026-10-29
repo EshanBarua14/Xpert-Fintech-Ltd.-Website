@@ -7,7 +7,7 @@ permissions:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     services:
       postgres:
         image: postgres:16
@@ -47,23 +47,101 @@ jobs:
       - name: Admin end-to-end
         run: |
           set +e
-          PLAYWRIGHT_JSON_OUTPUT_NAME=results.json BASE_URL=http://localhost:3000 npx playwright test e2e/admin-crud.spec.ts e2e/lead.spec.ts --project=desktop --retries=0 --reporter=list,json > e2e.log 2>&1
+          PLAYWRIGHT_JSON_OUTPUT_NAME=results.json BASE_URL=http://localhost:3000 npx playwright test e2e/admin-crud.spec.ts e2e/lead.spec.ts e2e/workflows.spec.ts e2e/admin-content.spec.ts e2e/roles.spec.ts --project=desktop --retries=0 --reporter=list,json > e2e.log 2>&1
           echo "exit $?" >> e2e.log
+          cp -r test-results admin-results 2>/dev/null || true
           tail -150 e2e.log
+      # Public pages: home, language and theme, and an accessibility scan (WCAG 2.2 AA) in both themes.
+      - name: Public pages and accessibility
+        if: always()
+        run: |
+          set +e
+          BASE_URL=http://localhost:3000 npx playwright test e2e/home.spec.ts e2e/switching.spec.ts e2e/a11y.spec.ts e2e/crawl.spec.ts --project=desktop --project=mobile --retries=0 --reporter=list > public.log 2>&1
+          echo "exit $?" >> public.log
+          tail -60 public.log
+          grep -E '^A11Y ' public.log | sort -u | head -9 | sed 's/^/::error::/' || true
+          grep -E '^\s+\+\s+"' public.log | sort -u | head -80 | sed 's/^/::warning::problem: /' || true
+          grep -E "crawled [0-9]+ pages" public.log | sed 's/^/::notice::/' || true
+          grep -E "passed|failed|skipped|^exit" public.log | sed 's/^/::notice::public: /' || true
+          grep -E "✘" public.log | head -40 | sed 's/^/::error::public: /' || true
+          awk '/Error:/{n=10} n>0{printf "%s%%0A", $0; n--; if(n==0) print ""}' public.log | head -40 | sed 's/^/::warning::public: /' || true
+      # Every admin screen as admin and editor, security checks, two-factor sign-in.
+      - name: Admin sweep, security and two-factor
+        if: always()
+        run: |
+          set +e
+          BASE_URL=http://localhost:3000 npx playwright test e2e/security.spec.ts e2e/admin-sweep.spec.ts e2e/admin-2fa.spec.ts --project=desktop --retries=0 --reporter=list > sweep.log 2>&1
+          echo "exit $?" >> sweep.log
+          tail -40 sweep.log
+          grep -E '^BROKEN ' sweep.log | sort -u | head -40 | sed 's/^BROKEN /::error::BROKEN /' || true
+          grep -E '^FINDING ' sweep.log | sort -u | head -60 | sed 's/^FINDING /::warning::FINDING /' || true
+          grep -E '^(WARN|SWEEP) ' sweep.log | sort -u | sed 's/^/::notice::/' || true
+          grep -E "✘" sweep.log | head -20 | sed 's/^/::error::sweep: /' || true
+          awk '/Error:/{n=12} n>0{printf "%s%%0A", $0; n--; if(n==0) print ""}' sweep.log | head -10 | sed 's/^/::warning::sweep: /' || true
+          grep -E "passed|failed|skipped|^exit" sweep.log | sed 's/^/::notice::sweep: /' || true
+      - name: Database matches the schema (no missing migration)
+        if: always()
+        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code > drift.log 2>&1; c=$?; [ $c -eq 0 ] && echo "::notice::MIGRATIONS database matches schema.prisma" || { sed 's/^/::error::MIGRATIONS /' drift.log | head -20; }; exit 0
+        shell: bash
+      # Lighthouse (phone): performance, accessibility, best practices, SEO for the main pages.
+      - name: Lighthouse
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          CHROME=$(node -e "console.log(require('playwright').chromium.executablePath())")
+          for p in /en /bn /en/products /en/products/trading-platform /en/company/about /en/company/team /en/request-demo /en/news /admin/login; do
+            f=lh-$(echo "$p" | tr '/' '_').json
+            timeout 180 npx -y lighthouse@12.2.1 "http://localhost:3000$p" --chrome-path="$CHROME" --chrome-flags="--headless=new --no-sandbox" --only-categories=performance,accessibility,best-practices,seo --output=json --output-path="$f" --quiet > /dev/null 2>&1
+            node -e 'const r=require("./'$f'");const c=r.categories;const s=k=>Math.round((c[k]?.score??0)*100);const a=r.audits;const lcp=a["largest-contentful-paint"]?.displayValue,cls=a["cumulative-layout-shift"]?.displayValue,tbt=a["total-blocking-time"]?.displayValue;const err=r.runtimeError?.code?` (Lighthouse could not measure: ${r.runtimeError.code} ${r.runtimeError.message||""})`.slice(0,200):"";if(err){console.log(`::warning::LIGHTHOUSE '$p':${err}`);process.exit(0)}if("'$p'".startsWith("/admin"))delete c.seo;const line=`LIGHTHOUSE '$p': performance ${s("performance")}, accessibility ${s("accessibility")}, best practices ${s("best-practices")}, ${c.seo?`SEO ${s("seo")}`:"SEO n/a (noindex)"} (LCP ${lcp}, CLS ${cls}, TBT ${tbt})`;console.log((s("accessibility")<90||(c.seo&&s("seo")<90)||s("best-practices")<80||s("performance")<50?"::warning::":"::notice::")+line)' 2>/dev/null || echo "::warning::LIGHTHOUSE $p: could not run"
+          done
+          exit 0
+      # Load: 25 visitors at once for 15 seconds on the busiest pages.
+      - name: Load test
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          for p in /en /en/products /api/health; do
+            npx -y autocannon@7.15.0 -c 25 -d 15 -j "http://localhost:3000$p" > load.json 2>/dev/null
+            node -e 'const r=require("./load.json");const l=r.latency;console.log(`::notice::LOAD '$p': ${Math.round(r.requests.average)} req/s, latency p50 ${l.p50} ms, p97.5 ${l.p97_5} ms, p99 ${l.p99} ms, errors ${r.errors}, timeouts ${r.timeouts}, non-2xx ${r.non2xx}`);if(r.errors||r.non2xx||r.timeouts)console.log(`::warning::LOAD '$p': failures under load`)' 2>/dev/null || echo "::warning::LOAD $p: could not run"
+          done
+          echo "::notice::LOAD database errors in server log after load: $(grep -c 'prisma:error' server.log 2>/dev/null || echo 0)"
+          exit 0
       - name: Results summary
         if: always()
         run: |
           grep -E "passed|failed|skipped|^exit" e2e.log | sed 's/^/::notice::/' || true
+          grep -E "TIMING" e2e.log | head -10 | sed 's/^/::notice::/' || true
           grep -E "✘" e2e.log | head -20 | sed 's/^/::error::/' || true
+          # Each failure's message and the lines after it, as one annotation (readable without the raw log).
+          awk '/Error:/{n=14} n>0{printf "%s%%0A", $0; n--; if(n==0) print ""}' e2e.log | head -12 | sed 's/^/::warning::/' || true
           echo "::notice::database errors in server log: $(grep -c 'prisma:error' server.log 2>/dev/null || echo 0)"
+          grep -E "\[leads\]" server.log | head -10 | sed 's/^/::warning::server: /' || true
+      # The test step above always finishes (to print the log); this one fails the run when any test failed.
+      - name: Fail on test failures
+        if: always()
+        run: grep -q "^exit 0" e2e.log && grep -q "^exit 0" public.log && grep -q "^exit 0" sweep.log
+      - name: Map pictures
+        if: always()
+        run: BASE_URL=http://localhost:3000 npx playwright test e2e/shots.spec.ts e2e/admin-shots.spec.ts --project=desktop --retries=0 --reporter=list 2>&1 | grep -E "SHOT|passed|failed" | sed 's/^/::notice::/' || true
       - name: Push screenshots to a temporary branch
         if: always()
         run: |
           shopt -s globstar nullglob
-          files=(test-results/**/*.png admin-results/**/*.png)
+          files=(map-shots/*.png test-results/**/*.png admin-results/**/*.png)
           [ ${#files[@]} -eq 0 ] && exit 0
           d=$(mktemp -d); i=0; for f in "${files[@]}"; do i=$((i+1)); cp "$f" "$d/$i-$(echo "$f" | tr '/' '_' | tail -c 90)"; done
+          # Screenshots only, no app: tell Vercel not to deploy this branch (it failed with "No Next.js version detected").
+          echo '{"git":{"deploymentEnabled":false}}' > "$d/vercel.json"
           cd "$d" && git init -q && git add . && git -c user.name=ci -c user.email=ci@local commit -qm shots && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/tmp/e2e-shots || true
       - name: Remove the temporary results branch
         if: always()
         run: git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" --delete tmp/dse-pages || true
+      - name: Failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: admin-results/**/*.png
+          retention-days: 3

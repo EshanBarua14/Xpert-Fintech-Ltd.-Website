@@ -188,3 +188,11 @@ a.admin-card:hover::after,
   .admin-ring { transition: none; }
   a.admin-card:hover, .admin-card-hover:hover { transform: none; }
 }
+
+/* ── Tick boxes and option buttons: at least 24×24 px to tap (WCAG 2.2, target size) ── */
+.admin-shell input[type="checkbox"],
+.admin-shell input[type="radio"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}

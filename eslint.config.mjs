@@ -11,6 +11,11 @@ const eslintConfig = [
     ignores: ["node_modules/**", ".next/**", "out/**", "next-env.d.ts"],
   },
   {
+    // The Namecheap start file runs as plain CommonJS under Node (cPanel / PM2): require() is correct there.
+    files: ["deploy/**/*.js", "**/*.cjs"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
+  {
     rules: {
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
     },

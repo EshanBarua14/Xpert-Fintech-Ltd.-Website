@@ -55,9 +55,9 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         <p className="mt-1 text-sm text-text-secondary">Every change an admin makes, newest first: who, what, which record and which fields. Kept for reference; it cannot be edited.</p>
       </div>
       <form className="flex flex-wrap items-end gap-3 text-sm" action="/admin/audit">
-        <label className="flex flex-col gap-1">
+        <label className="flex min-w-0 max-w-full flex-col gap-1">
           <span className="text-xs text-text-secondary">Admin</span>
-          <select name="actor" defaultValue={params.actor ?? ""} className="field-select h-10 rounded-control border border-fg/15 bg-ink-950/60 px-3">
+          <select name="actor" defaultValue={params.actor ?? ""} className="field-select h-10 max-w-full rounded-control border border-fg/15 bg-ink-950/60 px-3">
             <option value="">Everyone</option>
             {admins.map((a) => (
               <option key={a.id} value={a.id}>
@@ -66,9 +66,9 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1">
+        <label className="flex min-w-0 max-w-full flex-col gap-1">
           <span className="text-xs text-text-secondary">Area</span>
-          <select name="area" defaultValue={params.area ?? ""} className="field-select h-10 rounded-control border border-fg/15 bg-ink-950/60 px-3">
+          <select name="area" defaultValue={params.area ?? ""} className="field-select h-10 max-w-full rounded-control border border-fg/15 bg-ink-950/60 px-3">
             <option value="">Everything</option>
             {areas.map((m) => (
               <option key={m} value={m}>

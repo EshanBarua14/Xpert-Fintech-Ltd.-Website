@@ -3203,7 +3203,8 @@ async function seedMikaHeadCard() {
 }
 
 // ── 29 Oct (XFL): full-resolution photos of Najmul Hasan Rifat and Md. Wahidul Alam ──
-// The copies uploaded in the admin looked soft; these are the originals (1449×1650, 1792×2400).
+// The copies uploaded in the admin looked soft. Rifat: his office photo with the background made white
+// (face untouched), framed like his studio photo (1449×1650). Wahidul: the original (1792×2400).
 // Each person's photo is set to the file in prisma/seed-media/people with its face point; the
 // earlier upload stays in Admin → Media.
 async function seedSharpPortraits() {

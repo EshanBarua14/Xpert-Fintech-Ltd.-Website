@@ -236,7 +236,7 @@ test.describe("Security", () => {
       { name: "evil.svg", mimeType: "image/svg+xml", buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"/>') },
       { name: "evil.png", mimeType: "image/png", buffer: Buffer.from("<html><script>alert(1)</script></html>") },
     ]);
-    await page.getByRole("button", { name: "Upload" }).click();
+    await page.getByRole("button", { name: "Upload", exact: true }).click();
     const alert = page.locator("form [role='alert']");
     await expect(alert).toContainText("evil.svg", { timeout: 20_000 });
     await expect(alert).toContainText("evil.png");

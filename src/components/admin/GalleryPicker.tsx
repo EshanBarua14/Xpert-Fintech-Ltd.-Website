@@ -117,12 +117,12 @@ export function GalleryPicker({ name, options: initialOptions, defaultValue }: {
                   <img src={o.url} alt="" loading="lazy" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
                   <span className="absolute top-1.5 left-1.5 rounded bg-ink-950/80 px-1.5 text-[11px]">{i + 1}</span>
                 </span>
-                <span className="flex items-center justify-between gap-1 px-2 py-1.5 text-xs">
-                  <span className="flex gap-1">
-                    <button type="button" aria-label="Move earlier" disabled={i === 0} onClick={() => move(i, -1)} className="inline-flex size-6 items-center justify-center rounded hover:bg-fg/10 disabled:opacity-30">
+                <span className="flex flex-wrap items-center justify-between gap-1 px-2 py-1.5 text-xs">
+                  <span className="flex shrink-0 gap-1">
+                    <button type="button" aria-label="Move earlier" disabled={i === 0} onClick={() => move(i, -1)} className="inline-flex size-6 min-h-[24px] min-w-[24px] shrink-0 items-center justify-center rounded hover:bg-fg/10 disabled:opacity-30">
                       ←
                     </button>
-                    <button type="button" aria-label="Move later" disabled={i === ids.length - 1} onClick={() => move(i, 1)} className="inline-flex size-6 items-center justify-center rounded hover:bg-fg/10 disabled:opacity-30">
+                    <button type="button" aria-label="Move later" disabled={i === ids.length - 1} onClick={() => move(i, 1)} className="inline-flex size-6 min-h-[24px] min-w-[24px] shrink-0 items-center justify-center rounded hover:bg-fg/10 disabled:opacity-30">
                       →
                     </button>
                   </span>

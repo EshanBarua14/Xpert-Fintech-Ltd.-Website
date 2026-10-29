@@ -1,0 +1,67 @@
+{
+  "name": "xpert-nexus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Xpert Fintech Ltd. website and admin CMS (internal project name: XPERT NEXUS)",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "dev:webpack": "next dev",
+    "dev:fast": "next dev --turbopack",
+    "build": "node scripts/migrate-on-deploy.mjs && prisma generate && next build",
+    "start": "next start",
+    "deploy": "node scripts/deploy.mjs",
+    "build:server": "prisma generate && NEXT_OUTPUT=standalone next build && bash deploy/package.sh",
+    "preview": "next build && next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "db:validate": "prisma validate",
+    "db:format": "prisma format",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "db:erd": "node scripts/generate-erd.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "test:a11y": "playwright test a11y",
+    "db:seed:content": "prisma generate && tsx prisma/seed-content.ts",
+    "assets:import": "tsx scripts/import-assets.ts",
+    "admin:password": "tsx scripts/reset-admin-password.ts",
+    "setup": "tsx scripts/setup.ts",
+    "market:check": "tsx --conditions=react-server scripts/market-check.ts",
+    "db:permissions": "tsx scripts/db-permissions.ts",
+    "import:live-site": "tsx scripts/import-live-site.ts",
+    "media:to-db": "tsx scripts/media-to-db.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@fontsource/noto-sans-bengali": "^5.3.0",
+    "@node-rs/argon2": "^2.0.2",
+    "@prisma/client": "^6.16.0",
+    "next": "^15.5.28",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "server-only": "^0.0.1",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@eslint/eslintrc": "^3.3.0",
+    "@playwright/test": "^1.55.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "eslint": "^9.30.0",
+    "eslint-config-next": "^15.5.28",
+    "prisma": "^6.16.0",
+    "tailwindcss": "^4.1.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  }
+}
